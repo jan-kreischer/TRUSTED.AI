@@ -20,12 +20,23 @@ import pickle
 from app import server
 from app import app
 # import all pages in the app
-from apps import home, upload_train_data, visualisation, test
+from apps import home, upload_train_data, visualisation, test, examples, pillar_fairness, pillar_explainability, pillar_robustness, pillar_methodology 
+#from apps import *
 
-#LOGO = "./logo.png"
-
-#image_filename = 'logo.png' # replace with your own image
-#encoded_image = base64.b64encode(open(image_filename, 'rb').read())
+search_bar = dbc.Row(
+    [
+        dbc.Col(dbc.Input(type="search", placeholder="Search")),
+        dbc.Col(
+            dbc.Button(
+                "Search", color="primary", className="ml-2", n_clicks=0
+            ),
+            width="auto",
+        ),
+    ],
+    no_gutters=True,
+    className="ml-auto flex-nowrap mt-3 mt-md-0",
+    align="center",
+)
 
 navbar = dbc.Navbar(
     dbc.Container(
@@ -41,7 +52,29 @@ navbar = dbc.Navbar(
                 ),
                 href="/home",
             ),
-            dbc.NavbarToggler(id="navbar-toggler2"),
+            dbc.NavbarToggler(id="navbar-toggler1"),
+            dbc.Collapse(
+                dbc.Nav(
+                    [
+                        dbc.DropdownMenu(
+                        children=[
+                            dbc.DropdownMenuItem("Fairness", href="/pillars/fairness"),
+                            dbc.DropdownMenuItem("Explainability", href="/pillars/explainability"),
+                            dbc.DropdownMenuItem("Robustness", href="/pillars/robustness"),
+                            dbc.DropdownMenuItem("Methodology", href="/pillars/methodology"),
+                        ],
+                        nav=True,
+                        in_navbar=True,
+                        label="Pillars",
+                        ),
+                        dbc.NavItem(dbc.NavLink("Demo", href="/demo")),
+                        dbc.NavItem(dbc.NavLink("Compare", href="/compare")),
+                        dbc.NavItem(dbc.NavLink("Examples", href="/examples")),
+                    ], className="ml-auto", navbar=True
+                ),
+                id="navbar-collapse1",
+                navbar=True,
+            ),
         ]
     ),
     color="#000080",
@@ -143,8 +176,7 @@ def calculate_trust_score(n_clicks, modeltrigger, traintrigger, testtrigger, tra
     else:
         return ""
 
-@app.callback(Output('page-content', 'children'),
-              [Input('url', 'pathname')])
+@app.callback(Output('page-content', 'children'), [Input('url', 'pathname')])
 def display_page(pathname):
     if pathname == '/upload_train_data':
         return upload_train_data.layout
@@ -153,9 +185,28 @@ def display_page(pathname):
     elif pathname == '/test':
         return test.layout
     elif pathname == '/pillars/fairness':
-        return test.layout
+        return pillar_fairness.layout
+    elif pathname == '/pillars/explainability':
+        return pillar_explainablity.layout
+    elif pathname == '/pillars/robustness':
+        return pillar_robustness.layout
+    elif pathname == '/pillars/methodology':
+        return pillar_methodology.layout
+    elif pathname == '/examples':
+        return examples.layout
     else:
         return home.layout
+        
+    #if pathname == '/upload_train_data':
+    #    return upload_train_data.layout
+    #elif pathname == '/visualisation':
+    #    return visualisation.layout
+    #elif pathname == '/test':
+    #    return test.layout
+    #elif pathname == '/pillars/fairness':
+    #    return test.layout
+    #else:
+    #   return home.layout
     
 @app.callback(
    Output(component_id='panel', component_property='style'),
@@ -212,7 +263,7 @@ def show_the_graphs(value):
 
 
 if __name__ == '__main__':
-    app.run_server(debug=False)
+    app.run_server(debug=True)
 
 
 #debug

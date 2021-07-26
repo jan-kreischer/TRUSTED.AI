@@ -10,7 +10,7 @@ import dash_bootstrap_components as dbc
 layout = html.Div([
     dbc.Container([
         dbc.Row([
-            dbc.Col(html.H1("Quantifying the Trustworthiness Level of Artificial Intelligence", className="text-center")
+            dbc.Col(html.H1("Examples", className="text-center")
                     , className="mb-5 mt-5")
         ]),
         dbc.Row([
