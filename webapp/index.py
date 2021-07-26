@@ -22,7 +22,10 @@ from app import app
 # import all pages in the app
 from apps import home, upload_train_data, visualisation, test
 
+#LOGO = "./logo.png"
 
+#image_filename = 'logo.png' # replace with your own image
+#encoded_image = base64.b64encode(open(image_filename, 'rb').read())
 
 navbar = dbc.Navbar(
     dbc.Container(
@@ -30,7 +33,8 @@ navbar = dbc.Navbar(
             html.A(
                 dbc.Row(
                     [
-                        dbc.Col(dbc.NavbarBrand("Trusted AI", className="ml-2")),
+                        dbc.Col(html.Img(src=app.get_asset_url('logo.svg'), height="32px")),
+                        dbc.Col(dbc.NavbarBrand("TRUSTED.AI", className="ml-2")),
                     ],
                     align="center",
                     no_gutters=True,
