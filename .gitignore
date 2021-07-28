@@ -1,1 +1,6 @@
+webapp/uploaded_files
+.idea
 site/
+.ipynb_checkpoints
+.DS_Store
+

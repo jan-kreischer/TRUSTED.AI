@@ -4,16 +4,26 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 import dash_table
+import os
 
-
+existing_problem_sets = [dbc.DropdownMenuItem(f.name) for f in os.scandir('./problem_sets') if f.is_dir()]
 
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-layout = html.Div([
-    dbc.Col([html.H3("1. Please upload the train data (csv and pickle files are accepted).", className="text-center"),
+layout = dbc.Container([
+    dbc.Col([html.H3("1. Please select the correpsonding Problem Set.", className="text-center"),
+        html.H5("Please place the label to the last column of the dataframe.", className="text-center")],
+        className="mb-4"),
+    
+    dbc.DropdownMenu(
+        label="Menu",
+        children=existing_problem_sets
+    ),
+    
+    dbc.Col([html.H3("2. Please upload the train data (csv and pickle files are accepted).", className="text-center"),
             html.H5("Please place the label to the last column of the dataframe.", className="text-center")],
             className="mb-4"),
     dcc.Upload(
@@ -34,7 +44,7 @@ layout = html.Div([
     ),
     html.Div(id='output-train-data-upload'),
     
-    dbc.Col([html.H3("2. Please upload the test data (csv and pickle files are accepted).", className="text-center"),
+    dbc.Col([html.H3("3. Please upload the test data (csv and pickle files are accepted).", className="text-center"),
             html.H5("Please place the label to the last column of the dataframe.", className="text-center")],
             className="mb-4"),
     
@@ -55,7 +65,7 @@ layout = html.Div([
         }
     ),
     html.Div(id='output-test-data-upload'),
-    dbc.Col(html.H3("3. Please upload the model as a .sav file.", className="text-center")
+    dbc.Col(html.H3("4. Please upload the model as a .sav file.", className="text-center")
                     , className="mb-4"),
     dcc.Upload(
         id='upload-model',
@@ -82,7 +92,9 @@ layout = html.Div([
     html.Div(html.Span(id="hidden-div")),
     html.Div(dbc.Button("Calculate Trust Score",  id='trustscore-button', color="primary", className="mt-3"), className="text-center"),
     
-])
+],
+fluid=False
+)
 
 
 #href="/visualisation",

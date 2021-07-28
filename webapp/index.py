@@ -20,7 +20,7 @@ import pickle
 from app import server
 from app import app
 # import all pages in the app
-from apps import home, upload_train_data, visualisation, test, examples, pillar_fairness, pillar_explainability, pillar_robustness, pillar_methodology 
+from apps import homepage, upload_train_data, visualisation, test, problem_sets, pillar_fairness, pillar_explainability, pillar_robustness, pillar_methodology, compare
 #from apps import *
 
 search_bar = dbc.Row(
@@ -39,8 +39,7 @@ search_bar = dbc.Row(
 )
 
 navbar = dbc.Navbar(
-    dbc.Container(
-        [
+    dbc.Container([
             html.A(
                 dbc.Row(
                     [
@@ -50,9 +49,9 @@ navbar = dbc.Navbar(
                     align="center",
                     no_gutters=True,
                 ),
-                href="/home",
+                href="/",
             ),
-            dbc.NavbarToggler(id="navbar-toggler1"),
+            dbc.NavbarToggler(id="navbar-toggler"),
             dbc.Collapse(
                 dbc.Nav(
                     [
@@ -69,30 +68,30 @@ navbar = dbc.Navbar(
                         ),
                         dbc.NavItem(dbc.NavLink("Demo", href="/demo")),
                         dbc.NavItem(dbc.NavLink("Compare", href="/compare")),
-                        dbc.NavItem(dbc.NavLink("Examples", href="/examples")),
+                        dbc.NavItem(dbc.NavLink("Examples", href="/problem-sets")),
                     ], className="ml-auto", navbar=True
                 ),
-                id="navbar-collapse1",
+                id="navbar-collapse",
                 navbar=True,
             ),
-        ]
+        ],
+        fluid=False
     ),
     color="#000080",
     dark=True,
     className="mb-4",
 )
 
+# add callback for toggling the collapse on small screens
+@app.callback(
+    Output("navbar-collapse", "is_open"),
+    [Input("navbar-toggler", "n_clicks")],
+    [State("navbar-collapse", "is_open")],
+)
 def toggle_navbar_collapse(n, is_open):
     if n:
         return not is_open
     return is_open
-
-for i in [2]:
-    app.callback(
-        Output(f"navbar-collapse{i}", "is_open"),
-        [Input(f"navbar-toggler{i}", "n_clicks")],
-        [State(f"navbar-collapse{i}", "is_open")],
-    )(toggle_navbar_collapse)
 
 # embedding the navigation bar
 app.layout = html.Div([
@@ -176,12 +175,23 @@ def calculate_trust_score(n_clicks, modeltrigger, traintrigger, testtrigger, tra
     else:
         return ""
 
+@app.route('/product/<name>')
+def get_product(name):
+  return "The product is " + str(name)
+
+
 @app.callback(Output('page-content', 'children'), [Input('url', 'pathname')])
 def display_page(pathname):
+    if pathname == '/':
+        return homepage.layout
     if pathname == '/upload_train_data':
         return upload_train_data.layout
     elif pathname == '/visualisation':
         return visualisation.layout
+    elif pathname == '/demo':
+        return upload_train_data.layout
+    elif pathname == '/compare':
+        return compare.layout
     elif pathname == '/test':
         return test.layout
     elif pathname == '/pillars/fairness':
@@ -192,21 +202,10 @@ def display_page(pathname):
         return pillar_robustness.layout
     elif pathname == '/pillars/methodology':
         return pillar_methodology.layout
-    elif pathname == '/examples':
-        return examples.layout
+    elif pathname == '/problem-sets':
+        return problem_sets.layout
     else:
-        return home.layout
-        
-    #if pathname == '/upload_train_data':
-    #    return upload_train_data.layout
-    #elif pathname == '/visualisation':
-    #    return visualisation.layout
-    #elif pathname == '/test':
-    #    return test.layout
-    #elif pathname == '/pillars/fairness':
-    #    return test.layout
-    #else:
-    #   return home.layout
+        return homepage.layout
     
 @app.callback(
    Output(component_id='panel', component_property='style'),
