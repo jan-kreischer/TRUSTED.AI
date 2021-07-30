@@ -8,9 +8,12 @@
     }
   },
   "weights": {
-    "Confidence_Score": 0.25,
-      "Clique_Method"    : 0.25,
-        "Loss_Sensitivity"  : 0.25, 
-        "CLEVER_Score"   : 0.25
+    "Confidence_Score": 0.20,
+      "Clique_Method"    : 0.20,
+        "Loss_Sensitivity"  : 0.20, 
+        "CLEVER_Score"   : 0.20,
+	"Empirical_Robustness_Fast_Gradient_Attack"   : 0.20,
+	"Empirical_Robustness_Carlini_Wagner_Attack"   : 0.20,
+	"Empirical_Robustness_Deepfool_Attack"   : 0.20
   }
 }

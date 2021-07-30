@@ -175,11 +175,6 @@ def calculate_trust_score(n_clicks, modeltrigger, traintrigger, testtrigger, tra
     else:
         return ""
 
-@app.route('/product/<name>')
-def get_product(name):
-  return "The product is " + str(name)
-
-
 @app.callback(Output('page-content', 'children'), [Input('url', 'pathname')])
 def display_page(pathname):
     if pathname == '/':

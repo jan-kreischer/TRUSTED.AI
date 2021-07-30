@@ -125,7 +125,7 @@ def trusting_AI_scores(model, train_data, test_data, config_fairness, config_exp
     output = dict(
         fairness       = calc_fairness_score(),
         explainability = calc_explainability_score(model, train_data, test_data, config_explainability),
-        robustness     = calc_robustness_score(),
+        robustness     = calc_robustness_score(model, train_data, test_data, config_robustness),
         methodology    = calc_methodology_score()
     )
     scores = dict((k, v.score) for k, v in output.items())
@@ -135,14 +135,16 @@ def trusting_AI_scores(model, train_data, test_data, config_fairness, config_exp
 
 # calculate final score with weigths
 def get_final_score(model, train_data, test_data, config_fairness, config_explainability, config_robustness, config_methodology):
-    scores = trusting_AI_scores(model, train_data, test_data, config_fairness, config_explainability, config_robustness, config_methodology).score
+    result = trusting_AI_scores(model, train_data, test_data, config_fairness, config_explainability, config_robustness, config_methodology)
+    scores = result.score
+    properties = result.properties
     final_scores = dict()
     for pillar, item in scores.items():
         config = eval("config_"+pillar)
         weighted_scores = list(map(lambda x: scores[pillar][x] * config["weights"][x], scores[pillar].keys()))
         final_scores[pillar] = round(np.sum(weighted_scores),1)
 
-    return final_scores, scores
+    return final_scores, scores, properties
 
 #config = {'fairness': 0.25, 'explainability': 0.25, 'robustness': 0.25, 'methodology': 0.25}
 
