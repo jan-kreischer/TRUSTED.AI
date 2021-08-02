@@ -4,3 +4,6 @@ site/
 .ipynb_checkpoints
 .DS_Store
 
+webapp/problem_sets
+!webapp/problem_sets/IT\ Sec\ Anomaly\ Detection
+!webapp/problem_sets/IT\ Sec\ Incident\ Classification
