@@ -2,5 +2,5 @@ venv
 *.pyc
 .DS_Store
 .env
-problem_sets/
+#problem_sets/
 !problem_sets/README.md

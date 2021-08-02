@@ -25,7 +25,7 @@ problem_set_name_input_form = dbc.Form([
             color="secondary",
         ),
         dbc.Button(
-            "Submit", id="submit", className="ml-auto", n_clicks=0
+            "Submit", id="submit", className="ml-auto", n_clicks=0, style={"float": "right"}
         )
     ])
 ])
@@ -46,17 +46,29 @@ modal = html.Div(
 
 # --- Callbacks --- #
 @app.callback(
-    Output("problem_set_name", "valid"),
-    [Input("problem_set_name", "value")],
-)
-def create_problem_set(name):
-    app.logger.info(name)
+    Output("problem_set_name", "value"),
+    [Input('submit', 'n_clicks')],
+    [State('problem_set_name', 'value')])
+def create_problem_set_name(n_clicks, name):
     if name:
+        app.logger.info("problem_set_name: {}".format(name))
         res = os.mkdir("./problem_sets/{}".format(name))
-        app.logger.info(res)
-        return True
+        return ""
     else:
-        return False
+        return ""
+
+#@app.callback(
+#    Output("problem_set_name", "valid"),
+#    [Input("problem_set_name", "value")],
+#)
+#def create_problem_set(name):
+#    app.logger.info("Name {}".format(name))
+#    if name:
+#        res = os.mkdir("./problem_sets/{}".format(name))
+#        app.logger.info("Res {}".format(res))
+#        return True
+#    else:
+#        return False
 
 #@app.callback(
 #    Output('output', 'children'),
