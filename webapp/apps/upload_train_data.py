@@ -6,7 +6,7 @@ import dash_bootstrap_components as dbc
 import dash_table
 import os
 
-existing_problem_sets = [dbc.DropdownMenuItem(f.name) for f in os.scandir('./problem_sets') if f.is_dir()]
+existing_problem_sets = [{'label': f.name, 'value': f.path} for f in os.scandir('./problem_sets') if f.is_dir()]
 
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
@@ -14,16 +14,26 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 layout = dbc.Container([
-    dbc.Col([html.H3("1. Please select the correpsonding Problem Set.", className="text-center"),
-        html.H5("Please place the label to the last column of the dataframe.", className="text-center")],
-        className="mb-4"),
-    
-    dbc.DropdownMenu(
-        label="Menu",
-        children=existing_problem_sets
+    dbc.Col([
+        html.H3("1. Please select the correpsonding Problem Set.", className="text-center"),
+        html.H5("Please place the label to the last column of the dataframe.", className="text-center"),
+        dcc.Dropdown(
+            id='demo-dropdown',
+            options=existing_problem_sets,
+            value='Select Problem Set A'
+        )], 
+        className="mb-4"
     ),
     
-    dbc.Col([html.H3("2. Please upload the train data (csv and pickle files are accepted).", className="text-center"),
+    dbc.Col([
+        html.H3("2. Enter a name for your model.", className="text-center"),
+        html.H5("Your model will be saved under this name.", className="text-center"),
+        dcc.Input(id="input2", type="text", placeholder="", debounce=True, style={'width': '100%', 'textAlign': 'center'})
+        ], 
+        className="mb-4"
+    ),
+    
+    dbc.Col([html.H3("3. Please upload the train data (csv and pickle files are accepted).", className="text-center"),
             html.H5("Please place the label to the last column of the dataframe.", className="text-center")],
             className="mb-4"),
     dcc.Upload(
@@ -44,7 +54,7 @@ layout = dbc.Container([
     ),
     html.Div(id='output-train-data-upload'),
     
-    dbc.Col([html.H3("3. Please upload the test data (csv and pickle files are accepted).", className="text-center"),
+    dbc.Col([html.H3("4. Please upload the test data (csv and pickle files are accepted).", className="text-center"),
             html.H5("Please place the label to the last column of the dataframe.", className="text-center")],
             className="mb-4"),
     
@@ -65,7 +75,7 @@ layout = dbc.Container([
         }
     ),
     html.Div(id='output-test-data-upload'),
-    dbc.Col(html.H3("4. Please upload the model as a .sav file.", className="text-center")
+    dbc.Col(html.H3("5. Please upload the model as a .sav file.", className="text-center")
                     , className="mb-4"),
     dcc.Upload(
         id='upload-model',

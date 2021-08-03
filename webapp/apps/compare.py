@@ -1,44 +1,41 @@
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
+from app import app
+import os
 
-# needed only if running this as a single page app
-#external_stylesheets = [dbc.themes.LUX]
+def solution_sets():
+    problem_sets = [(f.name, f.path) for f in os.scandir('./problem_sets') if f.is_dir()]
+    options = []
+    for problem_set_name, problem_set_path in problem_sets:
+        solution_sets = [(f.name, f.path) for f in os.scandir(problem_set_path) if f.is_dir()]
+        for solution_set_name, solution_set_path in solution_sets:
+            options.append({"label": problem_set_name + " > " + solution_set_name, "value": problem_set_path + "/" + solution_set_path})
+    return options
 
-#app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+solution_sets = solution_sets()
 
-# change to app.layout if running as single page app instead
 layout = html.Div([
     dbc.Container([
         dbc.Row([
-            dbc.Col(html.H1("Compare", className="text-center"), width=12, className="mb-5 mt-5"),
+            dbc.Col(html.H1("Compare", className="text-center"), width=12, className="mb-1 mt-1"),
 
             dbc.Col([
                 dcc.Dropdown(
                     id='demo-dropdown',
-                    options=[
-                        {'label': 'New York City', 'value': 'NYC'},
-                        {'label': 'Montreal', 'value': 'MTL'},
-                        {'label': 'San Francisco', 'value': 'SF'}
-                    ],
-                    value='Select Problem Set A'
+                    options=solution_sets
                 )], 
                 width=6, 
-                className="mb-5 mt-5"
+                className="mb-1 mt-1"
             ),
             
             dbc.Col([
                 dcc.Dropdown(
                     id='demo-dropdown',
-                    options=[
-                        {'label': 'New York City', 'value': 'NYC'},
-                        {'label': 'Montreal', 'value': 'MTL'},
-                        {'label': 'San Francisco', 'value': 'SF'}
-                    ],
-                    value='Select Problem Set B'
+                    options=solution_sets,
                 )], 
                 width=6, 
-                className="mb-5 mt-5"
+                className="mb-1 mt-1"
             )
         ])
     ])

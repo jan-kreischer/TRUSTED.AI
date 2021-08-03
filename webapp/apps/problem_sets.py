@@ -32,7 +32,12 @@ problem_set_name_input_form = dbc.Form([
 
 modal = html.Div(
     [
-        dbc.Button(html.I(className="fas fa-plus-circle"), id="open", n_clicks=0),
+        dbc.Button(
+            html.I(className="fas fa-plus-circle"),
+            id="open", 
+            n_clicks=0,
+            style={"float": "right"}
+        ),
         dbc.Modal(
             [
                 dbc.ModalHeader("Create new problem set"),
@@ -52,31 +57,11 @@ modal = html.Div(
 def create_problem_set_name(n_clicks, name):
     if name:
         app.logger.info("problem_set_name: {}".format(name))
+        app.logger.info(problem_set_list_2())
         res = os.mkdir("./problem_sets/{}".format(name))
         return ""
     else:
         return ""
-
-#@app.callback(
-#    Output("problem_set_name", "valid"),
-#    [Input("problem_set_name", "value")],
-#)
-#def create_problem_set(name):
-#    app.logger.info("Name {}".format(name))
-#    if name:
-#        res = os.mkdir("./problem_sets/{}".format(name))
-#        app.logger.info("Res {}".format(res))
-#        return True
-#    else:
-#        return False
-
-#@app.callback(
-#    Output('output', 'children'),
-#    [Input('problem-set-name', 'value')]
-#)
-#def create_problem_set(name):
-#    app.logger.info(name)
-#    os.mkdir("/problem_sets/{}".format(name))
 
 @app.callback(
     Output("modal", "is_open"),
@@ -110,19 +95,37 @@ def problem_set_list():
         final_tree.append(html.H3(problem_set_names[i]))
         for j in range(len(solution_sets[i])):
             final_tree.append(html.H5("-" + solution_sets[i][j]))
-    return final_tree        
+    return final_tree  
+
+def problem_set_list_2():
+    problem_sets = [(f.name, f.path) for f in os.scandir('./problem_sets') if f.is_dir()]
+    problem_set_names = [i[0] for i in problem_sets]
+    solution_sets = []
+    for name, path in problem_sets:
+        solution_set = [f.name for f in os.scandir(path) if f.is_dir()]
+        solution_sets.append(solution_set)
+    
+    final_tree = []
+    for i in range(len(problem_set_names)):
+        #final_tree.append(html.H3(problem_set_names[i]))
+        for j in range(len(solution_sets[i])):
+            final_tree.append({'label': problem_set_names[i] + ' - ' + solution_sets[i][j], 'value': 'path'})
+    return final_tree   
 
 layout = html.Div([
     dbc.Container([
         dbc.Row([
             dbc.Col(
                 html.Div(
-                    children=[html.H1("Problem Sets", className="text-center"),
-                    html.Div(children=problem_set_list()),
+                    children=[ 
+                        modal,
+                        html.H1("Problem Sets", className="text-center"),
+                        html.Div(children=problem_set_list()),
+                        html.H1(problem_set_list_2())
                     #for problem_set_name, solution_sets in problem_set_dict.items():
                         #html.H5(problem_set_name),
                               
-                    modal]
+                   ]
                 ),
                 className="mb-5 mt-5"
             ),
