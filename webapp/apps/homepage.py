@@ -18,7 +18,7 @@ layout = dbc.Container([
              dbc.Card(
                  children=[html.H3(children='Try the Demo', className="text-center"),
                                        dbc.Button("Demo",
-                                                  href="/upload_train_data",
+                                                  href="/upload",
                                                   color="primary",
                                                   className="mt-3"),
                                        ],

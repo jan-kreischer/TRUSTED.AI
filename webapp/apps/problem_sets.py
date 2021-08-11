@@ -73,15 +73,6 @@ def toggle_modal(n1, n2, is_open):
         return not is_open
     return is_open
 
-#def return_tree_structure():
-#    problem_sets = [(f.name, f.path) for f in os.scandir('./problem_sets') if f.is_dir()]
-#    problem_set_list = html.Div(className="problem-set-list", children=[])
-#    for problem_set_name, problem_set_path in problem_sets:
-#        problem_set_list.children.append()
-       
-    #for _, path in existing_problem_sets:
-    #    print ([f.name for f in os.scandir(path) if f.is_dir()])
-
 def problem_set_list():
     problem_sets = [(f.name, f.path) for f in os.scandir('./problem_sets') if f.is_dir()]
     problem_set_names = [i[0] for i in problem_sets]
@@ -111,6 +102,7 @@ def problem_set_list_2():
         for j in range(len(solution_sets[i])):
             final_tree.append({'label': problem_set_names[i] + ' - ' + solution_sets[i][j], 'value': 'path'})
     return final_tree   
+
 
 layout = html.Div([
     dbc.Container([
