@@ -4,8 +4,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 import dash_table
-from app import app
 import os
+from app import app
 
 
 problem_sets = [{'label': f.name, 'value': f.path} for f in os.scandir('./problem_sets') if f.is_dir()]
@@ -29,7 +29,7 @@ def create_info_modal(module_id, name, content):
                 dbc.ModalBody(content),
                 dbc.ModalFooter(
                     dbc.Button(
-                        "Close", id="close", className="ml-auto", n_clicks=0
+                        "Close", id="{}_close".format(module_id), className="ml-auto", n_clicks=0
                     )
                 ),
             ],
