@@ -8,11 +8,11 @@
     }
   },
   "weights": {
-    "Statistical_Parity": 0.16666666666666666,
-      "Disparate_Mistreatment": 0.16666666666666666,
-      "Class_Imbalance": 0.16666666666666666,
-      "Biased_Data": 0.16666666666666666,
-      "Disparate_Treatment" : 0.16666666666666666,
-      "Disparate_Impact": 0.16666666666666666
+    "Statistical_Parity": 0.17,
+      "Disparate_Mistreatment": 0.17,
+      "Class_Imbalance": 0.17,
+      "Biased_Data": 0.17,
+      "Disparate_Treatment" : 0.17,
+      "Disparate_Impact": 0.17
   }
 }

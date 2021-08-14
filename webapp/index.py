@@ -13,6 +13,8 @@ import dash_html_components as html
 import dash_table
 import json
 import pickle
+import plotly.express as px
+import plotly.graph_objects as go
 
 
 
@@ -20,7 +22,8 @@ import pickle
 from app import server
 from app import app
 # import all pages in the app
-from apps import homepage, upload, visualisation, test, problem_sets, pillar_fairness, pillar_explainability, pillar_robustness, pillar_methodology, compare
+from apps import homepage, upload, visualisation, problem_sets, pillar_fairness, pillar_explainability, pillar_robustness, pillar_methodology, compare
+from apps.config_panel import input_ids 
 #from apps import *
 
 search_bar = dbc.Row(
@@ -171,11 +174,11 @@ def display_page(pathname):
     elif pathname == '/compare':
         return compare.layout
     elif pathname == '/test':
-        return test.layout
+        return  visualisation.layout
     elif pathname == '/pillars/fairness':
         return pillar_fairness.layout
     elif pathname == '/pillars/explainability':
-        return pillar_explainablity.layout
+        return pillar_fairness.layout
     elif pathname == '/pillars/robustness':
         return pillar_robustness.layout
     elif pathname == '/pillars/methodology':
@@ -409,6 +412,175 @@ def validate_model(n_clicks, model):
             return html.H6("No model uploaded", style={"color":"Red"})
         else:
             return None
-        
+     
+
+visualisation.get_callbacks(app)
+#save config
+
+# @app.callback([Output('input-config', 'data'), Output("hidden-trigger", "value")], 
+#               [Input('save-weights', 'n_clicks'),
+#                Input('apply-config', 'n_clicks')],
+#                 list(map(lambda inp: State(inp, "value"),list(filter(lambda ids: ids[:2]=="w_", input_ids)))))
+# def store_input_config(n1, n2, *args):
+    
+    
+#     ctx = dash.callback_context
+    
+#     inputs= dict()
+    
+#     for name, val in zip(list(filter(lambda ids: ids[:2]=="w_", input_ids)), args):
+#         inputs[name[2:]] = float(val)
+    
+#     config_file =  {
+#         "fairness": {
+#             "parameters": {
+#                 "score_Statistical_Parity": {
+#                     "parameter_XY": {
+#                         "value": "The value of the parameter_XY",
+#                         "description": "The description of the paramter and its impact"
+#                     }
+#                 }
+#             },
+#             "weights": {
+#                 "Statistical_Parity":  inputs["Statistical_Parity"],
+#                 "Disparate_Mistreatment":  inputs["Disparate_Mistreatment"],
+#                 "Class_Imbalance":  inputs["Class_Imbalance"],
+#                 "Biased_Data":  inputs["Biased_Data"],
+#                 "Disparate_Treatment":  inputs["Disparate_Treatment"],
+#                 "Disparate_Impact":  inputs["Disparate_Impact"]
+#             }
+#         },
+#         "explainability": {
+#             "parameters": {
+#                 "score_Algorithm_Class": {
+#                     "clf_type_score": {
+#                         "value": {
+#                             "RandomForestClassifier": 3,
+#                             "KNeighborsClassifier": 3,
+#                             "SVC": 2,
+#                             "GaussianProcessClassifier": 3,
+#                             "DecisionTreeClassifier": 4,
+#                             "MLPClassifier": 1,
+#                             "AdaBoostClassifier": 3,
+#                             "GaussianNB": 3.5,
+#                             "QuadraticDiscriminantAnalysis": 3,
+#                             "LogisticRegression": 3,
+#                             "LinearRegression": 3.5
+#                         },
+#                         "description": "Mapping of Learning techniques to the level of explainability based on on literature research and qualitative analysis of each learning technique. For more information see gh-pages/explainability/taxonomy"
+#                     }
+#                 },
+#                 "score_Feature_Relevance": {
+#                     "scale_factor": {
+#                         "value": 1.5,
+#                         "description": "Used for the calculation to detect outliers in a dataset with the help of quartiels and the Interquartile Range (Q3-Q1) for example the lower bound for outliers is then calculated as follows: lw = Q1-scale_factor*IQR"
+#                     },
+#                     "distri_threshold": {
+#                         "value": 0.6,
+#                         "description": "Used for the calulation of how many features make up the a certain fraction (distri_threshold) of all importance. For example if the distri_threshold is 0.6 and the result would be 10% than this would mean that 10% of the used features concentrate 60% of all feature importance, which would mean that the importance of the features is not well balanced where only a few features are important for the classification and the majority of features has only very little or no impact at all"
+#                     }
+#                 }
+#             },
+#             "weights": {
+#                 "Algorithm_Class": inputs["Algorithm_Class"],
+#                 "Correlated_Features":  inputs["Correlated_Features"],
+#                 "Model_Size":  inputs["Model_Size"],
+#                 "Feature_Relevance": inputs["Feature_Relevance"]
+#             }
+#         },
+#         "robustness": {
+#             "parameters": {
+#                 "score_Confidence_Score": {
+#                     "parameter_XY": {
+#                         "value": "The value of the parameter_XY",
+#                         "description": "The description of the paramter and its impact"
+#                     }
+#                 }
+#             },
+#             "weights": {
+#                 "Confidence_Score":  inputs["Confidence_Score"],
+#                 "Clique_Method": inputs["Clique_Method"],
+#                 "Loss_Sensitivity":  inputs["Loss_Sensitivity"],
+#                 "CLEVER_Score":  inputs["CLEVER_Score"],
+#                 "Empirical_Robustness_Fast_Gradient_Attack":  inputs["Empirical_Robustness_Fast_Gradient_Attack"],
+#                 "Empirical_Robustness_Carlini_Wagner_Attack": inputs["Empirical_Robustness_Carlini_Wagner_Attack"],
+#                 "Empirical_Robustness_Deepfool_Attack":  inputs["Empirical_Robustness_Deepfool_Attack"]
+#             }
+#         },
+#         "methodology": {
+#             "parameters": {
+#                 "score_Normalization": {
+#                     "parameter_XY": {
+#                         "value": "The value of the parameter_XY",
+#                         "description": "The description of the paramter and its impact"
+#                     }
+#                 }
+#             },
+#             "weights": {
+#                 "Normalization":  inputs["Normalization"],
+#                 "Treatment_of_Corrupt_Values":  inputs["Treatment_of_Corrupt_Values"],
+#                 "Train_Test_Split":  inputs["Train_Test_Split"],
+#                 "Regularization":  inputs["Regularization"],
+#                 "Treatment_of_Categorical_Features":  inputs["Treatment_of_Categorical_Features"],
+#                 "Feature_Filtering": inputs["Feature_Filtering"]
+#             }
+#         },
+#         "pillars": {
+#             "fairness": inputs["fair_pillar"],
+#             "explainability": inputs["exp_pillar"],
+#             "robustness": inputs["rob_pillar"],
+#             "methodology": inputs["meth_pillar"]
+#         }
+#     }
+    
+#     return json.dumps(config_file), ctx.triggered[0]['prop_id']
+ 
+
+# @app.callback(
+#     Output("modal-success", "is_open"),
+#     [Input("hidden-trigger", "value"),Input("save-success", "n_clicks")],
+#     State("modal-success", "is_open"))
+# def update_output(trig,n, is_open):
+#     if trig == "save-weights.n_clicks" or n:
+#         return not is_open
+#     else:
+#         return is_open
+    
+# @app.callback(
+#     Output("modal-saved", "is_open"),
+#     [Input("save-success", "n_clicks")],
+#     [State("modal-saved", "is_open"),
+#      State("input-config", "data"),
+#       State("config-name", "value")])
+# def save_config(n_clicks, is_open,config, conf_name):
+    
+#     if n_clicks and config is not None:
+#         config_file = json.loads(config)
+#         with open('configs/'+ conf_name+'.json', 'w') as outfile:
+#             json.dump(config_file, outfile, indent=4)
+#         return not is_open
+#     else:
+#         return is_open
+    
+
+# @app.callback(
+#     Output('bar', 'figure'),
+#     Input('apply-config', 'n_clicks'))
+# def update_figure(n, ):
+    
+#     final_score, results, properties = get_final_score(model, train_data, test_data, main_config)
+#     trust_score = get_trust_score(final_score, main_config["pillars"])
+#     performance =  get_performance_table(model, test_data).transpose()
+#     pillars = list(final_score.keys())
+#     values = list(final_score.values()) 
+    
+#     bar_chart = go.Figure(data=[go.Bar(
+#         x=pillars,
+#         y=values,
+#         marker_color=my_palette
+#             )])
+
+#     return bar_chart
+    
 if __name__ == '__main__':
     app.run_server(debug=True)

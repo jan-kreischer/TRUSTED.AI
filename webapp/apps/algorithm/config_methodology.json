@@ -8,11 +8,11 @@
     }
   },
   "weights": {
-   "Normalization":0.16666666666666666,
-      "Treatment_of_Corrupt_Values":  0.16666666666666666,
-      "Train_Test_Split":  0.16666666666666666,
-      "Regularization":  0.16666666666666666,
-      "Treatment_of_Categorical_Features":  0.16666666666666666,
-      "Feature_Filtering": 0.16666666666666666
+   "Normalization":0.17,
+      "Treatment_of_Corrupt_Values":  0.17,
+      "Train_Test_Split":  0.17,
+      "Regularization":  0.17,
+      "Treatment_of_Categorical_Features":  0.17,
+      "Feature_Filtering": 0.17
   }
 }
