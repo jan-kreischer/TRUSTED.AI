@@ -16,8 +16,10 @@ import json
 from math import pi
 import dash_table
 import dash_bootstrap_components as dbc
-from apps import test
+from apps import config_panel
 from apps.algorithm.helper_functions import get_performance_table, get_final_score, get_case_inputs, trusting_AI_scores, get_trust_score
+from dash.dependencies import Input, Output, State
+
 
 children=[]
      
@@ -37,10 +39,16 @@ for config in ["config_pillars","config_fairness", "config_explainability", "con
     with open("apps/algorithm/"+config+".json") as file:
             exec("%s = json.load(file)" % config)
 
+pillars = ['fairness', 'explainability', 'robustness', 'methodology']
+main_config = dict(fairness=config_fairness, explainability=config_explainability, 
+                   robustness=config_robustness, methodology=config_methodology, pillars=config_pillars)
+
+with open('configs/default.json', 'w') as outfile:
+                json.dump(main_config, outfile, indent=4)
 
 #properties = trusting_AI_scores(model, train_data, test_data, config_fairness, config_explainability, config_robustness, config_methodology).properties
-final_score, results, properties = get_final_score(model, train_data, test_data, config_fairness, config_explainability, config_robustness, config_methodology)
-trust_score = get_trust_score(final_score, config_pillars)
+final_score, results, properties = get_final_score(model, train_data, test_data, main_config)
+trust_score = get_trust_score(final_score, main_config["pillars"])
 performance =  get_performance_table(model, test_data).transpose()
 pillars = list(final_score.keys())
 values = list(final_score.values())
@@ -63,7 +71,7 @@ children.append(html.Hr())
 children.append(html.Br())
 
 children.append(html.Br())
-children.append(test.layout)
+children.append(config_panel.layout)
 children.append(html.Br())
 
 children.append(dbc.Col(
@@ -98,7 +106,7 @@ for n, (pillar , sub_scores) in enumerate(results.items()):
     spider_plt_pillar.update_layout(title_x=0.5)
     # spider_plt_pillar.update_yaxes(range=[0,5],autorange=False)
 
-    spider_plt_pillars.append(dcc.Graph(id=pillar, figure=spider_plt_pillar, style={'display': 'inline-block','width': '50%'}))
+    spider_plt_pillars.append(dcc.Graph(id=pillar+"_spider", figure=spider_plt_pillar, style={'display': 'inline-block','width': '50%'}))
 
 children.append(html.Div(id="spider_pillars",children=spider_plt_pillars, style={'display': 'none'}))
 
@@ -107,18 +115,18 @@ bar_chart = go.Figure(data=[go.Bar(
     y=values,
     marker_color=my_palette
 )])
-bar_chart.update_layout(title_text="AI Final Trust Score: 3.1", title_x=0.5)
+bar_chart.update_layout(title_text='AI Final Trust Score: {}'.format(trust_score), title_x=0.5)
 children.append(dcc.Graph(id='bar',figure=bar_chart, style={'display': 'block'}))
 
 
 bar_chart_pillars=[]
 for n, (pillar , sub_scores) in enumerate(results.items()):
-    title = pillar
+    title = pillar 
     categories = list(map(lambda x: x.replace("_",' '), sub_scores.keys())) 
     values = list(map(int, sub_scores.values()))
     bar_chart_pillar = go.Figure(data=[go.Bar(x=categories, y=values, marker_color=my_palette[n])])
     bar_chart_pillar.update_layout(title_text=title, title_x=0.5)
-    bar_chart_pillars.append(dcc.Graph(id=str(pillar+"bar"), figure=bar_chart_pillar, style={'display': 'inline-block','width': '50%'}))
+    bar_chart_pillars.append(dcc.Graph(id=str(pillar+"_bar"), figure=bar_chart_pillar, style={'display': 'inline-block','width': '50%'}))
 children.append(html.Div(id="bar_pillars", children=bar_chart_pillars, style={'display': 'block'}))  
 
 
@@ -158,13 +166,74 @@ children.append(html.Div([
 
 
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+# external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+# app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 layout = html.Div(children=children)
+input_ids = config_panel.input_ids
 
-
+def get_callbacks(app):
     
-if __name__ == '__main__':
-    app.run_server(debug=True)
+   #get config callbacks
+   config_panel.get_callbacks(app)
+ 
+   @app.callback(
+        [Output('bar', 'figure'),Output('spider', 'figure'),
+         Output('fairness_bar', 'figure'),Output('explainability_bar', 'figure'),Output('robustness_bar', 'figure'),Output('methodology_bar', 'figure'),
+         Output('fairness_spider', 'figure'),Output('explainability_spider', 'figure'),Output('robustness_spider', 'figure'),Output('methodology_spider', 'figure')],
+        Input("hidden-trigger", "value"),
+        State("input-config", "data"))
+   def update_figure(trig, config):
+        
+        if not config or trig != "apply-config.n_clicks":
+            with open('configs/default.json','r') as f:
+                main_config = json.loads(f.read())
+        else:
+            main_config = json.loads(config)
+            
+        np.random.seed(6)
+        
+        final_score, results, properties = get_final_score(model, train_data, test_data, main_config)
+        trust_score = get_trust_score(final_score, main_config["pillars"])
+        pillars = list(final_score.keys())
+        values = list(final_score.values()) 
+        
+        # barchart
+        chart_list=[]
+        bar_chart = go.Figure(data=[go.Bar(
+            x=pillars,
+            y=values,
+            marker_color=my_palette
+                )])
+        bar_chart.update_layout(title_text='AI Final Trust Score:  <b style="font-size:50px;">{}</b>'.format(trust_score), title_x=0.5)
+        chart_list.append(bar_chart)
+        
+        #spider
+        spider_plt = px.line_polar(r=values, theta=pillars, line_close=True, title='AI Final Trust Score:  <b style="font-size:50px;">{}</b>'.format(trust_score))
+        spider_plt.update_layout(title_x=0.5)
+        chart_list.append(spider_plt)
+        
+        #barcharts
+        for n, (pillar , sub_scores) in enumerate(results.items()):
+            title = pillar + " (score: {})".format(final_score[pillar])
+            categories = list(map(lambda x: x.replace("_",' '), sub_scores.keys()))
+            values = list(map(int, sub_scores.values()))
+            bar_chart_pillar = go.Figure(data=[go.Bar(x=categories, y=values, marker_color=my_palette[n])])
+            bar_chart_pillar.update_layout(title_text=title, title_x=0.5)
+            chart_list.append(bar_chart_pillar)
+            
+        #spider charts
+        for n, (pillar , sub_scores) in enumerate(results.items()):
+            title = pillar  + " (score: {})".format(final_score[pillar])
+            categories = list(map(lambda x: x.replace("_",' '), sub_scores.keys()))
+            val = list(map(int, sub_scores.values()))
+            spider_plt_pillar = px.line_polar(r=val, theta=categories, line_close=True, title=title)
+            spider_plt_pillar.update_traces(fill='toself', fillcolor=my_palette[n], marker_color='rgb(250,00,00)',marker_line_width=1.5, opacity=0.6)
+            spider_plt_pillar.update_layout(title_x=0.5)
+            chart_list.append(spider_plt_pillar)
+            
+        return chart_list
+
+# if __name__ == '__main__':
+#     app.run_server(debug=True)

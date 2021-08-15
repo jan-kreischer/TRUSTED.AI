@@ -13,12 +13,16 @@ import dash_html_components as html
 import dash_table
 import json
 import pickle
+import plotly.express as px
+import plotly.graph_objects as go
 
 # must add this line in order for the app to be deployed successfully on Heroku
 from app import server
 from app import app
 # import all pages in the app
 from apps import homepage, upload, visualisation, test, problem_sets, compare, analyze
+from apps.config_panel import input_ids 
+
 
 navbar = dbc.Navbar(
     dbc.Container([
@@ -106,6 +110,8 @@ def show_the_graphs(value):
         return [{'display': 'block'}, {'display': 'block'}, {'display': 'none'}, {'display': 'none'}]
     else:
         return [{'display': 'none'}, {'display': 'none'}, {'display': 'block'}, {'display': 'block'}]
-       
+
+visualisation.get_callbacks(app)
+
 if __name__ == '__main__':
     app.run_server(debug=True)

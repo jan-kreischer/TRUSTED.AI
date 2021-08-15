@@ -134,22 +134,34 @@ def trusting_AI_scores(model, train_data, test_data, config_fairness, config_exp
     return  result(score=scores, properties=properties)
 
 # calculate final score with weigths
-def get_final_score(model, train_data, test_data, config_fairness, config_explainability, config_robustness, config_methodology):
+def get_final_score(model, train_data, test_data, main_config):
+    config_fairness = main_config["fairness"]
+    config_explainability = main_config["explainability"]
+    config_robustness = main_config["robustness"]
+    config_methodology = main_config["methodology"]
+    
     result = trusting_AI_scores(model, train_data, test_data, config_fairness, config_explainability, config_robustness, config_methodology)
     scores = result.score
     properties = result.properties
     final_scores = dict()
     for pillar, item in scores.items():
         config = eval("config_"+pillar)
+        sum_weights = sum(config["weights"].values())
         weighted_scores = list(map(lambda x: scores[pillar][x] * config["weights"][x], scores[pillar].keys()))
-        final_scores[pillar] = round(np.sum(weighted_scores),1)
+        if sum_weights == 0:
+            result = 0
+        else:
+            result = round(np.sum(weighted_scores)/sum_weights,1)
+        final_scores[pillar] = result
 
     return final_scores, scores, properties
 
 #config = {'fairness': 0.25, 'explainability': 0.25, 'robustness': 0.25, 'methodology': 0.25}
 
 def get_trust_score(final_score, config):
-     return round(np.sum(list(map(lambda x: final_score[x] * config[x], final_score.keys()))),1)
+    if sum(config.values()) == 0:
+        return 0
+    return round(np.sum(list(map(lambda x: final_score[x] * config[x], final_score.keys())))/sum(config.values()),1)
     
 ### delete later
 # define model inputs
