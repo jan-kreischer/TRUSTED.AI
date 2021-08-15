@@ -38,8 +38,8 @@ for config in ["config_pillars","config_fairness", "config_explainability", "con
             exec("%s = json.load(file)" % config)
 
 
-properties = trusting_AI_scores(model, train_data, test_data, config_fairness, config_explainability, config_robustness, config_methodology).properties
-final_score, results = get_final_score(model, train_data, test_data, config_fairness, config_explainability, config_robustness, config_methodology)
+#properties = trusting_AI_scores(model, train_data, test_data, config_fairness, config_explainability, config_robustness, config_methodology).properties
+final_score, results, properties = get_final_score(model, train_data, test_data, config_fairness, config_explainability, config_robustness, config_methodology)
 trust_score = get_trust_score(final_score, config_pillars)
 performance =  get_performance_table(model, test_data).transpose()
 pillars = list(final_score.keys())
@@ -87,6 +87,7 @@ spider_plt.update_layout(title_x=0.5)
 children.append(dcc.Graph(id='spider',figure=spider_plt, style={'display': 'none'}))
 
 my_palette = ['yellow','cornflowerblue','lightgrey','lightseagreen']
+
 spider_plt_pillars=[]
 for n, (pillar , sub_scores) in enumerate(results.items()):
     title = pillar

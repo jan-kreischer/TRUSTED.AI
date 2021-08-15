@@ -20,8 +20,7 @@ import pickle
 from app import server
 from app import app
 # import all pages in the app
-from apps import homepage, upload, visualisation, test, problem_sets, pillar_fairness, pillar_explainability, pillar_robustness, pillar_methodology, compare
-#from apps import *
+from apps import homepage, upload, visualisation, test, problem_sets, compare, analyze
 
 search_bar = dbc.Row(
     [
@@ -55,18 +54,8 @@ navbar = dbc.Navbar(
             dbc.Collapse(
                 dbc.Nav(
                     [
-                        dbc.DropdownMenu(
-                        children=[
-                            dbc.DropdownMenuItem("Fairness", href="/pillars/fairness"),
-                            dbc.DropdownMenuItem("Explainability", href="/pillars/explainability"),
-                            dbc.DropdownMenuItem("Robustness", href="/pillars/robustness"),
-                            dbc.DropdownMenuItem("Methodology", href="/pillars/methodology"),
-                        ],
-                        nav=True,
-                        in_navbar=True,
-                        label="Pillars",
-                        ),
-                        dbc.NavItem(dbc.NavLink("Demo", href="/upload")),
+                        dbc.NavItem(dbc.NavLink("Upload", href="/upload")),
+                        dbc.NavItem(dbc.NavLink("Analyze", href="/analyze")),
                         dbc.NavItem(dbc.NavLink("Compare", href="/compare")),
                         dbc.NavItem(dbc.NavLink("Examples", href="/problem-sets")),
                     ], className="ml-auto", navbar=True
@@ -114,7 +103,7 @@ def parse_contents(contents, filename):
         elif 'pkl' in filename:
                 # Assume that the user uploaded an excel file
                 df = pd.read_pickle(io.BytesIO(decoded))
-        df = df.describe().reset_index()
+        df = df[:8]
         
     except Exception as e:
         print(e)
@@ -123,7 +112,7 @@ def parse_contents(contents, filename):
         ])
     
     return html.Div([
-        html.H5("Statistics regarding "+filename, className="text-center", style={"color":"DarkBlue"}),
+        html.H5("Preview of "+filename, className="text-center", style={"color":"DarkBlue"}),
         dash_table.DataTable(
             data=df.to_dict('records'),
             columns=[{'name': i, 'id': i} for i in df.columns],
@@ -164,6 +153,8 @@ def display_page(pathname):
         return homepage.layout
     if pathname == '/upload':
         return upload.layout
+    if pathname == '/analyze':
+        return analyze.layout
     elif pathname == '/visualisation':
         return visualisation.layout
     elif pathname == '/demo':
@@ -194,26 +185,29 @@ def show_hide_element(visibility_state):
     if visibility_state == False:
         return {'display': 'none'}
 
-@app.callback([Output('training_data_summary', 'children'),
-              Output('training_data_upload', 'children')],
+@app.callback([Output('training_data_upload', 'children'),
+               Output('training_data_summary', 'children')],
               [Input('training_data_upload', 'contents'),
               State('training_data_upload', 'filename')])
 def training_data_preview(content, name):
+    message = html.Div(['Drag and Drop or Select File'])
+    summary = []
     if content is not None:
-        children = [parse_contents(content, name)]
-        return [children, html.Div(['Drag and Drop or Select a Different File (Overwrites the Previous #One)'])]
-    return [None, html.Div(['Drag and Drop or Select File'])]
+        message = html.Div(name)
+        summary = [parse_contents(content, name)]
+    return [message, summary]
 
-
-@app.callback([Output('test_data_summary', 'children'),
-              Output('test_data_upload', 'children')],
+@app.callback([Output('test_data_upload', 'children'),
+               Output('test_data_summary', 'children')],
               [Input('test_data_upload', 'contents'),
               State('test_data_upload', 'filename')])
 def test_data_preview(content, name):
+    message = html.Div(['Drag and Drop or Select File'])
+    summary = []
     if content is not None:
-        children = [parse_contents(content, name)]
-        return [children, html.Div(['Drag and Drop or Select a Different File (Overwrites the Previous One)'])]
-    return [None, html.Div(['Drag and Drop or Select File'])]
+        message = html.Div(name)
+        summary = [parse_contents(content, name)]
+    return [message, summary]
 
 @app.callback([Output('factsheet_upload', 'children'),
                Output('factsheet_summary', 'children')],
@@ -226,16 +220,16 @@ def factsheet_preview(content, name):
         return [message, summary]
     return [html.Div(['Drag and Drop or Select File']), None]
 
-@app.callback(
-    [Output('model-uploaded-div', 'children'),
-    Output('upload-model', 'children')],
-    [Input('upload-model', 'contents'),
-    State('upload-model', 'filename')])
+@app.callback([Output('model_upload', 'children'),
+               Output('model_summary', 'children')],
+              [Input('model_upload', 'contents'),
+              State('model_upload', 'filename')])
 def model_preview(content, name):
     if content is not None:
-        save_model(name, content)
-        return [html.H4("Model is uploaded.", style={"color":"Green"}),  html.Div(['Drag and Drop or Select a Different File #(Overwrites the Previous One)'])]
-    return [None,  html.Div(['Drag and Drop or Select File'])]
+        message = html.Div(name)
+        summary = html.Div()
+        return [message, summary]
+    return [html.Div(['Drag and Drop or Select File']), None]
 
 @app.callback([Output('spider', 'style'),
               Output('spider_pillars', 'style'),

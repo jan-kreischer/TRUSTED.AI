@@ -87,6 +87,7 @@ spider_plt.update_layout(title_x=0.5)
 children.append(dcc.Graph(id='spider',figure=spider_plt, style={'display': 'none'}))
 
 my_palette = ['yellow','cornflowerblue','lightgrey','lightseagreen']
+
 spider_plt_pillars=[]
 for n, (pillar , sub_scores) in enumerate(results.items()):
     title = pillar

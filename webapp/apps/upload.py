@@ -190,7 +190,7 @@ layout = dbc.Container([
             'margin': '10px'
         }
     ),
-    html.Div(id="model-uploaded-div", className="text-center"),
+    html.Div(id='model_summary'),
     html.Div(html.Span(id="upload_alert")),
     html.Div(dbc.Button("Analyze",  id='trustscore-button', color="primary", className="mt-3"), className="text-center"),
     
