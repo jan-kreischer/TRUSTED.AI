@@ -78,24 +78,12 @@ def display_page(pathname):
         return upload.layout
     if pathname == '/analyze':
         return analyze.layout
-    elif pathname == '/visualisation':
-        return visualisation.layout
-    elif pathname == '/demo':
-        return upload.layout
     elif pathname == '/compare':
         return compare.layout
-    elif pathname == '/test':
-        return test.layout
-    elif pathname == '/pillars/fairness':
-        return pillar_fairness.layout
-    elif pathname == '/pillars/explainability':
-        return pillar_explainablity.layout
-    elif pathname == '/pillars/robustness':
-        return pillar_robustness.layout
-    elif pathname == '/pillars/methodology':
-        return pillar_methodology.layout
     elif pathname == '/problem-sets':
         return problem_sets.layout
+    elif pathname == '/visualisation':
+        return visualisation.layout
     else:
         return homepage.layout
     
