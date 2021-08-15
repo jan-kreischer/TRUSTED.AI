@@ -11,10 +11,10 @@ import matplotlib.pyplot as plt
 import json
 from math import pi
 import sklearn.metrics as metrics
-from apps.algorithm.fairness_score import calc_fairness_score
-from apps.algorithm.explainability_score import calc_explainability_score
-from apps.algorithm.robustness_score import calc_robustness_score
-from apps.algorithm.methodology_score import calc_methodology_score
+from sites.algorithm.fairness_score import calc_fairness_score
+from sites.algorithm.explainability_score import calc_explainability_score
+from sites.algorithm.robustness_score import calc_robustness_score
+from sites.algorithm.methodology_score import calc_methodology_score
 import collections
 
 result = collections.namedtuple('result', 'score properties')
@@ -174,7 +174,7 @@ def get_trust_score(final_score, config):
 
 # config_fairness, config_explainability, config_robustness, config_methodology = 0, 0, 0 ,0
 # for config in ["config_fairness", "config_explainability", "config_robustness", "config_methodology"]:
-#     with open("apps/algorithm/"+config+".json") as file:
+#     with open("sites/algorithm/"+config+".json") as file:
 #             exec("%s = json.load(file)" % config)
 
 # trusting_AI_scores(model, train_data, test_data, config_fairness, config_explainability, config_robustness, config_methodology)

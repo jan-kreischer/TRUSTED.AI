@@ -16,8 +16,8 @@ import json
 from math import pi
 import dash_table
 import dash_bootstrap_components as dbc
-from apps import config_panel
-from apps.algorithm.helper_functions import get_performance_table, get_final_score, get_case_inputs, trusting_AI_scores, get_trust_score
+from sites import config_panel
+from sites.algorithm.helper_functions import get_performance_table, get_final_score, get_case_inputs, trusting_AI_scores, get_trust_score
 from dash.dependencies import Input, Output, State
 
 
@@ -36,7 +36,7 @@ model, train_data, test_data = get_case_inputs(case)
 
 config_fairness, config_explainability, config_robustness, config_methodology, config_pillars = 0, 0, 0 ,0,0
 for config in ["config_pillars","config_fairness", "config_explainability", "config_robustness", "config_methodology"]:
-    with open("apps/algorithm/"+config+".json") as file:
+    with open("sites/algorithm/"+config+".json") as file:
             exec("%s = json.load(file)" % config)
 
 pillars = ['fairness', 'explainability', 'robustness', 'methodology']

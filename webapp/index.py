@@ -20,8 +20,8 @@ import plotly.graph_objects as go
 from app import server
 from app import app
 # import all pages in the app
-from apps import homepage, upload, visualisation, problem_sets, compare, analyze
-from apps.config_panel import input_ids 
+from sites import homepage, upload, visualisation, problem_sets, compare, analyze
+from sites.config_panel import input_ids 
 
 
 navbar = dbc.Navbar(

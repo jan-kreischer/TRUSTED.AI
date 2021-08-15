@@ -17,11 +17,11 @@ from math import pi
 import dash_table
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
-from apps.algorithm.helper_functions import get_performance_table, get_final_score, get_case_inputs, trusting_AI_scores
-from apps.algorithm.explainability_panel import explainability_panel, exp_input_ids
-from apps.algorithm.fairness_panel import fairness_panel ,fair_input_ids
-from apps.algorithm.robustness_panel import robustness_panel, rob_input_ids
-from apps.algorithm.methodology_panel import methodology_panel, meth_input_ids
+from sites.algorithm.helper_functions import get_performance_table, get_final_score, get_case_inputs, trusting_AI_scores
+from sites.algorithm.explainability_panel import explainability_panel, exp_input_ids
+from sites.algorithm.fairness_panel import fairness_panel ,fair_input_ids
+from sites.algorithm.robustness_panel import robustness_panel, rob_input_ids
+from sites.algorithm.methodology_panel import methodology_panel, meth_input_ids
 import dash_daq as daq
 
 children=[]
@@ -31,7 +31,7 @@ children=[]
 
 config_fairness, config_explainability, config_robustness, config_methodology = 0, 0, 0 ,0
 for config in ["config_fairness", "config_explainability", "config_robustness", "config_methodology"]:
-    with open("apps/algorithm/"+config+".json") as file:
+    with open("sites/algorithm/"+config+".json") as file:
             exec("%s = json.load(file)" % config)
 
 #panels
