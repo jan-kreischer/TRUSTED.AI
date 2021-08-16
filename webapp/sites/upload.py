@@ -11,13 +11,14 @@ import os
 import io
 import base64
 from app import app
+from config import SCENARIOS_FOLDER_PATH
 
 # === CALLBACKS ===
 # --- Preview Callbacks --- #
 @app.callback([Output('training_data_upload', 'children'),
                Output('training_data_summary', 'children')],
               [Input('training_data_upload', 'contents'),
-              State('training_data_upload', 'filename')])
+              State('training_data_upload', 'filename')], prevent_initial_call=True)
 def training_data_preview(content, name):
     message = html.Div(['Drag and Drop or Select File'])
     summary = []
@@ -29,7 +30,7 @@ def training_data_preview(content, name):
 @app.callback([Output('test_data_upload', 'children'),
                Output('test_data_summary', 'children')],
               [Input('test_data_upload', 'contents'),
-              State('test_data_upload', 'filename')])
+              State('test_data_upload', 'filename')], prevent_initial_call=True)
 def test_data_preview(content, name):
     message = html.Div(['Drag and Drop or Select File'])
     summary = []
@@ -41,7 +42,7 @@ def test_data_preview(content, name):
 @app.callback([Output('factsheet_upload', 'children'),
                Output('factsheet_summary', 'children')],
               [Input('factsheet_upload', 'contents'),
-              State('factsheet_upload', 'filename')])
+              State('factsheet_upload', 'filename')], prevent_initial_call=True)
 def factsheet_preview(content, name):
     if content is not None:
         message = html.Div(name)
@@ -52,7 +53,7 @@ def factsheet_preview(content, name):
 @app.callback([Output('model_upload', 'children'),
                Output('model_summary', 'children')],
               [Input('model_upload', 'contents'),
-              State('model_upload', 'filename')])
+              State('model_upload', 'filename')], prevent_initial_call=True)
 def model_preview(content, name):
     if content is not None:
         message = html.Div(name)
@@ -64,7 +65,7 @@ def model_preview(content, name):
 @app.callback(Output('problem_set_alert', 'children'),
               [Input('trustscore-button', 'n_clicks'),
                Input('problem_set', 'value'),
-               ])
+               ], prevent_initial_call=True)
 def validate_problem_set(n_clicks, problem_set):
     if n_clicks is not None:
         if problem_set is not None:
@@ -76,7 +77,7 @@ def validate_problem_set(n_clicks, problem_set):
               [Input('trustscore-button', 'n_clicks'),
                Input('problem_set', 'value'),
                Input('model_name', 'value'),
-               ])
+               ], prevent_initial_call=True)
 def validate_model_name(n_clicks, problem_set, model_name):
     if n_clicks is not None:
         if not model_name:
@@ -91,7 +92,7 @@ def validate_model_name(n_clicks, problem_set, model_name):
             
 @app.callback(Output('training_data_alert', 'children'),
                [Input('trustscore-button', 'n_clicks'),
-                Input('training_data_upload', 'contents')],
+                Input('training_data_upload', 'contents')], prevent_initial_call=True
                 )
 def validate_training_data(n_clicks, training_data):
     if n_clicks is not None:
@@ -102,7 +103,7 @@ def validate_training_data(n_clicks, training_data):
         
 @app.callback(Output('test_data_alert', 'children'),
                [Input('trustscore-button', 'n_clicks'),
-                Input('test_data_upload', 'contents')],
+                Input('test_data_upload', 'contents')], prevent_initial_call=True
                 )
 def validate_test_data(n_clicks, test_data):
     if n_clicks is not None:
@@ -116,15 +117,13 @@ def validate_test_data(n_clicks, test_data):
                [Input('trustscore-button', 'n_clicks'),
                 Input('factsheet_upload', 'filename'),
                 Input('factsheet_upload', 'contents')
-               ])
+               ], prevent_initial_call=True)
 def validate_factsheet(n_clicks, factsheet_name, factsheet_content):
-    app.logger.info("validate factsheet called")
     if n_clicks is not None:
         if factsheet_content is None:
             return html.H6("No factsheet provided", style={"color":"Red"})
         else:
             file_name, file_extension = os.path.splitext(factsheet_name)
-            app.logger.info(file_extension)
             if file_extension not in ['.json']:
                 return html.H6("Please select a .json file", style={"color":"Red"})   
             return None
@@ -132,13 +131,25 @@ def validate_factsheet(n_clicks, factsheet_name, factsheet_content):
 @app.callback(Output('model_alert', 'children'),
                [Input('trustscore-button', 'n_clicks'),
                 Input('model_upload', 'contents')],
-                )
+                prevent_initial_call=True)
 def validate_model(n_clicks, model):
     if n_clicks is not None:
         if model is None:
             return html.H6("No model uploaded", style={"color":"Red"})
         else:
             return None
+        
+@app.callback(Output('uploaded_solution_set_path', 'data'),
+    [Input('trustscore-button', 'n_clicks'),
+    State('problem_set', 'value'),
+    State('model_name', 'value')], prevent_initial_call=True)
+def save_new_model_name(n_clicks, problem_set_path, model_name):
+    if n_clicks is not None:
+        if problem_set_path and model_name:
+            print("Uploaded solution set path {}".format(os.path.join(problem_set_path, model_name)))
+            return {'path': os.path.join(problem_set_path, model_name)}
+    else:
+        return {'path': ""}
 
 @app.callback(Output('upload_alert', 'children'),
               [
@@ -153,7 +164,7 @@ def validate_model(n_clicks, model):
                State('factsheet_upload', 'filename'),
                State('model_upload', 'contents'),
                State('model_upload', 'filename')
-])             
+], prevent_initial_call=True)             
 def upload_data(
     n_clicks,
     problem_set,
@@ -169,14 +180,11 @@ def upload_data(
     if n_clicks is None:
         return ""
     else:
-        app.logger.info("UPLOAD FUNCTION CALLED")
-        app.logger.info(model_name)
         if None in (problem_set, model_name, training_data, test_data, model):   
             return html.H5("Please provide all necessary data", style={"color":"Red"},  className="text-center")
         else:
             # Create directory within the problem set to contain the data
             path = problem_set + "/" + model_name
-            app.logger.info(path)
             # Check if directory does not exists yet
             if not os.path.isdir(path):
                 os.mkdir(path)
@@ -185,24 +193,20 @@ def upload_data(
                 
                 # Upload all the data to the new directory.
                 # Saving Training Data
-                app.logger.info("Uploading training data")
                 save_training_data(path, training_data_filename, training_data)
                 
                 # Saving Test Data
-                app.logger.info("Uploading test data")
                 save_test_data(path, test_data_filename, test_data)
                 
                 # Saving Factsheet
-                app.logger.info("Uploading factsheet")
                 save_factsheet(path, "factsheet.json")
                     
                 # Saving Model
-                app.logger.info("Uploading model")
                 save_model(path, model_filename, model)   
             else: 
                 return html.H4("Directory already exists", style={"color":"Red"}, className="text-center")
                       
-            return dcc.Location(pathname="/visualisation", id="someid_doesnt_matter")
+            return dcc.Location(pathname="/analyze", id="someid_doesnt_matter")
             return html.H5("Upload Successful", className="text-center")
 
 modals = ["problem_set", "solution_set", "training_data", "test_data", "factsheet", "model"]
@@ -210,7 +214,7 @@ for m in modals:
     @app.callback(
         Output("{}_info_modal".format(m), "is_open"),
         [Input("{}_info_button".format(m), "n_clicks"), Input("{}_close".format(m), "n_clicks")],
-        [State("{}_info_modal".format(m), "is_open")],
+        [State("{}_info_modal".format(m), "is_open")], prevent_initial_call=True
     )
     def toggle_input_modal(n1, n2, is_open):
         if n1 or n2:
@@ -270,13 +274,13 @@ def save_model(path, name, content):
     pickle.dump(df, open(os.path.join(path, "model" + file_extension), 'wb'))
 
 def save_factsheet(path, name):
-    app.logger.info(name)
     factsheet = { 'regularization': 'used'}
     with open(os.path.join(path, name), "w",  encoding="utf8") as fp:
         json.dump(factsheet, fp, indent=4)
          
 # === SITE ===
-problem_sets = [{'label': f.name, 'value': f.path} for f in os.scandir('./problem_sets') if f.is_dir()]
+scenarios_folder_path = './scenarios' 
+problem_sets = [{'label': f.name, 'value': f.path} for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir()]
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -312,10 +316,10 @@ layout = dbc.Container([
     dbc.Col([
 
         html.Div([
-            create_info_modal("problem_set", "Problem Set", "All different solutions found should belong to the same problem set. It can be seen as the scenario you are working on."),
+            create_info_modal("problem_set", "Scenario", "All different solutions found should belong to the same scenario"),
             html.Div(id="problem_set_alert"),
-            html.H3("1. Problem Set"),
-            html.H5("Please select the problem set your data belongs to.")
+            html.H3("1. Scenario"),
+            html.H5("Please select the scenario your solution belongs to.")
         ], className="text-center"),
         dcc.Dropdown(
             id='problem_set',
@@ -328,10 +332,10 @@ layout = dbc.Container([
     
     dbc.Col([
         html.Div([
-            create_info_modal("solution_set", "Solution Set", "One specifically trained model including its training-, test data and factsheet can be seen as a solution set. Your solution set will be saved under the name you entered here."),
+            create_info_modal("solution_set", "Solution", "One specifically trained model including its training-, test data and factsheet can be seen as a solution set. Your solution set will be saved under the name you entered here."),
             html.Div(id="model_name_alert"),
-            html.H3("2. Solution Set"),
-            html.H5("Please enter a name for your solution set")
+            html.H3("2. Solution"),
+            html.H5("Please enter a name for your solution.")
         ], 
         className="text-center"
         ),

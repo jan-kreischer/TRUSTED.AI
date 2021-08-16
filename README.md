@@ -1,5 +1,5 @@
 
-# Trusted AI
+# TRUSTED.AI
 
 ## Project Documentation 
 

@@ -16,13 +16,14 @@ import pickle
 import plotly.express as px
 import plotly.graph_objects as go
 
+from config import SCENARIOS_FOLDER_PATH
+
 # must add this line in order for the app to be deployed successfully on Heroku
 from app import server
 from app import app
 # import all pages in the app
-from sites import homepage, upload, visualisation, problem_sets, compare, analyze
+from sites import homepage, upload, analyze, compare, existing, factsheet, visualisation 
 from sites.config_panel import input_ids 
-
 
 navbar = dbc.Navbar(
     dbc.Container([
@@ -44,7 +45,8 @@ navbar = dbc.Navbar(
                         dbc.NavItem(dbc.NavLink("Upload", href="/upload")),
                         dbc.NavItem(dbc.NavLink("Analyze", href="/analyze")),
                         dbc.NavItem(dbc.NavLink("Compare", href="/compare")),
-                        dbc.NavItem(dbc.NavLink("Examples", href="/problem-sets")),
+                        dbc.NavItem(dbc.NavLink("Existing", href="/existing")),
+                        dbc.NavItem(dbc.NavLink("Factsheet", href="/factsheet")),
                     ], className="ml-auto", navbar=True
                 ),
                 id="navbar-collapse",
@@ -71,7 +73,8 @@ def toggle_navbar_collapse(n, is_open):
 app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     navbar,
-    html.Div(id='page_content')
+    html.Div(id='page_content'),
+    dcc.Store(id='uploaded_solution_set_path', storage_type='session')
 ])
     
 @app.callback(Output('page_content', 'children'), [Input('url', 'pathname')])
@@ -84,8 +87,10 @@ def display_page(pathname):
         return analyze.layout
     elif pathname == '/compare':
         return compare.layout
-    elif pathname == '/problem-sets':
-        return problem_sets.layout
+    elif pathname == '/existing':
+        return existing.layout
+    elif pathname == '/factsheet':
+        return factsheet.layout
     elif pathname == '/visualisation':
         return visualisation.layout
     else:

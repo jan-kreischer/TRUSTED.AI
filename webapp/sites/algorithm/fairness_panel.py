@@ -11,7 +11,7 @@ import json
 
 config_fairness, config_pillars = 0, 0
 for config in ["config_pillars", "config_fairness"]:
-    with open("apps/algorithm/"+config+".json") as file:
+    with open("sites/algorithm/"+config+".json") as file:
             exec("%s = json.load(file)" % config)
 
 # create panel

@@ -8,9 +8,10 @@ import pandas as pd
 import os
 import json
 import glob
+from config import SCENARIOS_FOLDER_PATH
 
 def solution_sets():
-    problem_sets = [(f.name, f.path) for f in os.scandir('./problem_sets') if f.is_dir()]
+    problem_sets = [(f.name, f.path) for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir()]
     options = []
     for problem_set_name, problem_set_path in problem_sets:
         solution_sets = [(f.name, f.path) for f in os.scandir(problem_set_path) if f.is_dir()]
@@ -110,10 +111,8 @@ for c in columns:
     State('training_data_a', 'data'),
     State("solution_set_dropdown_a", 'value')], prevent_initial_call=True)
 def fairness_metrics_class_balance(label, jsonified_training_data, solution_set_path):
-    app.logger.info("Why triggerst du nicht?")
     training_data = pd.read_csv("{}/train.csv".format(solution_set_path))
     graph = dcc.Graph(figure=px.histogram(training_data, x=label))
-    app.logger.info("Was mach ich hier eigentlich?")
     return [graph]
     
     #print("label {}".format(label))
@@ -137,7 +136,6 @@ for c in columns:
 
          # more generally, this line would be
          # json.dumps(cleaned_df)
-        app.logger.info("loaded data")
         if solution_set_path is not None:
             training_data = pd.read_csv("{}/train.csv".format(solution_set_path))
             print("LENGTH OF TRAIN DATA {}".format(len(training_data)))
@@ -146,8 +144,7 @@ for c in columns:
             test_data = pd.read_csv("{}/test.csv".format(solution_set_path))
             print("LENGTH OF TEST DATA {}".format(len(test_data)))
             print(test_data.head(5))
-            
-            app.logger.info("SAVED DATA")
+           
             return training_data.to_json(date_format='iso', orient='split'), test_data.to_json(date_format='iso', orient='split'), 
             #return json.dumps(training_data), json.dumps(test_data)
         else:
@@ -262,8 +259,6 @@ for c in columns:
         Output(component_id="methodology_section_{}".format(c), component_property='style'),
         [Input("solution_set_dropdown_{}".format(c), 'value')], prevent_initial_call=True)
     def toggle_pillar_section_visibility(path):
-        app.logger.info(path)
-        app.logger.info("called show hide element")
         if path is not None:
             return {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}
         else:
@@ -411,7 +406,6 @@ for s in SECTIONS:
             prevent_initial_call=True
         )
         def toggle_detail_section(n, is_open):
-            app.logger.info("toggle {0} detail section {1}".format(s, c))
             if is_open:
                 return (not is_open, {'display': 'None'})
             else:

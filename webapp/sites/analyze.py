@@ -8,17 +8,13 @@ import pandas as pd
 import os
 import json
 import glob
+import shutil
+from helpers import solution_sets
+from config import SCENARIOS_FOLDER_PATH
 
 from pillars.fairness.class_balance import compute_class_balance
 
-def solution_sets():
-    problem_sets = [(f.name, f.path) for f in os.scandir('./problem_sets') if f.is_dir()]
-    options = []
-    for problem_set_name, problem_set_path in problem_sets:
-        solution_sets = [(f.name, f.path) for f in os.scandir(problem_set_path) if f.is_dir()]
-        for solution_set_name, solution_set_path in solution_sets:
-            options.append({"label": problem_set_name + " > " + solution_set_name, "value": solution_set_path})
-    return options
+
 
 solution_sets = solution_sets()
 
@@ -27,6 +23,25 @@ EXPLAINABLITY_HIGHLIGHT_COLOR = "cornflowerblue"
 ROBUSTNESS_HIGHLIGHT_COLOR = "lightgrey"
 METHODOLOGY_HIGHLIGHT_COLOR = "lightseagreen"
 
+@app.callback(Output('solution_set_dropdown', 'value'),
+              Output('analyze_alert_section', 'children'),
+              [Input('delete_solution_confirm', 'submit_n_clicks'),
+               Input('uploaded_solution_set_path', 'data'),
+              State('solution_set_dropdown', 'value')])
+def update_output(submit_n_clicks, uploaded_solution_set, solution_set_path):
+    print("UPDATE OUTPUT {}".format(submit_n_clicks))
+    if submit_n_clicks:
+        app.logger.info("Deletign {}".format(solution_set_path))
+        try:
+            shutil.rmtree(solution_set_path, ignore_errors=False)
+        except Exception as e:
+            print(e)
+            raise
+        return "", html.H3("Deleted solution", className="text-center", style={"color": "Red"})
+    else:
+        if uploaded_solution_set is not None and uploaded_solution_set:
+            return uploaded_solution_set["path"], [],
+        
 # === TRUST ===
 @app.callback(
     [Output("trust_overview", 'children'),
@@ -52,6 +67,7 @@ def analyze_trust(solution_set_path):
     Output("fairness_details", 'children')],
     [Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
 def analyze_fairness(solution_set_path):
+    print("Analyze Fairness {}".format(solution_set_path))
     if solution_set_path is not None:
         train_data = pd.read_csv("{}/train.csv".format(solution_set_path))
         test_data = pd.read_csv("{}/test.csv".format(solution_set_path))
@@ -69,13 +85,12 @@ def analyze_fairness(solution_set_path):
 
             y_column_name = factsheet["y_column_name"]
             
-            app.logger.info(y_column_name)
             protected_column_name = factsheet["protected_column_name"]
 
             f.close()
         # Create a factsheet
         else:
-            app.logger.info("no factsheet exists yet")
+            print("No factsheet exists yet")
 
 
         solution_set_label_select_options = list(map(lambda x: {"label": x, "value": x}, features))
@@ -127,10 +142,8 @@ The following function updates
     State('training_data', 'data'),
     State("solution_set_dropdown", 'value')])
 def fairness_metrics_class_balance(label, jsonified_training_data, solution_set_path):
-    app.logger.info("Why triggerst du nicht?")
     training_data = pd.read_csv("{}/train.csv".format(solution_set_path))
     graph = dcc.Graph(figure=px.histogram(training_data, x=label, opacity=0.5, title="Label vs Label Occurence", color_discrete_sequence=['#00FF00']))
-    app.logger.info("Was mach ich hier eigentlich?")
     #compute_class_balance("hi")
     update_factsheet("{}/factsheet.json".format(solution_set_path), "y_column_name", label)
     return [html.H3("1.1 Class Balance"), graph]
@@ -155,7 +168,6 @@ def load_data(solution_set_path):
 
      # more generally, this line would be
      # json.dumps(cleaned_df)
-    app.logger.info("loaded data")
     if solution_set_path is not None:
         training_data = pd.read_csv("{}/train.csv".format(solution_set_path))
         print("LENGTH OF TRAIN DATA {}".format(len(training_data)))
@@ -165,7 +177,6 @@ def load_data(solution_set_path):
         print("LENGTH OF TEST DATA {}".format(len(test_data)))
         print(test_data.head(5))
 
-        app.logger.info("SAVED DATA")
         return training_data.to_json(date_format='iso', orient='split'), test_data.to_json(date_format='iso', orient='split'), 
         #return json.dumps(training_data), json.dumps(test_data)
     else:
@@ -226,28 +237,6 @@ def analyze_robustness(solution_set_path):
         return [], []
  
 # === METHODOLOGY ===
-'''
-for c in columns:
-    print("Methodology {}".format(c))
-    @app.callback(
-        [Output("methodology_overview_{}".format(c), 'children'),
-        Output("methodology_details_{}".format(c), 'children')],
-        [Input("solution_set_dropdown".format(c), 'value')], prevent_initial_call=True)
-    def analyze_methodology(solution_set_path):
-        if solution_set_path is not None:
-            df = pd.DataFrame(dict(
-                r=[1, 5, 2, 2, 3],
-                theta=['processing cost','mechanical properties','chemical stability',
-               'thermal stability', 'device integration']))
-            fig = px.line_polar(df, r='r', theta='theta', line_close=True)
-            fig.update_traces(fill='toself')
-            explainability_overview = dcc.Graph(figure=fig)
-            return [explainability_overview], [html.Div("Methodology Metrics {}".format(c), style={"display": "None"})]
-        else:
-            return [], []
-'''
-
-
 @app.callback(
     [Output("methodology_overview", 'children'),
     Output("methodology_details", 'children')],
@@ -264,7 +253,7 @@ def analyze_methodology(solution_set_path):
         return [explainability_overview], [html.Div("Methodology Metrics a", style={"display": "None"})]
     else:
         return [], []
-    
+   
 @app.callback(
     Output(component_id="trust_section", component_property='style'),
     Output(component_id="fairness_section", component_property='style'),
@@ -273,30 +262,28 @@ def analyze_methodology(solution_set_path):
     Output(component_id="methodology_section", component_property='style'),
     [Input("solution_set_dropdown", 'value')], prevent_initial_call=True)
 def toggle_pillar_section_visibility(path):
-    app.logger.info(path)
-    app.logger.info("called show hide element")
     if path is not None:
         return {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}
     else:
         return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
    
-#@app.callback(
-#   Output(component_id='element-to-hide', component_property='style'),
-#   [Input(component_id='dropdown-to-show_or_hide-element', component_property='value')])
-#def show_hide_element(visibility_state):
-#    if visibility_state == 'on':
-#        return {'display': 'block'}
-#    if visibility_state == 'off':
-#        return {'display': 'none'}
-
 @app.callback(
     [Output('alert_section', 'children'),
-    Output('analysis_section', 'style')],
-    [Input('solution_set_dropdown', 'value')])
+    Output('analysis_section', 'style'),
+    Output('delete_solution_button', 'children')],
+    [Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
 def analyze_methdology(solution_set_path):
+    button = []
     alerts = []
     style={'display': 'block'}
     if solution_set_path is not None:
+        button = dbc.Button(
+            html.I(className="fas fa-backspace"),
+            id="delete_button", 
+            n_clicks=0,
+            style={"float": "right"}
+        ),
+        
         factsheet_path = "{}/factsheet.*".format(solution_set_path)
         test_data_path = "{}/test.*".format(solution_set_path)
         training_data_path = "{}/train.*".format(solution_set_path)
@@ -313,7 +300,15 @@ def analyze_methdology(solution_set_path):
         if alerts:
             style={'display': 'none'}
             alerts.append(html.H5("Please provide a complete dataset", className="text-center", style={"color":"Red"}))
-    return alerts, style
+    return alerts, style, button
+
+@app.callback(Output('delete_solution_confirm', 'displayed'),
+              Input('delete_solution_button', 'n_clicks'), prevent_initial_call=True)
+def display_confirm(n_clicks):
+    if n_clicks:
+        return True
+    else:
+        return False
 
 # === SECTIONS ===
 def trust_section(c):
@@ -411,7 +406,6 @@ def alert_section(c):
 
 
 SECTIONS = ['trust', 'fairness', 'explainablity', 'robustness', 'methodology']
-
 for s in SECTIONS:
     @app.callback(
         [Output("{0}_details".format(s), "is_open"),
@@ -421,7 +415,7 @@ for s in SECTIONS:
         prevent_initial_call=True
     )
     def toggle_detail_section(n, is_open):
-        app.logger.info("toggle {0} detail section".format(s))
+        #app.logger.info("toggle {0} detail section".format(s))
         if is_open:
             return (not is_open, {'display': 'None'})
         else:
@@ -432,14 +426,20 @@ layout = html.Div([
         dbc.Row([
             dbc.Col(html.H1("Analyze", className="text-center"), width=12, className="mb-2 mt-1"),
             
-            dbc.Col(dcc.Dropdown(
+            dbc.Col([dcc.Dropdown(
                     id='solution_set_dropdown',
                     options=solution_sets,
-                    placeholder='Select Model A'
-                ), width=12, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
+                    placeholder='Select Solution'
+                )], width=12, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
             ),
                      
             dbc.Col([
+                dcc.ConfirmDialog(
+                    id='delete_solution_confirm',
+                    message='Are you sure that you want to delete this solution?',
+                ),
+                html.Div([], id="delete_solution_button"),
+                html.Div([], id="analyze_alert_section", className="text-center", style={"color":"Red"}),
                 alert_section('a'),
                 html.Div([
                     trust_section('a'),
