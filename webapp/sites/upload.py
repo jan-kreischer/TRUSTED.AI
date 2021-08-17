@@ -12,11 +12,13 @@ import io
 import base64
 from app import app
 from config import SCENARIOS_FOLDER_PATH
+from helpers import list_of_scenarios
 
 # === CALLBACKS ===
 # --- Preview Callbacks --- #
 @app.callback([Output('training_data_upload', 'children'),
-               Output('training_data_summary', 'children')],
+               Output('training_data_summary', 'children'), 
+               Output('target_column_dropdown', 'options')],
               [Input('training_data_upload', 'contents'),
               State('training_data_upload', 'filename')], prevent_initial_call=True)
 def training_data_preview(content, name):
@@ -24,8 +26,12 @@ def training_data_preview(content, name):
     summary = []
     if content is not None:
         message = html.Div(name)
-        summary = [parse_contents(content, name)]
-    return [message, summary]
+        summary, columns = parse_contents(content, name)
+        print(columns)
+        options = []
+        for c in columns:
+            options.append({"label": c, "value": c})
+    return [message, summary, options]
 
 @app.callback([Output('test_data_upload', 'children'),
                Output('test_data_summary', 'children')],
@@ -36,7 +42,7 @@ def test_data_preview(content, name):
     summary = []
     if content is not None:
         message = html.Div(name)
-        summary = [parse_contents(content, name)]
+        summary, columns = parse_contents(content, name)
     return [message, summary]
 
 @app.callback([Output('factsheet_upload', 'children'),
@@ -241,9 +247,9 @@ def parse_contents(contents, filename):
         print(e)
         return html.Div([
             'There was an error processing this file.'
-        ])
+        ]), []
     
-    return html.Div([
+    table = html.Div([
         html.H5("Preview of "+filename, className="text-center", style={"color":"DarkBlue"}),
         dash_table.DataTable(
             data=df.to_dict('records'),
@@ -252,6 +258,8 @@ def parse_contents(contents, filename):
         ),
         html.Hr(),
     ])
+    columns = df.columns.values
+    return table, columns
 
 
 def save_training_data(path, name, content):
@@ -314,7 +322,6 @@ def create_info_modal(module_id, name, content):
 
 layout = dbc.Container([
     dbc.Col([
-
         html.Div([
             create_info_modal("problem_set", "Scenario", "All different solutions found should belong to the same scenario"),
             html.Div(id="problem_set_alert"),
@@ -323,7 +330,7 @@ layout = dbc.Container([
         ], className="text-center"),
         dcc.Dropdown(
             id='problem_set',
-            options=problem_sets,
+            options=list_of_scenarios(),
         ),
         html.Div(id='problem_set_path')
     ], 
@@ -418,9 +425,9 @@ layout = dbc.Container([
             className="mb-4"),
     
     dcc.Dropdown(
-                    id='solution_set_dropdown',
+                    id='target_column_dropdown',
                     options=[],
-                    placeholder='Select Solution'
+                    placeholder='Select Target Column'
     ),
     
     #dcc.Upload(
@@ -439,8 +446,7 @@ layout = dbc.Container([
     #        'margin': '10px'
     #    }
     #),
-    
-    html.Div(id='test_data_summary'),
+
     
     # --- FACTSHEET --- #
     
