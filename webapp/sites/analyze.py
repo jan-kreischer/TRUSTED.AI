@@ -21,6 +21,8 @@ solution_sets = solution_sets()
 test, train, model, factsheet = read_scenario('scenarios\\IT Sec Anomaly Detection\\case 1')
 target_column = factsheet["general"].get("target_column")
 
+data_stores = html.Div([dcc.Store(id='test_data'),  dcc.Store(id='train_data'),  dcc.Store(id='model'),  dcc.Store(id='factsheet')])
+
 performance =  get_performance_table(model, test, target_column).transpose()
 
 performance_table = dash_table.DataTable(
@@ -149,6 +151,7 @@ for s in SECTIONS:
 
 layout = html.Div([
     dbc.Container([
+        data_stores,
         dbc.Row([
             dbc.Col(html.H1("Analyze", className="text-center"), width=12, className="mb-2 mt-1"),
             
@@ -481,6 +484,15 @@ def display_confirm(n_clicks):
         return True
     else:
         return False
+    
+# #data_stores = html.Div[dcc.Store(id='test_data'),  dcc.Store(id='train_data'),  dcc.Store(id='model'),  dcc.Store(id='factsheet')]
+@app.callback([Output('test', 'data'), Output('train_data', 'data'),Output('model', 'data')], 
+          Input('solution_set_dropdown', 'value'))
+def store_solution_set(solution_set_dropdown):
+     
+    test, train, model, _ = read_scenario(solution_set_dropdown)
+    
+    return test, train, model
 
 
 
