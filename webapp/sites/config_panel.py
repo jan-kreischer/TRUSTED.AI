@@ -35,24 +35,23 @@ for config in ["config_fairness", "config_explainability", "config_robustness", 
             exec("%s = json.load(file)" % config)
 
 #panels
-exp_panel_comp = [html.H3("Explainability Panel", style={'text-align':'center'}),html.Br(),] + explainability_panel
+exp_panel_comp = [html.H3("Explainability Panel", style={'text-align':'center'})] + explainability_panel
 exp_panel = html.Div(exp_panel_comp, style={'width': '22%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10,"background-color":"lightyellow"})
 
-fair_panel_comp = [html.H3("Fairness Panel", style={'text-align':'center'}),html.Br(),] + fairness_panel
+fair_panel_comp = [html.H3("Fairness Panel", style={'text-align':'center'})] + fairness_panel
 fair_panel = html.Div(fair_panel_comp, style={'width': '22%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10})
 
-rob_panel_comp = [html.H3("Robustness Panel", style={'text-align':'center'}),html.Br(),] + robustness_panel
+rob_panel_comp = [html.H3("Robustness Panel", style={'text-align':'center'})] + robustness_panel
 rob_panel = html.Div(rob_panel_comp, style={'width': '22%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10})
 
-meth_panel_comp = [html.H3("Methodology Panel", style={'text-align':'center'}),html.Br(),] + methodology_panel
+meth_panel_comp = [html.H3("Methodology Panel", style={'text-align':'center'})] + methodology_panel
 meth_panel = html.Div(meth_panel_comp, style={'width': '22%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10})
 
 
-children.append(html.Div([html.H3("Configuration",style={'text-align':'center'}),exp_panel,fair_panel,rob_panel,meth_panel,html.Hr()],
+children.append(html.Div([html.H3("Configuration",style={'text-align':'center'}),exp_panel,fair_panel,rob_panel,meth_panel],
                           style={"background-color":"lightyellow"}))
 
 button_div = html.Div([
-    html.Hr(),
     html.Div([
                     html.Div(html.Label("Choose Configuration:"), style={'width': '200px', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10}),
                     html.Div(dcc.Dropdown(
@@ -66,9 +65,9 @@ button_div = html.Div([
     html.Br(),html.Br(),
     html.Button('Save Weights', id='save-weights', style={"background-color": "green",'margin-left': 50}),
     dcc.Store(id='input-config'),
-    html.Div(dcc.Input(id="hidden-trigger", value=None, type='text'), style={"display":"none"}),
+    html.Div(dcc.Input(id="hidden-trigger", value=None, type='text'), style={"display":"none"})
     # html.Div(id="hidden-trigger-save", style={"display":"none"}),
-    html.Br()], style={"background-color": "rgba(255,228,181,0.5)",'padding-bottom': 20})
+    ], style={"background-color": "rgba(255,228,181,0.5)",'padding-bottom': 20," margin-left": "auto", "margin-right": "auto"})
     
 
 
@@ -85,6 +84,15 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 #list(filter(lambda ids: ids[:2]=="w_", input_ids))
 
 layout = html.Div([
+    html.Div(
+    [html.P('show configuration',style = {"font-size":"20px", "font-weight":"bold",'text-align':'center'}),
+    daq.BooleanSwitch(id='toggle-hide',
+                      on=False,
+                      #label='show configuration',
+                      labelPosition="top",
+                      color = "green"
+                     
+                    )],style={"background-color": "rgba(255,228,181,0.5)",'padding-bottom': 20}),
     panel_div,
     dbc.Modal(
     [   
@@ -116,14 +124,7 @@ layout = html.Div([
     id="modal-saved",
     is_open=False,
     backdrop=True
-    ),
-    daq.BooleanSwitch(id='toggle-hide',
-                      on=False,
-                      label="show configuration",
-                      labelPosition="top",
-                      color = "green"
-                     
-                    ),  
+    ) 
         ], style={"margin-left": "100px","margin-right": "50px"})
 
 input_ids = exp_input_ids + fair_input_ids + rob_input_ids + meth_input_ids
@@ -134,116 +135,26 @@ def get_callbacks(app):
                Input('apply-config', 'n_clicks')],
                 list(map(lambda inp: State(inp, "value"),list(filter(lambda ids: ids[:2]=="w_", input_ids)))))
     def store_input_config(n1, n2, *args):
-        
-        
+         
         ctx = dash.callback_context
         
         inputs= dict()
         
         for name, val in zip(list(filter(lambda ids: ids[:2]=="w_", input_ids)), args):
-            inputs[name[2:]] = float(val)
+            inputs[name] = float(val)
+            
+        with open('configs/default.json','r') as f:
+                config_file = json.loads(f.read())
         
-        config_file =  {
-            "fairness": {
-                "parameters": {
-                    "score_Statistical_Parity": {
-                        "parameter_XY": {
-                            "value": "The value of the parameter_XY",
-                            "description": "The description of the paramter and its impact"
-                        }
-                    }
-                },
-                "weights": {
-                    "Statistical_Parity":  inputs["Statistical_Parity"],
-                    "Disparate_Mistreatment":  inputs["Disparate_Mistreatment"],
-                    "Class_Imbalance":  inputs["Class_Imbalance"],
-                    "Biased_Data":  inputs["Biased_Data"],
-                    "Disparate_Treatment":  inputs["Disparate_Treatment"],
-                    "Disparate_Impact":  inputs["Disparate_Impact"]
-                }
-            },
-            "explainability": {
-                "parameters": {
-                    "score_Algorithm_Class": {
-                        "clf_type_score": {
-                            "value": {
-                                "RandomForestClassifier": 3,
-                                "KNeighborsClassifier": 3,
-                                "SVC": 2,
-                                "GaussianProcessClassifier": 3,
-                                "DecisionTreeClassifier": 4,
-                                "MLPClassifier": 1,
-                                "AdaBoostClassifier": 3,
-                                "GaussianNB": 3.5,
-                                "QuadraticDiscriminantAnalysis": 3,
-                                "LogisticRegression": 3,
-                                "LinearRegression": 3.5
-                            },
-                            "description": "Mapping of Learning techniques to the level of explainability based on on literature research and qualitative analysis of each learning technique. For more information see gh-pages/explainability/taxonomy"
-                        }
-                    },
-                    "score_Feature_Relevance": {
-                        "scale_factor": {
-                            "value": 1.5,
-                            "description": "Used for the calculation to detect outliers in a dataset with the help of quartiels and the Interquartile Range (Q3-Q1) for example the lower bound for outliers is then calculated as follows: lw = Q1-scale_factor*IQR"
-                        },
-                        "distri_threshold": {
-                            "value": 0.6,
-                            "description": "Used for the calulation of how many features make up the a certain fraction (distri_threshold) of all importance. For example if the distri_threshold is 0.6 and the result would be 10% than this would mean that 10% of the used features concentrate 60% of all feature importance, which would mean that the importance of the features is not well balanced where only a few features are important for the classification and the majority of features has only very little or no impact at all"
-                        }
-                    }
-                },
-                "weights": {
-                    "Algorithm_Class": inputs["Algorithm_Class"],
-                    "Correlated_Features":  inputs["Correlated_Features"],
-                    "Model_Size":  inputs["Model_Size"],
-                    "Feature_Relevance": inputs["Feature_Relevance"]
-                }
-            },
-            "robustness": {
-                "parameters": {
-                    "score_Confidence_Score": {
-                        "parameter_XY": {
-                            "value": "The value of the parameter_XY",
-                            "description": "The description of the paramter and its impact"
-                        }
-                    }
-                },
-                "weights": {
-                    "Confidence_Score":  inputs["Confidence_Score"],
-                    "Clique_Method": inputs["Clique_Method"],
-                    "Loss_Sensitivity":  inputs["Loss_Sensitivity"],
-                    "CLEVER_Score":  inputs["CLEVER_Score"],
-                    "Empirical_Robustness_Fast_Gradient_Attack":  inputs["Empirical_Robustness_Fast_Gradient_Attack"],
-                    "Empirical_Robustness_Carlini_Wagner_Attack": inputs["Empirical_Robustness_Carlini_Wagner_Attack"],
-                    "Empirical_Robustness_Deepfool_Attack":  inputs["Empirical_Robustness_Deepfool_Attack"]
-                }
-            },
-            "methodology": {
-                "parameters": {
-                    "score_Normalization": {
-                        "parameter_XY": {
-                            "value": "The value of the parameter_XY",
-                            "description": "The description of the paramter and its impact"
-                        }
-                    }
-                },
-                "weights": {
-                    "Normalization":  inputs["Normalization"],
-                    "Treatment_of_Corrupt_Values":  inputs["Treatment_of_Corrupt_Values"],
-                    "Train_Test_Split":  inputs["Train_Test_Split"],
-                    "Regularization":  inputs["Regularization"],
-                    "Treatment_of_Categorical_Features":  inputs["Treatment_of_Categorical_Features"],
-                    "Feature_Filtering": inputs["Feature_Filtering"]
-                }
-            },
-            "pillars": {
-                "fairness": inputs["fair_pillar"],
-                "explainability": inputs["exp_pillar"],
-                "robustness": inputs["rob_pillar"],
-                "methodology": inputs["meth_pillar"]
-            }
-        }
+        
+        pillars = ['explainability', 'fairness', 'robustness', 'methodology']
+        ids = [exp_input_ids, fair_input_ids, rob_input_ids, meth_input_ids]
+        for pillar, pillar_ids in zip(pillars, ids):
+            #output = output + [config["pillars"][pillar]] + list(map(lambda metric: config[pillar]["weights"][metric[2:]],pillar_ids[1:]))
+            config_file["pillars"][pillar] = inputs[pillar_ids[0]]
+            for metric in pillar_ids[1:]:
+                config_file[pillar]["weights"][metric[2:]] = inputs[metric]
+        
         
         return json.dumps(config_file), ctx.triggered[0]['prop_id']
      
@@ -291,4 +202,3 @@ def get_callbacks(app):
             output = output + [config["pillars"][pillar]] + list(map(lambda metric: config[pillar]["weights"][metric[2:]],pillar_ids[1:]))
             
         return output
-    

@@ -9,14 +9,186 @@ import os
 import json
 import glob
 import shutil
-from helpers import solution_sets
+from helpers import solution_sets, read_scenario
 from config import SCENARIOS_FOLDER_PATH
-
+from sites.algorithm.helper_functions import get_performance_table, get_final_score, get_case_inputs, trusting_AI_scores, get_trust_score
 from pillars.fairness.class_balance import compute_class_balance
-
-
+import dash_table
 
 solution_sets = solution_sets()
+
+#test 
+test, train, model, factsheet = read_scenario('scenarios\\IT Sec Anomaly Detection\\case 1')
+target_column = factsheet["general"].get("target_column")
+
+performance =  get_performance_table(model, test, target_column).transpose()
+
+performance_table = dash_table.DataTable(
+                        id='table',
+                        columns=[{"name": i, "id": i} for i in performance.columns],
+                        data=performance.to_dict('records'),
+                         style_table={
+                'width': '100%',
+                'margin-left': 'auto', 
+                'margin-right': 'auto'
+            })
+
+performance_div = html.Div([html.H5("Performance metrics", style={"width": "100%","text-align": "center", "margin-right": "auto", "margin-left": "auto" }),
+                            performance_table],style={"margin": "20px" ,"width": "100%"})
+
+# === SECTIONS ===
+def trust_section(c):
+    return html.Div([ 
+        html.H2("Trustworthiness"),
+        html.Div([], id="trust_overview"),
+        html.Div([], id="trust_details"),
+        html.Hr()
+    ], id="trust_section", style={"display": "None"})
+
+def fairness_section(c):
+    return html.Div([
+        dbc.Button(
+            html.I(className="fas fa-chevron-down"),
+            id="toggle_fairness_details",
+            className="mb-3",
+            n_clicks=0,
+            style={"float": "right"}
+        ),
+        html.H3("1. Fairness"),
+        html.Div([], id="fairness_overview"),
+        dbc.Collapse([], id="fairness_details", is_open=False),
+        html.Hr(),
+        #html.Div(id="class_balance"),
+    ], id="fairness_section", style={"display": "None"})
+
+def explainability_section(c):
+    return html.Div([
+        dbc.Button(
+            html.I(className="fas fa-chevron-down"),
+            id="toggle_explainability_details",
+            className="mb-3",
+            n_clicks=0,
+            style={"float": "right"}
+        ),
+        html.H3("2. Explainablity"),
+        html.Div([
+            html.H6("Explainablity Overview")],
+            id="explainability_overview"
+        ),
+        dbc.Collapse(
+            html.P("Explainability Details"),
+            id="explainability_details",
+            is_open=False,
+        ),
+        html.Hr(),
+    ], id="explainablity_section", style={"display": "None"})
+
+
+def robustness_section(c):
+    return html.Div([
+        dbc.Button(
+            html.I(className="fas fa-chevron-down"),
+            id="toggle_robustness_details",
+            className="mb-3",
+            n_clicks=0,
+            style={"float": "right"}
+        ),
+        html.H3("3. Robustness"),
+        html.Div([], id="robustness_overview"),
+        dbc.Collapse(
+            html.P("Robustness Details"),
+            id="robustness_details",
+            is_open=False,
+        ),
+        html.Hr(),
+    ], id="robustness_section", style={"display": "None"})
+
+
+def methodology_section(c):
+    return html.Div([
+        dbc.Button(
+            html.I(className="fas fa-chevron-down"),
+            id="toggle_methodology_details",
+            className="mb-3",
+            n_clicks=0,
+            style={"float": "right"}
+        ),
+        html.H3("4. Methodology"),
+        
+        html.Div([], id="methodology_overview"),
+        dbc.Collapse(
+            html.P("Methodology Details"),
+            id="methodology_details",
+            is_open=False,
+            style={"display": "None"}
+        ),
+        html.Hr(),
+    ], id="methodology_section", style={"display": "None"})
+
+
+def alert_section(c):
+    return html.Div([
+    ], id="alert_section")
+
+
+SECTIONS = ['trust', 'fairness', 'explainablity', 'robustness', 'methodology']
+for s in SECTIONS:
+    @app.callback(
+        [Output("{0}_details".format(s), "is_open"),
+        Output("{0}_details".format(s), "style")],
+        [Input("toggle_{0}_details".format(s), "n_clicks")],
+        [State("{0}_details".format(s), "is_open")],
+        prevent_initial_call=True
+    )
+    def toggle_detail_section(n, is_open):
+        #app.logger.info("toggle {0} detail section".format(s))
+        if is_open:
+            return (not is_open, {'display': 'None'})
+        else:
+            return (not is_open, {'display': 'Block'})
+
+layout = html.Div([
+    dbc.Container([
+        dbc.Row([
+            dbc.Col(html.H1("Analyze", className="text-center"), width=12, className="mb-2 mt-1"),
+            
+            dbc.Col([dcc.Dropdown(
+                    id='solution_set_dropdown',
+                    options=solution_sets,
+                    placeholder='Select Solution'
+                )], width=12, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
+            ),
+                
+            performance_div,
+            
+            dbc.Col([
+                dcc.ConfirmDialog(
+                    id='delete_solution_confirm',
+                    message='Are you sure that you want to delete this solution?',
+                ),
+                html.Div([], id="delete_solution_button"),
+                html.Div([], id="analyze_alert_section", className="text-center", style={"color":"Red"}),
+                alert_section('a'),
+                html.Div([
+                    trust_section('a'),
+                    fairness_section('a'),
+                    explainability_section('a'),
+                    robustness_section('a'),
+                    methodology_section('a'),
+                    dcc.Store(id='training_data', storage_type='session'),
+                    dcc.Store(id='test_data', storage_type='session')
+                ], id="analysis_section")
+            ],
+                width=12, 
+                className="mt-2 pt-2 pb-2 mb-2",
+                style={
+                    "border": "1px solid #d8d8d8",
+                    "borderRadius": "6px"
+                }   
+            ),
+        ], no_gutters=False)
+    ])
+])
 
 FAIRNESS_HIGHLIGHT_COLOR = "yellow"
 EXPLAINABLITY_HIGHLIGHT_COLOR = "cornflowerblue"
@@ -69,14 +241,14 @@ def analyze_trust(solution_set_path):
 def analyze_fairness(solution_set_path):
     print("Analyze Fairness {}".format(solution_set_path))
     if solution_set_path is not None:
-        train_data = pd.read_csv("{}/train.csv".format(solution_set_path))
-        test_data = pd.read_csv("{}/test.csv".format(solution_set_path))
+        train_data = pd.read_csv(os.path.join(solution_set_path,"train.csv"))
+        test_data = pd.read_csv(os.path.join(solution_set_path,"test.csv"))
 
         features = list(train_data.columns)
         y_column_name=""
         factsheet = None
 
-        factsheet_path = "{}/factsheet.json".format(solution_set_path)
+        factsheet_path = os.path.join(solution_set_path,"factsheet.csv") 
         # Check if a factsheet.json file already exists in the target directory
         if os.path.isfile(factsheet_path):
 
@@ -142,10 +314,10 @@ The following function updates
     State('training_data', 'data'),
     State("solution_set_dropdown", 'value')])
 def fairness_metrics_class_balance(label, jsonified_training_data, solution_set_path):
-    training_data = pd.read_csv("{}/train.csv".format(solution_set_path))
+    training_data = pd.read_csv(os.path.join(solution_set_path,"test.csv"))
     graph = dcc.Graph(figure=px.histogram(training_data, x=label, opacity=0.5, title="Label vs Label Occurence", color_discrete_sequence=['#00FF00']))
     #compute_class_balance("hi")
-    update_factsheet("{}/factsheet.json".format(solution_set_path), "y_column_name", label)
+    update_factsheet(r"{}/factsheet.json".format(solution_set_path), "y_column_name", label)
     return [html.H3("1.1 Class Balance"), graph]
     
     #print("label {}".format(label))
@@ -169,11 +341,11 @@ def load_data(solution_set_path):
      # more generally, this line would be
      # json.dumps(cleaned_df)
     if solution_set_path is not None:
-        training_data = pd.read_csv("{}/train.csv".format(solution_set_path))
+        training_data = pd.read_csv(os.path.join(solution_set_path,"test.csv"))
         print("LENGTH OF TRAIN DATA {}".format(len(training_data)))
         print(training_data.head(5))
 
-        test_data = pd.read_csv("{}/test.csv".format(solution_set_path))
+        test_data = pd.read_csv(os.path.join(solution_set_path,"test.csv"))
         print("LENGTH OF TEST DATA {}".format(len(test_data)))
         print(test_data.head(5))
 
@@ -310,155 +482,7 @@ def display_confirm(n_clicks):
     else:
         return False
 
-# === SECTIONS ===
-def trust_section(c):
-    return html.Div([ 
-        html.H2("Trustworthiness"),
-        html.Div([], id="trust_overview"),
-        html.Div([], id="trust_details"),
-        html.Hr()
-    ], id="trust_section", style={"display": "None"})
-
-def fairness_section(c):
-    return html.Div([
-        dbc.Button(
-            html.I(className="fas fa-chevron-down"),
-            id="toggle_fairness_details",
-            className="mb-3",
-            n_clicks=0,
-            style={"float": "right"}
-        ),
-        html.H3("1. Fairness"),
-        html.Div([], id="fairness_overview"),
-        dbc.Collapse([], id="fairness_details", is_open=False),
-        html.Hr(),
-        #html.Div(id="class_balance"),
-    ], id="fairness_section", style={"display": "None"})
-
-def explainability_section(c):
-    return html.Div([
-        dbc.Button(
-            html.I(className="fas fa-chevron-down"),
-            id="toggle_explainability_details",
-            className="mb-3",
-            n_clicks=0,
-            style={"float": "right"}
-        ),
-        html.H3("2. Explainablity"),
-        html.Div([
-            html.H6("Explainablity Overview")],
-            id="explainability_overview"
-        ),
-        dbc.Collapse(
-            html.P("Explainability Details"),
-            id="explainability_details",
-            is_open=False,
-        ),
-        html.Hr(),
-    ], id="explainablity_section", style={"display": "None"})
 
 
-def robustness_section(c):
-    return html.Div([
-        dbc.Button(
-            html.I(className="fas fa-chevron-down"),
-            id="toggle_robustness_details",
-            className="mb-3",
-            n_clicks=0,
-            style={"float": "right"}
-        ),
-        html.H3("3. Robustness"),
-        html.Div([], id="robustness_overview"),
-        dbc.Collapse(
-            html.P("Robustness Details"),
-            id="robustness_details",
-            is_open=False,
-        ),
-        html.Hr(),
-    ], id="robustness_section", style={"display": "None"})
 
-
-def methodology_section(c):
-    return html.Div([
-        dbc.Button(
-            html.I(className="fas fa-chevron-down"),
-            id="toggle_methodology_details",
-            className="mb-3",
-            n_clicks=0,
-            style={"float": "right"}
-        ),
-        html.H3("4. Methodology"),
-        
-        html.Div([], id="methodology_overview"),
-        dbc.Collapse(
-            html.P("Methodology Details"),
-            id="methodology_details",
-            is_open=False,
-            style={"display": "None"}
-        ),
-        html.Hr(),
-    ], id="methodology_section", style={"display": "None"})
-
-
-def alert_section(c):
-    return html.Div([
-    ], id="alert_section")
-
-
-SECTIONS = ['trust', 'fairness', 'explainablity', 'robustness', 'methodology']
-for s in SECTIONS:
-    @app.callback(
-        [Output("{0}_details".format(s), "is_open"),
-        Output("{0}_details".format(s), "style")],
-        [Input("toggle_{0}_details".format(s), "n_clicks")],
-        [State("{0}_details".format(s), "is_open")],
-        prevent_initial_call=True
-    )
-    def toggle_detail_section(n, is_open):
-        #app.logger.info("toggle {0} detail section".format(s))
-        if is_open:
-            return (not is_open, {'display': 'None'})
-        else:
-            return (not is_open, {'display': 'Block'})
-
-layout = html.Div([
-    dbc.Container([
-        dbc.Row([
-            dbc.Col(html.H1("Analyze", className="text-center"), width=12, className="mb-2 mt-1"),
-            
-            dbc.Col([dcc.Dropdown(
-                    id='solution_set_dropdown',
-                    options=solution_sets,
-                    placeholder='Select Solution'
-                )], width=12, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
-            ),
-                     
-            dbc.Col([
-                dcc.ConfirmDialog(
-                    id='delete_solution_confirm',
-                    message='Are you sure that you want to delete this solution?',
-                ),
-                html.Div([], id="delete_solution_button"),
-                html.Div([], id="analyze_alert_section", className="text-center", style={"color":"Red"}),
-                alert_section('a'),
-                html.Div([
-                    trust_section('a'),
-                    fairness_section('a'),
-                    explainability_section('a'),
-                    robustness_section('a'),
-                    methodology_section('a'),
-                    dcc.Store(id='training_data', storage_type='session'),
-                    dcc.Store(id='test_data', storage_type='session')
-                ], id="analysis_section")
-            ],
-                width=12, 
-                className="mt-2 pt-2 pb-2 mb-2",
-                style={
-                    "border": "1px solid #d8d8d8",
-                    "borderRadius": "6px"
-                }   
-            ),
-        ], no_gutters=False)
-    ])
-])
 

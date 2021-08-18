@@ -16,13 +16,23 @@ from sites.algorithm.explainability_score import calc_explainability_score
 from sites.algorithm.robustness_score import calc_robustness_score
 from sites.algorithm.methodology_score import calc_methodology_score
 import collections
+from helpers import read_scenario
+
+# test, train, model, factsheet = read_scenario('scenarios\\IT Sec Anomaly Detection\\case 1')
+# target_column = factsheet["general"].get("target_column")
 
 result = collections.namedtuple('result', 'score properties')
 
-def get_perfomance_metric(clf,test_data):
+def get_perfomance_metric(clf,test_data, target_column):
     
-    X_test = test_data.iloc[:,:-1]
-    y_test = test_data.iloc[:,-1: ]
+    test_data = test_data.copy()
+    
+    if target_column:
+        X_test = test_data.drop(target_column, axis=1)
+        y_test = test_data[target_column]
+    else:
+        X_test = test_data.iloc[:,:-1]
+        y_test = test_data.iloc[:,-1: ]
     
     y_true =  y_test.values.flatten()
     y_pred = clf.predict(X_test)
@@ -182,8 +192,8 @@ def get_trust_score(final_score, config):
 # final_scores
 
 
-def get_performance_table(model, test_data):
-    performance_metrics = get_perfomance_metric(model, test_data)
+def get_performance_table(model, test_data, target_column=None):
+    performance_metrics = get_perfomance_metric(model, test_data, target_column)
     df = pd.DataFrame(performance_metrics, index=["Performance Metrics"]).transpose()
     df["Performance Metrics"] = df["Performance Metrics"].round(2)
     df = df.loc[["accuracy","class weighted recall","class weighted precision","class weighted f1 score","cross-entropy loss","ROC AUC"]]
