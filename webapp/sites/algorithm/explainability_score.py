@@ -94,7 +94,7 @@ def score_Feature_Relevance(clf, train_data, scale_factor):
     score =  max(dist_score,1)
     properties = {"n_outliers":  info("number of outliers in the importance distribution",n_outliers),
                   "pct_dist":  info("percentage of feature that make up over 60% of all features importance", "{:.2f}%".format(100*pct_dist)),
-                  "importance":  info("feature importance", {"value": importance, "labels": feat_labels})
+                  "importance":  info("feature importance", {"value": list(importance), "labels": list(feat_labels)})
                   }
     
     return result(score=score, properties=properties)

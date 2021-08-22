@@ -44,100 +44,34 @@ def trust_section(c):
         html.Hr()
     ], id="trust_section", style={"display": "None"})
 
-def fairness_section(c):
-    return html.Div([
-        dbc.Button(
-            html.I(className="fas fa-chevron-down"),
-            id="toggle_fairness_details",
-            className="mb-3",
-            n_clicks=0,
-            style={"float": "right"}
-        ),
-        html.H3("1. Fairness"),
-        html.Div([], id="fairness_overview"),
-        dcc.Graph(id='fairness_spider', style={'display': 'none'}),
-        dcc.Graph(id='fairness_bar', style={'display': 'block'}),    
-        dbc.Collapse([], id="fairness_details", is_open=False),
-        html.Hr(),
-        #html.Div(id="class_balance"),
-    ], id="fairness_section", style={"display": "None"})
-
-def explainability_section(c):
-    return html.Div([
-        dbc.Button(
-            html.I(className="fas fa-chevron-down"),
-            id="toggle_explainability_details",
-            className="mb-3",
-            n_clicks=0,
-            style={"float": "right"}
-        ),
-        html.H3("2. Explainablity"),
-        html.Div([
-            html.H6("Explainablity Overview")],
-            id="explainability_overview"
-        ),
-        dcc.Graph(id='explainability_spider', style={'display': 'none'}),
-        dcc.Graph(id='explainability_bar', style={'display': 'block'}),    
-        dbc.Collapse(
-            html.P("Explainability Details"),
-            id="explainability_details",
-            is_open=False,
-        ),
-        html.Hr(),
-    ], id="explainablity_section", style={"display": "None"})
-
-
-def robustness_section(c):
-    return html.Div([
-        dbc.Button(
-            html.I(className="fas fa-chevron-down"),
-            id="toggle_robustness_details",
-            className="mb-3",
-            n_clicks=0,
-            style={"float": "right"}
-        ),
-        html.H3("3. Robustness"),
-        html.Div([], id="robustness_overview"),
-        dcc.Graph(id='robustness_spider', style={'display': 'none'}),
-        dcc.Graph(id='robustness_bar', style={'display': 'block'}),    
-        dbc.Collapse(
-            html.P("Robustness Details"),
-            id="robustness_details",
-            is_open=False,
-        ),
-        html.Hr(),
-    ], id="robustness_section", style={"display": "None"})
-
-
-def methodology_section(c):
-    return html.Div([
-        dbc.Button(
-            html.I(className="fas fa-chevron-down"),
-            id="toggle_methodology_details",
-            className="mb-3",
-            n_clicks=0,
-            style={"float": "right"}
-        ),
-        html.H3("4. Methodology"),
-        dcc.Graph(id='methodology_spider', style={'display': 'none'}),
-        dcc.Graph(id='methodology_bar', style={'display': 'block'}),    
-        html.Div([], id="methodology_overview"),
-        dbc.Collapse(
-            html.P("Methodology Details"),
-            id="methodology_details",
-            is_open=False,
-            style={"display": "None"}
-        ),
-        html.Hr(),
-    ], id="methodology_section", style={"display": "None"})
-
+def pillar_section(pillar):
+        return html.Div([
+                    dbc.Button(
+                        html.I(className="fas fa-chevron-down"),
+                        id="toggle_{}_details".format(pillar),
+                        className="mb-3",
+                        n_clicks=0,
+                        style={"float": "right"}
+                    ),
+                    html.H3(pillar.upper()),
+                    html.Div([], id="{}_overview".format(pillar)),
+                    dcc.Graph(id='{}_spider'.format(pillar), style={'display': 'none'}),
+                    dcc.Graph(id='{}_bar'.format(pillar), style={'display': 'block'}),    
+                    dbc.Collapse(
+                        html.P("{} Details".format(pillar)),
+                        id="{}_details".format(pillar),
+                        is_open=False,
+                    ),
+                    html.Hr(),
+                ], id="{}_section".format(pillar), style={"display": "None"})
+    
 
 def alert_section(c):
     return html.Div([
     ], id="alert_section")
 
 
-SECTIONS = ['trust', 'fairness', 'explainablity', 'robustness', 'methodology']
+SECTIONS = ['trust', 'fairness', 'explainability', 'robustness', 'methodology']
 for s in SECTIONS:
     @app.callback(
         [Output("{0}_details".format(s), "is_open"),
@@ -182,10 +116,10 @@ layout = html.Div([
                 alert_section('a'),
                 html.Div([
                     trust_section('a'),
-                    fairness_section('a'),
-                    explainability_section('a'),
-                    robustness_section('a'),
-                    methodology_section('a'),
+                    pillar_section("fairness"),
+                    pillar_section("explainability"),
+                    pillar_section("robustness"),
+                    pillar_section("methodology"),
                     dcc.Store(id='training_data', storage_type='session'),
                     dcc.Store(id='test_data', storage_type='session')
                 ], id="analysis_section")
@@ -440,7 +374,7 @@ def load_data(solution_set_path):
 @app.callback(
     Output(component_id="trust_section", component_property='style'),
     Output(component_id="fairness_section", component_property='style'),
-    Output(component_id="explainablity_section", component_property='style'),
+    Output(component_id="explainability_section", component_property='style'),
     Output(component_id="robustness_section", component_property='style'),
     Output(component_id="methodology_section", component_property='style'),
     [Input("bar", 'figure')], prevent_initial_call=True)
@@ -543,11 +477,12 @@ def store_result(solution_set_dropdown,config):
         
         def convert(o):
             if isinstance(o, np.int64): return int(o)  
-            raise TypeError
+           
             
         data = {"final_score":final_score,
                 "results":results,
-                "trust_score":trust_score}
+                "trust_score":trust_score,
+                "properties" : properties}
         
         return json.dumps(data,default=convert)
     
