@@ -193,7 +193,7 @@ def analyze_fairness(solution_set_path):
         y_column_name=""
         factsheet = None
 
-        factsheet_path = os.path.join(solution_set_path,"factsheet.csv") 
+        factsheet_path = os.path.join(solution_set_path,"factsheet.json") 
         # Check if a factsheet.json file already exists in the target directory
         if os.path.isfile(factsheet_path):
 

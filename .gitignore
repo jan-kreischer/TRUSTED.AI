@@ -4,6 +4,16 @@ site/
 .ipynb_checkpoints
 .DS_Store
 
-webapp/problem_sets
-!webapp/problem_sets/IT\ Sec\ Anomaly\ Detection
+# Ignore all created scenarios
+webapp/scenarios
+
+# Ignore all created solutions except three default solutions
+!webapp/scenarios/IT Sec Anomaly Detection
+!webapp/scenarios/IT Sec Anomaly Detection/Solution 01
+!webapp/scenarios/IT Sec Anomaly Detection/Solution 02
+!webapp/scenarios/IT Sec Anomaly Detection/Solution 03
+
 !webapp/problem_sets/IT\ Sec\ Incident\ Classification
+!webapp/scenarios/IT Sec Incident Classification/Solution 01
+!webapp/scenarios/IT Sec Incident Classification/Solution 02
+!webapp/scenarios/IT Sec Incident Classification/Solution 03
