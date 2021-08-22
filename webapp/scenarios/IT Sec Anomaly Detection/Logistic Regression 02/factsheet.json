@@ -1,1 +1,8 @@
-{"y_column_name": "Account Balance", "y_column_id": -1, "protected_column_name": "Race"}
+{
+  "general": {
+    "name": "Case 1",
+    "description": "Random forest classifier (example code from Alberto)",
+    "target_column": "Creditability"
+  },
+  "y_column_name": "Creditability", "y_column_id": -1, "protected_column_name": "Race"
+}

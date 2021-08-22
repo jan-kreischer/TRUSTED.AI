@@ -22,7 +22,7 @@ from config import SCENARIOS_FOLDER_PATH
 from app import server
 from app import app
 # import all pages in the app
-from sites import homepage, upload, analyze, compare, existing, factsheet, visualisation 
+from sites import homepage, upload, analyze, compare, existing, factsheet #, visualisation 
 from sites.config_panel import input_ids 
 
 navbar = dbc.Navbar(
@@ -91,19 +91,11 @@ def display_page(pathname):
         return existing.layout
     elif pathname == '/factsheet':
         return factsheet.layout
-    elif pathname == '/visualisation':
-        return visualisation.layout
+    # elif pathname == '/visualisation':
+    #     return visualisation.layout
     else:
         return homepage.layout
     
-@app.callback(
-   Output(component_id='panel', component_property='style'),
-   [Input(component_id="toggle-hide", component_property='on')])
-def show_hide_element(visibility_state):
-    if visibility_state == True:
-        return {'display': 'block'}
-    if visibility_state == False:
-        return {'display': 'none'}
 
 @app.callback([Output('spider', 'style'),
               Output('spider_pillars', 'style'),
@@ -116,7 +108,7 @@ def show_the_graphs(value):
     else:
         return [{'display': 'none'}, {'display': 'none'}, {'display': 'block'}, {'display': 'block'}]
 
-visualisation.get_callbacks(app)
+#visualisation.get_callbacks(app)
 
 if __name__ == '__main__':
     app.run_server(debug=True)

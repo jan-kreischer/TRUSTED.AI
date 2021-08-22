@@ -9,12 +9,12 @@
             }
         },
         "weights": {
-            "Statistical_Parity": 0.16666666666666666,
-            "Disparate_Mistreatment": 0.16666666666666666,
-            "Class_Imbalance": 0.16666666666666666,
-            "Biased_Data": 0.16666666666666666,
-            "Disparate_Treatment": 0.16666666666666666,
-            "Disparate_Impact": 0.16666666666666666
+            "Statistical_Parity": 0.17,
+            "Disparate_Mistreatment": 0.17,
+            "Class_Imbalance": 0.17,
+            "Biased_Data": 0.17,
+            "Disparate_Treatment": 0.17,
+            "Disparate_Impact": 0.17
         }
     },
     "explainability": {
@@ -84,17 +84,17 @@
             }
         },
         "weights": {
-            "Normalization": 0.16666666666666666,
-            "Treatment_of_Corrupt_Values": 0.16666666666666666,
-            "Train_Test_Split": 0.16666666666666666,
-            "Regularization": 0.16666666666666666,
-            "Treatment_of_Categorical_Features": 0.16666666666666666,
-            "Feature_Filtering": 0.16666666666666666
+            "Normalization": 0.17,
+            "Treatment_of_Corrupt_Values": 0.17,
+            "Train_Test_Split": 0.17,
+            "Regularization": 0.17,
+            "Treatment_of_Categorical_Features": 0.17,
+            "Feature_Filtering": 0.17
         }
     },
     "pillars": {
-        "fairness": 0.25,
-        "explainability": 5.0,
+        "fairness": 33.0,
+        "explainability": 33.0,
         "robustness": 0.25,
         "methodology": 0.25
     }

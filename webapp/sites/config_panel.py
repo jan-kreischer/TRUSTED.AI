@@ -202,3 +202,12 @@ def get_callbacks(app):
             output = output + [config["pillars"][pillar]] + list(map(lambda metric: config[pillar]["weights"][metric[2:]],pillar_ids[1:]))
             
         return output
+    
+    @app.callback(
+       Output(component_id='panel', component_property='style'),
+       [Input(component_id="toggle-hide", component_property='on')])
+    def show_hide_element(visibility_state):
+        if visibility_state == True:
+            return {'display': 'block'}
+        if visibility_state == False:
+            return {'display': 'none'}

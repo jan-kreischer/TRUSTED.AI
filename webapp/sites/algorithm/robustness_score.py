@@ -127,7 +127,7 @@ def calc_robustness_score(model, train_data, test_data, config):
         Empirical_Robustness_Carlini_Wagner_Attack = score_Carlini_Wagner_Attack(model, train_data, test_data),
         Empirical_Robustness_Deepfool_Attack = score_Deepfool_Attack(model, train_data, test_data)
                  )
-    scores = dict((k, v.score) for k, v in output.items())
+    scores = dict((k, int(v.score)) for k, v in output.items())
     properties = dict((k, v.properties) for k, v in output.items())
     
     return  result(score=scores, properties=properties)
