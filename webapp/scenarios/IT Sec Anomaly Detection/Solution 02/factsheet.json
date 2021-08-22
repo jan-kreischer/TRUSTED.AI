@@ -1,0 +1,7 @@
+{
+  "general": {
+    "name": "Case 1",
+    "description": "Random forest classifier (example code from Alberto)",
+    "target_column": "label"
+  }
+}
