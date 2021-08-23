@@ -4,17 +4,13 @@ site/
 .ipynb_checkpoints
 .DS_Store
 
-# Ignore all created scenarios
 webapp/scenarios/*
 !webapp/scenarios/IT Sec Anomaly Detection
 !webapp/scenarios/IT Sec Incident Classification
 
-
-# Ignore all created solutions except if they start with the term 'Solution'
 webapp/scenarios/IT Sec Anomaly Detection/*
 !webapp/scenarios/IT Sec Anomaly Detection/Solution*
+
 webapp/scenarios/IT Sec Incident Classification/*
 !webapp/scenarios/IT Sec Incident Classification/Solution*
 
-#!webapp/scenarios/IT Sec Anomaly Detection/Solution*
-#!webapp/scenarios/IT Sec Incident Classification/Solution*

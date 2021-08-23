@@ -4,6 +4,7 @@ import glob
 import pickle
 import pandas as pd
 import json
+from config import TRAINING_DATA_FILE_NAME_REGEX, TEST_DATA_FILE_NAME_REGEX
 
 def get_solution_sets():
     problem_sets = [(f.name, f.path) for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir() and not f.name.startswith('.')]
@@ -22,9 +23,8 @@ def list_of_scenarios():
     return options
 
 def read_test(solution_set_path):
-    
     #test data
-    test_file = glob.glob(os.path.join(solution_set_path,"test.*"))[0]
+    test_file = glob.glob(os.path.join(solution_set_path, TEST_DATA_FILE_NAME_REGEX))[0]
     ext = os.path.splitext(test_file)[1]
     if ext == ".pkl":
         with open(test_file,'rb') as file:
@@ -37,9 +37,8 @@ def read_test(solution_set_path):
     return test
         
 def read_train(solution_set_path):
-    
- #train data
-    train_file = glob.glob(os.path.join(solution_set_path,"test.*"))[0]
+    train_file = glob.glob(os.path.join(solution_set_path, TRAINING_DATA_FILE_NAME_REGEX))[0]
+    print("--- {}".format(glob.glob(os.path.join(solution_set_path,"train.*"))[0]))
     ext = os.path.splitext(train_file)[1]
     if ext == ".pkl":
         with open(train_file,'rb') as file:
@@ -50,6 +49,17 @@ def read_train(solution_set_path):
         train = None
     
     return train
+
+def compute_train_test_split(solution_set_path):
+    training_dataset = read_train(solution_set_path)
+    test_dataset = read_test(solution_set_path)
+    print("TRAIN TEST SPLIT => TRAIN {0}, TEST {1}, SPLIT {2}".format(len(training_dataset), len(test_dataset), len(training_dataset)/len(test_dataset)))
+    print("Lenght of test dataset {}".format(len(test_dataset)))
+    print("Lenght of training dataset {}".format(len(train_dataset)))
+    return len(training_dataset)/len(test_dataset)
+
+def score_train_test_split():
+    return 2.5
 
 def read_model(solution_set_path):
  

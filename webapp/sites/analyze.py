@@ -190,7 +190,7 @@ def analyze_fairness(solution_set_path):
         test_data =  read_test(solution_set_path)
 
         features = list(train_data.columns)
-        y_column_name=""
+        target_column=""
         factsheet = None
 
         factsheet_path = os.path.join(solution_set_path,"factsheet.json") 
@@ -200,7 +200,7 @@ def analyze_fairness(solution_set_path):
             f = open(factsheet_path,)
             factsheet = json.load(f)
 
-            y_column_name = factsheet["y_column_name"]
+            target_column = factsheet["target_column"]
             
             protected_column_name = factsheet["protected_column_name"]
 
@@ -216,7 +216,7 @@ def analyze_fairness(solution_set_path):
             dcc.Dropdown(
                 id="solution_set_label_select",
                 options=solution_set_label_select_options,
-                value=y_column_name
+                value=target_column
             ),
         ])
 
@@ -262,7 +262,7 @@ def fairness_metrics_class_balance(label, jsonified_training_data, solution_set_
     training_data = read_train(solution_set_path)
     graph = dcc.Graph(figure=px.histogram(training_data, x=label, opacity=0.5, title="Label vs Label Occurence", color_discrete_sequence=['#00FF00']))
     #compute_class_balance("hi")
-    update_factsheet(r"{}/factsheet.json".format(solution_set_path), "y_column_name", label)
+    update_factsheet(r"{}/factsheet.json".format(solution_set_path), "target_column", label)
     return [html.H3("1.1 Class Balance"), graph]
     
     #print("label {}".format(label))
@@ -280,22 +280,11 @@ def fairness_metrics_class_balance(label, jsonified_training_data, solution_set_
      Output('test_data', 'data')],
     [Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
 def load_data(solution_set_path):
-     # some expensive clean data step
-     #cleaned_df = your_expensive_clean_or_compute_step(value)
-
-     # more generally, this line would be
-     # json.dumps(cleaned_df)
     if solution_set_path is not None:
         training_data = read_train(solution_set_path)
-        print("LENGTH OF TRAIN DATA {}".format(len(training_data)))
-        print(training_data.head(5))
-
         test_data = read_test(solution_set_path)
-        print("LENGTH OF TEST DATA {}".format(len(test_data)))
-        print(test_data.head(5))
-
+        compute_train_test_split(solution_set_path)
         return training_data.to_json(date_format='iso', orient='split'), test_data.to_json(date_format='iso', orient='split'), 
-        #return json.dumps(training_data), json.dumps(test_data)
     else:
         return None, None
     
@@ -501,7 +490,7 @@ def update_figure(data, trig):
       #     main_config = json.loads(config)
          
       # np.random.seed(6)
-     
+        
       result = json.loads(data)
       final_score, results = result["final_score"] , result["results"]
       trust_score = result["trust_score"]
