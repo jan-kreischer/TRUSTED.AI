@@ -276,6 +276,13 @@ def save_test_data(path, name, content):
     
 def save_model(path, name, content):
     file_name, file_extension = os.path.splitext(name)
+    print("file extension {}".format(file_extension))
+    
+    #if file_extension == ".joblib":
+    #    print("saving joblib model")
+    
+    #if file_extension == ".sav":
+    #
     content_type, content_string = content.split(',')
     decoded = base64.b64decode(content_string)
     df = pd.read_pickle(io.BytesIO(decoded))
