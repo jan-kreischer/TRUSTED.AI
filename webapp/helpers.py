@@ -4,6 +4,9 @@ import glob
 import pickle
 import pandas as pd
 import json
+import dash_core_components as dcc
+import dash_html_components as html
+import dash_bootstrap_components as dbc
 from config import TRAINING_DATA_FILE_NAME_REGEX, TEST_DATA_FILE_NAME_REGEX
 
 def get_solution_sets():
@@ -84,4 +87,29 @@ def read_scenario(solution_set_path):
     factsheet = read_factsheet(solution_set_path)
                 
     return test, train, model, factsheet
-    
+   
+def create_info_modal(module_id, name, content, example):
+    modal = html.Div(
+    [
+        dbc.Button(
+            html.I(className="fas fa-info-circle"),
+            id="{}_info_button".format(module_id), 
+            n_clicks=0,
+            style={"float": "right"}
+        ),
+        dbc.Modal(
+            [
+                dbc.ModalHeader(name),
+                dbc.ModalBody([content, html.Br(), html.Br(), dcc.Markdown(example) ]),
+                dbc.ModalFooter(
+                    dbc.Button(
+                        "Close", id="{}_close".format(module_id), className="ml-auto", n_clicks=0
+                    )
+                ),
+            ],
+            id="{}_info_modal".format(module_id),
+            is_open=False,
+        ),
+    ]
+)
+    return modal

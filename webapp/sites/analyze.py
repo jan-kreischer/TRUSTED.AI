@@ -448,7 +448,7 @@ def get_performance(solution_set_dropdown):
 @app.callback(Output('result', 'data'), 
           [Input('solution_set_dropdown', 'value'),
           Input("input-config","data")])
-def store_result(solution_set_dropdown,config):
+def store_result(solution_set_dropdown, config):
     
         if not solution_set_dropdown:
             return None
@@ -479,8 +479,7 @@ def store_result(solution_set_dropdown,config):
       [Output('bar', 'figure'),Output('spider', 'figure'),
       Output('fairness_bar', 'figure'),Output('explainability_bar', 'figure'),Output('robustness_bar', 'figure'),Output('methodology_bar', 'figure'),
       Output('fairness_spider', 'figure'),Output('explainability_spider', 'figure'),Output('robustness_spider', 'figure'),Output('methodology_spider', 'figure')],
-      [Input('result', 'data'),Input("hidden-trigger", "value")])
-      
+      [Input('result', 'data'),Input("hidden-trigger", "value")])  
 def update_figure(data, trig):
      
       # if not config or trig != "apply-config.n_clicks":

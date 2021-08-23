@@ -12,7 +12,7 @@ import io
 import base64
 from app import app
 from config import SCENARIOS_FOLDER_PATH
-from helpers import list_of_scenarios
+from helpers import list_of_scenarios, create_info_modal
 
 # === CALLBACKS ===
 # --- Preview Callbacks --- #
@@ -294,36 +294,10 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
-def create_info_modal(module_id, name, content):
-    modal = html.Div(
-    [
-        dbc.Button(
-            html.I(className="fas fa-info-circle"),
-            id="{}_info_button".format(module_id), 
-            n_clicks=0,
-            style={"float": "right"}
-        ),
-        dbc.Modal(
-            [
-                dbc.ModalHeader(name),
-                dbc.ModalBody(content),
-                dbc.ModalFooter(
-                    dbc.Button(
-                        "Close", id="{}_close".format(module_id), className="ml-auto", n_clicks=0
-                    )
-                ),
-            ],
-            id="{}_info_modal".format(module_id),
-            is_open=False,
-        ),
-    ]
-)
-    return modal
-
 layout = dbc.Container([
     dbc.Col([
         html.Div([
-            create_info_modal("problem_set", "Scenario", "All different solutions found should belong to the same scenario"),
+            create_info_modal("problem_set", "Scenario", "All different solutions found should belong to the same scenario", ""),
             html.Div(id="problem_set_alert"),
             html.H3(["1. Scenario", html.Sup("*")]),
             html.H5("Please select the scenario your solution belongs to.")
@@ -339,7 +313,7 @@ layout = dbc.Container([
     
     dbc.Col([
         html.Div([
-            create_info_modal("solution_set", "Solution", "One specifically trained model including its training-, test data and factsheet can be seen as a solution set. Your solution set will be saved under the name you entered here."),
+            create_info_modal("solution_set", "Solution", "One specifically trained model including its training-, test data and factsheet can be seen as a solution set. Your solution set will be saved under the name you entered here.", ""),
             html.Div(id="model_name_alert"),
             html.H3(["2. Solution", html.Sup("*")]),
             html.H5("Please enter a name for your solution.")
@@ -354,7 +328,7 @@ layout = dbc.Container([
     
     dbc.Col([
         html.Div([
-            create_info_modal("training_data", "Training Data", "Please upload the training data you used to train your model. Csv and pickle (pkl) files are accepted. Please place the label to the last column of the dataframe."),
+            create_info_modal("training_data", "Training Data", "Please upload the training data you used to train your model. Csv and pickle (pkl) files are accepted. Please place the label to the last column of the dataframe.", ""),
             html.Div(id="training_data_alert"),
             html.H3(["3. Training Data", html.Sup("*")]),
             html.H5("Please upload the training data")
@@ -382,7 +356,7 @@ layout = dbc.Container([
     
     dbc.Col([
         html.Div([
-            create_info_modal("test_data", "Test Data", "Please upload the test data you used to test your model. Csv and pickle (pkl) files are accepted. Please place the label to the last column of the dataframe."),
+            create_info_modal("test_data", "Test Data", "Please upload the test data you used to test your model. Csv and pickle (pkl) files are accepted. Please place the label to the last column of the dataframe.", ""),
             html.Div(id="test_data_alert"),
             html.H3(["4. Test Data", html.Sup("*")]),
             html.H5("Please upload the test data")
@@ -414,7 +388,7 @@ layout = dbc.Container([
     
     dbc.Col([
         html.Div([
-            create_info_modal("target_column", "Target Column", "The target column contains the values that you want to predict with your model."),
+            create_info_modal("target_column", "Target Column", "The target column contains the values that you want to predict with your model.", ""),
             html.Div(id="target_column_alert"),
             html.H3("5. Target Column"),
             html.H5("Please select the target column")
@@ -452,7 +426,7 @@ layout = dbc.Container([
     
     dbc.Col([
         html.Div([
-            create_info_modal("factsheet", "Factsheet", "The factsheet contains the most important information about the methology used."),
+            create_info_modal("factsheet", "Factsheet", "The factsheet contains the most important information about the methology used.", ""),
             html.Div(id="factsheet_alert"),
             html.H3(["6. Factsheet", html.Sup("*")]),
             html.H5("Please upload the factsheet")
@@ -482,7 +456,7 @@ layout = dbc.Container([
     
     dbc.Col([
         html.Div([
-            create_info_modal("model", "Model", "Please upload the model you want to assess."),
+            create_info_modal("model", "Model", "Please upload the model you want to assess.", ""),
             html.Div(id="model_alert"),
             html.H3(["7. Model", html.Sup("*")]),
             html.H5("Please upload the model")
