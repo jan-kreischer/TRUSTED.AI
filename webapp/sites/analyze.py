@@ -98,6 +98,7 @@ layout = html.Div([
             dbc.Col([dcc.Dropdown(
                     id='solution_set_dropdown',
                     options=solution_sets,
+                    value=None,
 
                     placeholder='Select Solution'
                 )], width=12, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
@@ -184,6 +185,8 @@ def update_output(submit_n_clicks, uploaded_solution_set, solution_set_path):
     Output("fairness_details", 'children')],
     [Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
 def analyze_fairness(solution_set_path):
+    if solution_set_path == "":
+        return [{}, {}]
     print("Analyze Fairness {}".format(solution_set_path))
     if solution_set_path is not None:
         train_data =  read_train(solution_set_path)
@@ -200,9 +203,8 @@ def analyze_fairness(solution_set_path):
             f = open(factsheet_path,)
             factsheet = json.load(f)
 
-            target_column = factsheet["target_column"]
-            
-            protected_column_name = factsheet["protected_column_name"]
+            target_column = factsheet["general"]["target_column"]
+            protected_column_name = "protected_column_name" in factsheet
 
             f.close()
         # Create a factsheet
@@ -220,8 +222,8 @@ def analyze_fairness(solution_set_path):
             ),
         ])
 
-        fig = px.histogram(train_data, x="Creditability")
-        class_balance_graph = dcc.Graph(figure=fig)
+        #fig = px.histogram(train_data, x="Creditability")
+        #class_balance_graph = dcc.Graph(figure=fig)
 
         df = pd.DataFrame(dict(
             r=[1, 5, 2, 2, 3],
@@ -280,7 +282,7 @@ def fairness_metrics_class_balance(label, jsonified_training_data, solution_set_
      Output('test_data', 'data')],
     [Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
 def load_data(solution_set_path):
-    if solution_set_path is not None:
+    if solution_set_path != "":
         training_data = read_train(solution_set_path)
         test_data = read_test(solution_set_path)
         compute_train_test_split(solution_set_path)
@@ -489,7 +491,8 @@ def update_figure(data, trig):
       #     main_config = json.loads(config)
          
       # np.random.seed(6)
-        
+      if data is None:
+          return [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}]
       result = json.loads(data)
       final_score, results = result["final_score"] , result["results"]
       trust_score = result["trust_score"]
