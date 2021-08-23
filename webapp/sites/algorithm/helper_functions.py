@@ -156,12 +156,12 @@ def get_final_score(model, train_data, test_data, main_config):
     final_scores = dict()
     for pillar, item in scores.items():
         config = eval("config_"+pillar)
-        sum_weights = sum(config["weights"].values())
         weighted_scores = list(map(lambda x: scores[pillar][x] * config["weights"][x], scores[pillar].keys()))
+        sum_weights = np.nansum(np.array(list(config["weights"].values()))[~np.isnan(weighted_scores)])
         if sum_weights == 0:
             result = 0
         else:
-            result = round(np.sum(weighted_scores)/sum_weights,1)
+            result = round(np.nansum(weighted_scores)/sum_weights,1)
         final_scores[pillar] = result
 
     return final_scores, scores, properties
@@ -171,8 +171,9 @@ def get_final_score(model, train_data, test_data, main_config):
 def get_trust_score(final_score, config):
     if sum(config.values()) == 0:
         return 0
-    return round(np.sum(list(map(lambda x: final_score[x] * config[x], final_score.keys())))/sum(config.values()),1)
+    return round(np.nansum(list(map(lambda x: final_score[x] * config[x], final_score.keys())))/np.sum(config.values()),1)
     
+
 ### delete later
 # define model inputs
 # choose scenario case (case1,case1,..)
