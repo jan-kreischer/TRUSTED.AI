@@ -171,7 +171,7 @@ def get_final_score(model, train_data, test_data, main_config):
 def get_trust_score(final_score, config):
     if sum(config.values()) == 0:
         return 0
-    return round(np.nansum(list(map(lambda x: final_score[x] * config[x], final_score.keys())))/np.sum(config.values()),1)
+    return round(np.nansum(list(map(lambda x: final_score[x] * config[x], final_score.keys())))/np.sum(list(config.values())),1)
     
 
 ### delete later
