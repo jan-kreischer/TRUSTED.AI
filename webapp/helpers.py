@@ -4,10 +4,13 @@ import glob
 import pickle
 import pandas as pd
 import json
+import base64
+import io
+import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
-from config import TRAINING_DATA_FILE_NAME_REGEX, TEST_DATA_FILE_NAME_REGEX
+from config import TRAINING_DATA_FILE_NAME_REGEX, TEST_DATA_FILE_NAME_REGEX, MODEL_REGEX
 
 def get_solution_sets():
     problem_sets = [(f.name, f.path) for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir() and not f.name.startswith('.')]
@@ -66,13 +69,19 @@ def compute_train_test_split(solution_set_path):
 def score_train_test_split():
     return 2.5
 
+# Load .joblib or .pickle model
 def read_model(solution_set_path):
- 
-    #model
-    with open(os.path.join(solution_set_path, "model.sav"),'rb') as file:
-        model = pickle.load(file)
-    
-    return model
+    model_file = glob.glob(os.path.join(solution_set_path, MODEL_REGEX))[0]
+    print("model_file: {}".format(model_file))
+    file_extension = os.path.splitext(model_file)[1]
+    print("file extension of model to load {0}".format(file_extension))
+    pickle_file_extensions = [".sav", ".pkl", ".pickle"]
+    if file_extension in pickle_file_extensions:
+        with open(model_file,'rb') as file:
+            model = pickle.load(file)
+        return model
+    if file_extension == ".joblib":
+        print("loading joblib model")
 
 def read_factsheet(solution_set_path):
  
@@ -115,3 +124,37 @@ def create_info_modal(module_id, name, content, example):
     ]
 )
     return modal
+
+def parse_contents(contents, filename):
+    content_type, content_string = contents.split(',')
+
+    decoded = base64.b64decode(content_string)
+    
+    try:
+        if 'csv' in filename:
+                # Assume that the user uploaded a CSV file
+                df = pd.read_csv(
+                    io.StringIO(decoded.decode('utf-8')))
+        elif 'pkl' in filename:
+                # Assume that the user uploaded an excel file
+                df = pd.read_pickle(io.BytesIO(decoded))
+        df = df[:8]
+        
+    except Exception as e:
+        print(e)
+        return html.Div([
+            'There was an error processing this file.'
+        ]), []
+    
+    table = html.Div([
+        html.H5("Preview of "+filename, className="text-center", style={"color":"DarkBlue"}),
+        dash_table.DataTable(
+            data=df.to_dict('records'),
+            columns=[{'name': i, 'id': i} for i in df.columns],
+            style_table={'overflowX': 'scroll'},
+            style_header={"textTransform": "none"},
+        ),
+        html.Hr(),
+    ])
+    columns = df.columns.values
+    return table, columns

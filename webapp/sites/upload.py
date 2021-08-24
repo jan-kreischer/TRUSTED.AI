@@ -10,9 +10,10 @@ import pickle
 import os
 import io
 import base64
+from joblib import dump, load
 from app import app
-from config import SCENARIOS_FOLDER_PATH
-from helpers import list_of_scenarios, create_info_modal
+from config import SCENARIOS_FOLDER_PATH, PICKLE_FILE_EXTENSIONS, JOBLIB_FILE_EXTENSIONS
+from helpers import * 
 
 # === CALLBACKS ===
 # --- Preview Callbacks --- #
@@ -227,41 +228,6 @@ for m in modals:
             return not is_open
         return is_open
 
-# === HELPER FUNCTIONS ===
-def parse_contents(contents, filename):
-    content_type, content_string = contents.split(',')
-
-    decoded = base64.b64decode(content_string)
-    
-    try:
-        if 'csv' in filename:
-                # Assume that the user uploaded a CSV file
-                df = pd.read_csv(
-                    io.StringIO(decoded.decode('utf-8')))
-        elif 'pkl' in filename:
-                # Assume that the user uploaded an excel file
-                df = pd.read_pickle(io.BytesIO(decoded))
-        df = df[:8]
-        
-    except Exception as e:
-        print(e)
-        return html.Div([
-            'There was an error processing this file.'
-        ]), []
-    
-    table = html.Div([
-        html.H5("Preview of "+filename, className="text-center", style={"color":"DarkBlue"}),
-        dash_table.DataTable(
-            data=df.to_dict('records'),
-            columns=[{'name': i, 'id': i} for i in df.columns],
-            style_table={'overflowX': 'scroll'},
-        ),
-        html.Hr(),
-    ])
-    columns = df.columns.values
-    return table, columns
-
-
 def save_training_data(path, name, content):
     file_name, file_extension = os.path.splitext(name)
     data = content.encode("utf8").split(b";base64,")[1]
@@ -273,21 +239,20 @@ def save_test_data(path, name, content):
     data = content.encode("utf8").split(b";base64,")[1]
     with open(os.path.join(path, "test" + file_extension), "wb") as fp:
         fp.write(base64.decodebytes(data))
-    
+  
 def save_model(path, name, content):
     file_name, file_extension = os.path.splitext(name)
-    print("file extension {}".format(file_extension))
-    
-    #if file_extension == ".joblib":
-    #    print("saving joblib model")
-    
-    #if file_extension == ".sav":
-    #
     content_type, content_string = content.split(',')
     decoded = base64.b64decode(content_string)
-    df = pd.read_pickle(io.BytesIO(decoded))
-    pickle.dump(df, open(os.path.join(path, "model" + file_extension), 'wb'))
-
+    
+    if file_extension in PICKLE_FILE_EXTENSIONS:
+        model = pd.read_pickle(io.BytesIO(decoded))
+        pickle.dump(model, open(os.path.join(path, "model" + file_extension), 'wb'))
+        
+    if file_extension == JOBLIB_FILE_EXTENSIONS:
+        model = load(io.BytesIO(decoded))
+        dump(model, os.path.join(path, "model" + file_extension)) 
+    
 def save_factsheet(path, name):
     factsheet = { 'regularization': 'used'}
     with open(os.path.join(path, name), "w",  encoding="utf8") as fp:
@@ -410,25 +375,7 @@ layout = dbc.Container([
                     options=[],
                     placeholder='Select Target Column'
     ),
-    
-    #dcc.Upload(
-    #    id='test_data_upload',
-    #    children=[
-    #        'Drag and Drop or Select a File'
-    #    ],
-    #    style={
-    #        'width': '100%',
-    #        'height': '60px',
-    #        'lineHeight': '60px',
-    #        'borderWidth': '1px',
-    #        'borderStyle': 'dashed',
-    #        'borderRadius': '5px',
-    #        'textAlign': 'center',
-    #        'margin': '10px'
-    #    }
-    #),
-
-    
+      
     # --- FACTSHEET --- #
     
     dbc.Col([
@@ -489,7 +436,6 @@ layout = dbc.Container([
     html.Div(id='model_summary'),
     html.Div(html.Span(id="upload_alert")),
     html.Div(dbc.Button("Analyze",  id='upload_button', color="primary", className="mt-3"), className="text-center"),
-    
 ],
 fluid=False
 )

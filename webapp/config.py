@@ -4,3 +4,6 @@ MAIL_FROM_EMAIL = "robert@example.com" # For use in application emails
 SCENARIOS_FOLDER_PATH = "scenarios"
 TRAINING_DATA_FILE_NAME_REGEX = "train.*"
 TEST_DATA_FILE_NAME_REGEX = "test.*"
+MODEL_REGEX = "model.*"
+PICKLE_FILE_EXTENSIONS = [".sav", ".pkl", ".pickle"]
+JOBLIB_FILE_EXTENSIONS = [".joblib"]
