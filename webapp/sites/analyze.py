@@ -19,7 +19,6 @@ from sites import config_panel
 import plotly.express as px
 import plotly.graph_objects as go
 
-solution_sets = get_solution_sets()
 
 config_fairness, config_explainability, config_robustness, config_methodology, config_pillars = 0, 0, 0 ,0,0
 for config in ["config_pillars","config_fairness", "config_explainability", "config_robustness", "config_methodology"]:
@@ -97,7 +96,7 @@ layout = html.Div([
             
             dbc.Col([dcc.Dropdown(
                     id='solution_set_dropdown',
-                    options=solution_sets,
+                    options= get_solution_sets(),
                     value=None,
 
                     placeholder='Select Solution'
@@ -135,6 +134,12 @@ layout = html.Div([
         ], no_gutters=False)
     ])
 ])
+
+
+@app.callback(Output('solution_set_dropdown', 'options'),
+              Input('solution_set_dropdown', 'nclicks'))
+def update_solution_set_dropdown(n_clicks):
+    return get_solution_sets()
 
 FAIRNESS_HIGHLIGHT_COLOR = "yellow"
 EXPLAINABLITY_HIGHLIGHT_COLOR = "cornflowerblue"
@@ -520,7 +525,16 @@ def update_figure(data, trig):
       for n, (pillar , sub_scores) in enumerate(results.items()):
           title = pillar + " (score: {})".format(final_score[pillar])
           categories = list(map(lambda x: x.replace("_",' '), sub_scores.keys()))
-          values = list(map(int, sub_scores.values()))
+          values = list(map(float, sub_scores.values()))
+          if np.isnan(values).any():
+              nonNanCategories = list()
+              nonNanValues = list()
+              for c, v in zip(categories, values):
+                  if not np.isnan(v):
+                      nonNanCategories.append(c)
+                      nonNanValues.append(v)
+              categories = nonNanCategories
+              values = nonNanValues
           bar_chart_pillar = go.Figure(data=[go.Bar(x=categories, y=values, marker_color=my_palette[n])])
           bar_chart_pillar.update_layout(title_text=title, title_x=0.5)
           chart_list.append(bar_chart_pillar)
@@ -529,7 +543,16 @@ def update_figure(data, trig):
       for n, (pillar , sub_scores) in enumerate(results.items()):
           title = pillar  + " (score: {})".format(final_score[pillar])
           categories = list(map(lambda x: x.replace("_",' '), sub_scores.keys()))
-          val = list(map(int, sub_scores.values()))
+          val = list(map(float, sub_scores.values()))
+          if np.isnan(values).any():
+              nonNanCategories = list()
+              nonNanValues = list()
+              for c, v in zip(categories, values):
+                  if not np.isnan(v):
+                      nonNanCategories.append(c)
+                      nonNanValues.append(v)
+              categories = nonNanCategories
+              val = nonNanValues
           spider_plt_pillar = px.line_polar(r=val, theta=categories, line_close=True, title=title)
           spider_plt_pillar.update_traces(fill='toself', fillcolor=my_palette[n], marker_color='rgb(250,00,00)',marker_line_width=1.5, opacity=0.6)
           spider_plt_pillar.update_layout(title_x=0.5)

@@ -22,15 +22,16 @@ from helpers import list_of_scenarios, create_info_modal
               [Input('training_data_upload', 'contents'),
               State('training_data_upload', 'filename')], prevent_initial_call=True)
 def training_data_preview(content, name):
+
     message = html.Div(['Drag and Drop or Select File'])
     summary = []
+    options = []
     if content is not None:
         message = html.Div(name)
         summary, columns = parse_contents(content, name)
-        print(columns)
-        options = []
         for c in columns:
-            options.append({"label": c, "value": c})
+            options.append({"label": str(c), "value": str(c)})
+
     return [message, summary, options]
 
 @app.callback([Output('test_data_upload', 'children'),
@@ -205,10 +206,10 @@ def upload_data(
                 save_test_data(path, test_data_filename, test_data)
                 
                 # Saving Factsheet
-                save_factsheet(path, "factsheet.json")
+                save_factsheet(path, "factsheet.json", factsheet)
                     
                 # Saving Model
-                save_model(path, model_filename, model)   
+                save_model(path, model_filename, model)
             else: 
                 return html.H4("Directory already exists", style={"color":"Red"}, className="text-center")
                       
@@ -248,12 +249,11 @@ def parse_contents(contents, filename):
         return html.Div([
             'There was an error processing this file.'
         ]), []
-    
     table = html.Div([
         html.H5("Preview of "+filename, className="text-center", style={"color":"DarkBlue"}),
         dash_table.DataTable(
             data=df.to_dict('records'),
-            columns=[{'name': i, 'id': i} for i in df.columns],
+            columns=[{'name': str(i), 'id': str(i)} for i in df.columns],
             style_table={'overflowX': 'scroll'},
         ),
         html.Hr(),
@@ -281,11 +281,11 @@ def save_model(path, name, content):
     df = pd.read_pickle(io.BytesIO(decoded))
     pickle.dump(df, open(os.path.join(path, "model" + file_extension), 'wb'))
 
-def save_factsheet(path, name):
-    factsheet = { 'regularization': 'used'}
-    with open(os.path.join(path, name), "w",  encoding="utf8") as fp:
-        json.dump(factsheet, fp, indent=4)
-         
+def save_factsheet(path, name, content):
+    data = content.encode("utf8").split(b";base64,")[1]
+    with open(os.path.join(path, name), "wb") as fp:
+        fp.write(base64.decodebytes(data))
+
 # === SITE ===
 scenarios_folder_path = './scenarios' 
 problem_sets = [{'label': f.name, 'value': f.path} for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir()]
