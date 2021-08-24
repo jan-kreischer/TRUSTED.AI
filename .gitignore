@@ -10,7 +10,12 @@ webapp/scenarios/*
 
 webapp/scenarios/IT Sec Anomaly Detection/*
 !webapp/scenarios/IT Sec Anomaly Detection/Solution*
+!webapp/scenarios/IT Sec Anomaly Detection/Jan*
+!webapp/scenarios/IT Sec Anomaly Detection/Joel*
+!webapp/scenarios/IT Sec Anomaly Detection/Melike*
 
 webapp/scenarios/IT Sec Incident Classification/*
 !webapp/scenarios/IT Sec Incident Classification/Solution*
-
+!webapp/scenarios/IT Sec Incident Classification/Jan*
+!webapp/scenarios/IT Sec Incident Classification/Joel*
+!webapp/scenarios/IT Sec Incident Classification/Melike*

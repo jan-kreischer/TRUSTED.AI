@@ -262,7 +262,7 @@ def save_factsheet(path, name, content, target_column_name):
     content_type, content_string = content.split(',')
     factsheet = json.loads(base64.b64decode(content_string).decode())
     if target_column_name:
-        factsheet['general']['target_column_name'] = target_column_name
+        factsheet['general']['target_column'] = target_column_name
     print(factsheet)
     print(target_column_name)
     with open(os.path.join(path, name), "w",  encoding="utf8") as file:
