@@ -12,7 +12,7 @@ import io
 import base64
 from joblib import dump, load
 from app import app
-from config import SCENARIOS_FOLDER_PATH, PICKLE_FILE_EXTENSIONS, JOBLIB_FILE_EXTENSIONS
+from config import SCENARIOS_FOLDER_PATH, PICKLE_FILE_EXTENSIONS, JOBLIB_FILE_EXTENSIONS, FACTSHEET_NAME
 from helpers import * 
 
 # === CALLBACKS ===
@@ -167,6 +167,7 @@ def save_new_model_name(n_clicks, problem_set_path, model_name):
                State('training_data_upload', 'filename'),
                State('test_data_upload', 'contents'),
                State('test_data_upload', 'filename'),
+               State('target_column_dropdown', 'value'),
                State('factsheet_upload', 'contents'),
                State('factsheet_upload', 'filename'),
                State('model_upload', 'contents'),
@@ -180,6 +181,7 @@ def upload_data(
     training_data_filename,
     test_data,
     test_data_filename,
+    target_column_name,
     factsheet,
     factsheet_filename,
     model,
@@ -206,7 +208,8 @@ def upload_data(
                 save_test_data(path, test_data_filename, test_data)
                 
                 # Saving Factsheet
-                save_factsheet(path, "factsheet.json")
+                print("Target column name".format(target_column_name))
+                save_factsheet(path, FACTSHEET_NAME, factsheet, target_column_name)
                     
                 # Saving Model
                 save_model(path, model_filename, model)   
@@ -253,10 +256,16 @@ def save_model(path, name, content):
         model = load(io.BytesIO(decoded))
         dump(model, os.path.join(path, "model" + file_extension)) 
     
-def save_factsheet(path, name):
-    factsheet = { 'regularization': 'used'}
-    with open(os.path.join(path, name), "w",  encoding="utf8") as fp:
-        json.dump(factsheet, fp, indent=4)
+def save_factsheet(path, name, content, target_column_name):
+    file_name, file_extension = os.path.splitext(name)
+    content_type, content_string = content.split(',')
+    factsheet = json.loads(base64.b64decode(content_string).decode())
+    if target_column_name:
+        factsheet['general']['target_column_name'] = target_column_name
+    print(factsheet)
+    print(target_column_name)
+    with open(os.path.join(path, name), "w",  encoding="utf8") as file:
+        json.dump(factsheet, file, indent=4)
          
 # === SITE ===
 scenarios_folder_path = './scenarios' 
@@ -364,16 +373,14 @@ layout = dbc.Container([
             html.Div(id="target_column_alert"),
             html.H3("5. Target Column"),
             html.H5("Please select the target column")
-            #(csv and pickle files are accepted).
-            #"Please place the label to the last column of the dataframe."
         ], className="text-center"),
     ],
             className="mb-4"),
     
     dcc.Dropdown(
-                    id='target_column_dropdown',
-                    options=[],
-                    placeholder='Select Target Column'
+        id='target_column_dropdown',
+        options=[],
+        placeholder='Select Target Column'
     ),
       
     # --- FACTSHEET --- #

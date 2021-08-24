@@ -7,3 +7,4 @@ TEST_DATA_FILE_NAME_REGEX = "test.*"
 MODEL_REGEX = "model.*"
 PICKLE_FILE_EXTENSIONS = [".sav", ".pkl", ".pickle"]
 JOBLIB_FILE_EXTENSIONS = [".joblib"]
+FACTSHEET_NAME = "factsheet.json"

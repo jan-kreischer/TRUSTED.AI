@@ -19,7 +19,7 @@ from sites import config_panel
 import plotly.express as px
 import plotly.graph_objects as go
 
-solution_sets = get_solution_sets()
+#solution_sets = get_solution_sets()
 
 config_fairness, config_explainability, config_robustness, config_methodology, config_pillars = 0, 0, 0 ,0,0
 for config in ["config_pillars","config_fairness", "config_explainability", "config_robustness", "config_methodology"]:
@@ -97,7 +97,7 @@ layout = html.Div([
             
             dbc.Col([dcc.Dropdown(
                     id='solution_set_dropdown',
-                    options=solution_sets,
+                    options=get_solution_sets(),
                     value=None,
 
                     placeholder='Select Solution'
@@ -232,10 +232,25 @@ def analyze_fairness(solution_set_path):
         fig = px.line_polar(df, r='r', theta='theta', line_close=True)
         fig.update_traces(fill='toself')
         fairness_overview = dcc.Graph(figure=fig)
-        fairness_metrics_class_balance = html.Div("Class Balance", id="fairness_metrics_class_balance")
-        return [html.H1("Nothing")], [html.H4("Fairness Metrics"), solution_set_label_select, fairness_metrics_class_balance]
+        class_balance_section = html.Div("1.1 Class Balance", id="class_balance_section", )
+        statistical_parity_difference_section = html.Div("1.2 Statistical Parity Difference", id="statistical_parity_difference_section"),
+        equal_opportunity_difference_section = html.Div(["1.3 Equal Opportunity Difference"], id="statistical_parity_difference_section")
+        average_odds_difference_section = html.Div(["1.4 Average Odds Difference"], id="average_odds_difference_section")
+        disparate_impact_section = html.Div(["1.5 Disparate Impact"], id="disparate_impact_section")
+        theil_index_section = html.Div(["1.6 Theil Index"], id="theil_index_section")
+        euclidean_distance_section = html.Div(["1.6 Euclidean Distance"], id="euclidean_distance_section")
+        
+        return [html.H1("Fairness Overview")], [html.H4("Fairness Metrics"), solution_set_label_select, 
+                                      class_balance_section, 
+                                      statistical_parity_difference_section,
+                                      equal_opportunity_difference_section,
+                                      average_odds_difference_section,
+                                      disparate_impact_section, 
+                                      theil_index_section,
+                                      euclidean_distance_section, 
+        ]
     else:
-        return [html.H1("Nothing")], [html.H1("Nothing")]
+        return [html.H1("Fairness Overview")], [html.H1("Fairness Details")]
 
 def update_factsheet(factsheet_path, key, value):
     print("update factsheet {0} with {1}  {2}".format(factsheet_path, key, value))
@@ -251,12 +266,13 @@ def update_factsheet(factsheet_path, key, value):
     jsonFile = open(factsheet_path, "w+")
     jsonFile.write(json.dumps(data))
     jsonFile.close()
-     
+
+# === FAIRNESS > 1.1 Class Balance ===
 '''
 The following function updates
 '''
 @app.callback(
-    Output("fairness_metrics_class_balance", 'children'),
+    Output("class_balance_section", 'children'),
     [Input("solution_set_label_select", 'value'), 
     State('training_data', 'data'),
     State("solution_set_dropdown", 'value')])
@@ -266,7 +282,22 @@ def fairness_metrics_class_balance(label, jsonified_training_data, solution_set_
     #compute_class_balance("hi")
     update_factsheet(r"{}/factsheet.json".format(solution_set_path), "target_column", label)
     return [html.H3("1.1 Class Balance"), graph]
-    
+       
+'''
+The following function updates
+'''
+#@app.callback(
+#    Output("statistical_parity_difference_section", 'children'),
+#    [Input("solution_set_label_select", 'value'), 
+#    State('training_data', 'data'),
+#    State("solution_set_dropdown", 'value')])
+#def fairness_metrics_statistical_parity_difference(label, jsonified_training_data, solution_set_path):
+#    training_data = read_train(solution_set_path)
+#    graph = dcc.Graph(figure=px.histogram(training_data, x=label, opacity=0.5, title="Label vs Label Occurence", color_discrete_sequence=['#00FF00']))
+#    #compute_class_balance("hi")
+#    update_factsheet(r"{}/factsheet.json".format(solution_set_path), "target_column", label)
+#    return [html.H3("1.1 Class Balance"), graph]
+
     #print("label {}".format(label))
     #print("JSONIFIED TRAINING DATA {}".format(jsonified_training_data))
     #training_data = pd.read_json(jsonified_training_data, orient='split')
