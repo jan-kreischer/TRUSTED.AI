@@ -23,15 +23,16 @@ from helpers import *
               [Input('training_data_upload', 'contents'),
               State('training_data_upload', 'filename')], prevent_initial_call=True)
 def training_data_preview(content, name):
+
     message = html.Div(['Drag and Drop or Select File'])
     summary = []
+    options = []
     if content is not None:
         message = html.Div(name)
         summary, columns = parse_contents(content, name)
-        print(columns)
-        options = []
         for c in columns:
-            options.append({"label": c, "value": c})
+            options.append({"label": str(c), "value": str(c)})
+
     return [message, summary, options]
 
 @app.callback([Output('test_data_upload', 'children'),
@@ -210,9 +211,9 @@ def upload_data(
                 # Saving Factsheet
                 print("Target column name".format(target_column_name))
                 save_factsheet(path, FACTSHEET_NAME, factsheet, target_column_name)
-                    
+  
                 # Saving Model
-                save_model(path, model_filename, model)   
+                save_model(path, model_filename, model)
             else: 
                 return html.H4("Directory already exists", style={"color":"Red"}, className="text-center")
                       

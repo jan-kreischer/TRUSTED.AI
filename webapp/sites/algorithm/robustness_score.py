@@ -22,7 +22,7 @@ def score_Confidence_Score(model, train_data, test_data):
         score = confidence_score * 5
         return result(score=score, properties={})
     except:
-        return result(score=0, properties={})
+        return result(score=np.nan, properties={})
 
 def score_Class_Specific_Metrics():
     return result(score=np.random.randint(1,6), properties={})
@@ -56,10 +56,11 @@ def score_Fast_Gradient_Attack(model, train_data, test_data):
             score = 0
         return result(score=score, properties={})
     except:
-        return result(score=0, properties={})
+        return result(score=np.nan, properties={})
 
 def score_Carlini_Wagner_Attack(model, train_data, test_data):
     try:
+        print("HEREs")
         randomData = test_data.sample(5)
         randomX = randomData.iloc[:,:-1]
         randomY = randomData.iloc[:,-1: ]
@@ -85,7 +86,7 @@ def score_Carlini_Wagner_Attack(model, train_data, test_data):
             score = 0
         return result(score=score, properties={})
     except:
-        return result(score=0, properties={})
+        return result(score=np.nan, properties={})
 
 def score_Deepfool_Attack(model, train_data, test_data):
     try:
@@ -114,7 +115,7 @@ def score_Deepfool_Attack(model, train_data, test_data):
             score = 0
         return result(score=score, properties={})
     except:
-        return result(score=0, properties={})
+        return result(score=np.nan, properties={})
 
 def calc_robustness_score(model, train_data, test_data, config):
     
@@ -127,7 +128,7 @@ def calc_robustness_score(model, train_data, test_data, config):
         Empirical_Robustness_Carlini_Wagner_Attack = score_Carlini_Wagner_Attack(model, train_data, test_data),
         Empirical_Robustness_Deepfool_Attack = score_Deepfool_Attack(model, train_data, test_data)
                  )
-    scores = dict((k, int(v.score)) for k, v in output.items())
+    scores = dict((k, v.score) for k, v in output.items())
     properties = dict((k, v.properties) for k, v in output.items())
     
     return  result(score=scores, properties=properties)
