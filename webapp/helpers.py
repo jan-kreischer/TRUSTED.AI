@@ -12,6 +12,18 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 from config import TRAINING_DATA_FILE_NAME_REGEX, TEST_DATA_FILE_NAME_REGEX, MODEL_REGEX
 
+def show_star_rating(rating):
+    stars = []
+    for i in range(0,5):
+        print("i {0}  rating {1}".format(i, rating))
+        if i+0.99 <= rating:
+            stars.append(html.I(className="fas fa-star"))
+        elif i+0.49 < rating:
+            stars.append(html.I(className="fas fa-star-half-alt"))
+        else:
+            stars.append(html.I(className="far fa-star"))
+    return stars
+
 def get_solution_sets():
     problem_sets = [(f.name, f.path) for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir() and not f.name.startswith('.')]
     options = []

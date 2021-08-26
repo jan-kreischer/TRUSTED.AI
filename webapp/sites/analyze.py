@@ -43,12 +43,10 @@ def trust_section(c):
             style={"float": "right"}
         )], className="mt-2"),
         html.H2("Trustworthiness"),
-        html.I(u"\u2BEA"),
-        html.I(u"\u2605"),
-        html.I(u"\u2BE8"),
 
         html.Div([], id="trust_overview"),
         html.H3("Overall Score", className="text-center"),
+        html.Div([], id="trust_star_rating", className="star_rating, text-center"),
         dcc.Graph(id='spider', style={'display': 'none'}),
         dcc.Graph(id='bar', style={'display': 'block'}),
         html.Div([], id="trust_details"),
@@ -74,6 +72,7 @@ def pillar_section(pillar):
                     html.H2("• {}".format(pillar.upper()), className="mb-5"),
                     html.Div([], id="{}_overview".format(pillar)),
                     html.H3("{0}-Score".format(pillar), className="text-center"),
+                    html.Div([], id="{}_star_rating".format(pillar), className="star_rating, text-center"),
                     dcc.Graph(id='{}_spider'.format(pillar), style={'display': 'none'}),
                     dcc.Graph(id='{}_bar'.format(pillar), style={'display': 'block'}),    
                     dbc.Collapse(
@@ -619,7 +618,12 @@ def store_result(solution_set_dropdown, config):
        Output('fairness_spider', 'figure'),
        Output('explainability_spider', 'figure'),
        Output('robustness_spider', 'figure'),
-       Output('methodology_spider', 'figure')],
+       Output('methodology_spider', 'figure'),
+       Output('trust_star_rating', 'children'),
+       Output('fairness_star_rating', 'children'),
+       Output('explainability_star_rating', 'children'),
+       Output('robustness_star_rating', 'children'),
+       Output('methodology_star_rating', 'children')],
       [Input('result', 'data'),Input("hidden-trigger", "value")])  
 def update_figure(data, trig):
      
@@ -631,7 +635,7 @@ def update_figure(data, trig):
          
       # np.random.seed(6)
       if data is None:
-          return [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}]
+          return [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}]
       result = json.loads(data)
       final_score, results = result["final_score"] , result["results"]
       trust_score = result["trust_score"]
@@ -693,7 +697,13 @@ def update_figure(data, trig):
           spider_plt_pillar.update_layout(title_x=0.5)
           chart_list.append(spider_plt_pillar)
          
-      return chart_list
+      star_ratings = []
+      star_ratings.append(show_star_rating(trust_score))
+      star_ratings.append(show_star_rating(final_score["fairness"]))
+      star_ratings.append(show_star_rating(final_score["explainability"]))
+      star_ratings.append(show_star_rating(final_score["robustness"]))
+      star_ratings.append(show_star_rating(final_score["methodology"]))
+      return chart_list + star_ratings
  
 config_panel.get_callbacks(app)
 
