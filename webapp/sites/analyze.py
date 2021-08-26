@@ -64,6 +64,13 @@ def pillar_section(pillar):
                         n_clicks=0,
                         style={"float": "right"}
                     ),
+                    daq.BooleanSwitch(id='toggle-hide',
+                      on=False,
+                      label='Show Mappings',
+                      labelPosition="top",
+                      color = "green",
+                      style={"float": "right"}
+                    ),
                     html.H2("• {}".format(pillar.upper()), className="mb-5"),
                     html.Div([], id="{}_overview".format(pillar)),
                     html.H3("{0}-Score".format(pillar), className="text-center"),
