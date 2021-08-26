@@ -220,7 +220,7 @@ def upload_data(
             return dcc.Location(pathname="/analyze", id="someid_doesnt_matter")
             return html.H5("Upload Successful", className="text-center")
 
-modals = ["problem_set", "solution_set", "training_data", "test_data", "target_column" ,"factsheet", "model"]
+modals = ["problem_set", "solution_set", "training_data", "test_data", "target_column_name" ,"factsheet", "model"]
 for m in modals:
     @app.callback(
         Output("{}_info_modal".format(m), "is_open"),
@@ -370,7 +370,7 @@ layout = dbc.Container([
     
     dbc.Col([
         html.Div([
-            create_info_modal("target_column", "Target Column", "The target column contains the values that you want to predict with your model.", ""),
+            create_info_modal("target_column_name", "Target Column", "The target column contains the values that you want to predict with your model.", ""),
             html.Div(id="target_column_alert"),
             html.H3("5. Target Column"),
             html.H5("Please select the target column")

@@ -96,18 +96,6 @@ def display_page(pathname):
     else:
         return homepage.layout
     
-
-@app.callback([Output('spider', 'style'),
-              Output('spider_pillars', 'style'),
-              Output('bar', 'style'),
-              Output('bar_pillars', 'style')],
-              [Input('plot_type', 'value')])
-def show_the_graphs(value):
-    if value == "spider":
-        return [{'display': 'block'}, {'display': 'block'}, {'display': 'none'}, {'display': 'none'}]
-    else:
-        return [{'display': 'none'}, {'display': 'none'}, {'display': 'block'}, {'display': 'block'}]
-
 #visualisation.get_callbacks(app)
 
 if __name__ == '__main__':

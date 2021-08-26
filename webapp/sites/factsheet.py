@@ -15,7 +15,8 @@ from app import app
 from config import SCENARIOS_FOLDER_PATH
 from helpers import create_info_modal
 
-elements = ["model_name", "purpose_description", "domain_description", "training_data_description", "model_information",    "data_normalization", "target_column_name", "contact_information"]
+general_inputs = ["model_name", "purpose_description", "domain_description", "training_data_description", "model_information",    "data_normalization", "target_column", "contact_information"]
+fairness_inputs = ["protected_feature", "privileged_class_definition"]
 
 @app.callback([Output('create_factsheet_alert', 'children'),
                Output("download_factsheet", "data"),
@@ -25,8 +26,9 @@ elements = ["model_name", "purpose_description", "domain_description", "training
                Output('training_data_description', 'value'),
                Output('model_information', 'value'), 
                Output('data_normalization', 'value'),
-               Output('target_column_name', 'value'), 
-               Output('contact_information', 'value')],
+               Output('target_column', 'value'), 
+               Output('contact_information', 'value'),
+               Output('protected_feature', 'value')],
               [
                Input('download_factsheet_button', 'n_clicks'),
                State('model_name', 'value'),
@@ -36,7 +38,8 @@ elements = ["model_name", "purpose_description", "domain_description", "training
                State('model_information', 'value'), 
                State('data_normalization', 'value'),
                State('target_column_name', 'value'), 
-               State('contact_information', 'value')
+               State('contact_information', 'value'),
+               State('protected_feature', 'value')
 ], prevent_initial_call=True)             
 def create_factsheet(
     n_clicks,
@@ -46,23 +49,30 @@ def create_factsheet(
     training_data_description,
     model_information,
     data_normalization,
-    target_column_name,
+    target_column,
     contact_information,
+    protected_feature
 ):
     print(training_data_description)
     print(n_clicks)
     factsheet = {}
     if n_clicks is not None:
-        for e in elements:
+        factsheet["general"] = {}
+        for e in general_inputs:
             if eval(e):
                 print("{0}, {1}".format(e, eval(e)))
-                factsheet[e] = eval(e)
+                factsheet["general"][e] = eval(e)
+        
+        factsheet["fairness"] = {}
+        for e in fairness_inputs:
+            if eval(e):
+                factsheet["fairness"][e] = eval(e)
                 
         print(factsheet)
-        return html.H3("Created Factsheet", className="text-center", style={"color": "Red"}), dict(content=json.dumps(factsheet), filename="factsheet.json"), "", "", "", "", "", "", "", ""
+        return html.H3("Created Factsheet", className="text-center", style={"color": "Red"}), dict(content=json.dumps(factsheet), filename="factsheet.json"), "", "", "", "", "", "", "", "", ""
         
 
-for m in elements:
+for m in general_inputs + fairness_inputs:
     @app.callback(
         Output("{}_info_modal".format(m), "is_open"),
         [Input("{}_info_button".format(m), "n_clicks"), Input("{}_close".format(m), "n_clicks")],
@@ -76,9 +86,12 @@ for m in elements:
 layout = dbc.Container([
     dbc.Col([
         html.Div([
-            html.H1("Factsheet"),
+            html.H1("Factsheet", className="text-center"),
             html.Div([], id="create_factsheet_alert"),
             
+            #=== General Information ===
+            html.Hr(),
+            html.H2("• General Information"),
             #--- Purpose ---
             html.Div([
                 create_info_modal("model_name", "Model Name", "Please enter a name for your model.", ""),
@@ -144,9 +157,9 @@ layout = dbc.Container([
                         
             #--- Target Column Name ---
             html.Div([
-                create_info_modal("target_column_name", "Target Column Name", "Please enter the name of the target column within your dataset.", ""),
+                create_info_modal("target_column", "Target Column Name", "Please enter the name of the target column within your dataset.", ""),
                 html.H3("Target Column Name"),
-                dcc.Input(id="target_column_name", type="text", placeholder="", value="", debounce=True, style={'width': '100%'}),
+                dcc.Input(id="target_column", type="text", placeholder="", value="", debounce=True, style={'width': '100%'}),
             ], className="mb-4 mt-4"),
                 
             #--- Domain ---
@@ -157,7 +170,21 @@ layout = dbc.Container([
                 id='contact_information',
                 value='',
                 style={'width': '100%', 'height': 150},
-            )], className="mb-4")
+            )], className="mb-4"),
+            
+            html.Hr(),
+            html.H2("• Fairness"),
+            html.Div([
+                create_info_modal("protected_feature", "Protected Feature", "Please enter the name of the target column within your dataset.", ""),
+                html.H3("Protected Feature"),
+                dcc.Input(id="protected_feature", type="text", placeholder="", value="", debounce=True, style={'width': '100%'}),
+            ], className="mb-4 mt-4"),
+            
+            html.Div([
+                create_info_modal("privileged_class_definition", "Privileged Class Definition", "Please enter the name of the target column within your dataset.", ""),
+                html.H3("Privileged Class Definition"),
+                dcc.Input(id="privileged_class_definition", type="text", placeholder="e.g lambda x: x >= 25", value="", debounce=True, style={'width': '100%'}),
+            ], className="mb-4 mt-4"),
     ], 
     className=""
     ),

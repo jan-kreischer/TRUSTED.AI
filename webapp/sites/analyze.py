@@ -1,6 +1,7 @@
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
+import dash_daq as daq
 from dash.dependencies import Input, Output, State
 import plotly.express as px
 from app import app
@@ -10,7 +11,7 @@ import json
 import glob
 import shutil
 from helpers import *
-from config import SCENARIOS_FOLDER_PATH
+from config import SCENARIOS_FOLDER_PATH, FAIRNESS_COLOR, EXPLAINABILITY_COLOR, ROBUSTNESS_COLOR, METHODOLOGY_COLOR, TRUST_COLOR
 from sites.algorithm.helper_functions import get_performance_table, get_final_score, get_case_inputs, trusting_AI_scores, get_trust_score
 from pillars.fairness.class_balance import compute_class_balance
 import dash_table
@@ -35,8 +36,19 @@ with open('configs/default.json', 'w') as outfile:
 # === SECTIONS ===
 def trust_section(c):
     return html.Div([ 
+        html.Div(id='boolean-switch-output'),
+        html.Div([daq.BooleanSwitch(id='toggle_charts',
+            on=False,
+            color = "green",   
+            style={"float": "right"}
+        )], className="mt-2"),
         html.H2("Trustworthiness"),
+        html.I(u"\u2BEA"),
+        html.I(u"\u2605"),
+        html.I(u"\u2BE8"),
+
         html.Div([], id="trust_overview"),
+        html.H3("Overall Score", className="text-center"),
         dcc.Graph(id='spider', style={'display': 'none'}),
         dcc.Graph(id='bar', style={'display': 'block'}),
         html.Div([], id="trust_details"),
@@ -52,8 +64,9 @@ def pillar_section(pillar):
                         n_clicks=0,
                         style={"float": "right"}
                     ),
-                    html.H3(pillar.upper()),
+                    html.H2("• {}".format(pillar.upper()), className="mb-5"),
                     html.Div([], id="{}_overview".format(pillar)),
+                    html.H3("{0}-Score".format(pillar), className="text-center"),
                     dcc.Graph(id='{}_spider'.format(pillar), style={'display': 'none'}),
                     dcc.Graph(id='{}_bar'.format(pillar), style={'display': 'block'}),    
                     dbc.Collapse(
@@ -61,7 +74,8 @@ def pillar_section(pillar):
                         id="{}_details".format(pillar),
                         is_open=False,
                     ),
-                    html.Hr(),
+                    html.Hr(style={"size": "10"}),
+
                 ], id="{}_section".format(pillar), style={"display": "None"})
     
 
@@ -103,7 +117,7 @@ layout = html.Div([
                 )], width=12, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
             ),
                 
-             html.Div([], id="performance_div"),
+            dbc.Col([html.Div([], id="performance_div")], width=12),
              
  
             dbc.Col([
@@ -111,7 +125,10 @@ layout = html.Div([
                     id='delete_solution_confirm',
                     message='Are you sure that you want to delete this solution?',
                 ),
+
+                html.Div([], id="toggle_charts_section"),
                 html.Div([], id="delete_solution_button"),
+                
                 html.Div([], id="analyze_alert_section", className="text-center", style={"color":"Red"}),
                 alert_section('a'),
                 html.Div([
@@ -135,16 +152,31 @@ layout = html.Div([
     ])
 ])
 
+@app.callback(
+    Output(component_id="bar", component_property='style'),
+    Output(component_id="fairness_bar", component_property='style'),
+    Output(component_id="explainability_bar", component_property='style'),
+    Output(component_id="robustness_bar", component_property='style'),
+    Output(component_id="methodology_bar", component_property='style'),
+    Output(component_id="spider", component_property='style'),
+    Output(component_id="fairness_spider", component_property='style'),
+    Output(component_id="explainability_spider", component_property='style'),
+    Output(component_id="robustness_spider", component_property='style'),
+    Output(component_id="methodology_spider", component_property='style'),
+    Input('toggle_charts', 'on')
+)
+def toggle_charts(visibility_state):
+    if visibility_state == True:
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}
+    if visibility_state == False:
+        return {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
+
+
 
 @app.callback(Output('solution_set_dropdown', 'options'),
               Input('solution_set_dropdown', 'nclicks'))
 def update_solution_set_dropdown(n_clicks):
     return get_solution_sets()
-
-FAIRNESS_HIGHLIGHT_COLOR = "yellow"
-EXPLAINABLITY_HIGHLIGHT_COLOR = "cornflowerblue"
-ROBUSTNESS_HIGHLIGHT_COLOR = "lightgrey"
-METHODOLOGY_HIGHLIGHT_COLOR = "lightseagreen"
 
 @app.callback([Output('solution_set_dropdown', 'value'),
               Output('analyze_alert_section', 'children')],
@@ -185,6 +217,24 @@ def update_output(submit_n_clicks, uploaded_solution_set, solution_set_path):
 
 
 # === FAIRNESS ===
+fairness_metrics = ["class_balance", "statistical_parity_difference", "equal_opportunity_difference", "average_odds_difference", "disparate_impact", "theil_index", "euclidean_distance", "mahalanobis_distance", "manhattan_distance"]
+
+
+for m in fairness_metrics:
+    @app.callback(
+        [Output("{0}_details".format(m), "is_open"),
+        Output("{0}_details".format(m), "style")],
+        [Input("toggle_{0}_details".format(m), "n_clicks")],
+        [State("{0}_details".format(m), "is_open")],
+        prevent_initial_call=True
+    )
+    def toggle_detail_section(n, is_open):
+        #app.logger.info("toggle {0} detail section".format(s))
+        if is_open:
+            return (not is_open, {'display': 'None'})
+        else:
+            return (not is_open, {'display': 'Block'})
+
 @app.callback(
     [Output("fairness_overview", 'children'),
     Output("fairness_details", 'children')],
@@ -207,10 +257,22 @@ def analyze_fairness(solution_set_path):
 
             f = open(factsheet_path,)
             factsheet = json.load(f)
-
-            target_column = factsheet["general"]["target_column"]
-            protected_column_name = "protected_column_name" in factsheet
-
+            
+            target_column = ""
+            if "general" in factsheet and "target_column" in factsheet["general"]:
+                target_column = factsheet["general"]["target_column"]
+            print("target_column {}".format(target_column))
+            
+            protected_feature = ""
+            if "fairness" in factsheet and "protected_feature" in factsheet["fairness"]:
+                protected_feature = factsheet["fairness"]["protected_feature"]
+            print("protected_feature {}".format(protected_feature))
+            
+            privileged_class_definition = ""
+            if "fairness" in factsheet and "privileged_class_definition" in factsheet["fairness"]:
+                privileged_class_definition = factsheet["fairness"]["privileged_class_definition"]
+            print("privileged_class_definition {}".format(privileged_class_definition))
+            
             f.close()
         # Create a factsheet
         else:
@@ -219,26 +281,58 @@ def analyze_fairness(solution_set_path):
 
         solution_set_label_select_options = list(map(lambda x: {"label": x, "value": x}, features))
         solution_set_label_select = html.Div([
-            html.H5("Select Label Column"), 
+            "Select Target Column", 
             dcc.Dropdown(
                 id="solution_set_label_select",
                 options=solution_set_label_select_options,
                 value=target_column
             ),
         ])
+        
+        protected_feature_select_options = list(map(lambda x: {"label": x, "value": x}, features))
+        protected_feature_select = html.Div([
+            "Select Protected Feature", 
+            dcc.Dropdown(
+                id="protected_feature_select",
+                options=protected_feature_select_options,
+                value=protected_feature
+            ),
+        ])
+        
+        privileged_class_definition = html.Div([
+            "Define Privileged Class",
+            html.Br(),
+            dcc.Input(
+                id="privileged_class_definition",
+                type="text",
+                placeholder="e.g lambda x: x >= 25",
+                style={'width': '100%'}
+            ),
+        ])
 
-        #fig = px.histogram(train_data, x="Creditability")
-        #class_balance_graph = dcc.Graph(figure=fig)
+        sections = [ html.Hr(), html.H3("▶ Fairness Configuration"), solution_set_label_select, protected_feature_select, privileged_class_definition, html.Hr(), html.H3("▶ Fairness Metrics")]
+        
 
-        df = pd.DataFrame(dict(
-            r=[1, 5, 2, 2, 3],
-            theta=['processing cost','mechanical properties','chemical stability',
-           'thermal stability', 'device integration']))
-        fig = px.line_polar(df, r='r', theta='theta', line_close=True)
-        fig.update_traces(fill='toself')
-        fairness_overview = dcc.Graph(figure=fig)
-        fairness_metrics_class_balance = html.Div("Class Balance", id="fairness_metrics_class_balance")
-        return [html.H1("Nothing")], [html.H4("Fairness Metrics"), solution_set_label_select, fairness_metrics_class_balance]
+        for i in range(len(fairness_metrics)):
+            metric = fairness_metrics[i]
+            metric_id = metric
+            metric_name = metric_id.replace("_", " ")
+            sections.append(html.Div([dbc.Button(
+                        html.I(className="fas fa-chevron-down"),
+                        id="toggle_{}_details".format(metric),
+                        className="mb-3",
+                        n_clicks=0,
+                        style={"float": "right"}
+                    ),html.H4("1.{0} {1}".format(i+1, metric_name)), 
+                    dbc.Collapse(
+                        html.Div("{}_details".format(metric)),
+                        id="{}_details".format(metric),
+                        is_open=False,          
+                    ),
+            ], id="{}_section".format(metric), className="mb-5 mt-5"))
+        
+        
+        return [html.H1("Nothing")], sections
     else:
         return [html.H1("Nothing")], [html.H1("Nothing")]
 
@@ -261,16 +355,16 @@ def update_factsheet(factsheet_path, key, value):
 The following function updates
 '''
 @app.callback(
-    Output("fairness_metrics_class_balance", 'children'),
+    Output("class_balance_details", 'children'),
     [Input("solution_set_label_select", 'value'), 
     State('training_data', 'data'),
     State("solution_set_dropdown", 'value')])
 def fairness_metrics_class_balance(label, jsonified_training_data, solution_set_path):
     training_data = read_train(solution_set_path)
-    graph = dcc.Graph(figure=px.histogram(training_data, x=label, opacity=0.5, title="Label vs Label Occurence", color_discrete_sequence=['#00FF00']))
+    graph = dcc.Graph(figure=px.histogram(training_data, x=label, opacity=1, title="Label vs Label Occurence", color_discrete_sequence=[FAIRNESS_COLOR]))
     #compute_class_balance("hi")
     update_factsheet(r"{}/factsheet.json".format(solution_set_path), "target_column", label)
-    return [html.H3("1.1 Class Balance"), graph]
+    return [graph]
     
     #print("label {}".format(label))
     #print("JSONIFIED TRAINING DATA {}".format(jsonified_training_data))
@@ -281,6 +375,32 @@ def fairness_metrics_class_balance(label, jsonified_training_data, solution_set_
     #fig = px.histogram(train_data, x=label)
     #graph = dcc.Graph(figure=px.histogram(training_data, x=label))
     #return [html.H3("Selected {} as label column. Computing class balance now.".format(label)), graph]
+    
+'''
+The following function updates
+'''
+@app.callback(
+    Output("statistical_parity_difference_details", 'children'),
+    [Input("solution_set_label_select", 'value'), 
+    State('training_data', 'data'),
+    State("solution_set_dropdown", 'value')])
+def fairness_metrics_statistical_parity_difference(label, jsonified_training_data, solution_set_path):
+    training_data = read_train(solution_set_path)
+    graph = dcc.Graph(figure=px.histogram(training_data, x=label, opacity=0.5, title="Label vs Label Occurence", color_discrete_sequence=['#00FF00']))
+    #compute_class_balance("hi")
+    update_factsheet(r"{}/factsheet.json".format(solution_set_path), "target_column", label)
+    return [graph]
+    
+    #print("label {}".format(label))
+    #print("JSONIFIED TRAINING DATA {}".format(jsonified_training_data))
+    #training_data = pd.read_json(jsonified_training_data, orient='split')
+    #print("Training data")
+    #print(dff.head(5))
+    #figure = create_figure(dff)
+    #fig = px.histogram(train_data, x=label)
+    #graph = dcc.Graph(figure=px.histogram(training_data, x=label))
+    #return [html.H3("Selected {} as label column. Computing class balance now.".format(label)), graph]
+    
 
 @app.callback(
     [Output('training_data', 'data'),
@@ -483,9 +603,16 @@ def store_result(solution_set_dropdown, config):
         return json.dumps(data,default=convert)
     
 @app.callback(
-      [Output('bar', 'figure'),Output('spider', 'figure'),
-      Output('fairness_bar', 'figure'),Output('explainability_bar', 'figure'),Output('robustness_bar', 'figure'),Output('methodology_bar', 'figure'),
-      Output('fairness_spider', 'figure'),Output('explainability_spider', 'figure'),Output('robustness_spider', 'figure'),Output('methodology_spider', 'figure')],
+      [Output('bar', 'figure'),
+       Output('spider', 'figure'),
+       Output('fairness_bar', 'figure'),
+       Output('explainability_bar', 'figure'),
+       Output('robustness_bar', 'figure'),
+       Output('methodology_bar', 'figure'),
+       Output('fairness_spider', 'figure'),
+       Output('explainability_spider', 'figure'),
+       Output('robustness_spider', 'figure'),
+       Output('methodology_spider', 'figure')],
       [Input('result', 'data'),Input("hidden-trigger", "value")])  
 def update_figure(data, trig):
      
@@ -504,26 +631,27 @@ def update_figure(data, trig):
       pillars = list(final_score.keys())
       values = list(final_score.values()) 
         
-      my_palette = ['yellow','cornflowerblue','lightgrey','lightseagreen']
+      colors = [FAIRNESS_COLOR, EXPLAINABILITY_COLOR, ROBUSTNESS_COLOR, METHODOLOGY_COLOR]
       
       # barchart
       chart_list=[]
       bar_chart = go.Figure(data=[go.Bar(
           x=pillars,
           y=values,
-          marker_color=my_palette
+          marker_color=colors
               )])
-      bar_chart.update_layout(title_text='AI Final Trust Score:  <b style="font-size:50px;">{}</b>'.format(trust_score), title_x=0.5)
+      bar_chart.update_layout(title_text='<b style="font-size: 48px;">{}</b>'.format(trust_score), title_x=0.5)
       chart_list.append(bar_chart)
      
       #spider
-      spider_plt = px.line_polar(r=values, theta=pillars, line_close=True, title='AI Final Trust Score:  <b style="font-size:50px;">{}</b>'.format(trust_score))
+      spider_plt = px.line_polar(r=values, theta=pillars, line_close=True, title='<b style="font-size:42px;">{}</b>'.format(trust_score))
       spider_plt.update_layout(title_x=0.5)
+      spider_plt.update_traces(fill='toself', fillcolor=TRUST_COLOR, marker_color=TRUST_COLOR,marker_line_width=1.5, opacity=0.6)
       chart_list.append(spider_plt)
      
       #barcharts
       for n, (pillar , sub_scores) in enumerate(results.items()):
-          title = pillar + " (score: {})".format(final_score[pillar])
+          title = "<b style='font-size:32px;''>{}</b>".format(final_score[pillar])
           categories = list(map(lambda x: x.replace("_",' '), sub_scores.keys()))
           values = list(map(float, sub_scores.values()))
           if np.isnan(values).any():
@@ -535,13 +663,13 @@ def update_figure(data, trig):
                       nonNanValues.append(v)
               categories = nonNanCategories
               values = nonNanValues
-          bar_chart_pillar = go.Figure(data=[go.Bar(x=categories, y=values, marker_color=my_palette[n])])
+          bar_chart_pillar = go.Figure(data=[go.Bar(x=categories, y=values, marker_color=colors[n])])
           bar_chart_pillar.update_layout(title_text=title, title_x=0.5)
           chart_list.append(bar_chart_pillar)
          
       #spider charts
       for n, (pillar , sub_scores) in enumerate(results.items()):
-          title = pillar  + " (score: {})".format(final_score[pillar])
+          title = "<b style='font-size:32px;''>{}</b>".format(final_score[pillar])
           categories = list(map(lambda x: x.replace("_",' '), sub_scores.keys()))
           val = list(map(float, sub_scores.values()))
           if np.isnan(values).any():
@@ -554,7 +682,7 @@ def update_figure(data, trig):
               categories = nonNanCategories
               val = nonNanValues
           spider_plt_pillar = px.line_polar(r=val, theta=categories, line_close=True, title=title)
-          spider_plt_pillar.update_traces(fill='toself', fillcolor=my_palette[n], marker_color='rgb(250,00,00)',marker_line_width=1.5, opacity=0.6)
+          spider_plt_pillar.update_traces(fill='toself', fillcolor=colors[n], marker_color=colors[n],marker_line_width=1.5, opacity=0.6)
           spider_plt_pillar.update_layout(title_x=0.5)
           chart_list.append(spider_plt_pillar)
          

@@ -71,7 +71,7 @@ button_div = html.Div([
     
 
 
-children.insert(0,button_div)
+children.insert(0, button_div)
 
 panel_div = html.Div(children, id= "panel", style= {'display': 'block'})
 
