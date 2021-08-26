@@ -647,18 +647,18 @@ def update_figure(data, trig):
           y=values,
           marker_color=colors
               )])
-      bar_chart.update_layout(title_text='<b style="font-size: 48px;">{}</b>'.format(trust_score), title_x=0.5)
+      bar_chart.update_layout(title_text='<b style="font-size: 48px;">{}/5</b>'.format(trust_score), title_x=0.5)
       chart_list.append(bar_chart)
      
       #spider
-      spider_plt = px.line_polar(r=values, theta=pillars, line_close=True, title='<b style="font-size:42px;">{}</b>'.format(trust_score))
+      spider_plt = px.line_polar(r=values, theta=pillars, line_close=True, title='<b style="font-size:42px;">{}/5</b>'.format(trust_score))
       spider_plt.update_layout(title_x=0.5)
       spider_plt.update_traces(fill='toself', fillcolor=TRUST_COLOR, marker_color=TRUST_COLOR,marker_line_width=1.5, opacity=0.6)
       chart_list.append(spider_plt)
      
       #barcharts
       for n, (pillar , sub_scores) in enumerate(results.items()):
-          title = "<b style='font-size:32px;''>{}</b>".format(final_score[pillar])
+          title = "<b style='font-size:32px;''>{}/5</b>".format(final_score[pillar])
           categories = list(map(lambda x: x.replace("_",' '), sub_scores.keys()))
           values = list(map(float, sub_scores.values()))
           if np.isnan(values).any():
@@ -676,7 +676,7 @@ def update_figure(data, trig):
          
       #spider charts
       for n, (pillar , sub_scores) in enumerate(results.items()):
-          title = "<b style='font-size:32px;''>{}</b>".format(final_score[pillar])
+          title = "<b style='font-size:32px;''>{}/5</b>".format(final_score[pillar])
           categories = list(map(lambda x: x.replace("_",' '), sub_scores.keys()))
           val = list(map(float, sub_scores.values()))
           if np.isnan(values).any():
