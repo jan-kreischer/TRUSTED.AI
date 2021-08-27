@@ -6,10 +6,35 @@ import sklearn.metrics as metrics
 from art.attacks.evasion import FastGradientMethod, CarliniL2Method, DeepFool
 from art.estimators.classification import SklearnClassifier
 from sklearn.preprocessing import OneHotEncoder
+from art.metrics import clever_u
+from art.estimators.classification import KerasClassifier
+import tensorflow as tf
 
 result = collections.namedtuple('result', 'score properties')
 
 # functions for robustness score
+
+def score_Clever_Score(model, train_data, test_data):
+    try:
+        X_test = test_data.iloc[:,:-1]
+        X_train = train_data.iloc[:, :-1]
+        classifier = KerasClassifier(model, False)
+
+        min_score = 100
+
+        randomX = X_test.sample(10)
+        randomX = np.array(randomX)
+
+        for x in randomX:
+            temp = clever_u(classifier=classifier, x=x, nb_batches=1, batch_size=1, radius=1, norm=2)
+            if min_score > temp:
+                min_score = temp
+        print(min_score)
+
+        return result(score=0, properties={})
+    except Exception as e:
+        print(e)
+        return result(score=np.nan, properties={})
 
 def score_Confidence_Score(model, train_data, test_data):
     try:
@@ -54,13 +79,12 @@ def score_Fast_Gradient_Attack(model, train_data, test_data):
         score = 5- (((before_attack - after_attack)/before_attack) * 5)
         if score > 5 or score < 0:
             score = 0
-        return result(score=score, properties={})
+        return result(score=score, properties={"Before_attack_accuracy":before_attack ,"After_attack_accuracy":after_attack })
     except:
         return result(score=np.nan, properties={})
 
 def score_Carlini_Wagner_Attack(model, train_data, test_data):
     try:
-        print("HEREs")
         randomData = test_data.sample(5)
         randomX = randomData.iloc[:,:-1]
         randomY = randomData.iloc[:,-1: ]
@@ -84,7 +108,7 @@ def score_Carlini_Wagner_Attack(model, train_data, test_data):
         score = 5- (((before_attack - after_attack)/before_attack) * 5)
         if score > 5 or score < 0:
             score = 0
-        return result(score=score, properties={})
+        return result(score=score, properties={"Before_attack_accuracy":before_attack ,"After_attack_accuracy":after_attack })
     except:
         return result(score=np.nan, properties={})
 
@@ -113,7 +137,7 @@ def score_Deepfool_Attack(model, train_data, test_data):
         score = 5- (((before_attack - after_attack)/before_attack) * 5)
         if score > 5 or score < 0:
             score = 0
-        return result(score=score, properties={})
+        return result(score=score, properties={"Before_attack_accuracy":before_attack ,"After_attack_accuracy":after_attack })
     except:
         return result(score=np.nan, properties={})
 
@@ -123,7 +147,7 @@ def calc_robustness_score(model, train_data, test_data, config):
         Confidence_Score          = score_Confidence_Score(model, train_data, test_data),
         Clique_Method    = score_Class_Specific_Metrics(),
         Loss_Sensitivity   = score_Class_Specific_Metrics(),
-        CLEVER_Score   = score_Class_Specific_Metrics(),
+        CLEVER_Score   = score_Clever_Score(model, train_data, test_data),
         Empirical_Robustness_Fast_Gradient_Attack = score_Fast_Gradient_Attack(model, train_data, test_data),
         Empirical_Robustness_Carlini_Wagner_Attack = score_Carlini_Wagner_Attack(model, train_data, test_data),
         Empirical_Robustness_Deepfool_Attack = score_Deepfool_Attack(model, train_data, test_data)
