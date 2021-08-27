@@ -1,6 +1,7 @@
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
+import dash_daq as daq
 from dash.dependencies import Input, Output, State
 import plotly.express as px
 from app import app
@@ -8,469 +9,547 @@ import pandas as pd
 import os
 import json
 import glob
-from config import SCENARIOS_FOLDER_PATH
+import shutil
+from helpers import *
+from config import SCENARIOS_FOLDER_PATH, FAIRNESS_COLOR, EXPLAINABILITY_COLOR, ROBUSTNESS_COLOR, METHODOLOGY_COLOR, \
+    TRUST_COLOR
+from sites.algorithm.helper_functions import get_performance_table, get_final_score, get_case_inputs, \
+    trusting_AI_scores, get_trust_score
+from pillars.fairness.class_balance import compute_class_balance
+import dash_table
+import numpy as np
+from sites import config_panel
+import plotly.express as px
+import plotly.graph_objects as go
 
-def solution_sets():
-    problem_sets = [(f.name, f.path) for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir()]
-    options = []
-    for problem_set_name, problem_set_path in problem_sets:
-        solution_sets = [(f.name, f.path) for f in os.scandir(problem_set_path) if f.is_dir()]
-        for solution_set_name, solution_set_path in solution_sets:
-            options.append({"label": problem_set_name + " > " + solution_set_name, "value": solution_set_path})
-    return options
+config_fairness, config_explainability, config_robustness, config_methodology, config_pillars = 0, 0, 0, 0, 0
+for config in ["config_pillars", "config_fairness", "config_explainability", "config_robustness", "config_methodology"]:
+    with open("sites/algorithm/" + config + ".json") as file:
+        exec("%s = json.load(file)" % config)
 
-solution_sets = solution_sets()
+pillars = ['fairness', 'explainability', 'robustness', 'methodology']
+main_config = dict(fairness=config_fairness, explainability=config_explainability,
+                   robustness=config_robustness, methodology=config_methodology, pillars=config_pillars)
 
-FAIRNESS_HIGHLIGHT_COLOR = "yellow"
-EXPLAINABLITY_HIGHLIGHT_COLOR = "cornflowerblue"
-ROBUSTNESS_HIGHLIGHT_COLOR = "lightgrey"
-METHODOLOGY_HIGHLIGHT_COLOR = "lightseagreen"
+with open('configs/default.json', 'w') as outfile:
+    json.dump(main_config, outfile, indent=4)
 
-columns = ['a', 'b']
-# === TRUST ===
-for c in columns:  
-    @app.callback(
-        [Output("trust_overview_{}".format(c), 'children'),
-        Output("trust_details_{}".format(c), 'children')],
-        [Input('solution_set_dropdown_{}'.format(c), 'value')], prevent_initial_call=True)
-    def analyze_trust(solution_set_path):
-        if solution_set_path is not None:
-            df = pd.DataFrame(dict(
-                r=[1, 5, 2, 2],
-                theta=['processing cost','mechanical properties','chemical stability',
-               'thermal stability']))
-            fig = px.line_polar(df, r='r', theta='theta', line_close=True)
-            fig.update_traces(fill='toself')
-            explainability_overview = dcc.Graph(figure=fig)
-            return [explainability_overview], []
-        else:
-            return [], []
-
-
-# === FAIRNESS ===
-for c in columns:  
-    @app.callback(
-        [Output("fairness_overview_{}".format(c), 'children'),
-        Output("fairness_details_{}".format(c), 'children')],
-        [Input('solution_set_dropdown_{}'.format(c), 'value')], prevent_initial_call=True)
-    def analyze_fairness(solution_set_path):
-        if solution_set_path is not None:
-            train_data = pd.read_csv("{}/train.csv".format(solution_set_path))
-            test_data = pd.read_csv("{}/test.csv".format(solution_set_path))
-
-            features = list(train_data.columns)
-            y_column_name=""
-            #factsheet = None
-
-            #factsheet_path = "{}/factsheet.json".format(solution_set_path)
-            # Check if a factsheet.json file already exists in the target directory
-            #if os.path.isfile(factsheet_path):
-
-                #f = open(factsheet_path,)
-                #factsheet = json.load(f)
-
-                #y_column_name = factsheet["y_column_name"]
-                #app.logger.info(y_column_name)
-                #protected_column_name = factsheet["protected_column_name"]
-
-                #f.close()
-            # Create a factsheet
-            #else:
-                #app.logger.info("no factsheet exists yet")
-
-
-            solution_set_label_select_options = list(map(lambda x: {"label": x, "value": x}, features))
-            solution_set_label_select = html.Div([
-                html.H5("Select Label Column"), 
-                dcc.Dropdown(
-                    id="solution_set_{}_label_select".format(c),
-                    options=solution_set_label_select_options,
-                    value="Credibility"
-                ),
-            ])
-
-            fig = px.histogram(train_data, x="Creditability")
-            class_balance_graph = dcc.Graph(figure=fig)
-
-            df = pd.DataFrame(dict(
-                r=[1, 5, 2, 2, 3],
-                theta=['processing cost','mechanical properties','chemical stability',
-               'thermal stability', 'device integration']))
-            fig = px.line_polar(df, r='r', theta='theta', line_close=True)
-            fig.update_traces(fill='toself')
-            fairness_overview = dcc.Graph(figure=fig)
-            fairness_metrics_class_balance = html.Div("Common Fairness Metrics {} Class Balance".format(c), id="fairness_metrics_{}_class_balance".format(c))
-            return [fairness_overview], [html.H4("Fairness Metrics Overview"), solution_set_label_select, fairness_metrics_class_balance]
-        else:
-            return [html.H1("Nothing")], [html.H1("Nothing")]
-
-     
-@app.callback(
-    Output("fairness_metrics_a_class_balance", 'children'),
-    [Input("solution_set_a_label_select", 'value'), 
-    State('training_data_a', 'data'),
-    State("solution_set_dropdown_a", 'value')], prevent_initial_call=True)
-def fairness_metrics_class_balance(label, jsonified_training_data, solution_set_path):
-    training_data = pd.read_csv("{}/train.csv".format(solution_set_path))
-    graph = dcc.Graph(figure=px.histogram(training_data, x=label))
-    return [graph]
-    
-    #print("label {}".format(label))
-    #print("JSONIFIED TRAINING DATA {}".format(jsonified_training_data))
-    #training_data = pd.read_json(jsonified_training_data, orient='split')
-    #print("Training data")
-    #print(dff.head(5))
-    #figure = create_figure(dff)
-    #fig = px.histogram(train_data, x=label)
-    #graph = dcc.Graph(figure=px.histogram(training_data, x=label))
-    #return [html.H3("Selected {} as label column. Computing class balance now.".format(label)), graph]
-
-for c in columns:
-    @app.callback(
-        [Output('training_data_{}'.format(c), 'data'),
-         Output('test_data_{}'.format(c), 'data')],
-        [Input('solution_set_dropdown_{}'.format(c), 'value')], prevent_initial_call=True)
-    def load_data(solution_set_path):
-         # some expensive clean data step
-         #cleaned_df = your_expensive_clean_or_compute_step(value)
-
-         # more generally, this line would be
-         # json.dumps(cleaned_df)
-        if solution_set_path is not None:
-            training_data = pd.read_csv("{}/train.csv".format(solution_set_path))
-            print("LENGTH OF TRAIN DATA {}".format(len(training_data)))
-            print(training_data.head(5))
-            
-            test_data = pd.read_csv("{}/test.csv".format(solution_set_path))
-            print("LENGTH OF TEST DATA {}".format(len(test_data)))
-            print(test_data.head(5))
-           
-            return training_data.to_json(date_format='iso', orient='split'), test_data.to_json(date_format='iso', orient='split'), 
-            #return json.dumps(training_data), json.dumps(test_data)
-        else:
-            return None, None
-    
-#@app.callback(Output('graph', 'figure'), Input('intermediate-value', 'data'))
-#def update_graph(jsonified_cleaned_data):
-
-    # more generally, this line would be
-    # json.loads(jsonified_cleaned_data)
-#    dff = pd.read_json(jsonified_cleaned_data, orient='split')
-
-#    figure = create_figure(dff)
-#    return figure
-
-#@app.callback(Output('table', 'children'), Input('intermediate-value', 'data'))
-#def update_table(jsonified_cleaned_data):
-#    dff = pd.read_json(jsonified_cleaned_data, orient='split')
-#    table = create_table(dff)
-#    return table
-    
-# === EXPLAINABILITY ===
-for c in columns:  
-    @app.callback(
-        [Output("explainability_overview_{}".format(c), 'children'),
-        Output("explainability_details_{}".format(c), 'children')],
-        [Input("solution_set_dropdown_{}".format(c), 'value')], prevent_initial_call=True)
-    def analyze_explainability(solution_set_path):
-        if solution_set_path is not None:
-            
-            df = pd.DataFrame(dict(
-                r=[1, 5, 2, 2, 3],
-                theta=['processing cost','mechanical properties','chemical stability',
-               'thermal stability', 'device integration']))
-            fig = px.line_polar(df, r='r', theta='theta', line_close=True)
-            fig.update_traces(fill='toself')
-            explainability_overview = dcc.Graph(figure=fig)
-            return [explainability_overview], []
-        else:
-            return [], []
-        
-
-# === ROBUSTNESS ===
-for c in columns:  
-    @app.callback(
-        [Output("robustness_overview_{}".format(c), 'children'),
-        Output("robustness_details_{}".format(c), 'children')],
-        [Input("solution_set_dropdown_{}".format(c), 'value')], prevent_initial_call=True)
-    def analyze_robustness(solution_set_path):
-        if solution_set_path is not None:
-            df = pd.DataFrame(dict(
-                r=[1, 5, 2, 2, 3],
-                theta=['processing cost','mechanical properties','chemical stability',
-               'thermal stability', 'device integration']))
-            fig = px.line_polar(df, r='r', theta='theta', line_close=True)
-            fig.update_traces(fill='toself')
-            explainability_overview = dcc.Graph(figure=fig)
-            return [explainability_overview], [html.Div("Robustness Metrics {}".format(c))]
-        else:
-            return [], []
- 
-# === METHODOLOGY ===
-'''
-for c in columns:
-    print("Methodology {}".format(c))
-    @app.callback(
-        [Output("methodology_overview_{}".format(c), 'children'),
-        Output("methodology_details_{}".format(c), 'children')],
-        [Input("solution_set_dropdown_{}".format(c), 'value')], prevent_initial_call=True)
-    def analyze_methodology(solution_set_path):
-        if solution_set_path is not None:
-            df = pd.DataFrame(dict(
-                r=[1, 5, 2, 2, 3],
-                theta=['processing cost','mechanical properties','chemical stability',
-               'thermal stability', 'device integration']))
-            fig = px.line_polar(df, r='r', theta='theta', line_close=True)
-            fig.update_traces(fill='toself')
-            explainability_overview = dcc.Graph(figure=fig)
-            return [explainability_overview], [html.Div("Methodology Metrics {}".format(c), style={"display": "None"})]
-        else:
-            return [], []
-'''
-
-
-@app.callback(
-    [Output("methodology_overview_a".format(c), 'children'),
-    Output("methodology_details_a".format(c), 'children')],
-    [Input("solution_set_dropdown_a".format(c), 'value')], prevent_initial_call=True)
-def analyze_methodology(solution_set_path):
-    if solution_set_path is not None:
-        df = pd.DataFrame(dict(
-            r=[1, 5, 2, 2, 3],
-            theta=['processing cost','mechanical properties','chemical stability',
-           'thermal stability', 'device integration']))
-        fig = px.line_polar(df, r='r', theta='theta', line_close=True)
-        fig.update_traces(fill='toself')
-        explainability_overview = dcc.Graph(figure=fig)
-        return [explainability_overview], [html.Div("Methodology Metrics a", style={"display": "None"})]
-    else:
-        return [], []
-    
-
-
-        
-
-for c in columns:   
-    @app.callback(
-        Output(component_id="trust_section_{}".format(c), component_property='style'),
-        Output(component_id="fairness_section_{}".format(c), component_property='style'),
-        Output(component_id="explainablity_section_{}".format(c), component_property='style'),
-        Output(component_id="robustness_section_{}".format(c), component_property='style'),
-        Output(component_id="methodology_section_{}".format(c), component_property='style'),
-        [Input("solution_set_dropdown_{}".format(c), 'value')], prevent_initial_call=True)
-    def toggle_pillar_section_visibility(path):
-        if path is not None:
-            return {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}
-        else:
-            return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
-   
-@app.callback(
-   Output(component_id='element-to-hide', component_property='style'),
-   [Input(component_id='dropdown-to-show_or_hide-element', component_property='value')])
-def show_hide_element(visibility_state):
-    if visibility_state == 'on':
-        return {'display': 'block'}
-    if visibility_state == 'off':
-        return {'display': 'none'}
-
-@app.callback(
-    [Output('alert_section_a', 'children'),
-    Output('analysis_section_a', 'style')],
-    [Input('solution_set_dropdown_a', 'value')])
-def analyze_methdology(solution_set_path):
-    alerts = []
-    style={'display': 'block'}
-    if solution_set_path is not None:
-        factsheet_path = "{}/factsheet.*".format(solution_set_path)
-        test_data_path = "{}/test.*".format(solution_set_path)
-        training_data_path = "{}/train.*".format(solution_set_path)
-        model_path = "{}/model.*".format(solution_set_path)
-        
-        if not glob.glob(factsheet_path):
-            alerts.append(html.H5("No factsheet provided", className="text-center", style={"color":"Red"}))
-        if not glob.glob(training_data_path):
-            alerts.append(html.H5("No training data provided", className="text-center", style={"color":"Red"}))
-        if not glob.glob(test_data_path):
-            alerts.append(html.H5("No test data provided", className="text-center", style={"color":"Red"}))
-        if not glob.glob(model_path):
-            alerts.append(html.H5("No model provided", className="text-center", style={"color":"Red"}))
-        if alerts:
-            style={'display': 'none'}
-            alerts.append(html.H5("Please provide a complete dataset", className="text-center", style={"color":"Red"}))
-    return alerts, style
 
 # === SECTIONS ===
-def trust_section(c):
-    return html.Div([ 
+def trust_section_1():
+    return html.Div([
+        html.Div(id='boolean-switch-output'),
+        html.Div([daq.BooleanSwitch(id='toggle_charts-1',
+                                    on=False,
+                                    color="green",
+                                    style={"float": "right"}
+                                    )], className="mt-2"),
         html.H2("Trustworthiness"),
-        html.Div([], id="trust_overview_{}".format(c)),
-        html.Div([], id="trust_details_{}".format(c)),
+
+        html.Div([], id="trust_overview-1"),
+        html.H3("Overall Score", className="text-center"),
+        html.Div([], id="trust_star_rating-1", className="star_rating, text-center"),
+        dcc.Graph(id='spider-1', style={'display': 'none'}),
+        dcc.Graph(id='bar-1', style={'display': 'none'}),
+        html.Div([], id="trust_details-1"),
         html.Hr()
-    ], id="trust_section_{}".format(c), style={"display": "None"})
+    ], id="trust_section-1", style={"display": "None"})
 
-def fairness_section(c):
+def trust_section_2():
     return html.Div([
-        dbc.Button(
-            html.I(className="fas fa-chevron-down"),
-            id="toggle_fairness_details_{}".format(c),
-            className="mb-3",
-            n_clicks=0,
-            style={"float": "right"}
-        ),
-        html.H3("1. Fairness"),
-        html.Div([], id="fairness_overview_{}".format(c)),
-        dbc.Collapse([], id="fairness_details_{}".format(c), is_open=False),
-        html.Hr(),
-        #html.Div(id="class_balance"),
-    ], id="fairness_section_{}".format(c), style={"display": "None"})
+        html.Div(id='boolean-switch-output'),
+        html.Div([daq.BooleanSwitch(id='toggle_charts-2',
+                                    on=False,
+                                    color="green",
+                                    style={"float": "right"}
+                                    )], className="mt-2"),
+        html.H2("Trustworthiness"),
 
-def explainability_section(c):
+        html.Div([], id="trust_overview-2"),
+        html.H3("Overall Score", className="text-center"),
+        html.Div([], id="trust_star_rating-2", className="star_rating, text-center"),
+        dcc.Graph(id='spider-2', style={'display': 'none'}),
+        dcc.Graph(id='bar-2', style={'display': 'block'}),
+        html.Div([], id="trust_details-2"),
+        html.Hr()
+    ], id="trust_section-2", style={"display": "None"})
+
+
+def pillar_section_1(pillar):
     return html.Div([
-        dbc.Button(
-            html.I(className="fas fa-chevron-down"),
-            id="toggle_explainability_details_{}".format(c),
-            className="mb-3",
-            n_clicks=0,
-            style={"float": "right"}
-        ),
-        html.H3("2. Explainablity"),
-        html.Div([
-            html.H6("Explainablity Overview")],
-            id="explainability_overview_{}".format(c)
-        ),
+        html.Div([], id="{}_overview-1".format(pillar)),
+        html.H3("{0}-Score-1".format(pillar), className="text-center"),
+        html.Div([], id="{}_star_rating-1".format(pillar), className="star_rating, text-center"),
+        dcc.Graph(id='{}_spider-1'.format(pillar), style={'display': 'none'}),
+        dcc.Graph(id='{}_bar-1'.format(pillar), style={'display': 'block'}),
         dbc.Collapse(
-            html.P("Explainability Details"),
-            id="explainability_details_{}".format(c),
+            html.P("{} Details".format(pillar)),
+            id="{}_details-1".format(pillar),
             is_open=False,
         ),
-        html.Hr(),
-    ], id="explainablity_section_{}".format(c), style={"display": "None"})
+        html.Hr(style={"size": "10"}),
 
+    ], id="{}_section-1".format(pillar), style={"display": "None"})
 
-def robustness_section(c):
+def pillar_section_2(pillar):
     return html.Div([
-        dbc.Button(
-            html.I(className="fas fa-chevron-down"),
-            id="toggle_robustness_details_{}".format(c),
-            className="mb-3",
-            n_clicks=0,
-            style={"float": "right"}
-        ),
-        html.H3("3. Robustness"),
-        html.Div([], id="robustness_overview_{}".format(c)),
+        html.Div([], id="{}_overview-2".format(pillar)),
+        html.H3("{0}-Score-2".format(pillar), className="text-center"),
+        html.Div([], id="{}_star_rating-2".format(pillar), className="star_rating, text-center"),
+        dcc.Graph(id='{}_spider-2'.format(pillar), style={'display': 'none'}),
+        dcc.Graph(id='{}_bar-2'.format(pillar), style={'display': 'block'}),
         dbc.Collapse(
-            html.P("Robustness Details"),
-            id="robustness_details_{}".format(c),
+            html.P("{} Details".format(pillar)),
+            id="{}_details-2".format(pillar),
             is_open=False,
         ),
-        html.Hr(),
-    ], id="robustness_section_{}".format(c), style={"display": "None"})
+        html.Hr(style={"size": "10"}),
 
-
-def methodology_section(c):
-    return html.Div([
-        dbc.Button(
-            html.I(className="fas fa-chevron-down"),
-            id="toggle_methodology_details_{}".format(c),
-            className="mb-3",
-            n_clicks=0,
-            style={"float": "right"}
-        ),
-        html.H3("4. Methodology"),
-        
-        html.Div([], id="methodology_overview_{}".format(c)),
-        dbc.Collapse(
-            html.P("Methodology Details"),
-            id="methodology_details_{}".format(c),
-            is_open=False,
-            style={"display": "None"}
-        ),
-        html.Hr(),
-    ], id="methodology_section_{}".format(c), style={"display": "None"})
-
-
-def alert_section(c):
-    return html.Div([
-    ], id="alert_section_{}".format(c))
-
-
-SECTIONS = ['trust', 'fairness', 'explainablity', 'robustness', 'methodology']
-COLUMNS = ['a', 'b']
-for s in SECTIONS:
-    for c in COLUMNS:
-        @app.callback(
-            [Output("{0}_details_{1}".format(s,c), "is_open"),
-            Output("{0}_details_{1}".format(s,c), "style")],
-            [Input("toggle_{0}_details_{1}".format(s, c), "n_clicks")],
-            [State("{0}_details_{1}".format(s, c), "is_open")],
-            prevent_initial_call=True
-        )
-        def toggle_detail_section(n, is_open):
-            if is_open:
-                return (not is_open, {'display': 'None'})
-            else:
-                return (not is_open, {'display': 'Block'})
+    ], id="{}_section-2".format(pillar), style={"display": "None"})
 
 layout = html.Div([
     dbc.Container([
         dbc.Row([
             dbc.Col(html.H1("Compare", className="text-center"), width=12, className="mb-2 mt-1"),
-            
-            dbc.Col(dcc.Dropdown(
-                    id='solution_set_dropdown_a',
-                    options=solution_sets,
-                    placeholder='Select Model A'
-                ), width=6, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
-            ),
-            
-            dbc.Col(
-                dcc.Dropdown(
-                    id='solution_set_dropdown_b',
-                    options=solution_sets,
-                    placeholder='Select Model B'
-                ), width=6, className="mb-1 mt-1"
-            ),
 
-            
-            dbc.Col([
-                alert_section('a'),
-                html.Div([
-                    trust_section('a'),
-                    fairness_section('a'),
-                    explainability_section('a'),
-                    robustness_section('a'),
-                    methodology_section('a'),
-                    dcc.Store(id='training_data_a', storage_type='session'),
-                    dcc.Store(id='test_data_a', storage_type='session')
-                ], id="analysis_section_a")
-            ],
-                width=6, 
-                className="mt-2 pt-2 pb-2 mb-2",
-                style={
-                    "border": "1px solid #d8d8d8",
-                    "borderRadius": "6px"
-                }   
+            dcc.Store(id='result-1'),
+            dbc.Col([dcc.Dropdown(
+                id='solution_set_dropdown-1',
+                options=get_solution_sets(),
+                placeholder='Select Model A',
+                value=None,
+            )], width=6, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
             ),
-            
+            dcc.Store(id='result-2'),
+            dbc.Col([dcc.Dropdown(
+                id='solution_set_dropdown-2',
+                options=get_solution_sets(),
+                placeholder='Select Model B',
+                value=None,
+            )], width=6, className="mb-1 mt-1"
+            ),
+            dbc.Col([html.Div([], id="performance_div-1")], width=6, style={"width":"40%","marginLeft": "0 px", "marginRight": "0 px"},),
+            dbc.Col([html.Div([], id="performance_div-2")], width=6, style={"width":"40%","marginLeft": "0 px", "marginRight": "0 px"}),
+
             dbc.Col([
-                alert_section('b'),
+                html.Div([], id="toggle_charts_section-1"),
                 html.Div([
-                    trust_section('b'),
-                    fairness_section('b'),
-                    explainability_section('b'),
-                    robustness_section('b'),
-                    methodology_section('b'),
-                    dcc.Store(id='training_data_b', storage_type='session'),
-                    dcc.Store(id='test_data_b', storage_type='session')
-                ], id="analysis_section_b")
-                ], 
-                width=6, 
+                    trust_section_1(),
+                    pillar_section_1("fairness"),
+                    pillar_section_1("explainability"),
+                    pillar_section_1("robustness"),
+                    pillar_section_1("methodology"),
+                    dcc.Store(id='training_data-1', storage_type='session'),
+                    dcc.Store(id='test_data-1', storage_type='session')
+                ], id="analysis_section-1")
+            ],
+                width=6,
                 className="mt-2 pt-2 pb-2 mb-2",
                 style={
                     "border": "1px solid #d8d8d8",
                     "borderRadius": "6px"
-                }  
+                }
+            ),
+            dbc.Col([
+                html.Div([], id="toggle_charts_section-2"),
+                html.Div([
+                    trust_section_2(),
+                    pillar_section_2("fairness"),
+                    pillar_section_2("explainability"),
+                    pillar_section_2("robustness"),
+                    pillar_section_2("methodology"),
+                    dcc.Store(id='training_data-2', storage_type='session'),
+                    dcc.Store(id='test_data-2', storage_type='session')
+                ], id="analysis_section-2")
+            ],
+                width=6,
+                className="mt-2 pt-2 pb-2 mb-2",
+                style={
+                    "border": "1px solid #d8d8d8",
+                    "borderRadius": "6px"
+                }
             ),
         ], no_gutters=False)
     ])
 ])
+
+@app.callback(
+    Output(component_id="bar-1", component_property='style'),
+    Output(component_id="fairness_bar-1", component_property='style'),
+    Output(component_id="explainability_bar-1", component_property='style'),
+    Output(component_id="robustness_bar-1", component_property='style'),
+    Output(component_id="methodology_bar-1", component_property='style'),
+    Output(component_id="spider-1", component_property='style'),
+    Output(component_id="fairness_spider-1", component_property='style'),
+    Output(component_id="explainability_spider-1", component_property='style'),
+    Output(component_id="robustness_spider-1", component_property='style'),
+    Output(component_id="methodology_spider-1", component_property='style'),
+    [Input('toggle_charts-1', 'on'), Input('solution_set_dropdown-1', 'value')]
+)
+def toggle_charts_1(visibility_state, solution_set):
+    if solution_set is None:
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {
+            'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {
+                   'display': 'none'}, {'display': 'none'}
+    if visibility_state == True:
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {
+            'display': 'none'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {
+                   'display': 'block'}, {'display': 'block'}
+    if visibility_state == False:
+        return {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {
+            'display': 'block'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {
+                   'display': 'none'}
+
+@app.callback(
+    Output(component_id="bar-2", component_property='style'),
+    Output(component_id="fairness_bar-2", component_property='style'),
+    Output(component_id="explainability_bar-2", component_property='style'),
+    Output(component_id="robustness_bar-2", component_property='style'),
+    Output(component_id="methodology_bar-2", component_property='style'),
+    Output(component_id="spider-2", component_property='style'),
+    Output(component_id="fairness_spider-2", component_property='style'),
+    Output(component_id="explainability_spider-2", component_property='style'),
+    Output(component_id="robustness_spider-2", component_property='style'),
+    Output(component_id="methodology_spider-2", component_property='style'),
+    [Input('toggle_charts-2', 'on'), Input('solution_set_dropdown-2', 'value')]
+)
+def toggle_charts_2(visibility_state, solution_set):
+    if solution_set is None:
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {
+            'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {
+                   'display': 'none'}, {'display': 'none'}
+    if visibility_state == True:
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {
+            'display': 'none'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {
+                   'display': 'block'}, {'display': 'block'}
+    if visibility_state == False:
+        return {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {
+            'display': 'block'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {
+                   'display': 'none'}
+
+@app.callback(Output('solution_set_dropdown-1', 'options'),
+              Input('solution_set_dropdown-1', 'nclicks'))
+def update_solution_set_dropdown_1(n_clicks):
+    return get_solution_sets()
+
+@app.callback(Output('solution_set_dropdown-2', 'options'),
+              Input('solution_set_dropdown-2', 'nclicks'))
+def update_solution_set_dropdown_2(n_clicks):
+    return get_solution_sets()
+
+
+@app.callback(
+    [Output('training_data-1', 'data'),
+     Output('test_data-1', 'data')],
+    [Input('solution_set_dropdown-1', 'value')], prevent_initial_call=True)
+def load_data_1(solution_set_path):
+    if solution_set_path != None:
+        training_data = read_train(solution_set_path)
+        test_data = read_test(solution_set_path)
+        compute_train_test_split(solution_set_path)
+        return training_data.to_json(date_format='iso', orient='split'), test_data.to_json(date_format='iso', orient='split'),
+    else:
+        return None, None
+
+@app.callback(
+    [Output('training_data-2', 'data'),
+     Output('test_data-2', 'data')],
+    [Input('solution_set_dropdown-2', 'value')], prevent_initial_call=True)
+def load_data_2(solution_set_path):
+    if solution_set_path != None:
+        training_data = read_train(solution_set_path)
+        test_data = read_test(solution_set_path)
+        compute_train_test_split(solution_set_path)
+        return training_data.to_json(date_format='iso', orient='split'), test_data.to_json(date_format='iso', orient='split'),
+    else:
+        return None, None
+
+
+@app.callback(
+    Output(component_id="trust_section-1", component_property='style'),
+    Output(component_id="fairness_section-1", component_property='style'),
+    Output(component_id="explainability_section-1", component_property='style'),
+    Output(component_id="robustness_section-1", component_property='style'),
+    Output(component_id="methodology_section-1", component_property='style'),
+    [Input("bar-1", 'figure')], prevent_initial_call=True)
+def toggle_pillar_section_visibility_1(path):
+    if path is not None:
+        return {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {
+            'display': 'block'}
+    else:
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
+
+@app.callback(
+    Output(component_id="trust_section-2", component_property='style'),
+    Output(component_id="fairness_section-2", component_property='style'),
+    Output(component_id="explainability_section-2", component_property='style'),
+    Output(component_id="robustness_section-2", component_property='style'),
+    Output(component_id="methodology_section-2", component_property='style'),
+    [Input("bar-2", 'figure')], prevent_initial_call=True)
+def toggle_pillar_section_visibility_2(path):
+    if path is not None:
+        return {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {
+            'display': 'block'}
+    else:
+        return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
+
+@app.callback(Output('performance_div-1', 'children'),
+              Input('solution_set_dropdown-1', 'value'))
+def get_performance_1(solution_set_dropdown):
+    if not solution_set_dropdown:
+        return html.P()
+    test, train, model, factsheet = read_scenario(solution_set_dropdown)
+    target_column = factsheet["general"].get("target_column")
+    performance = get_performance_table(model, test, target_column).transpose()
+    performance_table = dash_table.DataTable(
+        id='table-1',
+        columns=[{"name": i, "id": i} for i in performance.columns],
+        data=performance.to_dict('records'),
+        style_table={'overflowX': 'auto'},
+
+    )
+    performance_div = html.Div([html.H5("Performance metrics", style={"width": "100%", "text-align": "center", "margin-right": "auto",
+                                               "margin-left": "auto"}),
+                                performance_table],  style={ "width":"100%","marginLeft": "0 px", "marginRight": "0 px"})
+    return performance_div
+
+@app.callback(Output('performance_div-2', 'children'),
+              Input('solution_set_dropdown-2', 'value'))
+def get_performance_2(solution_set_dropdown):
+    if not solution_set_dropdown:
+        return html.P()
+    test, train, model, factsheet = read_scenario(solution_set_dropdown)
+    target_column = factsheet["general"].get("target_column")
+    performance = get_performance_table(model, test, target_column).transpose()
+    performance_table = dash_table.DataTable(
+        id='table-2',
+        columns=[{"name": i, "id": i} for i in performance.columns],
+        data=performance.to_dict('records'),
+        style_table={'overflowX': 'auto'},
+    )
+    performance_div = html.Div([html.H5("Performance metrics", style={"width": "100%", "text-align": "center", "margin-right": "auto",
+                                               "margin-left": "auto"}),
+                                performance_table],  style={ "width":"100%","marginLeft": "0 px", "marginRight": "0 px"})
+    return performance_div
+
+
+@app.callback(Output('result-1', 'data'),
+              Input('solution_set_dropdown-1', 'value'))
+def store_result_1(solution_set_dropdown):
+    if not solution_set_dropdown:
+        return None
+    with open('configs/default.json', 'r') as f:
+        main_config = json.loads(f.read())
+    test, train, model, factsheet = read_scenario(solution_set_dropdown)
+    final_score, results, properties = get_final_score(model, train, test, main_config)
+    trust_score = get_trust_score(final_score, main_config["pillars"])
+    def convert(o):
+        if isinstance(o, np.int64): return int(o)
+    data = {"final_score": final_score,
+            "results": results,
+            "trust_score": trust_score,
+            "properties": properties}
+    return json.dumps(data, default=convert)
+
+@app.callback(Output('result-2', 'data'),
+              Input('solution_set_dropdown-2', 'value'))
+def store_result_2(solution_set_dropdown):
+    if not solution_set_dropdown:
+        return None
+    with open('configs/default.json', 'r') as f:
+        main_config = json.loads(f.read())
+    test, train, model, factsheet = read_scenario(solution_set_dropdown)
+    final_score, results, properties = get_final_score(model, train, test, main_config)
+    trust_score = get_trust_score(final_score, main_config["pillars"])
+    def convert(o):
+        if isinstance(o, np.int64): return int(o)
+    data = {"final_score": final_score,
+            "results": results,
+            "trust_score": trust_score,
+            "properties": properties}
+    return json.dumps(data, default=convert)
+
+
+@app.callback(
+    [Output('bar-1', 'figure'),
+     Output('spider-1', 'figure'),
+     Output('fairness_bar-1', 'figure'),
+     Output('explainability_bar-1', 'figure'),
+     Output('robustness_bar-1', 'figure'),
+     Output('methodology_bar-1', 'figure'),
+     Output('fairness_spider-1', 'figure'),
+     Output('explainability_spider-1', 'figure'),
+     Output('robustness_spider-1', 'figure'),
+     Output('methodology_spider-1', 'figure'),
+     Output('trust_star_rating-1', 'children'),
+     Output('fairness_star_rating-1', 'children'),
+     Output('explainability_star_rating-1', 'children'),
+     Output('robustness_star_rating-1', 'children'),
+     Output('methodology_star_rating-1', 'children')],
+    Input('result-1', 'data'))
+def update_figure_1(data):
+    if data is None:
+        return [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}]
+    result = json.loads(data)
+    final_score, results = result["final_score"], result["results"]
+    trust_score = result["trust_score"]
+    pillars = list(final_score.keys())
+    values = list(final_score.values())
+
+    colors = [FAIRNESS_COLOR, EXPLAINABILITY_COLOR, ROBUSTNESS_COLOR, METHODOLOGY_COLOR]
+
+    # barchart
+    chart_list = []
+    bar_chart = go.Figure(data=[go.Bar(
+        x=pillars,
+        y=values,
+        marker_color=colors
+    )])
+    bar_chart.update_layout(title_text='<b style="font-size: 48px;">{}/5</b>'.format(trust_score), title_x=0.5)
+    chart_list.append(bar_chart)
+
+    # spider
+    spider_plt = px.line_polar(r=values, theta=pillars, line_close=True,
+                               title='<b style="font-size:42px;">{}/5</b>'.format(trust_score))
+    spider_plt.update_layout(title_x=0.5)
+    spider_plt.update_traces(fill='toself', fillcolor=TRUST_COLOR, marker_color=TRUST_COLOR, marker_line_width=1.5,
+                             opacity=0.6)
+    chart_list.append(spider_plt)
+
+    # barcharts
+    for n, (pillar, sub_scores) in enumerate(results.items()):
+        title = "<b style='font-size:32px;''>{}/5</b>".format(final_score[pillar])
+        categories = list(map(lambda x: x.replace("_", ' '), sub_scores.keys()))
+        values = list(map(float, sub_scores.values()))
+        if np.isnan(values).any():
+            nonNanCategories = list()
+            nonNanValues = list()
+            for c, v in zip(categories, values):
+                if not np.isnan(v):
+                    nonNanCategories.append(c)
+                    nonNanValues.append(v)
+            categories = nonNanCategories
+            values = nonNanValues
+        bar_chart_pillar = go.Figure(data=[go.Bar(x=categories, y=values, marker_color=colors[n])])
+        bar_chart_pillar.update_layout(title_text=title, title_x=0.5)
+        chart_list.append(bar_chart_pillar)
+
+    # spider charts
+    for n, (pillar, sub_scores) in enumerate(results.items()):
+        title = "<b style='font-size:32px;''>{}/5</b>".format(final_score[pillar])
+        categories = list(map(lambda x: x.replace("_", ' '), sub_scores.keys()))
+        val = list(map(float, sub_scores.values()))
+        if np.isnan(values).any():
+            nonNanCategories = list()
+            nonNanValues = list()
+            for c, v in zip(categories, values):
+                if not np.isnan(v):
+                    nonNanCategories.append(c)
+                    nonNanValues.append(v)
+            categories = nonNanCategories
+            val = nonNanValues
+        spider_plt_pillar = px.line_polar(r=val, theta=categories, line_close=True, title=title)
+        spider_plt_pillar.update_traces(fill='toself', fillcolor=colors[n], marker_color=colors[n],
+                                        marker_line_width=1.5, opacity=0.6)
+        spider_plt_pillar.update_layout(title_x=0.5)
+        chart_list.append(spider_plt_pillar)
+
+    star_ratings = []
+    star_ratings.append(show_star_rating(trust_score))
+    star_ratings.append(show_star_rating(final_score["fairness"]))
+    star_ratings.append(show_star_rating(final_score["explainability"]))
+    star_ratings.append(show_star_rating(final_score["robustness"]))
+    star_ratings.append(show_star_rating(final_score["methodology"]))
+    return chart_list + star_ratings
+
+@app.callback(
+    [Output('bar-2', 'figure'),
+     Output('spider-2', 'figure'),
+     Output('fairness_bar-2', 'figure'),
+     Output('explainability_bar-2', 'figure'),
+     Output('robustness_bar-2', 'figure'),
+     Output('methodology_bar-2', 'figure'),
+     Output('fairness_spider-2', 'figure'),
+     Output('explainability_spider-2', 'figure'),
+     Output('robustness_spider-2', 'figure'),
+     Output('methodology_spider-2', 'figure'),
+     Output('trust_star_rating-2', 'children'),
+     Output('fairness_star_rating-2', 'children'),
+     Output('explainability_star_rating-2', 'children'),
+     Output('robustness_star_rating-2', 'children'),
+     Output('methodology_star_rating-2', 'children')],
+    Input('result-2', 'data'))
+def update_figure_2(data):
+    if data is None:
+        return [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}]
+    result = json.loads(data)
+    final_score, results = result["final_score"], result["results"]
+    trust_score = result["trust_score"]
+    pillars = list(final_score.keys())
+    values = list(final_score.values())
+
+    colors = [FAIRNESS_COLOR, EXPLAINABILITY_COLOR, ROBUSTNESS_COLOR, METHODOLOGY_COLOR]
+
+    # barchart
+    chart_list = []
+    bar_chart = go.Figure(data=[go.Bar(
+        x=pillars,
+        y=values,
+        marker_color=colors
+    )])
+    bar_chart.update_layout(title_text='<b style="font-size: 48px;">{}/5</b>'.format(trust_score), title_x=0.5)
+    chart_list.append(bar_chart)
+
+    # spider
+    spider_plt = px.line_polar(r=values, theta=pillars, line_close=True,
+                               title='<b style="font-size:42px;">{}/5</b>'.format(trust_score))
+    spider_plt.update_layout(title_x=0.5)
+    spider_plt.update_traces(fill='toself', fillcolor=TRUST_COLOR, marker_color=TRUST_COLOR, marker_line_width=1.5,
+                             opacity=0.6)
+    chart_list.append(spider_plt)
+
+    # barcharts
+    for n, (pillar, sub_scores) in enumerate(results.items()):
+        title = "<b style='font-size:32px;''>{}/5</b>".format(final_score[pillar])
+        categories = list(map(lambda x: x.replace("_", ' '), sub_scores.keys()))
+        values = list(map(float, sub_scores.values()))
+        if np.isnan(values).any():
+            nonNanCategories = list()
+            nonNanValues = list()
+            for c, v in zip(categories, values):
+                if not np.isnan(v):
+                    nonNanCategories.append(c)
+                    nonNanValues.append(v)
+            categories = nonNanCategories
+            values = nonNanValues
+        bar_chart_pillar = go.Figure(data=[go.Bar(x=categories, y=values, marker_color=colors[n])])
+        bar_chart_pillar.update_layout(title_text=title, title_x=0.5)
+        chart_list.append(bar_chart_pillar)
+
+    # spider charts
+    for n, (pillar, sub_scores) in enumerate(results.items()):
+        title = "<b style='font-size:32px;''>{}/5</b>".format(final_score[pillar])
+        categories = list(map(lambda x: x.replace("_", ' '), sub_scores.keys()))
+        val = list(map(float, sub_scores.values()))
+        if np.isnan(values).any():
+            nonNanCategories = list()
+            nonNanValues = list()
+            for c, v in zip(categories, values):
+                if not np.isnan(v):
+                    nonNanCategories.append(c)
+                    nonNanValues.append(v)
+            categories = nonNanCategories
+            val = nonNanValues
+        spider_plt_pillar = px.line_polar(r=val, theta=categories, line_close=True, title=title)
+        spider_plt_pillar.update_traces(fill='toself', fillcolor=colors[n], marker_color=colors[n],
+                                        marker_line_width=1.5, opacity=0.6)
+        spider_plt_pillar.update_layout(title_x=0.5)
+        chart_list.append(spider_plt_pillar)
+
+    star_ratings = []
+    star_ratings.append(show_star_rating(trust_score))
+    star_ratings.append(show_star_rating(final_score["fairness"]))
+    star_ratings.append(show_star_rating(final_score["explainability"]))
+    star_ratings.append(show_star_rating(final_score["robustness"]))
+    star_ratings.append(show_star_rating(final_score["methodology"]))
+    return chart_list + star_ratings

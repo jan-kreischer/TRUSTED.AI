@@ -277,7 +277,7 @@ for m in fairness_metrics:
     [Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
 def analyze_fairness(solution_set_path):
     if solution_set_path == "":
-        return [{}, {}]
+        return ["", ""]
     print("Analyze Fairness {}".format(solution_set_path))
     if solution_set_path is not None:
         train_data =  read_train(solution_set_path)
@@ -380,8 +380,7 @@ def update_factsheet(factsheet_path, key, value):
 
     ## Working with buffered content
     data[key] = value
-    
-    print(data)
+
     ## Save our changes to JSON file
     jsonFile = open(factsheet_path, "w+")
     jsonFile.write(json.dumps(data))
@@ -650,7 +649,8 @@ def store_result(solution_set_dropdown, config):
        Output('fairness_star_rating', 'children'),
        Output('explainability_star_rating', 'children'),
        Output('robustness_star_rating', 'children'),
-       Output('methodology_star_rating', 'children')],
+       Output('methodology_star_rating', 'children'),
+       Output("robustness_details", 'children')],
       [Input('result', 'data'),Input("hidden-trigger", "value")])  
 def update_figure(data, trig):
      
@@ -662,9 +662,9 @@ def update_figure(data, trig):
          
       # np.random.seed(6)
       if data is None:
-          return [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}]
+          return [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, "", "", "", "", "", ""]
       result = json.loads(data)
-      final_score, results = result["final_score"] , result["results"]
+      final_score, results, properties = result["final_score"] , result["results"], result["properties"]
       trust_score = result["trust_score"]
       pillars = list(final_score.keys())
       values = list(final_score.values()) 
@@ -723,14 +723,27 @@ def update_figure(data, trig):
           spider_plt_pillar.update_traces(fill='toself', fillcolor=colors[n], marker_color=colors[n],marker_line_width=1.5, opacity=0.6)
           spider_plt_pillar.update_layout(title_x=0.5)
           chart_list.append(spider_plt_pillar)
-         
+
+      robutness_properties = properties["robustness"]
+      robustness_detail = []
+      for n, (metric , metric_properties) in enumerate(robutness_properties.items()):
+          categories = list(map(lambda x: x.replace("_",' '), metric_properties.keys()))
+          val = list(map(float, metric_properties.values()))
+          robustness_detail.append(html.Div(html.H4(metric),className="mb-5 mt-5"))
+
+          for cat, v in zip(categories, val):
+              robustness_detail.append(html.Div(html.H5(cat), className="mb-5 mt-5"))
+              robustness_detail.append(html.Div(html.H5(v), className="mb-5 mt-5"))
+
+      robustness_detail2 = [dbc.Col(children=robustness_detail)]
+
       star_ratings = []
       star_ratings.append(show_star_rating(trust_score))
       star_ratings.append(show_star_rating(final_score["fairness"]))
       star_ratings.append(show_star_rating(final_score["explainability"]))
       star_ratings.append(show_star_rating(final_score["robustness"]))
       star_ratings.append(show_star_rating(final_score["methodology"]))
-      return chart_list + star_ratings
+      return chart_list + star_ratings + robustness_detail2
  
 config_panel.get_callbacks(app)
 

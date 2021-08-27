@@ -11,6 +11,8 @@ import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 from config import TRAINING_DATA_FILE_NAME_REGEX, TEST_DATA_FILE_NAME_REGEX, MODEL_REGEX
+from tensorflow.keras.models import load_model
+import tensorflow as tf
 
 def show_star_rating(rating):
     stars = []
@@ -90,6 +92,10 @@ def read_model(solution_set_path):
     if file_extension in pickle_file_extensions:
         with open(model_file,'rb') as file:
             model = pickle.load(file)
+        return model
+    if file_extension == ".h5":
+        tf.compat.v1.disable_eager_execution()
+        model = load_model(model_file)
         return model
     if file_extension == ".joblib":
         print("loading joblib model")
