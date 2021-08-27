@@ -140,6 +140,7 @@ layout = html.Div([
      
         dbc.Row([
             dcc.Store(id='result'),
+            
             dbc.Col([html.H1("Analyze", className="text-center")], width=12, className="mb-2 mt-1"),
             
             dbc.Col([dcc.Dropdown(

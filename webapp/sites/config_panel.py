@@ -213,3 +213,9 @@ def get_callbacks(app):
             return {'display': 'block'}
         if visibility_state == False:
             return {'display': 'none'}
+        
+    @app.callback(
+            Output("config-dropdown", "options"),
+            Input("save-success", "n_clicks"))
+    def update_options(trig):
+           return list(map(lambda name:{'label': name[:-5], 'value': name} ,os.listdir("configs")))

@@ -22,17 +22,6 @@ from sites import config_panel
 import plotly.express as px
 import plotly.graph_objects as go
 
-config_fairness, config_explainability, config_robustness, config_methodology, config_pillars = 0, 0, 0, 0, 0
-for config in ["config_pillars", "config_fairness", "config_explainability", "config_robustness", "config_methodology"]:
-    with open("algorithms/" + config + ".json") as file:
-        exec("%s = json.load(file)" % config)
-
-pillars = ['fairness', 'explainability', 'robustness', 'methodology']
-main_config = dict(fairness=config_fairness, explainability=config_explainability,
-                   robustness=config_robustness, methodology=config_methodology, pillars=config_pillars)
-
-with open('configs/default.json', 'w') as outfile:
-    json.dump(main_config, outfile, indent=4)
 
 
 # === SECTIONS ===
@@ -111,7 +100,16 @@ layout = html.Div([
     dbc.Container([
         dbc.Row([
             dbc.Col(html.H1("Compare", className="text-center"), width=12, className="mb-2 mt-1"),
-
+            dbc.Col(html.Div([html.Br(),
+                html.Div(html.Label("Choose Configuration:"), style={'width': '200px', 'display': 'inline-block',"vertical-align": "top",'margin-left': 50}),
+                html.Br(),
+                html.Div(dcc.Dropdown(
+                            id='config-dropdown-compare',
+                            options=list(map(lambda name:{'label': name[:-5], 'value': name} ,os.listdir("configs"))),
+                            value='default.json'
+                        ), 
+                         style={'width': '300px', 'display': 'inline-block',"vertical-align": "top",'margin-left': 50}),
+                    ]), width=12, style={"background-color": "rgba(255,228,181,0.5)",'padding-bottom': 20," margin-left": "auto", "margin-right": "auto"}),
             dcc.Store(id='result-1'),
             dbc.Col([dcc.Dropdown(
                 id='solution_set_dropdown-1',
@@ -334,14 +332,17 @@ def get_performance_2(solution_set_dropdown):
 
 
 @app.callback(Output('result-1', 'data'),
-              Input('solution_set_dropdown-1', 'value'))
-def store_result_1(solution_set_dropdown):
+              [Input('solution_set_dropdown-1', 'value'),
+              Input("config-dropdown-compare", "value")])
+def store_result_1(solution_set_dropdown, config):
     if not solution_set_dropdown:
         return None
-    with open('configs/default.json', 'r') as f:
+    
+    with open('configs/' + config, 'r') as f:
         main_config = json.loads(f.read())
+        
     test, train, model, factsheet = read_scenario(solution_set_dropdown)
-    final_score, results, properties = get_final_score(model, train, test, main_config)
+    final_score, results, properties = get_final_score(model, train, test, main_config, factsheet)
     trust_score = get_trust_score(final_score, main_config["pillars"])
     def convert(o):
         if isinstance(o, np.int64): return int(o)
@@ -352,14 +353,15 @@ def store_result_1(solution_set_dropdown):
     return json.dumps(data, default=convert)
 
 @app.callback(Output('result-2', 'data'),
-              Input('solution_set_dropdown-2', 'value'))
-def store_result_2(solution_set_dropdown):
+              [Input('solution_set_dropdown-2', 'value'),
+               Input("config-dropdown-compare", "value")])
+def store_result_2(solution_set_dropdown,config):
     if not solution_set_dropdown:
         return None
-    with open('configs/default.json', 'r') as f:
+    with open(os.path.join('configs',config), 'r') as f:
         main_config = json.loads(f.read())
     test, train, model, factsheet = read_scenario(solution_set_dropdown)
-    final_score, results, properties = get_final_score(model, train, test, main_config)
+    final_score, results, properties = get_final_score(model, train, test, main_config, factsheet)
     trust_score = get_trust_score(final_score, main_config["pillars"])
     def convert(o):
         if isinstance(o, np.int64): return int(o)
