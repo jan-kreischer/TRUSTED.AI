@@ -164,6 +164,7 @@ def save_new_model_name(n_clicks, problem_set_path, model_name):
                Input('upload_button', 'n_clicks'),
                State('problem_set', 'value'),
                State('model_name', 'value'),
+               State('general_description', 'value'),
                State('training_data_upload', 'contents'),
                State('training_data_upload', 'filename'),
                State('test_data_upload', 'contents'),
@@ -178,6 +179,7 @@ def upload_data(
     n_clicks,
     problem_set,
     model_name,
+    general_description,
     training_data,
     training_data_filename,
     test_data,
@@ -194,7 +196,7 @@ def upload_data(
             return html.H5("Please provide all necessary data", style={"color":"Red"},  className="text-center")
         else:
             # Create directory within the problem set to contain the data
-            path = problem_set + "/" + model_name
+            path = os.path.join(problem_set, model_name)
             # Check if directory does not exists yet
             if not os.path.isdir(path):
                 os.mkdir(path)
@@ -209,8 +211,7 @@ def upload_data(
                 save_test_data(path, test_data_filename, test_data)
                 
                 # Saving Factsheet
-                print("Target column name".format(target_column_name))
-                save_factsheet(path, FACTSHEET_NAME, factsheet, target_column_name)
+                save_factsheet(path, FACTSHEET_NAME, factsheet, target_column_name, general_description)
   
                 # Saving Model
                 save_model(path, model_filename, model)
@@ -257,14 +258,15 @@ def save_model(path, name, content):
         model = load(io.BytesIO(decoded))
         dump(model, os.path.join(path, "model" + file_extension)) 
     
-def save_factsheet(path, name, content, target_column_name):
+def save_factsheet(path, name, content, target_column_name, description):
     file_name, file_extension = os.path.splitext(name)
     content_type, content_string = content.split(',')
     factsheet = json.loads(base64.b64decode(content_string).decode())
     if target_column_name:
         factsheet['general']['target_column'] = target_column_name
-    print(factsheet)
-    print(target_column_name)
+    if description:
+        factsheet['general']['description'] = description
+        
     with open(os.path.join(path, name), "w",  encoding="utf8") as file:
         json.dump(factsheet, file, indent=4)
          
@@ -309,10 +311,21 @@ layout = dbc.Container([
     ),
     
     dbc.Col([
+    html.Div([
+        create_info_modal("general_description", "Description", "Please add a brief description for your solution.", "*e.g Detect multiple objects within an image, with bounding boxes. The model is trained to recognize 80 different classes of objects in the COCO Dataset. The model consists of a deep convolutional net base model for image feature extraction, together with additional convolutional layers specialized for the task of object detection, that was trained on the COCO data set. It is based on SSD MobileNetV1 using the TensorFlow framework.*"),
+        html.H3("3. Description", className="text-center"),
+        dcc.Textarea(
+            id='general_description',
+            value='',
+            style={'width': '100%', 'height': 100},
+        )], className="mb-4"),
+    ]),
+    
+    dbc.Col([
         html.Div([
             create_info_modal("training_data", "Training Data", "Please upload the training data you used to train your model. Csv and pickle (pkl) files are accepted. Please place the label to the last column of the dataframe.", ""),
             html.Div(id="training_data_alert"),
-            html.H3(["3. Training Data", html.Sup("*")]),
+            html.H3(["4. Training Data", html.Sup("*")]),
             html.H5("Please upload the training data")
         ], className="text-center"),
     dcc.Upload(
@@ -340,7 +353,7 @@ layout = dbc.Container([
         html.Div([
             create_info_modal("test_data", "Test Data", "Please upload the test data you used to test your model. Csv and pickle (pkl) files are accepted. Please place the label to the last column of the dataframe.", ""),
             html.Div(id="test_data_alert"),
-            html.H3(["4. Test Data", html.Sup("*")]),
+            html.H3(["5. Test Data", html.Sup("*")]),
             html.H5("Please upload the test data")
             #(csv and pickle files are accepted).
             #"Please place the label to the last column of the dataframe."
@@ -372,7 +385,7 @@ layout = dbc.Container([
         html.Div([
             create_info_modal("target_column_name", "Target Column", "The target column contains the values that you want to predict with your model.", ""),
             html.Div(id="target_column_alert"),
-            html.H3("5. Target Column"),
+            html.H3("6. Target Column"),
             html.H5("Please select the target column")
         ], className="text-center"),
     ],
@@ -390,7 +403,7 @@ layout = dbc.Container([
         html.Div([
             create_info_modal("factsheet", "Factsheet", "The factsheet contains the most important information about the methology used.", ""),
             html.Div(id="factsheet_alert"),
-            html.H3(["6. Factsheet", html.Sup("*")]),
+            html.H3(["7. Factsheet", html.Sup("*")]),
             html.H5("Please upload the factsheet")
         ], className="text-center"),
     ],
@@ -420,7 +433,7 @@ layout = dbc.Container([
         html.Div([
             create_info_modal("model", "Model", "Please upload the model you want to assess.", ""),
             html.Div(id="model_alert"),
-            html.H3(["7. Model", html.Sup("*")]),
+            html.H3(["8. Model", html.Sup("*")]),
             html.H5("Please upload the model")
         ], className="text-center")
         # 5. Please upload the model as a .sav file.

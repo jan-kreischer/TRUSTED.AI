@@ -17,6 +17,9 @@ from helpers import create_info_modal
 
 general_inputs = ["model_name", "purpose_description", "domain_description", "training_data_description", "model_information",    "data_normalization", "target_column", "contact_information"]
 fairness_inputs = ["protected_feature", "privileged_class_definition"]
+explainability_inputs = ["protected_feature", "privileged_class_definition"]
+robustness_inputs = []
+methodology_inputs = []
 
 @app.callback([Output('create_factsheet_alert', 'children'),
                Output("download_factsheet", "data"),
@@ -89,8 +92,8 @@ layout = dbc.Container([
             html.H1("Factsheet", className="text-center"),
             html.Div([], id="create_factsheet_alert"),
             
+            html.Div([
             #=== General Information ===
-            html.Hr(),
             html.H2("• General Information"),
             #--- Purpose ---
             html.Div([
@@ -171,20 +174,36 @@ layout = dbc.Container([
                 value='',
                 style={'width': '100%', 'height': 150},
             )], className="mb-4"),
-            
-            html.Hr(),
+            ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px"}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),
+                
+            html.Div([
             html.H2("• Fairness"),
             html.Div([
                 create_info_modal("protected_feature", "Protected Feature", "Please enter the name of the target column within your dataset.", ""),
                 html.H3("Protected Feature"),
                 dcc.Input(id="protected_feature", type="text", placeholder="", value="", debounce=True, style={'width': '100%'}),
-            ], className="mb-4 mt-4"),
+            ], ),
             
             html.Div([
                 create_info_modal("privileged_class_definition", "Privileged Class Definition", "Please enter the name of the target column within your dataset.", ""),
                 html.H3("Privileged Class Definition"),
                 dcc.Input(id="privileged_class_definition", type="text", placeholder="e.g lambda x: x >= 25", value="", debounce=True, style={'width': '100%'}),
             ], className="mb-4 mt-4"),
+            ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px"}, className="pt-3 pb-3 pl-3 pr-3 mb-4 mt-4"),
+                        
+            html.Div([
+                html.H2("• Explainability")
+            ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px"}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),
+            
+            html.Div([
+
+                html.H2("• Robustness")
+            ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px"}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),
+            
+            html.Div([
+                html.H2("• Methodology")
+            ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px"}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),  
+            
     ], 
     className=""
     ),

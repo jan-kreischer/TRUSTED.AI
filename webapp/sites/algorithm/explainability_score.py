@@ -113,7 +113,7 @@ def calc_explainability_score(clf, train_data, test_data, config):
         Correlated_Features = score_Correlated_Features(train_data, test_data),
         Model_Size          = score_Model_Size(clf),
         Feature_Relevance   = score_Feature_Relevance(clf, train_data, scale_factor)
-                 )
+    )
     
     scores = dict((k, v.score) for k, v in output.items())
     properties = dict((k, v.properties) for k, v in output.items())

@@ -15,7 +15,6 @@ from config import TRAINING_DATA_FILE_NAME_REGEX, TEST_DATA_FILE_NAME_REGEX, MOD
 def show_star_rating(rating):
     stars = []
     for i in range(0,5):
-        print("i {0}  rating {1}".format(i, rating))
         if i+0.99 <= rating:
             stars.append(html.I(className="fas fa-star"))
         elif i+0.49 < rating:
