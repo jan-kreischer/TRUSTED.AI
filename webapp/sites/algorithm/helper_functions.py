@@ -9,6 +9,7 @@ import seaborn as sn
 import pandas as pd
 import matplotlib.pyplot as plt
 import json
+from config import *
 from math import pi
 import sklearn.metrics as metrics
 from sites.algorithm.fairness_score import calc_fairness_score
@@ -16,46 +17,9 @@ from sites.algorithm.explainability_score import calc_explainability_score
 from sites.algorithm.robustness_score import calc_robustness_score
 from sites.algorithm.methodology_score import calc_methodology_score
 import collections
-from helpers import read_scenario
-
-# test, train, model, factsheet = read_scenario('scenarios\\IT Sec Anomaly Detection\\case 1')
-# target_column = factsheet["general"].get("target_column")
+from helpers import read_solution
 
 result = collections.namedtuple('result', 'score properties')
-
-def get_perfomance_metric(clf,test_data, target_column):
-    
-    test_data = test_data.copy()
-    
-    if target_column:
-        X_test = test_data.drop(target_column, axis=1)
-        y_test = test_data[target_column]
-    else:
-        X_test = test_data.iloc[:,:-1]
-        y_test = test_data.iloc[:,-1: ]
-    
-    y_true =  y_test.values.flatten()
-    y_pred = clf.predict(X_test)
-    y_pred_proba = clf.predict_proba(X_test)
-    labels = np.unique(np.array([y_pred,y_true]).flatten())
-    
-    performance_metrics = {
-        "accuracy" :  metrics.accuracy_score(y_true, y_pred),
-        "global recall" :  metrics.recall_score(y_true, y_pred, labels=labels, average="micro"),
-        "class weighted recall" : metrics.recall_score(y_true, y_pred,average="weighted"),
-        "global precision" : metrics.precision_score(y_true, y_pred, labels=labels, average="micro"),
-        "class weighted precision" : metrics.precision_score(y_true, y_pred,average="weighted"),
-        "global f1 score" :  metrics.f1_score(y_true, y_pred,average="micro"),
-        "class weighted f1 score" :  metrics.f1_score(y_true, y_pred,average="weighted"),
-        "cross-entropy loss" : metrics.log_loss(y_true, y_pred_proba),
-        "ROC AUC" : metrics.roc_auc_score(y_true, y_pred_proba,average="weighted", multi_class='ovr')#one vs rest method
-        }
-    
-    # for name, value in performance_metrics.items():
-    #     print("%1s: %2.2f" %(name, value))
-    
-    return performance_metrics
-
 
 ## get inputs
 def get_case_inputs(case):
@@ -74,7 +38,6 @@ def get_case_inputs(case):
         test_data = pickle.load(file)
 
     return [model, train_data, test_data]
-
 
 def draw_spider(categories, values, ax, color='lightblue', title='Trusting AI Final Score'):
     
@@ -173,29 +136,31 @@ def get_trust_score(final_score, config):
         return 0
     return round(np.nansum(list(map(lambda x: final_score[x] * config[x], final_score.keys())))/np.sum(list(config.values())),1)
     
+def get_performance_metrics(model, test_data, target_column):
+    
+    test_data = test_data.copy()
+    
+    if target_column:
+        X_test = test_data.drop(target_column, axis=1)
+        y_test = test_data[target_column]
+    else:
+        X_test = test_data.iloc[:,:DEFAULT_TARGET_COLUMN_INDEX]
+        y_test = test_data.iloc[:,DEFAULT_TARGET_COLUMN_INDEX: ]
+    
+    y_true =  y_test.values.flatten()
+    y_pred = model.predict(X_test)
+    y_pred_proba = model.predict_proba(X_test)
+    labels = np.unique(np.array([y_pred,y_true]).flatten())
 
-### delete later
-# define model inputs
-# choose scenario case (case1,case1,..)
-# case = "case1"
-# np.random.seed(6)
-
-# # load case inputs
-# model, train_data, test_data = get_case_inputs(case)
-
-# config_fairness, config_explainability, config_robustness, config_methodology = 0, 0, 0 ,0
-# for config in ["config_fairness", "config_explainability", "config_robustness", "config_methodology"]:
-#     with open("sites/algorithm/"+config+".json") as file:
-#             exec("%s = json.load(file)" % config)
-
-# trusting_AI_scores(model, train_data, test_data, config_fairness, config_explainability, config_robustness, config_methodology)
-# final_scores, scores = get_final_score(model, train_data, test_data, config_fairness, config_explainability, config_robustness, config_methodology)
-# final_scores
-
-
-def get_performance_table(model, test_data, target_column=None):
-    performance_metrics = get_perfomance_metric(model, test_data, target_column)
-    df = pd.DataFrame(performance_metrics, index=["Performance Metrics"]).transpose()
-    df["Performance Metrics"] = df["Performance Metrics"].round(2)
-    df = df.loc[["accuracy","class weighted recall","class weighted precision","class weighted f1 score","cross-entropy loss","ROC AUC"]]
-    return df
+    performance_metrics = pd.DataFrame({
+        "accuracy" :  [metrics.accuracy_score(y_true, y_pred)],
+        #"global recall" :  [metrics.recall_score(y_true, y_pred, labels=labels, average="micro")],
+        "class weighted recall" : [metrics.recall_score(y_true, y_pred,average="weighted")],
+        #"global precision" : [metrics.precision_score(y_true, y_pred, labels=labels, average="micro")],
+        "class weighted precision" : [metrics.precision_score(y_true, y_pred,average="weighted")],
+        #"global f1 score" :  [metrics.f1_score(y_true, y_pred,average="micro")],
+        "class weighted f1 score" :  [metrics.f1_score(y_true, y_pred,average="weighted")],
+        "cross-entropy loss" : [metrics.log_loss(y_true, y_pred_proba)],
+        "ROC AUC" : [metrics.roc_auc_score(y_true, y_pred_proba,average="weighted", multi_class='ovr')]
+    }).round(decimals=2)
+    return performance_metrics

@@ -11,8 +11,8 @@ import json
 import glob
 import shutil
 from helpers import *
-from config import SCENARIOS_FOLDER_PATH, FAIRNESS_COLOR, EXPLAINABILITY_COLOR, ROBUSTNESS_COLOR, METHODOLOGY_COLOR, TRUST_COLOR
-from sites.algorithm.helper_functions import get_performance_table, get_final_score, get_case_inputs, trusting_AI_scores, get_trust_score
+from config import *
+from sites.algorithm.helper_functions import get_performance_metrics, get_final_score, get_case_inputs, trusting_AI_scores, get_trust_score
 from pillars.fairness.class_balance import compute_class_balance
 import dash_table
 import numpy as np
@@ -52,7 +52,7 @@ daq.BooleanSwitch(id='toggle_charts',
             ),
                     html.Div([html.H2("• General")]),
                     html.Div([], id="general_description"),
-                    html.Div([], id="performance_div"),
+                    html.Div(["Performance Metrics Section"], id="performance_metrics_section"),
                     ])
 
 
@@ -236,25 +236,9 @@ def update_output(submit_n_clicks, uploaded_solution_set, solution_set_path):
     else:
         if uploaded_solution_set:
             return uploaded_solution_set["path"], []
-        
-# === TRUST ===
-# @app.callback(
-#     [Output("trust_overview", 'children'),
-#     Output("trust_details", 'children')],
-#     [Input('solution_set_dropdown', 'value'), State("result","data")], prevent_initial_call=True)
-# def analyze_trust(solution_set_path, result, config):
-#     if solution_set_path and result:
-        
-#         dcc.Graph(id='spider-old', style={'display': 'none'})
-        
-#         return 
-#     else:
-#         return [], []
-
-
+    
 # === FAIRNESS ===
 fairness_metrics = ["class_balance", "statistical_parity_difference", "equal_opportunity_difference", "average_odds_difference", "disparate_impact", "theil_index", "euclidean_distance", "mahalanobis_distance", "manhattan_distance"]
-
 
 for m in fairness_metrics:
     @app.callback(
@@ -280,12 +264,7 @@ def analyze_fairness(solution_set_path):
         return ["", ""]
     print("Analyze Fairness {}".format(solution_set_path))
     if solution_set_path is not None:
-        train_data =  read_train(solution_set_path)
-        test_data =  read_test(solution_set_path)
 
-        features = list(train_data.columns)
-        target_column=""
-        factsheet = None
 
         factsheet_path = os.path.join(solution_set_path,"factsheet.json") 
         # Check if a factsheet.json file already exists in the target directory
@@ -486,7 +465,103 @@ def load_data(solution_set_path):
 #         return [], []
         
 
-# === ROBUSTNESS ===
+# === METHODOLOGY ===
+@app.callback(
+    [Output("methdology_overview", 'children'),
+    Output("methdology_details", 'children')],
+    [Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
+def analyze_methodology(solution_set_path):
+    if solution_set_path == "":
+        return ["", ""]
+    print("Analyzing Methodology {}".format(solution_set_path))
+    if solution_set_path is not None:
+        factsheet_path = os.path.join(solution_set_path, FACTSHEET_NAME) 
+        # Check if a factsheet.json file already exists in the target directory
+        if os.path.isfile(factsheet_path):
+
+            f = open(factsheet_path,)
+            factsheet = json.load(f)
+            
+            target_column = ""
+            if "general" in factsheet and "target_column" in factsheet["general"]:
+                target_column = factsheet["general"]["target_column"]
+            print("target_column {}".format(target_column))
+            
+            protected_feature = ""
+            if "fairness" in factsheet and "protected_feature" in factsheet["fairness"]:
+                protected_feature = factsheet["fairness"]["protected_feature"]
+            print("protected_feature {}".format(protected_feature))
+            
+            privileged_class_definition = ""
+            if "fairness" in factsheet and "privileged_class_definition" in factsheet["fairness"]:
+                privileged_class_definition = factsheet["fairness"]["privileged_class_definition"]
+            print("privileged_class_definition {}".format(privileged_class_definition))
+            
+            f.close()
+        # Create a factsheet
+        else:
+            print("No factsheet exists yet")
+
+
+        solution_set_label_select_options = list(map(lambda x: {"label": x, "value": x}, features))
+        solution_set_label_select = html.Div([
+            "Select Target Column", 
+            dcc.Dropdown(
+                id="solution_set_label_select",
+                options=solution_set_label_select_options,
+                value=target_column
+            ),
+        ])
+        
+        protected_feature_select_options = list(map(lambda x: {"label": x, "value": x}, features))
+        protected_feature_select = html.Div([
+            "Select Protected Feature", 
+            dcc.Dropdown(
+                id="protected_feature_select",
+                options=protected_feature_select_options,
+                value=protected_feature
+            ),
+        ])
+        
+        privileged_class_definition = html.Div([
+            "Define Privileged Class",
+            html.Br(),
+            dcc.Input(
+                id="privileged_class_definition",
+                type="text",
+                placeholder="e.g lambda x: x >= 25",
+                style={'width': '100%'}
+            ),
+        ])
+
+        sections = [html.Hr(), html.H3("▶ Fairness Configuration"), solution_set_label_select, protected_feature_select, privileged_class_definition, html.Hr(), html.H3("▶ Fairness Metrics")]
+        
+
+        for i in range(len(fairness_metrics)):
+            metric = fairness_metrics[i]
+            metric_id = metric
+            metric_name = metric_id.replace("_", " ")
+            sections.append(html.Div([dbc.Button(
+                        html.I(className="fas fa-chevron-down"),
+                        id="toggle_{}_details".format(metric),
+                        className="mb-3",
+                        n_clicks=0,
+                        style={"float": "right"}
+                    ),html.H4("1.{0} {1}".format(i+1, metric_name)), 
+                    dbc.Collapse(
+                        html.Div("{}_details".format(metric)),
+                        id="{}_details".format(metric),
+                        is_open=False,          
+                    ),
+            ], id="{}_section".format(metric), className="mb-5 mt-5"))
+        
+        
+        return [], sections
+    else:
+        return [], [html.H1("Nothing")]
+
+
+
 # @app.callback(
 #     [Output("robustness_overview", 'children'),
 #     Output("robustness_details", 'children')],
@@ -539,7 +614,7 @@ def toggle_pillar_section_visibility(path):
     [Output('analyze_alert_section', 'children'),
     Output('analysis_section', 'style')],
     [Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
-def analyze_methdology(solution_set_path):
+def analyze_solution_completeness(solution_set_path):
     button = []
     alerts = []
     style={'display': 'block'}
@@ -577,32 +652,49 @@ def display_confirm(n_clicks):
     else:
         return False
     
-# #data_stores = html.Div[dcc.Store(id='test_data'),  dcc.Store(id='train_data'),  dcc.Store(id='model'),  dcc.Store(id='factsheet')]
-@app.callback(Output('performance_div', 'children'), 
-          Input('solution_set_dropdown', 'value'))
-def get_performance(solution_set_dropdown):
-    
-    if not solution_set_dropdown:
-        return html.P()
-    
-    test, train, model, factsheet = read_scenario(solution_set_dropdown)
-    
-    target_column = factsheet["general"].get("target_column")
-    
-    performance =  get_performance_table(model, test, target_column).transpose()
-    
-    performance_table = dash_table.DataTable(
-                            id='table',
-                            columns=[{"name": i, "id": i} for i in performance.columns],
-                            data=performance.to_dict('records'),
-                            style_table={"table-layout": "fixed", "width": "100%"}
-
-    )
-    
-    performance_div = html.Div([html.H5("Performance metrics", style={"width": "100%","text-align": "center", "margin-right": "auto", "margin-left": "auto" }),
-                                performance_table],style={"width": "100%"})
+@app.callback(Output('performance_metrics_section', 'children'), 
+          Input('solution_set_dropdown', 'value'), prevent_initial_call=True)
+def show_performance_metrics(solution_set_path):
+    if not solution_set_path:
+        return []
+    else:
+        print("SHOW PERFORMANCE METRICS SECTION")
+        test_data, training_data, model, factsheet = read_solution(solution_set_path)
+        target_column = ""
+        if "general" in factsheet and "target_column" in factsheet["general"]:
+            target_column = factsheet["general"]["target_column"]
+        print("target_column {}".format(target_column))
         
-    return performance_div
+        print("LOADED MODEL")
+        performance_metrics =  get_performance_metrics(model, test_data, target_column)
+        #performance_metrics = {
+        #    "accuracy" :  [1],
+        #    "global recall" :  [2],
+        #    "class weighted recall" : [3],
+        #    "global precision" : [4],
+        #   "class weighted precision" : [5],
+        #    "global f1 score" :  [6],
+        #    "class weighted f1 score" :  [7],
+        #    "cross-entropy loss" : [8],
+        #    "ROC AUC" : [9],
+        #}
+
+        #print("CONVERT DICT TO PD")
+        #performance_metrics_df = pd.DataFrame.from_dict(performance_metrics)
+        #print(performance_metrics_df
+
+        print("PERFORMANCE METRICS DF COLUMNS {}".format(performance_metrics.columns))
+        performance_metrics_table = dash_table.DataTable(
+                                id='table',
+                                columns=[{"name": i, "id": i} for i in performance_metrics.columns],
+                                data=performance_metrics.to_dict('records'),
+                                style_table={"table-layout": "fixed", "width": "auto", 'overflowX': 'none'}
+        )
+
+        #performance_metrics_section = html.Div([html.H5("Performance metrics", style={"width": "100%","text-align": "center", "margin-right": "auto", "margin-left": "auto" }),
+                                    #performance_metrics_table],style={"width": "100%"})
+
+        return performance_metrics_table
 
 @app.callback(Output('result', 'data'), 
           [Input('solution_set_dropdown', 'value'),
@@ -618,7 +710,7 @@ def store_result(solution_set_dropdown, config):
         else:
             main_config = json.loads(config)
             
-        test, train, model, factsheet = read_scenario(solution_set_dropdown)
+        test, train, model, factsheet = read_solution(solution_set_dropdown)
     
         final_score, results, properties = get_final_score(model, train, test, main_config)
         trust_score = get_trust_score(final_score, main_config["pillars"])

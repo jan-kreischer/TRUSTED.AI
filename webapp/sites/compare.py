@@ -13,7 +13,7 @@ import shutil
 from helpers import *
 from config import SCENARIOS_FOLDER_PATH, FAIRNESS_COLOR, EXPLAINABILITY_COLOR, ROBUSTNESS_COLOR, METHODOLOGY_COLOR, \
     TRUST_COLOR
-from sites.algorithm.helper_functions import get_performance_table, get_final_score, get_case_inputs, \
+from sites.algorithm.helper_functions import get_final_score, get_case_inputs, \
     trusting_AI_scores, get_trust_score
 from pillars.fairness.class_balance import compute_class_balance
 import dash_table
@@ -293,44 +293,44 @@ def toggle_pillar_section_visibility_2(path):
     else:
         return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
 
-@app.callback(Output('performance_div-1', 'children'),
-              Input('solution_set_dropdown-1', 'value'))
-def get_performance_1(solution_set_dropdown):
-    if not solution_set_dropdown:
-        return html.P()
-    test, train, model, factsheet = read_scenario(solution_set_dropdown)
-    target_column = factsheet["general"].get("target_column")
-    performance = get_performance_table(model, test, target_column).transpose()
-    performance_table = dash_table.DataTable(
-        id='table-1',
-        columns=[{"name": i, "id": i} for i in performance.columns],
-        data=performance.to_dict('records'),
-        style_table={'overflowX': 'auto'},
+#@app.callback(Output('performance_div-1', 'children'),
+#              Input('solution_set_dropdown-1', 'value'))
+#def get_performance_1(solution_set_dropdown):
+#    if not solution_set_dropdown:
+#        return html.P()
+#    test, train, model, factsheet = read_scenario(solution_set_dropdown)
+#    target_column = factsheet["general"].get("target_column")
+#    performance = get_performance_table(model, test, target_column).transpose()
+#    performance_table = dash_table.DataTable(
+#        id='table-1',
+#        columns=[{"name": i, "id": i} for i in performance.columns],
+#        data=performance.to_dict('records'),
+#        style_table={'overflowX': 'auto'},
 
-    )
-    performance_div = html.Div([html.H5("Performance metrics", style={"width": "100%", "text-align": "center", "margin-right": "auto",
-                                               "margin-left": "auto"}),
-                                performance_table],  style={ "width":"100%","marginLeft": "0 px", "marginRight": "0 px"})
-    return performance_div
-
-@app.callback(Output('performance_div-2', 'children'),
-              Input('solution_set_dropdown-2', 'value'))
-def get_performance_2(solution_set_dropdown):
-    if not solution_set_dropdown:
-        return html.P()
-    test, train, model, factsheet = read_scenario(solution_set_dropdown)
-    target_column = factsheet["general"].get("target_column")
-    performance = get_performance_table(model, test, target_column).transpose()
-    performance_table = dash_table.DataTable(
-        id='table-2',
-        columns=[{"name": i, "id": i} for i in performance.columns],
-        data=performance.to_dict('records'),
-        style_table={'overflowX': 'auto'},
-    )
-    performance_div = html.Div([html.H5("Performance metrics", style={"width": "100%", "text-align": "center", "margin-right": "auto",
-                                               "margin-left": "auto"}),
-                                performance_table],  style={ "width":"100%","marginLeft": "0 px", "marginRight": "0 px"})
-    return performance_div
+#    )
+#    performance_div = html.Div([html.H5("Performance metrics", style={"width": "100%", "text-align": "center", "margin-right": "auto",
+#                                               "margin-left": "auto"}),
+#                                performance_table],  style={ "width":"100%","marginLeft": "0 px", "marginRight": "0 px"})
+#    return performance_div
+#
+#@app.callback(Output('performance_div-2', 'children'),
+#              Input('solution_set_dropdown-2', 'value'))
+#def get_performance_2(solution_set_dropdown):
+#    if not solution_set_dropdown:
+#        return html.P()
+#    test, train, model, factsheet = read_scenario(solution_set_dropdown)
+#    target_column = factsheet["general"].get("target_column")
+#    performance = get_performance_table(model, test, target_column).transpose()
+#    performance_table = dash_table.DataTable(
+#        id='table-2',
+#        columns=[{"name": i, "id": i} for i in performance.columns],
+#        data=performance.to_dict('records'),
+#        style_table={'overflowX': 'auto'},
+#    )
+#    performance_div = html.Div([html.H5("Performance metrics", style={"width": "100%", "text-align": "center", "margin-right": "auto",
+#                                               "margin-left": "auto"}),
+#                                performance_table],  style={ "width":"100%","marginLeft": "0 px", "marginRight": "0 px"})
+#    return performance_div
 
 
 @app.callback(Output('result-1', 'data'),

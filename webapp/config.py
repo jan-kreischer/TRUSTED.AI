@@ -7,7 +7,13 @@ TEST_DATA_FILE_NAME_REGEX = "test.*"
 MODEL_REGEX = "model.*"
 PICKLE_FILE_EXTENSIONS = [".sav", ".pkl", ".pickle"]
 JOBLIB_FILE_EXTENSIONS = [".joblib"]
+
+# Constants used for loading data from the solution
 FACTSHEET_NAME = "factsheet.json"
+
+# If no target column name is given, we assume 
+# that the last column to the right is containing the label (or predicted value)
+DEFAULT_TARGET_COLUMN_INDEX = -1
 
 PRIMARY_COLOR = ''
 SECONDARY_COLOR = ''

@@ -17,7 +17,7 @@ from math import pi
 import dash_table
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
-from sites.algorithm.helper_functions import get_performance_table, get_final_score, get_case_inputs, trusting_AI_scores
+from sites.algorithm.helper_functions import get_final_score, get_case_inputs, trusting_AI_scores
 from sites.algorithm.explainability_panel import explainability_panel, exp_input_ids
 from sites.algorithm.fairness_panel import fairness_panel ,fair_input_ids
 from sites.algorithm.robustness_panel import robustness_panel, rob_input_ids

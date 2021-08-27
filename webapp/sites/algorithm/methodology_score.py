@@ -22,7 +22,6 @@ def score_Test_Accuracy():
     return result(score=np.random.randint(1,6), properties={}) 
 
 def calc_methodology_score():
-    
     output = dict(
         Normalization    = score_Normalization(),
         Treatment_of_Corrupt_Values     = score_Test_F1_score(),

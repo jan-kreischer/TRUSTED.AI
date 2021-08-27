@@ -213,33 +213,5 @@ def get_final_score():
 
     return final_scores, scores
 
-def get_perfomance_metric(clf, y_test, X_test):
-    
-    y_true =  y_test.values.flatten()
-    y_pred = clf.predict(X_test)
-    y_pred_proba = clf.predict_proba(X_test)
-    labels = np.unique(np.array([y_pred,y_true]).flatten())
-    
-    performance_metrics = {
-        "accuracy" :  metrics.accuracy_score(y_true, y_pred),
-        "global recall" :  metrics.recall_score(y_true, y_pred, labels=labels, average="micro"),
-        "class weighted recall" : metrics.recall_score(y_true, y_pred,average="weighted"),
-        "global precision" : metrics.precision_score(y_true, y_pred, labels=labels, average="micro"),
-        "class weighted precision" : metrics.precision_score(y_true, y_pred,average="weighted"),
-        "global f1 score" :  metrics.f1_score(y_true, y_pred,average="micro"),
-        "class weighted f1 score" :  metrics.f1_score(y_true, y_pred,average="weighted"),
-        "cross-entropy loss" : metrics.log_loss(y_true, y_pred_proba),
-        "ROC AUC" : metrics.roc_auc_score(y_true, y_pred_proba,average="weighted", multi_class='ovr')#one vs rest method
-        }
-    
-    # for name, value in performance_metrics.items():
-    #     print("%1s: %2.2f" %(name, value))
-    
-    return performance_metrics
 
-def get_performance_table():
-    performance_metrics = get_perfomance_metric(model, y_test, X_test)
-    df = pd.DataFrame(performance_metrics, index=["Performance Metrics"]).transpose()
-    df["Performance Metrics"] = df["Performance Metrics"].round(2)
-    df = df.loc[["accuracy","class weighted recall","class weighted precision","class weighted f1 score","cross-entropy loss","ROC AUC"]]
-    return df
+

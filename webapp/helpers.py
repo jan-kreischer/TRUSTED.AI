@@ -10,7 +10,7 @@ import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
-from config import TRAINING_DATA_FILE_NAME_REGEX, TEST_DATA_FILE_NAME_REGEX, MODEL_REGEX
+from config import *
 from tensorflow.keras.models import load_model
 import tensorflow as tf
 
@@ -99,16 +99,21 @@ def read_model(solution_set_path):
         return model
     if file_extension == ".joblib":
         print("loading joblib model")
+        return joblib.load(model_file)
 
+'''
+    This function reads the factsheet into a dictionary
+'''
 def read_factsheet(solution_set_path):
- 
-    #factsheet
-    with open(os.path.join(solution_set_path, "factsheet.json"),'rb') as f:
-                factsheet = json.loads(f.read())
-    return factsheet
+    factsheet_path = os.path.join(solution_set_path, FACTSHEET_NAME)
+    if os.path.isfile(factsheet_path):
+        with open(factsheet_path,'rb') as f:
+            factsheet = json.loads(f.read())
+        return factsheet
+    else:
+        return {}
 
-def read_scenario(solution_set_path):
-    
+def read_solution(solution_set_path):
     test = read_test(solution_set_path)
     train = read_train(solution_set_path)
     model = read_model(solution_set_path)

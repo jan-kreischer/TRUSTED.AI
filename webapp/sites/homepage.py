@@ -49,8 +49,8 @@ layout = dbc.Container([
             
             dbc.Col(html.Div([html.H3("Fairness"), html.Div("Impartial and just decisions without discrimination of protected groups.")]), width=3, className="text-center"),
             dbc.Col(html.Div([html.H3("Explainability"), html.Div("Provide clarification for the cause of the decision")]), width=3, className="text-center"),
-            dbc.Col(html.Div(html.H3("Robustness")), width=3, className="text-center"),
-            dbc.Col(html.Div(html.H3("Methodology")), width=3, className="text-center"),
+            dbc.Col(html.Div([html.H3("Robustness"), html.Div("Resilience against adversarial inputs")]), width=3, className="text-center"),
+            dbc.Col(html.Div([html.H3("Methodology"), html.Div("Quality analysis of the model lifecycle")]), width=3, className="text-center"),
         ],
         justify="center",
         className="mb-5"),
