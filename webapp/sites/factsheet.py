@@ -143,21 +143,7 @@ layout = dbc.Container([
                     value='',
                     style={'width': '100%', 'height': 150},
             )], className="mb-4"),
-            
-            #--- Data Normalization ---
-            html.Div([
-                create_info_modal("data_normalization", "Data Normalization", "Please select the normalization technique you used to prepare your data", ""),
-                html.H3("Data Normalization"),
-                dcc.Dropdown(
-                    id='data_normalization',
-                    options=[
-                        {'label': 'None', 'value': 'none'},
-                        {'label': 'Normalization (Min-Max Scaling)', 'value': 'normalization'},
-                        {'label': 'Standardization (Z-score Normalization)', 'value': 'standardization'}
-                    ],
-                    value='none'
-            )], className="mb-4 mt-4"),
-                        
+                       
             #--- Target Column Name ---
             html.Div([
                 create_info_modal("target_column", "Target Column Name", "Please enter the name of the target column within your dataset.", ""),
@@ -201,7 +187,34 @@ layout = dbc.Container([
             ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px"}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),
             
             html.Div([
-                html.H2("• Methodology")
+                html.H2("• Methodology"), 
+                #--- Data Normalization ---
+                html.Div([
+                    create_info_modal("data_normalization", "Data Normalization", "Please select the normalization technique you used to prepare your data", ""),
+                    html.H3("Data Normalization"),
+                    dcc.Dropdown(
+                        id='data_normalization',
+                        options=[
+                            {'label': 'None', 'value': 'none'},
+                            {'label': 'Normalization (Min-Max Scaling)', 'value': 'normalization'},
+                            {'label': 'Standardization (Z-score Normalization)', 'value': 'standardization'}
+                        ],
+                        value='none'
+                )], className="mb-4 mt-4"),
+                
+                html.Div([
+                    create_info_modal("regression", "Regression", "Please select the regression technique used during training", ""),
+                    html.H3("Regularization"),
+                dcc.Dropdown(
+                        id='regularization',
+                        options=[
+                            {'label': 'None', 'value': 'none'},
+                            {'label': 'Lasso regression (L1)', 'value': 'lasso_regression'},
+                            {'label': 'Ridge regression (L2)', 'value': 'ridge_regression'},
+                            {'label': 'ElasticNet regression', 'value': 'elasticnet_regression'},
+                        ],
+                        value='none'
+                )], className="mb-4 mt-4"),
             ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px"}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),  
             
     ], 
