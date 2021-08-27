@@ -34,17 +34,42 @@ with open('configs/default.json', 'w') as outfile:
                 json.dump(main_config, outfile, indent=4)
 
 # === SECTIONS ===
+
+def general_information_section():
+    return html.Div([
+                                        dbc.Button(
+            html.I(className="fas fa-backspace"),
+            id="delete_solution_button", 
+            n_clicks=0,
+            style={"float": "right"}
+        ),
+daq.BooleanSwitch(id='toggle_charts',
+                on=False,
+                label='Alternative Style',
+                labelPosition="top",
+                color = TRUST_COLOR,   
+                style={"float": "right"}
+            ),
+                    html.Div([html.H2("• General")]),
+                    html.Div([], id="general_description"),
+                    html.Div([], id="performance_div"),
+                    ])
+
+
 def trust_section(c):
     return html.Div([ 
-        html.Div(id='boolean-switch-output'),
         html.Div([
-            daq.BooleanSwitch(id='toggle_charts',
-            on=False,
-            color = "green",   
-            style={"float": "right"}
-        )
-        ], className="mt-2"),
-        html.H2("Trustworthiness"),
+            html.Hr(),
+            html.Div([daq.BooleanSwitch(id='show_weighting',
+                      on=False,
+                      label='Show Weighting',
+                      labelPosition="top",
+                      color = TRUST_COLOR,
+                      style={"float": "right"}
+                     
+                    )]),
+            html.H2("• Trustworthiness"),
+        ], id="trust_section_heading", className="mt-2 mb-4"),
 
         html.Div([], id="trust_overview"),
         html.H3("Overall Score", className="text-center"),
@@ -57,6 +82,7 @@ def trust_section(c):
 
 def pillar_section(pillar):
         return html.Div([
+                html.Div([
                     dbc.Button(
                         html.I(className="fas fa-chevron-down"),
                         id="toggle_{}_details".format(pillar),
@@ -64,14 +90,15 @@ def pillar_section(pillar):
                         n_clicks=0,
                         style={"float": "right"}
                     ),
-                    daq.BooleanSwitch(id='toggle-hide',
+                    daq.BooleanSwitch(id='show_{}_mappings'.format(pillar),
                       on=False,
                       label='Show Mappings',
                       labelPosition="top",
-                      color = "green",
+                      color = TRUST_COLOR,
                       style={"float": "right"}
                     ),
                     html.H2("• {}".format(pillar.upper()), className="mb-5"),
+                ], id="{}_section_heading".format(pillar.lower())),
                     html.Div([], id="{}_overview".format(pillar)),
                     html.H3("{0}-Score".format(pillar), className="text-center"),
                     html.Div([], id="{}_star_rating".format(pillar), className="star_rating, text-center"),
@@ -87,9 +114,8 @@ def pillar_section(pillar):
                 ], id="{}_section".format(pillar), style={"display": "None"})
     
 
-def alert_section(c):
-    return html.Div([
-    ], id="alert_section")
+def alert_section(name):
+    return html.Div([], id="{}_alert_section".format(name), className="text-center", style={"color":"Red"})
 
 
 SECTIONS = ['trust', 'fairness', 'explainability', 'robustness', 'methodology']
@@ -114,7 +140,7 @@ layout = html.Div([
      
         dbc.Row([
             dcc.Store(id='result'),
-            dbc.Col(html.H1("Analyze", className="text-center"), width=12, className="mb-2 mt-1"),
+            dbc.Col([html.H1("Analyze", className="text-center")], width=12, className="mb-2 mt-1"),
             
             dbc.Col([dcc.Dropdown(
                     id='solution_set_dropdown',
@@ -125,21 +151,16 @@ layout = html.Div([
                 )], width=12, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
             ),
                 
-            dbc.Col([html.Div([], id="performance_div")], width=12),
-             
- 
             dbc.Col([
                 dcc.ConfirmDialog(
                     id='delete_solution_confirm',
                     message='Are you sure that you want to delete this solution?',
                 ),
-
-                html.Div([], id="toggle_charts_section"),
-                html.Div([], id="delete_solution_button"),
+                html.Div([], id="delete_solution_alert"),
+                html.Div([], id="analyze_alert_section"),
                 
-                html.Div([], id="analyze_alert_section", className="text-center", style={"color":"Red"}),
-                alert_section('a'),
                 html.Div([
+                    general_information_section(),
                     trust_section('a'),
                     pillar_section("fairness"),
                     pillar_section("explainability"),
@@ -179,15 +200,22 @@ def toggle_charts(visibility_state):
     if visibility_state == False:
         return {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
 
-
-
 @app.callback(Output('solution_set_dropdown', 'options'),
               Input('solution_set_dropdown', 'nclicks'))
 def update_solution_set_dropdown(n_clicks):
     return get_solution_sets()
-
+    
+@app.callback(Output('general_description', 'children'),
+              Input('solution_set_dropdown', 'value'), prevent_initial_call=True)
+def show_general_description(solution_set_path):
+    factsheet = read_factsheet(solution_set_path)
+    description = ""
+    if "general" in factsheet and "description" in factsheet["general"]:
+        description = factsheet["general"]["description"]
+    return [html.H4("Description: "), description]
+    
 @app.callback([Output('solution_set_dropdown', 'value'),
-              Output('analyze_alert_section', 'children')],
+              Output('delete_solution_alert', 'children')],
               [Input('delete_solution_confirm', 'submit_n_clicks'),
                Input('uploaded_solution_set_path', 'data')],
               State('solution_set_dropdown', 'value'))
@@ -249,7 +277,7 @@ for m in fairness_metrics:
     [Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
 def analyze_fairness(solution_set_path):
     if solution_set_path == "":
-        return [{}, {}]
+        return ["", ""]
     print("Analyze Fairness {}".format(solution_set_path))
     if solution_set_path is not None:
         train_data =  read_train(solution_set_path)
@@ -318,7 +346,7 @@ def analyze_fairness(solution_set_path):
             ),
         ])
 
-        sections = [ html.Hr(), html.H3("▶ Fairness Configuration"), solution_set_label_select, protected_feature_select, privileged_class_definition, html.Hr(), html.H3("▶ Fairness Metrics")]
+        sections = [html.Hr(), html.H3("▶ Fairness Configuration"), solution_set_label_select, protected_feature_select, privileged_class_definition, html.Hr(), html.H3("▶ Fairness Metrics")]
         
 
         for i in range(len(fairness_metrics)):
@@ -340,9 +368,9 @@ def analyze_fairness(solution_set_path):
             ], id="{}_section".format(metric), className="mb-5 mt-5"))
         
         
-        return [html.H1("Nothing")], sections
+        return [], sections
     else:
-        return [html.H1("Nothing")], [html.H1("Nothing")]
+        return [], [html.H1("Nothing")]
 
 def update_factsheet(factsheet_path, key, value):
     print("update factsheet {0} with {1}  {2}".format(factsheet_path, key, value))
@@ -352,8 +380,7 @@ def update_factsheet(factsheet_path, key, value):
 
     ## Working with buffered content
     data[key] = value
-    
-    print(data)
+
     ## Save our changes to JSON file
     jsonFile = open(factsheet_path, "w+")
     jsonFile.write(json.dumps(data))
@@ -509,9 +536,8 @@ def toggle_pillar_section_visibility(path):
         return {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
    
 @app.callback(
-    [Output('alert_section', 'children'),
-    Output('analysis_section', 'style'),
-    Output('delete_solution_button', 'children')],
+    [Output('analyze_alert_section', 'children'),
+    Output('analysis_section', 'style')],
     [Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
 def analyze_methdology(solution_set_path):
     button = []
@@ -541,7 +567,7 @@ def analyze_methdology(solution_set_path):
         if alerts:
             style={'display': 'none'}
             alerts.append(html.H5("Please provide a complete dataset", className="text-center", style={"color":"Red"}))
-    return alerts, style, button
+    return alerts, style
 
 @app.callback(Output('delete_solution_confirm', 'displayed'),
               Input('delete_solution_button', 'n_clicks'), prevent_initial_call=True)
@@ -569,14 +595,12 @@ def get_performance(solution_set_dropdown):
                             id='table',
                             columns=[{"name": i, "id": i} for i in performance.columns],
                             data=performance.to_dict('records'),
-                             style_table={
-                    'width': '100%',
-                    'margin-left': 'auto', 
-                    'margin-right': 'auto'
-                })
+                            style_table={"table-layout": "fixed", "width": "100%"}
+
+    )
     
     performance_div = html.Div([html.H5("Performance metrics", style={"width": "100%","text-align": "center", "margin-right": "auto", "margin-left": "auto" }),
-                                performance_table],style={"margin": "20px" ,"width": "100%"})
+                                performance_table],style={"width": "100%"})
         
     return performance_div
 
@@ -625,7 +649,8 @@ def store_result(solution_set_dropdown, config):
        Output('fairness_star_rating', 'children'),
        Output('explainability_star_rating', 'children'),
        Output('robustness_star_rating', 'children'),
-       Output('methodology_star_rating', 'children')],
+       Output('methodology_star_rating', 'children'),
+       Output("robustness_details", 'children')],
       [Input('result', 'data'),Input("hidden-trigger", "value")])  
 def update_figure(data, trig):
      
@@ -637,9 +662,9 @@ def update_figure(data, trig):
          
       # np.random.seed(6)
       if data is None:
-          return [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}, {}]
+          return [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, "", "", "", "", "", ""]
       result = json.loads(data)
-      final_score, results = result["final_score"] , result["results"]
+      final_score, results, properties = result["final_score"] , result["results"], result["properties"]
       trust_score = result["trust_score"]
       pillars = list(final_score.keys())
       values = list(final_score.values()) 
@@ -659,7 +684,7 @@ def update_figure(data, trig):
       #spider
       spider_plt = px.line_polar(r=values, theta=pillars, line_close=True, title='<b style="font-size:42px;">{}/5</b>'.format(trust_score))
       spider_plt.update_layout(title_x=0.5)
-      spider_plt.update_traces(fill='toself', fillcolor=TRUST_COLOR, marker_color=TRUST_COLOR,marker_line_width=1.5, opacity=0.6)
+      spider_plt.update_traces(fill='toself', fillcolor=TRUST_COLOR, marker_color=TRUST_COLOR, marker_line_color=TRUST_COLOR, marker_line_width=0, opacity=0.6)
       chart_list.append(spider_plt)
      
       #barcharts
@@ -698,14 +723,27 @@ def update_figure(data, trig):
           spider_plt_pillar.update_traces(fill='toself', fillcolor=colors[n], marker_color=colors[n],marker_line_width=1.5, opacity=0.6)
           spider_plt_pillar.update_layout(title_x=0.5)
           chart_list.append(spider_plt_pillar)
-         
+
+      robutness_properties = properties["robustness"]
+      robustness_detail = []
+      for n, (metric , metric_properties) in enumerate(robutness_properties.items()):
+          categories = list(map(lambda x: x.replace("_",' '), metric_properties.keys()))
+          val = list(map(float, metric_properties.values()))
+          robustness_detail.append(html.Div(html.H4(metric),className="mb-5 mt-5"))
+
+          for cat, v in zip(categories, val):
+              robustness_detail.append(html.Div(html.H5(cat), className="mb-5 mt-5"))
+              robustness_detail.append(html.Div(html.H5(v), className="mb-5 mt-5"))
+
+      robustness_detail2 = [dbc.Col(children=robustness_detail)]
+
       star_ratings = []
       star_ratings.append(show_star_rating(trust_score))
       star_ratings.append(show_star_rating(final_score["fairness"]))
       star_ratings.append(show_star_rating(final_score["explainability"]))
       star_ratings.append(show_star_rating(final_score["robustness"]))
       star_ratings.append(show_star_rating(final_score["methodology"]))
-      return chart_list + star_ratings
+      return chart_list + star_ratings + robustness_detail2
  
 config_panel.get_callbacks(app)
 

@@ -156,7 +156,7 @@ def calc_explainability_score(clf, train_data, test_data, config, factsheet):
         Feature_Relevance   = score_Feature_Relevance(clf, train_data ,target_column=target_column, thresholds=fr_thresholds,
                                                      threshold_outlier =threshold_outlier,penalty_outlier=penalty_outlier )
                  )
-    
+
     scores = dict((k, v.score) for k, v in output.items())
     properties = dict((k, v.properties) for k, v in output.items())
     

@@ -35,20 +35,20 @@ for config in ["config_fairness", "config_explainability", "config_robustness", 
             exec("%s = json.load(file)" % config)
 
 #panels
-exp_panel_comp = [html.H3("Explainability Panel", style={'text-align':'center'})] + explainability_panel
+exp_panel_comp = [html.H3("Explainability", style={'text-align':'center'})] + explainability_panel
 exp_panel = html.Div(exp_panel_comp, style={'width': '22%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10,"background-color":"lightyellow"})
 
-fair_panel_comp = [html.H3("Fairness Panel", style={'text-align':'center'})] + fairness_panel
+fair_panel_comp = [html.H3("Fairness", style={'text-align':'center'})] + fairness_panel
 fair_panel = html.Div(fair_panel_comp, style={'width': '22%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10})
 
-rob_panel_comp = [html.H3("Robustness Panel", style={'text-align':'center'})] + robustness_panel
+rob_panel_comp = [html.H3("Robustness", style={'text-align':'center'})] + robustness_panel
 rob_panel = html.Div(rob_panel_comp, style={'width': '22%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10})
 
-meth_panel_comp = [html.H3("Methodology Panel", style={'text-align':'center'})] + methodology_panel
+meth_panel_comp = [html.H3("Methodology", style={'text-align':'center'})] + methodology_panel
 meth_panel = html.Div(meth_panel_comp, style={'width': '22%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10})
 
 
-children.append(html.Div([html.H3("Configuration",style={'text-align':'center'}),exp_panel,fair_panel,rob_panel,meth_panel],
+children.append(html.Div([html.H3("Pillars and Metrics\n Weighting",style={'text-align':'center'}),exp_panel,fair_panel,rob_panel,meth_panel],
                           style={"background-color":"lightyellow"}))
 
 button_div = html.Div([
@@ -84,15 +84,15 @@ app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 #list(filter(lambda ids: ids[:2]=="w_", input_ids))
 
 layout = html.Div([
-    html.Div(
-    [html.P('show configuration',style = {"font-size":"20px", "font-weight":"bold",'text-align':'center'}),
-    daq.BooleanSwitch(id='toggle-hide',
-                      on=False,
-                      #label='show configuration',
-                      labelPosition="top",
-                      color = "green"
-                     
-                    )],style={"background-color": "rgba(255,228,181,0.5)",'padding-bottom': 20}),
+    #html.Div(
+    #[
+    #daq.BooleanSwitch(id='toggle-hide',
+    #                  on=False,
+    #                  label='Show Configuration',
+    #                  labelPosition="top",
+    #                  color = "green"
+    #                 
+    #                )],style={"background-color": "rgba(255,228,181,0.5)",'padding-bottom': 20}),
     panel_div,
     dbc.Modal(
     [   
@@ -205,7 +205,7 @@ def get_callbacks(app):
     
     @app.callback(
        Output(component_id='panel', component_property='style'),
-       [Input(component_id="toggle-hide", component_property='on')])
+       [Input(component_id="show_weighting", component_property='on')])
     def show_hide_element(visibility_state):
         if visibility_state == True:
             return {'display': 'block'}

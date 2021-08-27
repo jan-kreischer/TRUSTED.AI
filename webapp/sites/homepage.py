@@ -2,6 +2,7 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 from app import server
 from app import app
+from config import TRUST_COLOR
 
 # needed only if running this as a single page app
 #external_stylesheets = [dbc.themes.LUX]
@@ -19,8 +20,9 @@ layout = dbc.Container([
                  children=[html.H3(children='Try the Demo', className="text-center"),
                                        dbc.Button("Demo",
                                                   href="/upload",
-                                                  color="primary",
-                                                  className="mt-3"),
+                                                  className="mt-3",
+                                                  style={"background-color": TRUST_COLOR, "color": "#FFFFFF", "opacity": "0.8"}
+                                           ),
                                        ],
                              body=True, color="dark", outline=True)
                     , width=4, className="mb-4")
@@ -46,7 +48,7 @@ layout = dbc.Container([
             dbc.Col(html.H2("What metrics do we apply?"), width=12, className="text-center"),
             
             dbc.Col(html.Div([html.H3("Fairness"), html.Div("Impartial and just decisions without discrimination of protected groups.")]), width=3, className="text-center"),
-            dbc.Col(html.Div(html.H3("Explainability")), width=3, className="text-center"),
+            dbc.Col(html.Div([html.H3("Explainability"), html.Div("Provide clarification for the cause of the decision")]), width=3, className="text-center"),
             dbc.Col(html.Div(html.H3("Robustness")), width=3, className="text-center"),
             dbc.Col(html.Div(html.H3("Methodology")), width=3, className="text-center"),
         ],
@@ -56,8 +58,9 @@ layout = dbc.Container([
         dbc.Row([
         ],
         style={
-                "background-color": "#1a1a1a",
-                "height":  "300px"
+                "background-color": TRUST_COLOR,
+                "height":  "300px",
+                "opacity": "0.8",
         },   
         justify="center",
         className="mb-5 mt-5"),
