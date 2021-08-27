@@ -52,20 +52,22 @@ children.append(html.Div([html.H3("Pillars and Metrics\n Weighting",style={'text
                           style={"background-color":"lightyellow"}))
 
 button_div = html.Div([
+    html.Div(html.Br(), style={'width': '33%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10}),
     html.Div([
-                    html.Div(html.Label("Choose Configuration:"), style={'width': '200px', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10}),
+    html.Div([html.Br(),
+                    html.Div(html.Label("Choose Configuration:"), style={'width': '200px', 'display': 'inline-block',"vertical-align": "top",'margin-left': 50}),
                     html.Div(dcc.Dropdown(
                                 id='config-dropdown',
                                 options=list(map(lambda name:{'label': name[:-5], 'value': name} ,os.listdir("configs"))),
                                 value='default.json'
                             ), 
-                             style={'width': '300px', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10}),
+                             style={'width': '300px', 'display': 'inline-block',"vertical-align": "top",'margin-left': 50}),
                         ]),
     html.Button('apply config', id='apply-config', style={"background-color": "gold",'margin-left': 50}),
     html.Br(),html.Br(),
     html.Button('Save Weights', id='save-weights', style={"background-color": "green",'margin-left': 50}),
     dcc.Store(id='input-config'),
-    html.Div(dcc.Input(id="hidden-trigger", value=None, type='text'), style={"display":"none"})
+    html.Div(dcc.Input(id="hidden-trigger", value=None, type='text'), style={"display":"none"})],style={'width': '50%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10})
     # html.Div(id="hidden-trigger-save", style={"display":"none"}),
     ], style={"background-color": "rgba(255,228,181,0.5)",'padding-bottom': 20," margin-left": "auto", "margin-right": "auto"})
     

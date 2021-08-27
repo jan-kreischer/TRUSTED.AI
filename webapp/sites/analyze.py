@@ -208,6 +208,8 @@ def update_solution_set_dropdown(n_clicks):
 @app.callback(Output('general_description', 'children'),
               Input('solution_set_dropdown', 'value'), prevent_initial_call=True)
 def show_general_description(solution_set_path):
+    if not solution_set_path:
+        return ""
     factsheet = read_factsheet(solution_set_path)
     description = ""
     if "general" in factsheet and "description" in factsheet["general"]:
