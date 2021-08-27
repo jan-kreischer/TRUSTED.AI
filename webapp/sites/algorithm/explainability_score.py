@@ -19,9 +19,15 @@ info = collections.namedtuple('info', 'description value')
 # factsheet, model, X_test, X_train, y_test, y_train = get_case_inputs(case)
 
 # # #get config
-# with open("apps/algorithm/config_explainability.json") as file:
+# with open("sites/algorithm/config_explainability.json") as file:
 #         config = json.load(file)
     
+
+# scenarios = list(map(lambda x: x["value"], get_solution_sets()))
+# test_data, train_data, clf, factsheet = read_scenario(scenarios[6])
+# target_column = factsheet["general"].get("target_column")
+# res = calc_explainability_score(clf, train_data, test_data, config,target_column)
+# res.score
 
 # functions for explainability score
 
@@ -33,10 +39,18 @@ def score_Algorithm_Class(clf, clf_type_score):
     
     return  result(score=exp_score, properties=properties)
 
-def score_Correlated_Features(train_data, test_data):
+def score_Correlated_Features(train_data, test_data, thresholds=[0.05, 0.16, 0.28, 0.4], target_column=None):
     
-    X_train = train_data.iloc[:,:-1]
-    X_test = test_data.iloc[:,:-1]
+    test_data = test_data.copy()
+    train_data = train_data.copy()
+     
+    if target_column:
+        X_test = test_data.drop(target_column, axis=1)
+        X_train = train_data.drop(target_column, axis=1)
+    else:
+        X_test = test_data.iloc[:,:-1]
+        X_train = train_data.iloc[:,:-1]
+        
     
     df_comb = pd.concat([X_test, X_train])
     corr_matrix = df_comb.corr().abs()
@@ -49,25 +63,49 @@ def score_Correlated_Features(train_data, test_data):
     
     pct_drop = len(to_drop)/len(df_comb.columns)
     
-    bins = np.linspace(0.05, 0.4, 4)
-    score = 5-np.digitize(pct_drop, bins, right=False) 
+    bins = thresholds
+    score = 5-np.digitize(pct_drop, bins, right=True) 
     properties= {"pct_drop" : info("Percentage of highly correlated features", "{:.2f}%".format(100*pct_drop))}
     
     return  result(score=score, properties=properties)
 
 
-def score_Model_Size(clf, bins = np.array([10,30,100,500])):
-        
-    dist_score = 5- np.digitize(clf.n_features_, bins, right=False) 
-         
-    return result(score=dist_score, properties={"n_features": info("number of features", clf.n_features_)})
-
-def score_Feature_Relevance(clf, train_data, scale_factor):
+def score_Model_Size(test_data, thresholds = np.array([10,30,100,500])):
     
-    # scale_factor = 1.5
-    # distri_threshold = 0.6
-    X_train = train_data.iloc[:,:-1]
-    importance=clf.feature_importances_
+    dist_score = 5- np.digitize(test_data.shape[1]-1 , thresholds, right=True) 
+         
+    return result(score=dist_score, properties={"n_features": info("number of features", test_data.shape[1])})
+
+def score_Feature_Relevance(clf, train_data, target_column=None, threshold_outlier = 0.03, penalty_outlier = 0.5, thresholds = [0.05, 0.1, 0.2, 0.3]):
+    
+    pd.options.mode.chained_assignment = None  
+    train_data = train_data.copy()
+    if target_column:
+        X_train = train_data.drop(target_column, axis=1)
+        y_train = train_data[target_column]
+    else:
+        X_train = train_data.iloc[:,:-1]
+        y_train = train_data.iloc[:,-1: ]
+        
+    scale_factor = 1.5
+    distri_threshold = 0.6
+    if (type(clf).__name__ == 'LogisticRegression') or (type(clf).__name__ == 'LinearRegression'): 
+        #normalize 
+        for feature in X_train.columns:
+            X_train.loc[feature] = X_train[feature] / X_train[feature].std()   
+        clf.max_iter =1000
+        clf.fit(X_train, y_train.values.ravel())
+        importance = clf.coef_[0]
+        #pd.DataFrame(columns=feat_labels,data=importance.reshape(1,len(importance))).plot.bar()
+        
+    elif  (type(clf).__name__ == 'RandomForestClassifier') or (type(clf).__name__ == 'DecisionTreeClassifier'):
+         importance=clf.feature_importances_
+         
+    else:
+        return result(score= np.nan, properties=None) 
+   
+    # absolut values
+    importance = abs(importance)
     
     feat_labels = X_train.columns
     indices = np.argsort(importance)[::-1]
@@ -85,11 +123,10 @@ def score_Feature_Relevance(clf, train_data, scale_factor):
     # percentage of features that concentrate distri_threshold percent of all importance
     pct_dist = sum(np.cumsum(importance) < 0.6) / len(importance)
     
-    bins = np.linspace(0.05, 0.3, 4) # np.array([0.05,0.13333333,0.21666667, 0.3])
-    dist_score = np.digitize(pct_dist, bins, right=False) + 1 
+    dist_score = np.digitize(pct_dist, thresholds, right=False) + 1 
     
-    if n_outliers/len(importance) > 0.03:
-        dist_score -= 0.5
+    if n_outliers/len(importance) >= threshold_outlier:
+        dist_score -= penalty_outlier
     
     score =  max(dist_score,1)
     properties = {"n_outliers":  info("number of outliers in the importance distribution",n_outliers),
@@ -101,18 +138,23 @@ def score_Feature_Relevance(clf, train_data, scale_factor):
     # import seaborn as sns
     # sns.boxplot(data=importance)
     
-def calc_explainability_score(clf, train_data, test_data, config):
+def calc_explainability_score(clf, train_data, test_data, config, factsheet):
     
     #function parameters
+    target_column = factsheet["general"].get("target_column")
     clf_type_score = config["parameters"]["score_Algorithm_Class"]["clf_type_score"]["value"]
-    scale_factor = config["parameters"]["score_Feature_Relevance"]["scale_factor"]["value"]
-    distri_threshold = config["parameters"]["score_Feature_Relevance"]["distri_threshold"]["value"]
+    ms_thresholds = config["parameters"]["score_Model_Size"]["thresholds"]["value"]
+    cf_thresholds = config["parameters"]["score_Correlated_Features"]["thresholds"]["value"]
+    fr_thresholds = config["parameters"]["score_Feature_Relevance"]["thresholds"]["value"]
+    threshold_outlier = config["parameters"]["score_Feature_Relevance"]["threshold_outlier"]["value"]
+    penalty_outlier = config["parameters"]["score_Feature_Relevance"]["penalty_outlier"]["value"]
     
     output = dict(
         Algorithm_Class     = score_Algorithm_Class(clf, clf_type_score),
-        Correlated_Features = score_Correlated_Features(train_data, test_data),
-        Model_Size          = score_Model_Size(clf),
-        Feature_Relevance   = score_Feature_Relevance(clf, train_data, scale_factor)
+        Correlated_Features = score_Correlated_Features(train_data, test_data, thresholds=cf_thresholds, target_column=target_column ),
+        Model_Size          = score_Model_Size(train_data, ms_thresholds),
+        Feature_Relevance   = score_Feature_Relevance(clf, train_data ,target_column=target_column, thresholds=fr_thresholds,
+                                                     threshold_outlier =threshold_outlier,penalty_outlier=penalty_outlier )
                  )
     
     scores = dict((k, v.score) for k, v in output.items())

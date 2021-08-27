@@ -37,11 +37,13 @@ with open('configs/default.json', 'w') as outfile:
 def trust_section(c):
     return html.Div([ 
         html.Div(id='boolean-switch-output'),
-        html.Div([daq.BooleanSwitch(id='toggle_charts',
+        html.Div([
+            daq.BooleanSwitch(id='toggle_charts',
             on=False,
             color = "green",   
             style={"float": "right"}
-        )], className="mt-2"),
+        )
+        ], className="mt-2"),
         html.H2("Trustworthiness"),
 
         html.Div([], id="trust_overview"),
@@ -594,7 +596,7 @@ def store_result(solution_set_dropdown, config):
             
         test, train, model, factsheet = read_scenario(solution_set_dropdown)
     
-        final_score, results, properties = get_final_score(model, train, test, main_config)
+        final_score, results, properties = get_final_score(model, train, test, main_config, factsheet)
         trust_score = get_trust_score(final_score, main_config["pillars"])
         
         def convert(o):
