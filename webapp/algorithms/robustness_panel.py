@@ -10,7 +10,7 @@ import json
 
 config_robustness, config_pillars = 0, 0
 for config in ["config_pillars", "config_robustness"]:
-    with open("sites/algorithm/"+config+".json") as file:
+    with open("algorithms/"+config+".json") as file:
             exec("%s = json.load(file)" % config)
 
 # create panel

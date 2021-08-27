@@ -11,10 +11,10 @@ import matplotlib.pyplot as plt
 import json
 from math import pi
 import sklearn.metrics as metrics
-from sites.algorithm.fairness_score import calc_fairness_score
-from sites.algorithm.explainability_score import calc_explainability_score
-from sites.algorithm.robustness_score import calc_robustness_score
-from sites.algorithm.methodology_score import calc_methodology_score
+from algorithms.fairness_score import calc_fairness_score
+from algorithms.explainability_score import calc_explainability_score
+from algorithms.robustness_score import calc_robustness_score
+from algorithms.methodology_score import calc_methodology_score
 import collections
 from helpers import read_scenario
 
