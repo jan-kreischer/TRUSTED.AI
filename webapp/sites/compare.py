@@ -13,8 +13,7 @@ import shutil
 from helpers import *
 from config import SCENARIOS_FOLDER_PATH, FAIRNESS_COLOR, EXPLAINABILITY_COLOR, ROBUSTNESS_COLOR, METHODOLOGY_COLOR, \
     TRUST_COLOR
-from algorithms.helper_functions import get_performance_table, get_final_score, get_case_inputs, \
-    trusting_AI_scores, get_trust_score
+from algorithms.trustworthiness_score import trusting_AI_scores, get_trust_score, get_final_score
 from pillars.fairness.class_balance import compute_class_balance
 import dash_table
 import numpy as np

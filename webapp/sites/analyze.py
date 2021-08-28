@@ -12,7 +12,8 @@ import glob
 import shutil
 from helpers import *
 from config import *
-from sites.algorithm.helper_functions import get_performance_metrics, get_final_score, get_case_inputs, trusting_AI_scores, get_trust_score
+from algorithms.helper_functions import get_performance_metrics
+from algorithms.trustworthiness_score import trusting_AI_scores, get_trust_score, get_final_score
 from pillars.fairness.class_balance import compute_class_balance
 import dash_table
 import numpy as np
@@ -32,10 +33,18 @@ main_config = dict(fairness=config_fairness, explainability=config_explainabilit
 
 with open('configs/default.json', 'w') as outfile:
                 json.dump(main_config, outfile, indent=4)
+# === METRICS ===
+fairness_metrics = ["class_balance", "statistical_parity_difference", "equal_opportunity_difference", "average_odds_difference", "disparate_impact", "theil_index", "euclidean_distance", "mahalanobis_distance", "manhattan_distance"]
+explainability_metrics = ["explainablity_metric"]
+robustness_metrics = ["robustness_metric"]
+methodology_metrics = [
+    "normalization", 
+    "train_test_split",
+    "regularization"
+]
 
 # === SECTIONS ===
-
-def general_information_section():
+def general_section():
     return html.Div([
                                         dbc.Button(
             html.I(className="fas fa-backspace"),
@@ -56,7 +65,7 @@ daq.BooleanSwitch(id='toggle_charts',
                     ])
 
 
-def trust_section(c):
+def trust_section():
     return html.Div([ 
         html.Div([
             html.Hr(),
@@ -69,10 +78,10 @@ def trust_section(c):
                      
                     )]),
             html.H2("• Trustworthiness"),
-        ], id="trust_section_heading", className="mt-2 mb-4"),
+        ], id="trust_section_heading", className="mt-2 mb-5"),
 
         html.Div([], id="trust_overview"),
-        html.H3("Overall Score", className="text-center"),
+        html.H3("Overall Score", className="text-center mt-2"),
         html.Div([], id="trust_star_rating", className="star_rating, text-center"),
         dcc.Graph(id='spider', style={'display': 'none'}),
         dcc.Graph(id='bar', style={'display': 'block'}),
@@ -81,6 +90,10 @@ def trust_section(c):
     ], id="trust_section", style={"display": "None"})
 
 def pillar_section(pillar):
+        sections = []
+        for i in range(len(fairness_metrics)):
+            metric_id = fairness_metrics[i]
+            sections.append(create_metric_details_section(metric_id, i))
         return html.Div([
                 html.Div([
                     dbc.Button(
@@ -104,8 +117,7 @@ def pillar_section(pillar):
                     html.Div([], id="{}_star_rating".format(pillar), className="star_rating, text-center"),
                     dcc.Graph(id='{}_spider'.format(pillar), style={'display': 'none'}),
                     dcc.Graph(id='{}_bar'.format(pillar), style={'display': 'block'}),    
-                    dbc.Collapse(
-                        html.P("{} Details".format(pillar)),
+                    dbc.Collapse([],
                         id="{}_details".format(pillar),
                         is_open=False,
                     ),
@@ -133,54 +145,6 @@ for s in SECTIONS:
             return (not is_open, {'display': 'None'})
         else:
             return (not is_open, {'display': 'Block'})
-
-layout = html.Div([
-    config_panel.layout,
-    dbc.Container([
-     
-        dbc.Row([
-            dcc.Store(id='result'),
-            
-            dbc.Col([html.H1("Analyze", className="text-center")], width=12, className="mb-2 mt-1"),
-            
-            dbc.Col([dcc.Dropdown(
-                    id='solution_set_dropdown',
-                    options= get_solution_sets(),
-                    value=None,
-
-                    placeholder='Select Solution'
-                )], width=12, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
-            ),
-                
-            dbc.Col([
-                dcc.ConfirmDialog(
-                    id='delete_solution_confirm',
-                    message='Are you sure that you want to delete this solution?',
-                ),
-                html.Div([], id="delete_solution_alert"),
-                html.Div([], id="analyze_alert_section"),
-                
-                html.Div([
-                    general_information_section(),
-                    trust_section('a'),
-                    pillar_section("fairness"),
-                    pillar_section("explainability"),
-                    pillar_section("robustness"),
-                    pillar_section("methodology"),
-                    dcc.Store(id='training_data', storage_type='session'),
-                    dcc.Store(id='test_data', storage_type='session')
-                ], id="analysis_section")
-            ],
-                width=12, 
-                className="mt-2 pt-2 pb-2 mb-2",
-                style={
-                    "border": "1px solid #d8d8d8",
-                    "borderRadius": "6px"
-                }   
-            ),
-        ], no_gutters=False)
-    ])
-])
 
 @app.callback(
     Output(component_id="bar", component_property='style'),
@@ -241,23 +205,6 @@ def update_output(submit_n_clicks, uploaded_solution_set, solution_set_path):
             return uploaded_solution_set["path"], []
     
 # === FAIRNESS ===
-fairness_metrics = ["class_balance", "statistical_parity_difference", "equal_opportunity_difference", "average_odds_difference", "disparate_impact", "theil_index", "euclidean_distance", "mahalanobis_distance", "manhattan_distance"]
-
-for m in fairness_metrics:
-    @app.callback(
-        [Output("{0}_details".format(m), "is_open"),
-        Output("{0}_details".format(m), "style")],
-        [Input("toggle_{0}_details".format(m), "n_clicks")],
-        [State("{0}_details".format(m), "is_open")],
-        prevent_initial_call=True
-    )
-    def toggle_detail_section(n, is_open):
-        #app.logger.info("toggle {0} detail section".format(s))
-        if is_open:
-            return (not is_open, {'display': 'None'})
-        else:
-            return (not is_open, {'display': 'Block'})
-
 @app.callback(
     [Output("fairness_overview", 'children'),
     Output("fairness_details", 'children')],
@@ -267,7 +214,12 @@ def analyze_fairness(solution_set_path):
         return ["", ""]
     print("Analyze Fairness {}".format(solution_set_path))
     if solution_set_path is not None:
+        train_data =  read_train(solution_set_path)
+        test_data =  read_test(solution_set_path)
 
+        features = list(train_data.columns)
+        target_column=""
+        factsheet = None
 
         factsheet_path = os.path.join(solution_set_path,"factsheet.json") 
         # Check if a factsheet.json file already exists in the target directory
@@ -330,26 +282,9 @@ def analyze_fairness(solution_set_path):
 
         sections = [html.Hr(), html.H3("▶ Fairness Configuration"), solution_set_label_select, protected_feature_select, privileged_class_definition, html.Hr(), html.H3("▶ Fairness Metrics")]
         
-
         for i in range(len(fairness_metrics)):
-            metric = fairness_metrics[i]
-            metric_id = metric
-            metric_name = metric_id.replace("_", " ")
-            sections.append(html.Div([dbc.Button(
-                        html.I(className="fas fa-chevron-down"),
-                        id="toggle_{}_details".format(metric),
-                        className="mb-3",
-                        n_clicks=0,
-                        style={"float": "right"}
-                    ),html.H4("1.{0} {1}".format(i+1, metric_name)), 
-                    dbc.Collapse(
-                        html.Div("{}_details".format(metric)),
-                        id="{}_details".format(metric),
-                        is_open=False,          
-                    ),
-            ], id="{}_section".format(metric), className="mb-5 mt-5"))
-        
-        
+            metric_id = fairness_metrics[i]
+            sections.append(create_metric_details_section(metric_id, i))
         return [], sections
     else:
         return [], [html.H1("Nothing")]
@@ -427,179 +362,59 @@ def load_data(solution_set_path):
     if solution_set_path != "":
         training_data = read_train(solution_set_path)
         test_data = read_test(solution_set_path)
-        compute_train_test_split(solution_set_path)
+        #compute_train_test_split(solution_set_path)
         return training_data.to_json(date_format='iso', orient='split'), test_data.to_json(date_format='iso', orient='split'), 
     else:
         return None, None
-    
-#@app.callback(Output('graph', 'figure'), Input('intermediate-value', 'data'))
-#def update_graph(jsonified_cleaned_data):
-
-    # more generally, this line would be
-    # json.loads(jsonified_cleaned_data)
-#    dff = pd.read_json(jsonified_cleaned_data, orient='split')
-
-#    figure = create_figure(dff)
-#    return figure
-
-#@app.callback(Output('table', 'children'), Input('intermediate-value', 'data'))
-#def update_table(jsonified_cleaned_data):
-#    dff = pd.read_json(jsonified_cleaned_data, orient='split')
-#    table = create_table(dff)
-#    return table
-    
-# === EXPLAINABILITY ===
-# @app.callback(
-#     [Output("explainability_overview", 'children'),
-#     Output("explainability_details", 'children')],
-#     [Input("solution_set_dropdown", 'value')], prevent_initial_call=True)
-# def analyze_explainability(solution_set_path):
-#     if solution_set_path is not None:
-
-#         df = pd.DataFrame(dict(
-#             r=[1, 5, 2, 2, 3],
-#             theta=['processing cost','mechanical properties','chemical stability',
-#            'thermal stability', 'device integration']))
-#         fig = px.line_polar(df, r='r', theta='theta', line_close=True)
-#         fig.update_traces(fill='toself')
-#         explainability_overview = dcc.Graph(figure=fig)
-#         return [explainability_overview], []
-#     else:
-#         return [], []
-        
 
 # === METHODOLOGY ===
+def create_metric_details_section(metric_id, i):
+    metric_name = metric_id.replace("_", " ")
+    return html.Div([
+        dbc.Button(html.I(className="fas fa-chevron-down"),
+            id="toggle_{}_details".format(metric_id),
+            className="mb-3",
+            n_clicks=0,
+            style={"float": "right"}
+        ),
+        html.H4("1.{0} {1}".format(i+1, metric_name)), 
+            dbc.Collapse(
+            html.Div("{}_details".format(metric_name)),
+            id="{}_details".format(metric_id),
+            is_open=False,          
+        ),
+        ], id="{}_section".format(metric_id), className="mb-5 mt-5")
+
 @app.callback(
-    [Output("methdology_overview", 'children'),
-    Output("methdology_details", 'children')],
+    [Output("methodology_overview", 'children'),
+    Output("methodology_details", 'children')],
     [Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
 def analyze_methodology(solution_set_path):
-    if solution_set_path == "":
-        return ["", ""]
-    print("Analyzing Methodology {}".format(solution_set_path))
-    if solution_set_path is not None:
-        factsheet_path = os.path.join(solution_set_path, FACTSHEET_NAME) 
-        # Check if a factsheet.json file already exists in the target directory
-        if os.path.isfile(factsheet_path):
-
-            f = open(factsheet_path,)
-            factsheet = json.load(f)
-            
-            target_column = ""
-            if "general" in factsheet and "target_column" in factsheet["general"]:
-                target_column = factsheet["general"]["target_column"]
-            print("target_column {}".format(target_column))
-            
-            protected_feature = ""
-            if "fairness" in factsheet and "protected_feature" in factsheet["fairness"]:
-                protected_feature = factsheet["fairness"]["protected_feature"]
-            print("protected_feature {}".format(protected_feature))
-            
-            privileged_class_definition = ""
-            if "fairness" in factsheet and "privileged_class_definition" in factsheet["fairness"]:
-                privileged_class_definition = factsheet["fairness"]["privileged_class_definition"]
-            print("privileged_class_definition {}".format(privileged_class_definition))
-            
-            f.close()
-        # Create a factsheet
-        else:
-            print("No factsheet exists yet")
-
-
-        solution_set_label_select_options = list(map(lambda x: {"label": x, "value": x}, features))
-        solution_set_label_select = html.Div([
-            "Select Target Column", 
-            dcc.Dropdown(
-                id="solution_set_label_select",
-                options=solution_set_label_select_options,
-                value=target_column
-            ),
-        ])
-        
-        protected_feature_select_options = list(map(lambda x: {"label": x, "value": x}, features))
-        protected_feature_select = html.Div([
-            "Select Protected Feature", 
-            dcc.Dropdown(
-                id="protected_feature_select",
-                options=protected_feature_select_options,
-                value=protected_feature
-            ),
-        ])
-        
-        privileged_class_definition = html.Div([
-            "Define Privileged Class",
-            html.Br(),
-            dcc.Input(
-                id="privileged_class_definition",
-                type="text",
-                placeholder="e.g lambda x: x >= 25",
-                style={'width': '100%'}
-            ),
-        ])
-
-        sections = [html.Hr(), html.H3("▶ Fairness Configuration"), solution_set_label_select, protected_feature_select, privileged_class_definition, html.Hr(), html.H3("▶ Fairness Metrics")]
-        
-
-        for i in range(len(fairness_metrics)):
-            metric = fairness_metrics[i]
-            metric_id = metric
-            metric_name = metric_id.replace("_", " ")
-            sections.append(html.Div([dbc.Button(
-                        html.I(className="fas fa-chevron-down"),
-                        id="toggle_{}_details".format(metric),
-                        className="mb-3",
-                        n_clicks=0,
-                        style={"float": "right"}
-                    ),html.H4("1.{0} {1}".format(i+1, metric_name)), 
-                    dbc.Collapse(
-                        html.Div("{}_details".format(metric)),
-                        id="{}_details".format(metric),
-                        is_open=False,          
-                    ),
-            ], id="{}_section".format(metric), className="mb-5 mt-5"))
-        
-        
+    if solution_set_path:
+        sections = []
+        for i in range(len(methodology_metrics)):
+            metric_id = methodology_metrics[i]
+            sections.append(create_metric_details_section(metric_id, i))
         return [], sections
     else:
-        return [], [html.H1("Nothing")]
-
-
-
-# @app.callback(
-#     [Output("robustness_overview", 'children'),
-#     Output("robustness_details", 'children')],
-#     [Input("solution_set_dropdown", 'value')], prevent_initial_call=True)
-# def analyze_robustness(solution_set_path):
-#     if solution_set_path is not None:
-#         df = pd.DataFrame(dict(
-#             r=[1, 5, 2, 2, 3],
-#             theta=['processing cost','mechanical properties','chemical stability',
-#            'thermal stability', 'device integration']))
-#         fig = px.line_polar(df, r='r', theta='theta', line_close=True)
-#         fig.update_traces(fill='toself')
-#         explainability_overview = dcc.Graph(figure=fig)
-#         return [explainability_overview], [html.Div("Robustness Metrics")]
-#     else:
-#         return [], []
+        return [], []
  
-# === METHODOLOGY ===
-# @app.callback(
-#     [Output("methodology_overview", 'children'),
-#     Output("methodology_details", 'children')],
-#     [Input("solution_set_dropdown", 'value')], prevent_initial_call=True)
-# def analyze_methodology(solution_set_path):
-#     if solution_set_path is not None:
-#         df = pd.DataFrame(dict(
-#             r=[1, 5, 2, 2, 3],
-#             theta=['processing cost','mechanical properties','chemical stability',
-#            'thermal stability', 'device integration']))
-#         fig = px.line_polar(df, r='r', theta='theta', line_close=True)
-#         fig.update_traces(fill='toself')
-#         explainability_overview = dcc.Graph(figure=fig)
-#         return [explainability_overview], [html.Div("Methodology Metrics a", style={"display": "None"})]
-#     else:
-#         return [], []
-   
+
+
+@app.callback(
+    Output("train_test_split_details", 'children'),
+    [Input('result', 'data'),
+     State('solution_set_dropdown', 'value')], prevent_initial_call=True)
+def train_test_split(data, solution_set_path):
+      if data is None:
+          return []
+      else:
+          result = json.loads(data)
+          final_score, results, properties = result["final_score"] , result["results"], result["properties"]
+          training_data_ratio = properties["methodology"]["Train_Test_Split"]["training_data_ratio"]
+          test_data_ratio = properties["methodology"]["Train_Test_Split"]["test_data_ratio"]
+          return html.Div("Train-Test-Split: {0}/{1}".format(training_data_ratio, test_data_ratio))
+
 @app.callback(
     Output(component_id="trust_section", component_property='style'),
     Output(component_id="fairness_section", component_property='style'),
@@ -661,48 +476,25 @@ def show_performance_metrics(solution_set_path):
     if not solution_set_path:
         return []
     else:
-        print("SHOW PERFORMANCE METRICS SECTION")
         test_data, training_data, model, factsheet = read_solution(solution_set_path)
         target_column = ""
         if "general" in factsheet and "target_column" in factsheet["general"]:
             target_column = factsheet["general"]["target_column"]
-        print("target_column {}".format(target_column))
         
-        print("LOADED MODEL")
         performance_metrics =  get_performance_metrics(model, test_data, target_column)
-        #performance_metrics = {
-        #    "accuracy" :  [1],
-        #    "global recall" :  [2],
-        #    "class weighted recall" : [3],
-        #    "global precision" : [4],
-        #   "class weighted precision" : [5],
-        #    "global f1 score" :  [6],
-        #    "class weighted f1 score" :  [7],
-        #    "cross-entropy loss" : [8],
-        #    "ROC AUC" : [9],
-        #}
-
-        #print("CONVERT DICT TO PD")
-        #performance_metrics_df = pd.DataFrame.from_dict(performance_metrics)
-        #print(performance_metrics_df
-
-        print("PERFORMANCE METRICS DF COLUMNS {}".format(performance_metrics.columns))
         performance_metrics_table = dash_table.DataTable(
                                 id='table',
                                 columns=[{"name": i, "id": i} for i in performance_metrics.columns],
                                 data=performance_metrics.to_dict('records'),
-                                style_table={"table-layout": "fixed", "width": "auto", 'overflowX': 'none'}
+                                style_table={"table-layout": "fixed", "width": "auto", 'overflowX': 'hidden'}
         )
-
-        #performance_metrics_section = html.Div([html.H5("Performance metrics", style={"width": "100%","text-align": "center", "margin-right": "auto", "margin-left": "auto" }),
-                                    #performance_metrics_table],style={"width": "100%"})
-
         return performance_metrics_table
+
 
 @app.callback(Output('result', 'data'), 
           [Input('solution_set_dropdown', 'value'),
           Input("input-config","data")])
-def store_result(solution_set_dropdown, config):
+def store_trust_analysis(solution_set_dropdown, config):
     
         if not solution_set_dropdown:
             return None
@@ -727,7 +519,22 @@ def store_result(solution_set_dropdown, config):
                 "trust_score":trust_score,
                 "properties" : properties}
         
+        print(data)
         return json.dumps(data,default=convert)
+
+for m in fairness_metrics + methodology_metrics:
+    @app.callback(
+        [Output("{0}_details".format(m), "is_open"),
+        Output("{0}_details".format(m), "style")],
+        [Input("toggle_{0}_details".format(m), "n_clicks")],
+        [State("{0}_details".format(m), "is_open")],
+        prevent_initial_call=True
+    )
+    def toggle_detail_section(n, is_open):
+        if is_open:
+            return (not is_open, {'display': 'None'})
+        else:
+            return (not is_open, {'display': 'Block'})
     
 @app.callback(
       [Output('bar', 'figure'),
@@ -748,14 +555,6 @@ def store_result(solution_set_dropdown, config):
        Output("robustness_details", 'children')],
       [Input('result', 'data'),Input("hidden-trigger", "value")])  
 def update_figure(data, trig):
-     
-      # if not config or trig != "apply-config.n_clicks":
-      #     with open('configs/default.json','r') as f:
-      #         main_config = json.loads(f.read())
-      # else:
-      #     main_config = json.loads(config)
-         
-      # np.random.seed(6)
       if data is None:
           return [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, "", "", "", "", "", ""]
       result = json.loads(data)
@@ -842,3 +641,51 @@ def update_figure(data, trig):
  
 config_panel.get_callbacks(app)
 
+
+layout = html.Div([
+    config_panel.layout,
+    dbc.Container([
+     
+        dbc.Row([
+            dcc.Store(id='result'),
+            
+            dbc.Col([html.H1("Analyze", className="text-center")], width=12, className="mb-2 mt-1"),
+            
+            dbc.Col([dcc.Dropdown(
+                    id='solution_set_dropdown',
+                    options= get_solution_sets(),
+                    value=None,
+
+                    placeholder='Select Solution'
+                )], width=12, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
+            ),
+                
+            dbc.Col([
+                dcc.ConfirmDialog(
+                    id='delete_solution_confirm',
+                    message='Are you sure that you want to delete this solution?',
+                ),
+                html.Div([], id="delete_solution_alert"),
+                html.Div([], id="analyze_alert_section"),
+                
+                html.Div([
+                    general_section(),
+                    trust_section(),
+                    pillar_section("fairness"),
+                    pillar_section("explainability"),
+                    pillar_section("robustness"),
+                    pillar_section("methodology"),
+                    dcc.Store(id='training_data', storage_type='session'),
+                    dcc.Store(id='test_data', storage_type='session')
+                ], id="analysis_section")
+            ],
+                width=12, 
+                className="mt-2 pt-2 pb-2 mb-2",
+                style={
+                    "border": "1px solid #d8d8d8",
+                    "borderRadius": "6px"
+                }   
+            ),
+        ], no_gutters=False)
+    ])
+])

@@ -71,14 +71,6 @@ def read_train(solution_set_path):
     
     return train
 
-def compute_train_test_split(solution_set_path):
-    train_dataset = read_train(solution_set_path)
-    test_dataset = read_test(solution_set_path)
-    print("TRAIN TEST SPLIT => TRAIN {0}, TEST {1}, SPLIT {2}".format(len(train_dataset), len(test_dataset), len(train_dataset)/len(test_dataset)))
-    print("Lenght of test dataset {}".format(len(test_dataset)))
-    print("Lenght of training dataset {}".format(len(train_dataset)))
-    return len(train_dataset)/len(test_dataset)
-
 def score_train_test_split():
     return 2.5
 

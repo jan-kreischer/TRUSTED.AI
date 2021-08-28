@@ -1,1 +1,1 @@
-{"general": {"description": "Description", "target_column": "label"}, "fairness": {"protected_feature": "connectivity"}}
+{"general": {"description": "Description", "target_column": "label"}, "fairness": {"protected_feature": "connectivity"}, "target_column": "label"}

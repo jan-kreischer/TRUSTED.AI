@@ -11,6 +11,12 @@
         "value": "The value of the parameter_XY",
         "description": "The description of the paramter and its impact"
       }
+    },
+    "score_Train_Test_Split": {
+      "parameter_split": {
+        "value": "The value of the parameter_XY",
+        "description": "The description of the paramter and its impact"
+      }
     }
   },
   "weights": {
