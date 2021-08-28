@@ -17,11 +17,11 @@ from math import pi
 import dash_table
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
-from sites.algorithm.helper_functions import get_final_score, get_case_inputs, trusting_AI_scores
-from sites.algorithm.explainability_panel import explainability_panel, exp_input_ids
-from sites.algorithm.fairness_panel import fairness_panel ,fair_input_ids
-from sites.algorithm.robustness_panel import robustness_panel, rob_input_ids
-from sites.algorithm.methodology_panel import methodology_panel, meth_input_ids
+from algorithms.helper_functions import get_performance_table, get_final_score, get_case_inputs, trusting_AI_scores
+from algorithms.explainability_panel import explainability_panel, exp_input_ids
+from algorithms.fairness_panel import fairness_panel ,fair_input_ids
+from algorithms.robustness_panel import robustness_panel, rob_input_ids
+from algorithms.methodology_panel import methodology_panel, meth_input_ids
 import dash_daq as daq
 
 children=[]
@@ -31,7 +31,7 @@ children=[]
 
 config_fairness, config_explainability, config_robustness, config_methodology = 0, 0, 0 ,0
 for config in ["config_fairness", "config_explainability", "config_robustness", "config_methodology"]:
-    with open("sites/algorithm/"+config+".json") as file:
+    with open("algorithms/"+config+".json") as file:
             exec("%s = json.load(file)" % config)
 
 #panels
@@ -52,20 +52,22 @@ children.append(html.Div([html.H3("Pillars and Metrics\n Weighting",style={'text
                           style={"background-color":"lightyellow"}))
 
 button_div = html.Div([
+    html.Div(html.Br(), style={'width': '33%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10}),
     html.Div([
-                    html.Div(html.Label("Choose Configuration:"), style={'width': '200px', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10}),
+    html.Div([html.Br(),
+                    html.Div(html.Label("Choose Configuration:"), style={'width': '200px', 'display': 'inline-block',"vertical-align": "top",'margin-left': 50}),
                     html.Div(dcc.Dropdown(
                                 id='config-dropdown',
                                 options=list(map(lambda name:{'label': name[:-5], 'value': name} ,os.listdir("configs"))),
                                 value='default.json'
                             ), 
-                             style={'width': '300px', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10}),
+                             style={'width': '300px', 'display': 'inline-block',"vertical-align": "top",'margin-left': 50}),
                         ]),
     html.Button('apply config', id='apply-config', style={"background-color": "gold",'margin-left': 50}),
     html.Br(),html.Br(),
     html.Button('Save Weights', id='save-weights', style={"background-color": "green",'margin-left': 50}),
     dcc.Store(id='input-config'),
-    html.Div(dcc.Input(id="hidden-trigger", value=None, type='text'), style={"display":"none"})
+    html.Div(dcc.Input(id="hidden-trigger", value=None, type='text'), style={"display":"none"})],style={'width': '50%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10})
     # html.Div(id="hidden-trigger-save", style={"display":"none"}),
     ], style={"background-color": "rgba(255,228,181,0.5)",'padding-bottom': 20," margin-left": "auto", "margin-right": "auto"})
     
@@ -211,3 +213,9 @@ def get_callbacks(app):
             return {'display': 'block'}
         if visibility_state == False:
             return {'display': 'none'}
+        
+    @app.callback(
+            Output("config-dropdown", "options"),
+            Input("save-success", "n_clicks"))
+    def update_options(trig):
+           return list(map(lambda name:{'label': name[:-5], 'value': name} ,os.listdir("configs")))

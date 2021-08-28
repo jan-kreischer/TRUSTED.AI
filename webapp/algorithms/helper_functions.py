@@ -12,10 +12,10 @@ import json
 from config import *
 from math import pi
 import sklearn.metrics as metrics
-from sites.algorithm.fairness_score import calc_fairness_score
-from sites.algorithm.explainability_score import calc_explainability_score
-from sites.algorithm.robustness_score import calc_robustness_score
-from sites.algorithm.methodology_score import calc_methodology_score
+from algorithms.fairness_score import calc_fairness_score
+from algorithms.explainability_score import calc_explainability_score
+from algorithms.robustness_score import calc_robustness_score
+from algorithms.methodology_score import calc_methodology_score
 import collections
 from helpers import read_solution
 
@@ -94,10 +94,10 @@ def draw_bar_plot(categories, values, ax, color='lightblue', title='Trusting AI 
         plt.title(title, size=11, y=1.1)
         
 # define algo
-def trusting_AI_scores(model, train_data, test_data, config_fairness, config_explainability, config_robustness, config_methodology):
+def trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness, config_explainability, config_robustness, config_methodology):
     output = dict(
         fairness       = calc_fairness_score(),
-        explainability = calc_explainability_score(model, train_data, test_data, config_explainability),
+        explainability = calc_explainability_score(model, train_data, test_data, config_explainability, factsheet),
         robustness     = calc_robustness_score(model, train_data, test_data, config_robustness),
         methodology    = calc_methodology_score()
     )
@@ -107,13 +107,13 @@ def trusting_AI_scores(model, train_data, test_data, config_fairness, config_exp
     return  result(score=scores, properties=properties)
 
 # calculate final score with weigths
-def get_final_score(model, train_data, test_data, main_config):
+def get_final_score(model, train_data, test_data, main_config, factsheet):
     config_fairness = main_config["fairness"]
     config_explainability = main_config["explainability"]
     config_robustness = main_config["robustness"]
     config_methodology = main_config["methodology"]
     
-    result = trusting_AI_scores(model, train_data, test_data, config_fairness, config_explainability, config_robustness, config_methodology)
+    result = trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness, config_explainability, config_robustness, config_methodology)
     scores = result.score
     properties = result.properties
     final_scores = dict()

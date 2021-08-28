@@ -23,7 +23,7 @@ import plotly.graph_objects as go
 
 config_fairness, config_explainability, config_robustness, config_methodology, config_pillars = 0, 0, 0 ,0,0
 for config in ["config_pillars","config_fairness", "config_explainability", "config_robustness", "config_methodology"]:
-    with open("sites/algorithm/"+config+".json") as file:
+    with open("algorithms/"+config+".json") as file:
             exec("%s = json.load(file)" % config)
 
 pillars = ['fairness', 'explainability', 'robustness', 'methodology']
@@ -140,6 +140,7 @@ layout = html.Div([
      
         dbc.Row([
             dcc.Store(id='result'),
+            
             dbc.Col([html.H1("Analyze", className="text-center")], width=12, className="mb-2 mt-1"),
             
             dbc.Col([dcc.Dropdown(
@@ -208,6 +209,8 @@ def update_solution_set_dropdown(n_clicks):
 @app.callback(Output('general_description', 'children'),
               Input('solution_set_dropdown', 'value'), prevent_initial_call=True)
 def show_general_description(solution_set_path):
+    if not solution_set_path:
+        return ""
     factsheet = read_factsheet(solution_set_path)
     description = ""
     if "general" in factsheet and "description" in factsheet["general"]:
@@ -712,7 +715,7 @@ def store_result(solution_set_dropdown, config):
             
         test, train, model, factsheet = read_solution(solution_set_dropdown)
     
-        final_score, results, properties = get_final_score(model, train, test, main_config)
+        final_score, results, properties = get_final_score(model, train, test, main_config, factsheet)
         trust_score = get_trust_score(final_score, main_config["pillars"])
         
         def convert(o):
