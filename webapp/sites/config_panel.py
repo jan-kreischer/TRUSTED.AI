@@ -17,17 +17,14 @@ from math import pi
 import dash_table
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
-from algorithms.helper_functions import get_performance_table, get_final_score, get_case_inputs, trusting_AI_scores
-from algorithms.explainability_panel import explainability_panel, exp_input_ids
-from algorithms.fairness_panel import fairness_panel ,fair_input_ids
-from algorithms.robustness_panel import robustness_panel, rob_input_ids
-from algorithms.methodology_panel import methodology_panel, meth_input_ids
+from algorithms.trustworthiness_score import trusting_AI_scores, get_trust_score
+from sites.explainability_panel import explainability_panel, exp_input_ids
+from sites.fairness_panel import fairness_panel ,fair_input_ids
+from sites.robustness_panel import robustness_panel, rob_input_ids
+from sites.methodology_panel import methodology_panel, meth_input_ids
 import dash_daq as daq
 
 children=[]
-
-# load case inputs
-# model, train_data, test_data = get_case_inputs(case)
 
 config_fairness, config_explainability, config_robustness, config_methodology = 0, 0, 0 ,0
 for config in ["config_fairness", "config_explainability", "config_robustness", "config_methodology"]:
