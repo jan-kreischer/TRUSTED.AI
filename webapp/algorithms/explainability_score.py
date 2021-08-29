@@ -142,12 +142,12 @@ def calc_explainability_score(clf, train_data, test_data, config, factsheet):
     
     #function parameters
     target_column = factsheet["general"].get("target_column")
-    clf_type_score = config["parameters"]["score_Algorithm_Class"]["clf_type_score"]["value"]
-    ms_thresholds = config["parameters"]["score_Model_Size"]["thresholds"]["value"]
-    cf_thresholds = config["parameters"]["score_Correlated_Features"]["thresholds"]["value"]
-    fr_thresholds = config["parameters"]["score_Feature_Relevance"]["thresholds"]["value"]
-    threshold_outlier = config["parameters"]["score_Feature_Relevance"]["threshold_outlier"]["value"]
-    penalty_outlier = config["parameters"]["score_Feature_Relevance"]["penalty_outlier"]["value"]
+    clf_type_score = config["score_Algorithm_Class"]["clf_type_score"]["value"]
+    ms_thresholds = config["score_Model_Size"]["thresholds"]["value"]
+    cf_thresholds = config["score_Correlated_Features"]["thresholds"]["value"]
+    fr_thresholds = config["score_Feature_Relevance"]["thresholds"]["value"]
+    threshold_outlier = config["score_Feature_Relevance"]["threshold_outlier"]["value"]
+    penalty_outlier = config["score_Feature_Relevance"]["penalty_outlier"]["value"]
     
     output = dict(
         Algorithm_Class     = score_Algorithm_Class(clf, clf_type_score),

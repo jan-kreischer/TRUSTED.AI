@@ -142,7 +142,7 @@ def get_callbacks(app):
         for name, val in zip(list(filter(lambda ids: ids[:2]=="w_", input_ids)), args):
             inputs[name] = float(val)
             
-        with open('configs/default.json','r') as f:
+        with open('configs/weights/default.json','r') as f:
                 config_file = json.loads(f.read())
         
         
@@ -152,7 +152,7 @@ def get_callbacks(app):
             #output = output + [config["pillars"][pillar]] + list(map(lambda metric: config[pillar]["weights"][metric[2:]],pillar_ids[1:]))
             config_file["pillars"][pillar] = inputs[pillar_ids[0]]
             for metric in pillar_ids[1:]:
-                config_file[pillar]["weights"][metric[2:]] = inputs[metric]
+                config_file[pillar][metric[2:]] = inputs[metric]
         
         
         return json.dumps(config_file), ctx.triggered[0]['prop_id']
@@ -178,7 +178,7 @@ def get_callbacks(app):
         
         if n_clicks and config is not None:
             config_file = json.loads(config)
-            with open('configs/'+ conf_name+'.json', 'w') as outfile:
+            with open('configs/weights/'+ conf_name+'.json', 'w') as outfile:
                 json.dump(config_file, outfile, indent=4)
             return not is_open
         else:
@@ -191,14 +191,14 @@ def get_callbacks(app):
                 Input('config-dropdown', 'value'))
     def update_config(conf_name):
         
-        with open('configs/' + conf_name ,'r') as f:
+        with open('configs/weights/' + conf_name ,'r') as f:
                 config = json.loads(f.read())
                 
         output = []
         pillars = ['explainability', 'fairness', 'robustness', 'methodology']
         ids = [exp_input_ids, fair_input_ids, rob_input_ids, meth_input_ids]
         for pillar, pillar_ids in zip(pillars, ids):
-            output = output + [config["pillars"][pillar]] + list(map(lambda metric: config[pillar]["weights"][metric[2:]],pillar_ids[1:]))
+            output = output + [config["pillars"][pillar]] + list(map(lambda metric: config[pillar][metric[2:]],pillar_ids[1:]))
             
         return output
     
@@ -215,4 +215,5 @@ def get_callbacks(app):
             Output("config-dropdown", "options"),
             Input("save-success", "n_clicks"))
     def update_options(trig):
-           return list(map(lambda name:{'label': name[:-5], 'value': name} ,os.listdir("configs")))
+        options = list(map(lambda name:{'label': name[:-5], 'value': name} ,os.listdir("configs/weights")))
+        return options

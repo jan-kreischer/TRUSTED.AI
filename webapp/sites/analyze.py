@@ -28,11 +28,18 @@ for config in ["config_pillars","config_fairness", "config_explainability", "con
             exec("%s = json.load(file)" % config)
 
 pillars = ['fairness', 'explainability', 'robustness', 'methodology']
-main_config = dict(fairness=config_fairness, explainability=config_explainability, 
-                   robustness=config_robustness, methodology=config_methodology, pillars=config_pillars)
+weight_config = dict(fairness=config_fairness["weights"], explainability=config_explainability["weights"], 
+                   robustness=config_robustness["weights"], methodology=config_methodology["weights"], pillars=config_pillars)
 
-with open('configs/default.json', 'w') as outfile:
-                json.dump(main_config, outfile, indent=4)
+mappings_config = dict(fairness=config_fairness["parameters"], explainability=config_explainability["parameters"], 
+                   robustness=config_robustness["parameters"], methodology=config_methodology["parameters"])
+
+with open('configs/weights/default.json', 'w') as outfile:
+                json.dump(weight_config, outfile, indent=4)
+                
+with open('configs/mappings/default.json', 'w') as outfile:
+                json.dump(mappings_config, outfile, indent=4)
+
 # === METRICS ===
 fairness_metrics = ["class_balance", "statistical_parity_difference", "equal_opportunity_difference", "average_odds_difference", "disparate_impact", "theil_index", "euclidean_distance", "mahalanobis_distance", "manhattan_distance"]
 explainability_metrics = ["explainablity_metric"]
@@ -62,6 +69,7 @@ daq.BooleanSwitch(id='toggle_charts',
                     html.Div([html.H2("• General")]),
                     html.Div([], id="general_description"),
                     html.Div(["Performance Metrics Section"], id="performance_metrics_section"),
+                    dcc.Store(id='input-mappings'),
                     ])
 
 
@@ -500,15 +508,18 @@ def store_trust_analysis(solution_set_dropdown, config):
             return None
     
         if not config:
-            with open('configs/default.json','r') as f:
-                main_config = json.loads(f.read())
+            with open('configs/weights/default.json','r') as f:
+                weight_config = json.loads(f.read())
         else:
-            main_config = json.loads(config)
+            weight_config = json.loads(config)
+            
+        with open('configs/mappings/default.json', 'r') as f:
+                mappings_config = json.loads(f.read())
             
         test, train, model, factsheet = read_solution(solution_set_dropdown)
     
-        final_score, results, properties = get_final_score(model, train, test, main_config, factsheet)
-        trust_score = get_trust_score(final_score, main_config["pillars"])
+        final_score, results, properties = get_final_score(model, train, test, weight_config, mappings_config, factsheet)
+        trust_score = get_trust_score(final_score, weight_config["pillars"])
         
         def convert(o):
             if isinstance(o, np.int64): return int(o)  
@@ -519,7 +530,6 @@ def store_trust_analysis(solution_set_dropdown, config):
                 "trust_score":trust_score,
                 "properties" : properties}
         
-        print(data)
         return json.dumps(data,default=convert)
 
 for m in fairness_metrics + methodology_metrics:

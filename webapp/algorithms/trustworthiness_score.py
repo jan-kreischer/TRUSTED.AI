@@ -34,20 +34,20 @@ def trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness,
     return  result(score=scores, properties=properties)
 
 # calculate final score with weigths
-def get_final_score(model, train_data, test_data, main_config, factsheet):
-    config_fairness = main_config["fairness"]
-    config_explainability = main_config["explainability"]
-    config_robustness = main_config["robustness"]
-    config_methodology = main_config["methodology"]
+def get_final_score(model, train_data, test_data, config_weights, config_mappings, factsheet):
+    config_fairness = config_mappings["fairness"]
+    config_explainability = config_mappings["explainability"]
+    config_robustness = config_mappings["robustness"]
+    config_methodology = config_mappings["methodology"]
     
     result = trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness, config_explainability, config_robustness, config_methodology)
     scores = result.score
     properties = result.properties
     final_scores = dict()
     for pillar, item in scores.items():
-        config = eval("config_"+pillar)
-        weighted_scores = list(map(lambda x: scores[pillar][x] * config["weights"][x], scores[pillar].keys()))
-        sum_weights = np.nansum(np.array(list(config["weights"].values()))[~np.isnan(weighted_scores)])
+        config = config_weights[pillar]
+        weighted_scores = list(map(lambda x: scores[pillar][x] * config[x], scores[pillar].keys()))
+        sum_weights = np.nansum(np.array(list(config.values()))[~np.isnan(weighted_scores)])
         if sum_weights == 0:
             result = 0
         else:

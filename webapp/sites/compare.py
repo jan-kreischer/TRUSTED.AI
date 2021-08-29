@@ -243,7 +243,6 @@ def load_data_1(solution_set_path):
     if solution_set_path != None:
         training_data = read_train(solution_set_path)
         test_data = read_test(solution_set_path)
-        compute_train_test_split(solution_set_path)
         return training_data.to_json(date_format='iso', orient='split'), test_data.to_json(date_format='iso', orient='split'),
     else:
         return None, None
@@ -256,7 +255,6 @@ def load_data_2(solution_set_path):
     if solution_set_path != None:
         training_data = read_train(solution_set_path)
         test_data = read_test(solution_set_path)
-        compute_train_test_split(solution_set_path)
         return training_data.to_json(date_format='iso', orient='split'), test_data.to_json(date_format='iso', orient='split'),
     else:
         return None, None
@@ -337,12 +335,15 @@ def store_result_1(solution_set_dropdown, config):
     if not solution_set_dropdown:
         return None
     
-    with open('configs/' + config, 'r') as f:
-        main_config = json.loads(f.read())
-        
-    test, train, model, factsheet = read_scenario(solution_set_dropdown)
-    final_score, results, properties = get_final_score(model, train, test, main_config, factsheet)
-    trust_score = get_trust_score(final_score, main_config["pillars"])
+    with open('configs/weights/' + config, 'r') as f:
+        weights_config = json.loads(f.read())
+    
+    with open('configs/mappings/default.json', 'r') as f:
+        mappings_config = json.loads(f.read())
+    
+    test, train, model, factsheet = read_solution(solution_set_dropdown)
+    final_score, results, properties = get_final_score(model, train, test, weights_config, mappings_config, factsheet)
+    trust_score = get_trust_score(final_score, weights_config["pillars"])
     def convert(o):
         if isinstance(o, np.int64): return int(o)
     data = {"final_score": final_score,
@@ -357,11 +358,15 @@ def store_result_1(solution_set_dropdown, config):
 def store_result_2(solution_set_dropdown,config):
     if not solution_set_dropdown:
         return None
-    with open(os.path.join('configs',config), 'r') as f:
-        main_config = json.loads(f.read())
-    test, train, model, factsheet = read_scenario(solution_set_dropdown)
-    final_score, results, properties = get_final_score(model, train, test, main_config, factsheet)
-    trust_score = get_trust_score(final_score, main_config["pillars"])
+    with open('configs/weights/' + config, 'r') as f:
+        weights_config = json.loads(f.read())
+    
+    with open('configs/mappings/default.json', 'r') as f:
+        mappings_config = json.loads(f.read())
+    
+    test, train, model, factsheet = read_solution(solution_set_dropdown)
+    final_score, results, properties = get_final_score(model, train, test, weights_config, mappings_config, factsheet)
+    trust_score = get_trust_score(final_score, weights_config["pillars"])
     def convert(o):
         if isinstance(o, np.int64): return int(o)
     data = {"final_score": final_score,
@@ -554,3 +559,10 @@ def update_figure_2(data):
     star_ratings.append(show_star_rating(final_score["robustness"]))
     star_ratings.append(show_star_rating(final_score["methodology"]))
     return chart_list + star_ratings
+
+@app.callback(
+        Output("config-dropdown-compare", "options"),
+        Input("config-dropdown-compare", "value"))
+def update_options(trig):
+    options = list(map(lambda name:{'label': name[:-5], 'value': name} ,os.listdir("configs/weights")))
+    return options
