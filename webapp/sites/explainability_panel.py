@@ -1,11 +1,13 @@
 # -*- coding: utf-8 -*-
+import os
 import dash_core_components as dcc
 import dash_html_components as html
 import json
+from config import METRICS_CONFIG_PATH
 
 config_explainability,config_pillars = 0, 0
 for config in ["config_pillars", "config_explainability"]:
-    with open("algorithms/"+config+".json") as file:
+    with open(os.path.join(METRICS_CONFIG_PATH, config + ".json")) as file:
             exec("%s = json.load(file)" % config)
 
 # create panel
