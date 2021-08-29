@@ -177,6 +177,37 @@ def toggle_charts(visibility_state):
               Input('solution_set_dropdown', 'nclicks'))
 def update_solution_set_dropdown(n_clicks):
     return get_solution_sets()
+
+
+
+
+@app.callback(Output('input-mappings', 'data'), 
+          Input('show_explainability_mappings', 'on'))
+   #       Input('apply-config', 'n_clicks')],
+#            list(map(lambda inp: State(inp, "value"),list(filter(lambda ids: ids[:2]=="w_", input_ids)))))
+def store_mappings_config(config):
+     
+    # ctx = dash.callback_context
+    
+    # inputs= dict()
+    
+    # for name, val in zip(list(filter(lambda ids: ids[:2]=="w_", input_ids)), args):
+    #     inputs[name] = float(val)
+        
+    with open('configs/mappings/default.json','r') as f:
+            config_file = json.loads(f.read())
+    
+    
+    # pillars = ['explainability', 'fairness', 'robustness', 'methodology']
+    # ids = [exp_input_ids, fair_input_ids, rob_input_ids, meth_input_ids]
+    # for pillar, pillar_ids in zip(pillars, ids):
+    #     #output = output + [config["pillars"][pillar]] + list(map(lambda metric: config[pillar]["weights"][metric[2:]],pillar_ids[1:]))
+    #     config_file["pillars"][pillar] = inputs[pillar_ids[0]]
+    #     for metric in pillar_ids[1:]:
+    #         config_file[pillar][metric[2:]] = inputs[metric]
+    
+    
+    return json.dumps(config_file)
     
 @app.callback(Output('general_description', 'children'),
               Input('solution_set_dropdown', 'value'), prevent_initial_call=True)
@@ -501,20 +532,24 @@ def show_performance_metrics(solution_set_path):
 
 @app.callback(Output('result', 'data'), 
           [Input('solution_set_dropdown', 'value'),
-          Input("input-config","data")])
-def store_trust_analysis(solution_set_dropdown, config):
+          Input("input-config","data"),Input('input-mappings', 'data')])
+def store_trust_analysis(solution_set_dropdown, config_weights, config_mappings):
     
         if not solution_set_dropdown:
             return None
     
-        if not config:
+        if not config_weights:
             with open('configs/weights/default.json','r') as f:
                 weight_config = json.loads(f.read())
         else:
-            weight_config = json.loads(config)
+            weight_config = json.loads(config_weights)
             
-        with open('configs/mappings/default.json', 'r') as f:
+        if not config_mappings:
+            with open('configs/mappings/default.json', 'r') as f:
                 mappings_config = json.loads(f.read())
+        else:
+            mappings_config = json.loads(config_mappings)
+    
             
         test, train, model, factsheet = read_solution(solution_set_dropdown)
     
