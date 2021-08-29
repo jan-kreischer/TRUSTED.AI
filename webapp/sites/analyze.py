@@ -42,7 +42,7 @@ with open('configs/mappings/default.json', 'w') as outfile:
 
 # === METRICS ===
 fairness_metrics = ["class_balance", "statistical_parity_difference", "equal_opportunity_difference", "average_odds_difference", "disparate_impact", "theil_index", "euclidean_distance", "mahalanobis_distance", "manhattan_distance"]
-explainability_metrics = ["explainablity_metric"]
+explainability_metrics = ['Algorithm_Class', 'Correlated_Features', 'Model_Size', 'Feature_Relevance']
 robustness_metrics = ["robustness_metric"]
 methodology_metrics = [
     "normalization", 
@@ -328,6 +328,40 @@ def analyze_fairness(solution_set_path):
     else:
         return [], [html.H1("Nothing")]
 
+@app.callback(
+    Output("explainability_details", 'children'),
+    Input('result', 'data'), prevent_initial_call=True)
+def explainability_details(data):
+    if not data:
+        return []
+    result = json.loads(data)
+    properties = result["properties"]
+    metrics = list(properties["explainability"].keys())
+    
+    sections = [html.H3("▶ Explainability Metrics")]
+    for i in range(len(metrics)):
+            metric_id = metrics[i]
+            sections.append(create_metric_details_section(metric_id, i, 2))
+    return sections
+
+for metric in explainability_metrics:
+    @app.callback(
+    Output("{}_details".format(metric), 'children'),
+    Input('result', 'data'), prevent_initial_call=False)
+    def metric_detail(data):
+      if data is None:
+          return []
+      else:
+          result = json.loads(data)
+          properties = result["properties"]
+          metric_properties = properties["explainability"][metric]
+          print(metric)
+          prop = []
+          for p in metric_properties.values():
+              prop.append(html.Div("{} : {}".format(p[0], p[1])))
+          return html.Div(prop)
+
+
 def update_factsheet(factsheet_path, key, value):
     print("update factsheet {0} with {1}  {2}".format(factsheet_path, key, value))
     jsonFile = open(factsheet_path, "r") # Open the JSON file for reading
@@ -407,7 +441,7 @@ def load_data(solution_set_path):
         return None, None
 
 # === METHODOLOGY ===
-def create_metric_details_section(metric_id, i):
+def create_metric_details_section(metric_id, i, section_n = 1):
     metric_name = metric_id.replace("_", " ")
     return html.Div([
         dbc.Button(html.I(className="fas fa-chevron-down"),
@@ -416,7 +450,7 @@ def create_metric_details_section(metric_id, i):
             n_clicks=0,
             style={"float": "right"}
         ),
-        html.H4("1.{0} {1}".format(i+1, metric_name)), 
+        html.H4("{2}.{0} {1}".format(i+1, metric_name, section_n)), 
             dbc.Collapse(
             html.Div("{}_details".format(metric_name)),
             id="{}_details".format(metric_id),
@@ -567,7 +601,7 @@ def store_trust_analysis(solution_set_dropdown, config_weights, config_mappings)
         
         return json.dumps(data,default=convert)
 
-for m in fairness_metrics + methodology_metrics:
+for m in fairness_metrics + methodology_metrics + explainability_metrics:
     @app.callback(
         [Output("{0}_details".format(m), "is_open"),
         Output("{0}_details".format(m), "style")],
