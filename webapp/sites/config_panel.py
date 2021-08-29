@@ -23,12 +23,13 @@ from sites.fairness_panel import fairness_panel ,fair_input_ids
 from sites.robustness_panel import robustness_panel, rob_input_ids
 from sites.methodology_panel import methodology_panel, meth_input_ids
 import dash_daq as daq
+from config import METRICS_CONFIG_PATH
 
 children=[]
 
 config_fairness, config_explainability, config_robustness, config_methodology = 0, 0, 0 ,0
 for config in ["config_fairness", "config_explainability", "config_robustness", "config_methodology"]:
-    with open("algorithms/"+config+".json") as file:
+    with open(os.path.join(METRICS_CONFIG_PATH, config + ".json")) as file:
             exec("%s = json.load(file)" % config)
 
 #panels
