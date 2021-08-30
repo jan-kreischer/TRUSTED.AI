@@ -43,7 +43,7 @@ with open('configs/mappings/default.json', 'w') as outfile:
 # === METRICS ===
 fairness_metrics = ["class_balance", "statistical_parity_difference", "equal_opportunity_difference", "average_odds_difference", "disparate_impact", "theil_index", "euclidean_distance", "mahalanobis_distance", "manhattan_distance"]
 explainability_metrics = ['Algorithm_Class', 'Correlated_Features', 'Model_Size', 'Feature_Relevance']
-robustness_metrics = ["robustness_metric"]
+robustness_metrics = ["Empirical_Robustness_Fast_Gradient_Attack", "Empirical_Robustness_Deepfool_Attack", "Empirical_Robustness_Carlini_Wagner_Attack"]
 methodology_metrics = [
     "normalization", 
     "train_test_split",
@@ -601,7 +601,7 @@ def store_trust_analysis(solution_set_dropdown, config_weights, config_mappings)
         
         return json.dumps(data,default=convert)
 
-for m in fairness_metrics + methodology_metrics + explainability_metrics:
+for m in fairness_metrics + methodology_metrics + explainability_metrics + robustness_metrics:
     @app.callback(
         [Output("{0}_details".format(m), "is_open"),
         Output("{0}_details".format(m), "style")],
@@ -630,12 +630,11 @@ for m in fairness_metrics + methodology_metrics + explainability_metrics:
        Output('fairness_star_rating', 'children'),
        Output('explainability_star_rating', 'children'),
        Output('robustness_star_rating', 'children'),
-       Output('methodology_star_rating', 'children'),
-       Output("robustness_details", 'children')],
+       Output('methodology_star_rating', 'children')],
       [Input('result', 'data'),Input("hidden-trigger", "value")])  
 def update_figure(data, trig):
       if data is None:
-          return [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, "", "", "", "", "", ""]
+          return [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, "", "", "", "", ""]
       result = json.loads(data)
       final_score, results, properties = result["final_score"] , result["results"], result["properties"]
       trust_score = result["trust_score"]
@@ -696,27 +695,76 @@ def update_figure(data, trig):
           spider_plt_pillar.update_traces(fill='toself', fillcolor=colors[n], marker_color=colors[n],marker_line_width=1.5, opacity=0.6)
           spider_plt_pillar.update_layout(title_x=0.5)
           chart_list.append(spider_plt_pillar)
-
-      robutness_properties = properties["robustness"]
-      robustness_detail = []
-      for n, (metric , metric_properties) in enumerate(robutness_properties.items()):
-          categories = list(map(lambda x: x.replace("_",' '), metric_properties.keys()))
-          val = list(map(float, metric_properties.values()))
-          robustness_detail.append(html.Div(html.H4(metric),className="mb-5 mt-5"))
-
-          for cat, v in zip(categories, val):
-              robustness_detail.append(html.Div(html.H5(cat), className="mb-5 mt-5"))
-              robustness_detail.append(html.Div(html.H5(v), className="mb-5 mt-5"))
-
-      robustness_detail2 = [dbc.Col(children=robustness_detail)]
-
       star_ratings = []
       star_ratings.append(show_star_rating(trust_score))
       star_ratings.append(show_star_rating(final_score["fairness"]))
       star_ratings.append(show_star_rating(final_score["explainability"]))
       star_ratings.append(show_star_rating(final_score["robustness"]))
       star_ratings.append(show_star_rating(final_score["methodology"]))
-      return chart_list + star_ratings + robustness_detail2
+      return chart_list + star_ratings
+
+@app.callback(
+    Output("robustness_details", 'children'),
+    Input('result', 'data'), prevent_initial_call=True)
+def robustness_details(data):
+    if not data:
+        return []
+    result = json.loads(data)
+    properties = result["properties"]
+    metrics = list(properties["robustness"].keys())
+    print(properties["robustness"])
+
+    sections = [html.H3("▶ Robustness Metrics")]
+    for i in range(len(metrics)):
+        metric_id = metrics[i]
+        if properties["robustness"][metric_id] != {}:
+            sections.append(create_metric_details_section(metric_id, i, 2))
+    return sections
+
+@app.callback(
+Output("Empirical_Robustness_Deepfool_Attack_details", 'children'),
+Input('result', 'data'), prevent_initial_call=False)
+def Deepfool_Attack_metric_detail(data):
+  if data is None:
+      return []
+  else:
+      result = json.loads(data)
+      properties = result["properties"]
+      metric_properties = properties["robustness"]["Empirical_Robustness_Deepfool_Attack"]
+      prop = []
+      for p in metric_properties.values():
+          prop.append(html.Div(p))
+      return html.Div(prop)
+
+@app.callback(
+Output("Empirical_Robustness_Carlini_Wagner_Attack_details", 'children'),
+Input('result', 'data'), prevent_initial_call=False)
+def Carlini_Wagner_Attack_metric_detail(data):
+  if data is None:
+      return []
+  else:
+      result = json.loads(data)
+      properties = result["properties"]
+      metric_properties = properties["robustness"]["Empirical_Robustness_Carlini_Wagner_Attack"]
+      prop = []
+      for p in metric_properties.values():
+          prop.append(html.Div(p))
+      return html.Div(prop)
+
+@app.callback(
+Output("Empirical_Robustness_Fast_Gradient_Attack_details", 'children'),
+Input('result', 'data'), prevent_initial_call=False)
+def Fast_Gradient_Attack_metric_detail(data):
+  if data is None:
+      return []
+  else:
+      result = json.loads(data)
+      properties = result["properties"]
+      metric_properties = properties["robustness"]["Empirical_Robustness_Fast_Gradient_Attack"]
+      prop = []
+      for p in metric_properties.values():
+          prop.append(html.Div(p))
+      return html.Div(prop)
  
 config_panel.get_callbacks(app)
 
