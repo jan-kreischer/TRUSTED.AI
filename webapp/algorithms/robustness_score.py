@@ -52,7 +52,7 @@ def score_Confidence_Score(model, train_data, test_data):
 def score_Class_Specific_Metrics():
     return result(score=np.random.randint(1,6), properties={})
 
-def score_Fast_Gradient_Attack(model, train_data, test_data):
+def score_Fast_Gradient_Attack(model, train_data, test_data, thresholds):
     try:
         randomData = test_data.sample(50)
         randomX = randomData.iloc[:,:-1]
@@ -76,14 +76,12 @@ def score_Fast_Gradient_Attack(model, train_data, test_data):
         print("Accuracy on before_attacks: {}%".format(before_attack * 100))
         print("Accuracy on after_attack: {}%".format(after_attack * 100))
 
-        score = 5- (((before_attack - after_attack)/before_attack) * 5)
-        if score > 5 or score < 0:
-            score = 0
+        score = np.digitize((before_attack - after_attack)/before_attack*100, thresholds)
         return result(score=score, properties={"Before_attack_accuracy":before_attack ,"After_attack_accuracy":after_attack })
     except:
         return result(score=np.nan, properties={})
 
-def score_Carlini_Wagner_Attack(model, train_data, test_data):
+def score_Carlini_Wagner_Attack(model, train_data, test_data, thresholds):
     try:
         randomData = test_data.sample(5)
         randomX = randomData.iloc[:,:-1]
@@ -105,14 +103,12 @@ def score_Carlini_Wagner_Attack(model, train_data, test_data):
         after_attack = metrics.accuracy_score(randomY,predictions)
         print("Accuracy on before_attacks: {}%".format(before_attack * 100))
         print("Accuracy on after_attack: {}%".format(after_attack * 100))
-        score = 5- (((before_attack - after_attack)/before_attack) * 5)
-        if score > 5 or score < 0:
-            score = 0
+        score = np.digitize((before_attack - after_attack)/before_attack*100, thresholds)
         return result(score=score, properties={"Before_attack_accuracy":before_attack ,"After_attack_accuracy":after_attack })
     except:
         return result(score=np.nan, properties={})
 
-def score_Deepfool_Attack(model, train_data, test_data):
+def score_Deepfool_Attack(model, train_data, test_data, thresholds):
     try:
         randomData = test_data.sample(4)
         randomX = randomData.iloc[:,:-1]
@@ -134,23 +130,26 @@ def score_Deepfool_Attack(model, train_data, test_data):
         after_attack = metrics.accuracy_score(randomY,predictions)
         print("Accuracy on before_attacks: {}%".format(before_attack * 100))
         print("Accuracy on after_attack: {}%".format(after_attack * 100))
-        score = 5- (((before_attack - after_attack)/before_attack) * 5)
-        if score > 5 or score < 0:
-            score = 0
+
+        score = np.digitize((before_attack - after_attack)/before_attack*100, thresholds)
         return result(score=score, properties={"Before_attack_accuracy":before_attack ,"After_attack_accuracy":after_attack })
     except:
         return result(score=np.nan, properties={})
 
 def calc_robustness_score(model, train_data, test_data, config):
+
+    FSG_attack_thresholds = config["score_Fast_Gradient_Attack"]["thresholds"]["value"]
+    CW_attack_thresholds = config["score_Carlini_Wagner_Attack"]["thresholds"]["value"]
+    Deepfool_thresholds = config["score_Carlini_Wagner_Attack"]["thresholds"]["value"]
     
     output = dict(
         Confidence_Score          = score_Confidence_Score(model, train_data, test_data),
         Clique_Method    = score_Class_Specific_Metrics(),
         Loss_Sensitivity   = score_Class_Specific_Metrics(),
         CLEVER_Score   = score_Clever_Score(model, train_data, test_data),
-        Empirical_Robustness_Fast_Gradient_Attack = score_Fast_Gradient_Attack(model, train_data, test_data),
-        Empirical_Robustness_Carlini_Wagner_Attack = score_Carlini_Wagner_Attack(model, train_data, test_data),
-        Empirical_Robustness_Deepfool_Attack = score_Deepfool_Attack(model, train_data, test_data)
+        Empirical_Robustness_Fast_Gradient_Attack = score_Fast_Gradient_Attack(model, train_data, test_data, FSG_attack_thresholds),
+        Empirical_Robustness_Carlini_Wagner_Attack = score_Carlini_Wagner_Attack(model, train_data, test_data, CW_attack_thresholds),
+        Empirical_Robustness_Deepfool_Attack = score_Deepfool_Attack(model, train_data, test_data, Deepfool_thresholds)
                  )
     scores = dict((k, v.score) for k, v in output.items())
     properties = dict((k, v.properties) for k, v in output.items())

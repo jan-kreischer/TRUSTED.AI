@@ -712,7 +712,6 @@ def robustness_details(data):
     result = json.loads(data)
     properties = result["properties"]
     metrics = list(properties["robustness"].keys())
-    print(properties["robustness"])
 
     sections = [html.H3("▶ Robustness Metrics")]
     for i in range(len(metrics)):
