@@ -34,11 +34,11 @@ def trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness,
     return  result(score=scores, properties=properties)
 
 # calculate final score with weigths
-def get_final_score(model, train_data, test_data, config_weights, config_mappings, factsheet):
-    config_fairness = config_mappings["fairness"]
-    config_explainability = config_mappings["explainability"]
-    config_robustness = config_mappings["robustness"]
-    config_methodology = config_mappings["methodology"]
+def get_final_score(model, train_data, test_data, config_weights, mappings_config, factsheet):
+    config_fairness = mappings_config["fairness"]
+    config_explainability = mappings_config["explainability"]
+    config_robustness = mappings_config["robustness"]
+    config_methodology = mappings_config["methodology"]
     
     result = trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness, config_explainability, config_robustness, config_methodology)
     scores = result.score

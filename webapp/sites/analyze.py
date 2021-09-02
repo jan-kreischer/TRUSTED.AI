@@ -344,22 +344,26 @@ def explainability_details(data):
             sections.append(create_metric_details_section(metric_id, i, 2))
     return sections
 
-for metric in explainability_metrics:
-    @app.callback(
-    Output("{}_details".format(metric), 'children'),
-    Input('result', 'data'), prevent_initial_call=False)
-    def metric_detail(data):
-      if data is None:
-          return []
-      else:
-          result = json.loads(data)
-          properties = result["properties"]
+@app.callback(
+    list(map(lambda o: Output("{}_details".format(o), 'children'), explainability_metrics)),
+    Input('result', 'data'), prevent_initial_call=False)    
+def metric_detail(data):
+  if data is None:
+      return []
+  else:
+      output = []
+      result = json.loads(data)
+      properties = result["properties"]
+      for metric in explainability_metrics:
           metric_properties = properties["explainability"][metric]
-          print(metric)
-          prop = []
-          for p in metric_properties.values():
-              prop.append(html.Div("{} : {}".format(p[0], p[1])))
-          return html.Div(prop)
+          if not metric_properties:
+              output.append(html.Div())
+          else:
+              prop = []
+              for p in metric_properties.values():
+                  prop.append(html.Div("{} : {}".format(p[0], p[1])))
+              output.append(html.Div(prop))
+      return output
 
 
 def update_factsheet(factsheet_path, key, value):
@@ -441,7 +445,7 @@ def load_data(solution_set_path):
         return None, None
 
 # === METHODOLOGY ===
-def create_metric_details_section(metric_id, i, section_n = 1):
+def create_metric_details_section(metric_id, i, section_n = 1, is_open=False):
     metric_name = metric_id.replace("_", " ")
     return html.Div([
         dbc.Button(html.I(className="fas fa-chevron-down"),
@@ -454,7 +458,7 @@ def create_metric_details_section(metric_id, i, section_n = 1):
             dbc.Collapse(
             html.Div("{}_details".format(metric_name)),
             id="{}_details".format(metric_id),
-            is_open=False,          
+            is_open=is_open,          
         ),
         ], id="{}_section".format(metric_id), className="mb-5 mt-5")
 
