@@ -124,7 +124,7 @@ def mapping_panel(pillar):
             else:
                 map_panel.append(html.Div(dcc.Input(id=input_id, value=str(v.get("value" "")), type='text', style={"width":200}), style={"margin-left":"30%"}))
             map_panel.append(html.Br())
-            
+    map_panel.append(html.Button('Apply', id='apply-mapping-{}'.format(pillar), style={"background-color": "green",'margin-left': "30%"}),)
     return map_panel , input_ids
 
 def pillar_section(pillar):
@@ -155,6 +155,7 @@ def pillar_section(pillar):
                         is_open=False,
                         style={"background-color": "rgba(255,228,181,0.5)",'padding-bottom': 20, 'display': 'none'}
                     ),
+                    html.Br(),
                     html.Div([], id="{}_overview".format(pillar)),
                     html.H3("{0}-Score".format(pillar), className="text-center"),
                     html.Div([], id="{}_star_rating".format(pillar), className="star_rating, text-center"),
