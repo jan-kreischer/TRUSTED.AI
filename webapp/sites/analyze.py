@@ -20,6 +20,8 @@ import numpy as np
 from sites import config_panel
 import plotly.express as px
 import plotly.graph_objects as go
+import warnings
+warnings.filterwarnings('ignore')
 
 
 config_fairness, config_explainability, config_robustness, config_methodology, config_pillars = 0, 0, 0 ,0,0
@@ -53,7 +55,7 @@ methodology_metrics = [
 # === SECTIONS ===
 def general_section():
     return html.Div([
-                                        dbc.Button(
+        dbc.Button(
             html.I(className="fas fa-backspace"),
             id="delete_solution_button", 
             n_clicks=0,
@@ -66,11 +68,11 @@ daq.BooleanSwitch(id='toggle_charts',
                 color = TRUST_COLOR,   
                 style={"float": "right"}
             ),
-                    html.Div([html.H2("• General")]),
-                    html.Div([], id="general_description"),
-                    html.Div(["Performance Metrics Section"], id="performance_metrics_section"),
-                    dcc.Store(id='input-mappings'),
-                    ])
+                html.Div([html.H2("• General")]),
+                html.Div([], id="general_description"),
+                html.Div(["Performance Metrics Section"], id="performance_metrics_section"),
+                dcc.Store(id='input-mappings'),
+                ])
 
 
 def trust_section():
@@ -97,6 +99,34 @@ def trust_section():
         html.Hr()
     ], id="trust_section", style={"display": "None"})
 
+def mapping_panel(pillar):
+    
+    with open('configs/mappings/default.json', 'r') as f:
+                mappings_config = json.loads(f.read())
+    
+    mapping = mappings_config[pillar]
+    
+    map_panel = []
+    input_ids = []
+    
+    #weight panel
+    map_panel.append(html.H4("Mappings",style={'text-align':'center'}))
+    for metric, param in mapping.items():
+        map_panel.append(html.H5(metric.replace("_",' '),style={'text-align':'center'}))
+        for p, v in param.items():
+            input_id = "m_"+p
+            
+            input_ids.append(input_id)
+           
+            map_panel.append(html.Div(html.Label(v.get("label", p).replace("_",' ')), style={'title':v.get("description",""), "margin-left":"30%"})),
+            if p== "clf_type_score":
+                map_panel.append(html.Div(dcc.Textarea(id=input_id, value=str(v.get("value" "")), style={"width":300, "height":150}), style={"margin-left":"30%"}))
+            else:
+                map_panel.append(html.Div(dcc.Input(id=input_id, value=str(v.get("value" "")), type='text', style={"width":200}), style={"margin-left":"30%"}))
+            map_panel.append(html.Br())
+            
+    return map_panel , input_ids
+
 def pillar_section(pillar):
         sections = []
         for i in range(len(fairness_metrics)):
@@ -111,7 +141,7 @@ def pillar_section(pillar):
                         n_clicks=0,
                         style={"float": "right"}
                     ),
-                    daq.BooleanSwitch(id='show_{}_mappings'.format(pillar),
+                    daq.BooleanSwitch(id='toggle_{}_mapping'.format(pillar),
                       on=False,
                       label='Show Mappings',
                       labelPosition="top",
@@ -119,7 +149,12 @@ def pillar_section(pillar):
                       style={"float": "right"}
                     ),
                     html.H2("• {}".format(pillar.upper()), className="mb-5"),
-                ], id="{}_section_heading".format(pillar.lower())),
+                    ], id="{}_section_heading".format(pillar.lower())),
+                    dbc.Collapse(html.Div(mapping_panel(pillar)[0]),
+                        id="{}_mapping".format(pillar),
+                        is_open=False,
+                        style={"background-color": "rgba(255,228,181,0.5)",'padding-bottom': 20, 'display': 'none'}
+                    ),
                     html.Div([], id="{}_overview".format(pillar)),
                     html.H3("{0}-Score".format(pillar), className="text-center"),
                     html.Div([], id="{}_star_rating".format(pillar), className="star_rating, text-center"),
@@ -132,7 +167,7 @@ def pillar_section(pillar):
                     html.Hr(style={"size": "10"}),
 
                 ], id="{}_section".format(pillar), style={"display": "None"})
-    
+
 
 def alert_section(name):
     return html.Div([], id="{}_alert_section".format(name), className="text-center", style={"color":"Red"})
@@ -140,6 +175,21 @@ def alert_section(name):
 
 SECTIONS = ['trust', 'fairness', 'explainability', 'robustness', 'methodology']
 for s in SECTIONS:
+    @app.callback(
+        [Output("{0}_mapping".format(s), "is_open"),
+        Output("{0}_mapping".format(s), "style")],
+        [Input("toggle_{}_mapping".format(s), "on")],
+        [State("{0}_mapping".format(s), "is_open")],
+        prevent_initial_call=True
+    )
+    def toggle_mapping_section(n, is_open):
+        #app.logger.info("toggle {0} detail section".format(s))
+        if is_open:
+            return (not is_open, {'display': 'None'})
+        else:
+            return (not is_open,  {"background-color": "rgba(255,228,181,0.5)",'padding-bottom': 20, 'display': 'Block'})
+
+for s in SECTIONS[1:]:
     @app.callback(
         [Output("{0}_details".format(s), "is_open"),
         Output("{0}_details".format(s), "style")],
@@ -360,8 +410,26 @@ def metric_detail(data):
               output.append(html.Div())
           else:
               prop = []
-              for p in metric_properties.values():
-                  prop.append(html.Div("{} : {}".format(p[0], p[1])))
+              for k, p in metric_properties.items():
+                  print(k)
+                  if k == "importance" :
+                        importance = p[1]
+                        pct_dist = metric_properties["pct_dist"][1]
+                        pct_mark = importance["labels"][int(float(pct_dist[:-1])/100 * len(importance["value"]))-1]
+                        
+                        fig = go.Figure(data=go.Scatter(x=importance["labels"][:30], y=importance["value"][:30],mode='lines+markers'))
+                        fig.add_vline(x=pct_mark, line_width=3, line_dash="dash")
+                        fig.add_trace(go.Scatter(
+                            x=[importance["labels"][int(float(pct_dist[:-1])/100 * len(importance["value"]))-3]], y=[max(importance["value"])],
+                            text="60% Threshold",
+                            mode="text",
+                        ))
+                        fig.update_layout(showlegend=False)    
+                        prop.append(html.Div(["Features importance of top 30 features:",
+                            dcc.Graph(id='test',figure=fig, style={'display': 'block'})]))
+                  else:
+                      prop.append(html.Div("{} : {}".format(p[0], p[1])))
+                  prop.append(html.Br())
               output.append(html.Div(prop))
       return output
 
