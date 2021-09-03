@@ -19,7 +19,7 @@ general_inputs = ["model_name", "purpose_description", "domain_description", "tr
 fairness_inputs = ["protected_feature", "privileged_class_definition"]
 explainability_inputs = ["protected_feature", "privileged_class_definition"]
 robustness_inputs = []
-methodology_inputs = []
+methodology_inputs = ["data_normalization", "regularization"]
 
 @app.callback([Output('create_factsheet_alert', 'children'),
                Output("download_factsheet", "data"),
@@ -29,6 +29,7 @@ methodology_inputs = []
                Output('training_data_description', 'value'),
                Output('model_information', 'value'), 
                Output('data_normalization', 'value'),
+               Output('regularization', 'value'),
                Output('target_column', 'value'), 
                Output('contact_information', 'value'),
                Output('protected_feature', 'value')],
@@ -40,6 +41,7 @@ methodology_inputs = []
                State('training_data_description', 'value'),
                State('model_information', 'value'), 
                State('data_normalization', 'value'),
+               State('regularization', 'value'),
                State('target_column_name', 'value'), 
                State('contact_information', 'value'),
                State('protected_feature', 'value')
@@ -52,6 +54,7 @@ def create_factsheet(
     training_data_description,
     model_information,
     data_normalization,
+    regularization,
     target_column,
     contact_information,
     protected_feature
@@ -188,7 +191,7 @@ layout = dbc.Container([
             
             html.Div([
                 html.H2("• Methodology"), 
-                #--- Data Normalization ---
+                #--- Normalization ---
                 html.Div([
                     create_info_modal("data_normalization", "Data Normalization", "Please select the normalization technique you used to prepare your data", ""),
                     html.H3("Data Normalization"),

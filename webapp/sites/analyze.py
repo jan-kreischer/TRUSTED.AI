@@ -633,13 +633,12 @@ def load_data(solution_set_path):
 def create_metric_details_section(metric_id, i, section_n = 1, is_open=False):
     metric_name = metric_id.replace("_", " ")
     return html.Div([
-        dbc.Button(html.I(className="fas fa-chevron-down"),
-            id="toggle_{}_details".format(metric_id),
-            className="mb-3",
-            n_clicks=0,
-            style={"float": "right"}
-        ),
-        html.H4("{2}.{0} {1}".format(i+1, metric_name, section_n)), 
+
+        html.Div([
+            html.I(className="fas fa-chevron-down ml-4", id="toggle_{}_details".format(metric_id), style={"float": "right"}),
+            html.H4("(X/5)", id="{}_score".format(metric_name), style={"float": "right"}), 
+        html.H4("{2}.{0} {1}".format(i+1, metric_name, section_n)),
+        ]),
             dbc.Collapse(
             html.Div("{}_details".format(metric_name)),
             id="{}_details".format(metric_id),
@@ -664,18 +663,31 @@ def analyze_methodology(solution_set_path):
 
 
 @app.callback(
-    Output("train_test_split_details", 'children'),
+    [Output("train_test_split_details", 'children'), Output("train_test_split_score", 'children')],
     [Input('result', 'data'),
      State('solution_set_dropdown', 'value')], prevent_initial_call=True)
 def train_test_split(data, solution_set_path):
       if data is None:
-          return []
+          return [], []
       else:
           result = json.loads(data)
           final_score, results, properties = result["final_score"] , result["results"], result["properties"]
           training_data_ratio = properties["methodology"]["Train_Test_Split"]["training_data_ratio"]
           test_data_ratio = properties["methodology"]["Train_Test_Split"]["test_data_ratio"]
-          return html.Div("Train-Test-Split: {0}/{1}".format(training_data_ratio, test_data_ratio))
+          return html.Div("Train-Test-Split: {0}/{1}".format(training_data_ratio, test_data_ratio)), html.H4("({}/5)".format(5))
+    
+@app.callback(
+    [Output("normalization_details", 'children'), Output("normalization_score", 'children')],
+    [Input('result', 'data'),
+     State('solution_set_dropdown', 'value')], prevent_initial_call=True)
+def normalization(analysis, solution_set_path):
+    if analysis and solution_set_path:
+          analysis = json.loads(analysis)
+          pillar_scores, metric_scores, metric_properties = analysis["final_score"] , analysis["results"], analysis["properties"]
+          normalization_technique = metric_properties["methodology"]["Normalization"]["normalization_technique"]
+          return html.Div("Normalization Technique: {}".format(normalization_technique)), html.H4("({}/5)".format(metric_scores["methodology"]["Normalization"]))
+    else:
+        return [], []
 
 @app.callback(
     Output(component_id="trust_section", component_property='style'),

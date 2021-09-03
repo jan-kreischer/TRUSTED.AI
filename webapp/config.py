@@ -10,6 +10,7 @@ JOBLIB_FILE_EXTENSIONS = [".joblib"]
 
 # Constants used for loading data from the solution
 FACTSHEET_NAME = "factsheet.json"
+SCENARIO_DESCRIPTION_FILE = "description.md"
 
 # If no target column name is given, we assume 
 # that the last column to the right is containing the label (or predicted value)
@@ -25,4 +26,6 @@ METHODOLOGY_COLOR = '#118ab2'
 
 # Paths
 METRICS_CONFIG_PATH = "configs/metrics"
+
+
 

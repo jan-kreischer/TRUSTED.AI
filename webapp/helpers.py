@@ -139,6 +139,15 @@ def create_info_modal(module_id, name, content, example):
 )
     return modal
 
+def load_scenario_description(scenario_path):
+    scenario_description = ""
+    path = os.path.join(scenario_path, SCENARIO_DESCRIPTION_FILE)
+    if os.path.exists(path):
+        file = open(path, mode='r')
+        scenario_description = file.read()
+        file.close()
+    return scenario_description
+ 
 def parse_contents(contents, filename):
     content_type, content_string = contents.split(',')
 
@@ -172,3 +181,5 @@ def parse_contents(contents, filename):
     ])
     columns = df.columns.values
     return table, columns
+
+def list_of

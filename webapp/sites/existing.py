@@ -4,8 +4,8 @@ import dash_core_components as dcc
 import json
 import os
 import shutil
-from config import SCENARIOS_FOLDER_PATH
-from helpers import list_of_scenarios
+from config import *
+from helpers import *
 scenario_dropdown_options = list_of_scenarios()
 
 from app import server
@@ -44,11 +44,17 @@ create_scenario_dialog = html.Div(
                 dbc.ModalBody(
                 dbc.Form([
     dbc.FormGroup([
-        dbc.Label("Name", html_for="problem_set_name"),
-        dbc.Input(type="text", id="problem_set_name", placeholder="", debounce=True),
         dbc.FormText(
             "A scenario acts as a container for multiple different solutions.",
             color="secondary",
+        ),
+        dbc.Label("Name", html_for="scenario_name"),
+        dbc.Input(type="text", id="scenario_name", placeholder="", debounce=True),
+        dbc.Label("Description", html_for="scenario_name"),
+        dcc.Textarea(
+            id='scenario_description',
+            value='',
+            style={'width': '100%', 'height': 100},
         ),
         dbc.Button(
             "Create", id="submit_create_scenario_dialog", className="ml-auto", n_clicks=0, style={"float": "right"}
@@ -106,16 +112,18 @@ delete_scenario_dialog = html.Div(
 
 # --- Callbacks --- #
 @app.callback(
-    Output("problem_set_name", "value"),
+    [Output("scenario_name", "value"),Output("scenario_description", "value")],
     [Input('submit_create_scenario_dialog', 'n_clicks')],
-    [State('problem_set_name', 'value')], prevent_initial_call=True)
-def create_scenario(n_clicks, name):
-    app.logger.info("Creating scenario {}".format(name))
-    if name:
-        res = os.mkdir(os.path.join(SCENARIOS_FOLDER_PATH, name))
-        return ""
-    else:
-        return ""
+    [State('scenario_name', 'value'), State('scenario_description', 'value')], prevent_initial_call=True)
+def create_scenario(n_clicks, scenario_name, scenario_description):
+    if scenario_name:
+        res = os.mkdir(os.path.join(SCENARIOS_FOLDER_PATH, scenario_name))
+        f = open(os.path.join(SCENARIOS_FOLDER_PATH, scenario_name, SCENARIO_DESCRIPTION_FILE), "w")
+        print(scenario_description)
+        f.write(scenario_description)
+        f.close()
+    return "", ""
+
     
 # --- Callbacks --- #
 @app.callback(
@@ -142,19 +150,22 @@ def toggle_modal(n1, n2, is_open):
         return not is_open
     return is_open
 
-def problem_set_list():
-    problem_sets = [(f.name, f.path) for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir() and not f.name.startswith('.')]
-    problem_set_names = [i[0] for i in problem_sets]
+def scenario_list():
+    scenarios = [(f.name, f.path) for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir() and not f.name.startswith('.')]
+    scenario_names = [i[0] for i in scenarios]
+    scenario_paths = [i[1] for i in scenarios]
     solution_sets = []
-    for name, path in problem_sets:
+    for name, path in scenarios:
         solution_set = [f.name for f in os.scandir(path) if f.is_dir()]
         solution_sets.append(solution_set)
     
     final_tree = []
-    for i in range(len(problem_set_names)):
-        final_tree.append(html.H3(problem_set_names[i], id="scenario_{}".format(problem_set_names[i])))
+    for i in range(len(scenario_names)):
+        final_tree.append(html.H3(scenario_names[i], id="scenario_{}".format(scenario_names[i])))
+        final_tree.append(html.Div(load_scenario_description(scenario_paths[i]), className="mt-2 mb-4", style={"font-style": "italic"}))
         for j in range(len(solution_sets[i])):
             final_tree.append(html.H5("-" + solution_sets[i][j]))
+        final_tree.append(html.Hr())
     return final_tree  
 
 layout = html.Div([
@@ -165,8 +176,8 @@ layout = html.Div([
                     children=[ 
                         delete_scenario_dialog,
                         create_scenario_dialog,
-                        html.H1("Scenarios & Solutions", className="text-center"),
-                        html.Div(children=problem_set_list()),              
+                        html.H1("Scenarios", className="text-center"),
+                        html.Div(children=scenario_list()),              
                    ]
                 ),
                 className="mb-5 mt-5"

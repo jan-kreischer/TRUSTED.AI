@@ -16,7 +16,7 @@ import pickle
 import plotly.express as px
 import plotly.graph_objects as go
 
-from config import SCENARIOS_FOLDER_PATH
+from config import *
 
 # must add this line in order for the app to be deployed successfully on Heroku
 from app import server
