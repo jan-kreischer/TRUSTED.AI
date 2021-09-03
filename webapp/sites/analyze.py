@@ -123,11 +123,11 @@ def mapping_panel(pillar):
             
             input_ids.append(input_id)
            
-            map_panel.append(html.Div(html.Label(v.get("label", p).replace("_",' ')), style={'title':v.get("description",""), "margin-left":"30%"})),
+            map_panel.append(html.Div(html.Label(v.get("label", p).replace("_",' '), title=v.get("description","")), style={"margin-left":"30%"})),
             if p== "clf_type_score":
-                map_panel.append(html.Div(dcc.Textarea(id=input_id, value=str(v.get("value" "")), style={"width":300, "height":150}), style={"margin-left":"30%"}))
+                map_panel.append(html.Div(dcc.Textarea(id=input_id, name=pillar,value=str(v.get("value" "")).replace(",",',\n'), style={"width":300, "height":250}), style={"margin-left":"30%"}))
             else:
-                map_panel.append(html.Div(dcc.Input(id=input_id, value=str(v.get("value" "")), type='text', style={"width":200}), style={"margin-left":"30%"}))
+                map_panel.append(html.Div(dcc.Input(id=input_id, name=pillar,value=str(v.get("value" "")), type='text', style={"width":200}), style={"margin-left":"30%"}))
             map_panel.append(html.Br())
     map_panel.append(html.Hr())      
     map_panel.append(html.Div([html.Label("Load saved mappings",style={"margin-left":10}),
@@ -184,6 +184,37 @@ def pillar_section(pillar):
                         is_open=False,
                     ),
                     html.Hr(style={"size": "10"}),
+                    dbc.Modal(
+                    [   
+                        dbc.ModalHeader("Save {} Mapping".format(pillar)),
+                        dbc.ModalBody([
+                                       html.Div([
+                                        html.Div(html.Label("Please enter a name:"), style={'width': '40%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10}),
+                                        html.Div(dcc.Input(id="mapping-name-{}".format(pillar), type='text', placeholder="Alias for mapping", style={"width":"200px"}), 
+                                                 style={'width': '40%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10}),
+                                        ])
+                                      ]),
+                        dbc.ModalFooter(
+                                    dbc.Button(
+                                        "Save", id="save-{}-mapping".format(pillar), className="ml-auto", n_clicks=0, 
+                                        style={'background-color': 'green','font-weight': 'bold'}
+                                    )
+                                ),
+                    ],
+                    id="modal-{}-mapping".format(pillar),
+                    is_open=False,
+                    backdrop=True
+                    ),
+                    dbc.Modal(
+                    [
+                        dbc.ModalHeader("Success"),
+                        dbc.ModalBody([dbc.Alert(id="alert-success",children ="You successfully saved the Mapping", color="success"),
+                                      ]),
+                    ],
+                    id="modal-saved-{}".format(pillar),
+                    is_open=False,
+                    backdrop=True
+                    )                   
 
                 ], id="{}_section".format(pillar), style={"display": "None"})
 
@@ -191,7 +222,49 @@ def pillar_section(pillar):
 def alert_section(name):
     return html.Div([], id="{}_alert_section".format(name), className="text-center", style={"color":"Red"})
 
-
+for pillar in SECTIONS[1:]:
+    @app.callback(
+        Output("modal-{}-mapping".format(pillar), "is_open"),
+        [Input('save-mapping-{}'.format(pillar), "n_clicks"),Input("save-{}-mapping".format(pillar), "n_clicks")],
+        State("modal-{}-mapping".format(pillar), "is_open"))
+    def update_output(n, n2, is_open):
+        if n or n2:
+            return not is_open
+        else:
+            return is_open
+        
+    @app.callback(
+        Output("modal-saved-{}".format(pillar), "is_open"),
+        [Input("save-{}-mapping".format(pillar), "n_clicks")],
+        [State("modal-saved-{}".format(pillar), "is_open"),State("mapping-name-{}".format(pillar), "value"), State(mapping_panel(pillar)[1][0],"name")]+ 
+        list(map(lambda i: State(i, "value"),mapping_panel(pillar)[1])))
+    def save_mapping(n, is_open, conf_name, pillar, *args):
+        
+        if conf_name:  
+            inputs= dict()
+        
+            for name, val in zip(mapping_panel(pillar)[1] , args):
+                try:
+                    res = eval(val)
+                except (SyntaxError, NameError, TypeError, ZeroDivisionError):
+                    res = val
+               
+                inputs[name] = res
+            
+            with open('configs/mappings/{}/default.json'.format(pillar),'r') as f:
+                config_file = json.loads(f.read())
+                
+            for i in mapping_panel(pillar)[1]:
+                 metric, param = i.split("-")
+                 config_file[metric][param]["value"] = inputs[i]
+            print(inputs)
+            print('configs/mappings/{}/{}.json'.format(pillar,conf_name))
+            with open('configs/mappings/{}/{}.json'.format(pillar,conf_name), 'w') as outfile:
+                json.dump(config_file, outfile, indent=4)
+                    
+            return not is_open
+        else:
+            return is_open
 
 for s in SECTIONS:
     @app.callback(
@@ -411,7 +484,7 @@ def explainability_details(data):
     sections = [html.H3("▶ Explainability Metrics")]
     for i in range(len(metrics)):
             metric_id = metrics[i]
-            sections.append(create_metric_details_section(metric_id, i, 2))
+            sections.append(create_metric_details_section(metric_id, i, 2, True))
     return sections
 
 @app.callback(
@@ -431,7 +504,7 @@ def metric_detail(data):
           else:
               prop = []
               for k, p in metric_properties.items():
-                  print(k)
+           
                   if k == "importance" :
                         importance = p[1]
                         pct_dist = metric_properties["pct_dist"][1]
