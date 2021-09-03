@@ -95,20 +95,48 @@ def pillar_section_2(pillar):
 
     ], id="{}_section-2".format(pillar), style={"display": "None"})
 
+pillars = ['fairness', 'explainability', 'robustness', 'methodology']
+
+def map_dropdown(pillar):
+    return html.Div(
+        [html.Br(),
+        html.Div(html.Label("{} mapping".format(pillar)), style={ 'display': 'inline-block',"vertical-align": "top",'margin-left': "40%"}),
+        html.Br(),
+        html.Div(dcc.Dropdown(
+                    id='{}-dropdown-compare'.format(pillar),
+                    options=list(map(lambda name:{'label': name[:-5], 'value': "configs/mappings/{}/{}".format(pillar,name)} ,os.listdir("configs/mappings/{}".format(pillar)))),
+                    value='configs/mappings/{}/default.json'.format(pillar)
+                ), 
+                 style={'width': "20%", 'display': 'inline-block',"vertical-align": "top",'margin-left': "40%"})
+        ]
+        )
+
 layout = html.Div([
     dbc.Container([
         dbc.Row([
-            dbc.Col(html.H1("Compare", className="text-center"), width=12, className="mb-2 mt-1"),
-            dbc.Col(html.Div([html.Br(),
-                html.Div(html.Label("Choose Configuration:"), style={'width': '200px', 'display': 'inline-block',"vertical-align": "top",'margin-left': 50}),
+            dbc.Col(html.H1("Compare", className="text-center"), width=12, className="mb-5"),
+            daq.BooleanSwitch(id='toggle_config_compare',
+                      on=False,
+                      label="Show Configuration",
+                      labelPosition="top",
+                      color = TRUST_COLOR,
+                      style={"float": "right",'margin-left': "44%"}
+                    ),
+            html.Br(),
+            dbc.Col(html.Div(
+                [html.Br(),
+                html.H4("Applied Configurations", style = {"text-align":"center"}),
+                html.Div(html.Label("Weight Configuration"), style={ 'display': 'inline-block',"vertical-align": "top",'margin-left': "40%"}),
                 html.Br(),
                 html.Div(dcc.Dropdown(
                             id='config-dropdown-compare',
                             options=list(map(lambda name:{'label': name[:-5], 'value': name} ,os.listdir("configs"))),
                             value='default.json'
                         ), 
-                         style={'width': '300px', 'display': 'inline-block',"vertical-align": "top",'margin-left': 50}),
-                    ]), width=12, style={"background-color": "rgba(255,228,181,0.5)",'padding-bottom': 20," margin-left": "auto", "margin-right": "auto"}),
+                         style={'width': "20%", 'display': 'inline-block',"vertical-align": "top",'margin-left': "40%"}),
+                html.Div(list(map(lambda pillar: map_dropdown(pillar) , pillars)))
+                    ],style={"background-color": "rgba(255,228,181,0.5)",'padding-bottom': 20," margin-left": "auto", "margin-right": "auto"}), 
+                width=12,style={'display': 'none'},id="compare-config"),
             dcc.Store(id='result-1'),
             dbc.Col([dcc.Dropdown(
                 id='solution_set_dropdown-1',
@@ -169,6 +197,19 @@ layout = html.Div([
         ], no_gutters=False)
     ])
 ])
+
+@app.callback(
+    Output("compare-config", "style"),
+    [Input("toggle_config_compare", "on")],
+    prevent_initial_call=True
+)
+def toggle_config(on):
+    print(on)
+    #app.logger.info("toggle {0} detail section".format(s))
+    if not on:
+        return {'display': 'None'}
+    else:
+        return {'display': 'Block'}
 
 @app.callback(
     Output(component_id="bar-1", component_property='style'),
