@@ -164,7 +164,7 @@ def get_callbacks(app):
         [Input("hidden-trigger", "value"),Input("save-success", "n_clicks")],
         State("modal-success", "is_open"))
     def update_output(trig,n, is_open):
-        if trig == "save-weights.n_clicks" or n:
+        if trig == "save-weights.n_clicks":
             return not is_open
         else:
             return is_open
