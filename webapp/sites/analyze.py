@@ -23,7 +23,7 @@ import plotly.graph_objects as go
 import warnings
 warnings.filterwarnings('ignore')
 
-
+SECTIONS = ['trust', 'fairness', 'explainability', 'robustness', 'methodology']
 config_fairness, config_explainability, config_robustness, config_methodology, config_pillars = 0, 0, 0 ,0,0
 for config in ["config_pillars","config_fairness", "config_explainability", "config_robustness", "config_methodology"]:
     with open(os.path.join(METRICS_CONFIG_PATH, config + ".json")) as file:
@@ -38,9 +38,13 @@ mappings_config = dict(fairness=config_fairness["parameters"], explainability=co
 
 with open('configs/weights/default.json', 'w') as outfile:
                 json.dump(weight_config, outfile, indent=4)
-                
+
 with open('configs/mappings/default.json', 'w') as outfile:
                 json.dump(mappings_config, outfile, indent=4)
+
+for s in SECTIONS[1:]:
+    with open('configs/mappings/{}/default.json'.format(s), 'w') as outfile:
+                json.dump(mappings_config[s], outfile, indent=4)
 
 # === METRICS ===
 fairness_metrics = ["class_balance", "statistical_parity_difference", "equal_opportunity_difference", "average_odds_difference", "disparate_impact", "theil_index", "euclidean_distance", "mahalanobis_distance", "manhattan_distance"]
@@ -101,20 +105,21 @@ def trust_section():
 
 def mapping_panel(pillar):
     
-    with open('configs/mappings/default.json', 'r') as f:
-                mappings_config = json.loads(f.read())
+    with open('configs/mappings/{}/default.json'.format(pillar), 'r') as f:
+                mapping  = json.loads(f.read())
     
-    mapping = mappings_config[pillar]
+    # mapping = mappings_config[pillar]
     
     map_panel = []
     input_ids = []
     
     #weight panel
     map_panel.append(html.H4("Mappings",style={'text-align':'center'}))
+    # map_panel.append(dcc.Store(id='{}-mapping'.format(pillar)))
     for metric, param in mapping.items():
         map_panel.append(html.H5(metric.replace("_",' '),style={'text-align':'center'}))
         for p, v in param.items():
-            input_id = "m_"+p
+            input_id = "{}-{}".format(metric,p)
             
             input_ids.append(input_id)
            
@@ -124,14 +129,27 @@ def mapping_panel(pillar):
             else:
                 map_panel.append(html.Div(dcc.Input(id=input_id, value=str(v.get("value" "")), type='text', style={"width":200}), style={"margin-left":"30%"}))
             map_panel.append(html.Br())
-    map_panel.append(html.Button('Apply', id='apply-mapping-{}'.format(pillar), style={"background-color": "green",'margin-left': "30%"}),)
+    map_panel.append(html.Hr())      
+    map_panel.append(html.Div([html.Label("Load saved mappings",style={"margin-left":10}),
+                            dcc.Dropdown(
+                                id='mapping-dropdown-{}'.format(pillar),
+                                options=list(map(lambda name:{'label': name[:-5], 'value': "configs/mappings/{}".format(name)} ,os.listdir("configs/mappings/{}".format(pillar)))),
+                                value='configs/mappings/default.json',
+                                style={'width': 200}
+                            )],style={"margin-left":"30%","margin-bottom":15}))
+                            
+                        
+    map_panel.append(html.Div(html.Button('Apply', id='apply-mapping-{}'.format(pillar), style={"background-color": "gold","margin-left":"30%","margin-bottom":15,"width":200})
+                     , style={'width': '100%', 'display': 'inline-block'}))
+    map_panel.append(html.Div(html.Button('Save', id='save-mapping-{}'.format(pillar), style={"background-color": "green","margin-left":"30%","width":200})
+                     , style={'width': '100%', 'display': 'inline-block'}))
     return map_panel , input_ids
 
 def pillar_section(pillar):
-        sections = []
-        for i in range(len(fairness_metrics)):
-            metric_id = fairness_metrics[i]
-            sections.append(create_metric_details_section(metric_id, i))
+        # sections = []
+        # for i in range(len(fairness_metrics)):
+        #     metric_id = fairness_metrics[i]
+        #     sections.append(create_metric_details_section(metric_id, i))
         return html.Div([
                 html.Div([
                     dbc.Button(
@@ -174,7 +192,7 @@ def alert_section(name):
     return html.Div([], id="{}_alert_section".format(name), className="text-center", style={"color":"Red"})
 
 
-SECTIONS = ['trust', 'fairness', 'explainability', 'robustness', 'methodology']
+
 for s in SECTIONS:
     @app.callback(
         [Output("{0}_mapping".format(s), "is_open"),
@@ -233,30 +251,31 @@ def update_solution_set_dropdown(n_clicks):
 
 
 @app.callback(Output('input-mappings', 'data'), 
-          Input('show_explainability_mappings', 'on'))
-   #       Input('apply-config', 'n_clicks')],
-#            list(map(lambda inp: State(inp, "value"),list(filter(lambda ids: ids[:2]=="w_", input_ids)))))
-def store_mappings_config(config):
-     
-    # ctx = dash.callback_context
+        list(map(lambda i: Input('apply-mapping-{}'.format(i), "n_clicks"),SECTIONS[1:])),
+        list(map(lambda i: State(i, "value"), sum(list(map(lambda s: mapping_panel(s)[1],SECTIONS[1:])),[]) )))
+       
+def store_mappings_config(n1, n2, n3, n4, *args):
     
-    # inputs= dict()
+    inputs= dict()
     
-    # for name, val in zip(list(filter(lambda ids: ids[:2]=="w_", input_ids)), args):
-    #     inputs[name] = float(val)
+    for name, val in zip(sum(list(map(lambda s: mapping_panel(s)[1],SECTIONS[1:])),[]) , args):
+        try:
+               res = eval(val)
+        except (SyntaxError, NameError, TypeError, ZeroDivisionError):
+           res = val
+           
+        inputs[name] = res
         
     with open('configs/mappings/default.json','r') as f:
             config_file = json.loads(f.read())
     
     
-    # pillars = ['explainability', 'fairness', 'robustness', 'methodology']
-    # ids = [exp_input_ids, fair_input_ids, rob_input_ids, meth_input_ids]
-    # for pillar, pillar_ids in zip(pillars, ids):
-    #     #output = output + [config["pillars"][pillar]] + list(map(lambda metric: config[pillar]["weights"][metric[2:]],pillar_ids[1:]))
-    #     config_file["pillars"][pillar] = inputs[pillar_ids[0]]
-    #     for metric in pillar_ids[1:]:
-    #         config_file[pillar][metric[2:]] = inputs[metric]
-    
+    pillars = SECTIONS[1:]
+    ids = list(map(lambda s: mapping_panel(s)[1],SECTIONS[1:]))
+    for pillar, map_ids in zip(pillars, ids):
+        for i in map_ids:
+            metric, param = i.split("-")
+            config_file[pillar][metric][param]["value"] = inputs[i]
     
     return json.dumps(config_file)
     

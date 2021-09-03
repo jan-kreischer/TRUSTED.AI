@@ -61,9 +61,9 @@ button_div = html.Div([
                             ), 
                              style={'width': '300px', 'display': 'inline-block',"vertical-align": "top",'margin-left': 50}),
                         ]),
-    html.Button('apply config', id='apply-config', style={"background-color": "gold",'margin-left': 50}),
+    html.Button('apply config', id='apply-config', style={"background-color": "gold",'margin-left': 50,"width":150}),
     html.Br(),html.Br(),
-    html.Button('Save Weights', id='save-weights', style={"background-color": "green",'margin-left': 50}),
+    html.Button('Save Weights', id='save-weights', style={"background-color": "green",'margin-left': 50,"width":150}),
     dcc.Store(id='input-config'),
     html.Div(dcc.Input(id="hidden-trigger", value=None, type='text'), style={"display":"none"})],style={'width': '50%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10})
     # html.Div(id="hidden-trigger-save", style={"display":"none"}),
