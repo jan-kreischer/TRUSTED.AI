@@ -1,0 +1,20 @@
+{
+    "score_Normalization": {
+        "parameter_normalization_technique": {
+            "value": "The value of the parameter_XY",
+            "description": "The description of the paramter and its impact"
+        }
+    },
+    "score_Regularization": {
+        "parameter_regularization_technique": {
+            "value": "The value of the parameter_XY",
+            "description": "The description of the paramter and its impact"
+        }
+    },
+    "score_Train_Test_Split": {
+        "parameter_split": {
+            "value": "The value of the parameter_XY",
+            "description": "The description of the paramter and its impact"
+        }
+    }
+}

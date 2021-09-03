@@ -1,0 +1,50 @@
+{
+    "score_Confidence_Score": {
+        "parameter_XY": {
+            "value": "The value of the parameter_XY",
+            "description": "The description of the paramter and its impact"
+        }
+    },
+    "score_Fast_Gradient_Attack": {
+        "thresholds": {
+            "value": [
+                100,
+                80,
+                60,
+                40,
+                20,
+                0
+            ],
+            "description": "Thresholds of how to map difference between before-after attack accuracies from 1-5. Example: If the before attack accuracy is 85% and after attack accuracy is again 85% it means model is so robust that attack was not successful at all. The difference is 0 and hence this would result in a score of 5 (best score). However if the before attack accuracy was 100% and after attack accuracy is 0% then the model is not robust. The difference is 100% and it would result in score 0 (worst score)",
+            "label": "Score Thresholds"
+        }
+    },
+    "score_Carlini_Wagner_Attack": {
+        "thresholds": {
+            "value": [
+                100,
+                80,
+                60,
+                40,
+                20,
+                0
+            ],
+            "description": "Thresholds of how to map difference between before-after attack accuracies from 1-5. Example: If the before attack accuracy is 85% and after attack accuracy is again 85% it means model is so robust that attack was not successful at all. The difference is 0 and hence this would result in a score of 5 (best score). However if the before attack accuracy was 100% and after attack accuracy is 0% then the model is not robust. The difference is 100% and it would result in score 0 (worst score)",
+            "label": "Score Thresholds"
+        }
+    },
+    "score_Deepfool_Attack": {
+        "thresholds": {
+            "value": [
+                100,
+                80,
+                60,
+                40,
+                20,
+                0
+            ],
+            "description": "Thresholds of how to map difference between before-after attack accuracies from 1-5. Example: If the before attack accuracy is 85% and after attack accuracy is again 85% it means model is so robust that attack was not successful at all. The difference is 0 and hence this would result in a score of 5 (best score). However if the before attack accuracy was 100% and after attack accuracy is 0% then the model is not robust. The difference is 100% and it would result in score 0 (worst score)",
+            "label": "Score Thresholds"
+        }
+    }
+}
