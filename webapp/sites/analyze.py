@@ -133,9 +133,10 @@ def mapping_panel(pillar):
     map_panel.append(html.Div([html.Label("Load saved mappings",style={"margin-left":10}),
                             dcc.Dropdown(
                                 id='mapping-dropdown-{}'.format(pillar),
-                                options=list(map(lambda name:{'label': name[:-5], 'value': "configs/mappings/{}".format(name)} ,os.listdir("configs/mappings/{}".format(pillar)))),
-                                value='configs/mappings/default.json',
-                                style={'width': 200}
+                                options=list(map(lambda name:{'label': name[:-5], 'value': "configs/mappings/{}/{}".format(pillar,name)} ,os.listdir("configs/mappings/{}".format(pillar)))),
+                                value='configs/mappings/{}/default.json'.format(pillar),
+                                style={'width': 200},
+                                className = pillar
                             )],style={"margin-left":"30%","margin-bottom":15}))
                             
                         
@@ -234,7 +235,32 @@ for pillar in SECTIONS[1:]:
             return is_open
         
     @app.callback(
-        Output("modal-saved-{}".format(pillar), "is_open"),
+            Output("mapping-dropdown-{}".format(pillar), "options"),
+            Input("modal-saved-{}".format(pillar), "is_open"),
+            State("mapping-dropdown-{}".format(pillar), "className"))
+    def update_options(n, pillar):
+        options = list(map(lambda name:{'label': name[:-5], 'value': "configs/mappings/{}/{}".format(pillar,name)} ,os.listdir("configs/mappings/{}".format(pillar))))
+        return options
+    
+    @app.callback(
+                 list(map(lambda i: Output(i, "value"),mapping_panel(pillar)[1])), 
+                Input("mapping-dropdown-{}".format(pillar), 'value'),
+                State("mapping-dropdown-{}".format(pillar), "className"))
+    def update_mapping_input(conf_name,pillar):
+        
+        with open(conf_name ,'r') as f:
+                config = json.loads(f.read())
+                
+        output = []
+        ids = mapping_panel(pillar)[1]
+        for i in ids:
+            metric, param = i.split("-")
+            output.append(str(config[metric][param]["value"]))
+            
+        return output
+    
+    @app.callback(
+        [Output("modal-saved-{}".format(pillar), "is_open"),Output("mapping-dropdown-{}".format(pillar), "value")],
         [Input("save-{}-mapping".format(pillar), "n_clicks")],
         [State("modal-saved-{}".format(pillar), "is_open"),State("mapping-name-{}".format(pillar), "value"), State(mapping_panel(pillar)[1][0],"name")]+ 
         list(map(lambda i: State(i, "value"),mapping_panel(pillar)[1])))
@@ -257,14 +283,12 @@ for pillar in SECTIONS[1:]:
             for i in mapping_panel(pillar)[1]:
                  metric, param = i.split("-")
                  config_file[metric][param]["value"] = inputs[i]
-            print(inputs)
-            print('configs/mappings/{}/{}.json'.format(pillar,conf_name))
             with open('configs/mappings/{}/{}.json'.format(pillar,conf_name), 'w') as outfile:
                 json.dump(config_file, outfile, indent=4)
                     
-            return not is_open
+            return not is_open, 'configs/mappings/{}/{}.json'.format(pillar,conf_name)
         else:
-            return is_open
+            return is_open, 'configs/mappings/{}/default.json'.format(pillar)
 
 for s in SECTIONS:
     @app.callback(
