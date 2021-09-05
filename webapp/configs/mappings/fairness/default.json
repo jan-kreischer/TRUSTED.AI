@@ -1,5 +1,53 @@
 {
-    "score_Statistical_Parity": {
+    "score_class_balance": {
+        "parameter_XY": {
+            "value": "The value of the parameter_XY",
+            "description": "The description of the paramter and its impact"
+        }
+    },
+    "score_statistical_parity_difference": {
+        "parameter_XY": {
+            "value": "The value of the parameter_XY",
+            "description": "The description of the paramter and its impact"
+        }
+    },
+    "score_equal_opportunity_difference": {
+        "parameter_XY": {
+            "value": "The value of the parameter_XY",
+            "description": "The description of the paramter and its impact"
+        }
+    },
+    "score_average_odds_difference": {
+        "parameter_XY": {
+            "value": "The value of the parameter_XY",
+            "description": "The description of the paramter and its impact"
+        }
+    },
+    "score_disparate_impact": {
+        "parameter_XY": {
+            "value": "The value of the parameter_XY",
+            "description": "The description of the paramter and its impact"
+        }
+    },
+    "score_theil_index": {
+        "parameter_XY": {
+            "value": "The value of the parameter_XY",
+            "description": "The description of the paramter and its impact"
+        }
+    },
+    "score_euclidean_distance": {
+        "parameter_XY": {
+            "value": "The value of the parameter_XY",
+            "description": "The description of the paramter and its impact"
+        }
+    },
+    "score_mahalanobis_distance": {
+        "parameter_XY": {
+            "value": "The value of the parameter_XY",
+            "description": "The description of the paramter and its impact"
+        }
+    },
+    "score_manhattan_distance": {
         "parameter_XY": {
             "value": "The value of the parameter_XY",
             "description": "The description of the paramter and its impact"

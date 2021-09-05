@@ -13,8 +13,7 @@ import shutil
 from helpers import *
 from config import *
 from algorithms.helper_functions import get_performance_metrics
-from algorithms.trustworthiness_score import trusting_AI_scores, get_trust_score, get_final_score
-from pillars.fairness.class_balance import compute_class_balance
+from algorithms.trustworthiness_analysis import trusting_AI_scores, get_trust_score, get_final_score
 import dash_table
 import numpy as np
 from sites import config_panel
@@ -47,14 +46,11 @@ for s in SECTIONS[1:]:
                 json.dump(mappings_config[s], outfile, indent=4)
 
 # === METRICS ===
-fairness_metrics = ["class_balance", "statistical_parity_difference", "equal_opportunity_difference", "average_odds_difference", "disparate_impact", "theil_index", "euclidean_distance", "mahalanobis_distance", "manhattan_distance"]
+fairness_metrics = list_of_metrics("fairness")
+#["class_balance", "statistical_parity_difference", "equal_opportunity_difference", "average_odds_difference", "disparate_impact", "theil_index", "euclidean_distance", "mahalanobis_distance", "manhattan_distance"]
 explainability_metrics = ['Algorithm_Class', 'Correlated_Features', 'Model_Size', 'Feature_Relevance']
 robustness_metrics = ["CLEVER_Score", "Loss_Sensitivity","Confidence_Score","Empirical_Robustness_Fast_Gradient_Attack", "Empirical_Robustness_Deepfool_Attack", "Empirical_Robustness_Carlini_Wagner_Attack"]
-methodology_metrics = [
-    "normalization", 
-    "train_test_split",
-    "regularization"
-]
+methodology_metrics = list_of_metrics("methodology")
 
 # === SECTIONS ===
 def general_section():
@@ -151,6 +147,14 @@ def pillar_section(pillar):
         # for i in range(len(fairness_metrics)):
         #     metric_id = fairness_metrics[i]
         #     sections.append(create_metric_details_section(metric_id, i))
+        
+        #detail_sections = []
+        #metrics = eval("%s_metrics" % pillar)
+        #for i in range(len(metrics)):
+        #    metric_id = metrics[i]
+        #    print("{0} - {1}".format(i, metric_id))
+        #    detail_sections.append(create_metric_details_section(metric_id, i))
+
         return html.Div([
                 html.Div([
                     dbc.Button(
@@ -508,7 +512,7 @@ def explainability_details(data):
     sections = [html.H3("▶ Explainability Metrics")]
     for i in range(len(metrics)):
             metric_id = metrics[i]
-            sections.append(create_metric_details_section(metric_id, i, 2, True))
+            sections.append(create_metric_details_section(metric_id, i, 2))
     return sections
 
 @app.callback(
@@ -683,9 +687,11 @@ def train_test_split(data, solution_set_path):
 def normalization(analysis, solution_set_path):
     if analysis and solution_set_path:
           analysis = json.loads(analysis)
+          print("ANALYSIS")
+          print(analysis)
           pillar_scores, metric_scores, metric_properties = analysis["final_score"] , analysis["results"], analysis["properties"]
-          normalization_technique = metric_properties["methodology"]["Normalization"]["normalization_technique"]
-          return html.Div("Normalization Technique: {}".format(normalization_technique)), html.H4("({}/5)".format(metric_scores["methodology"]["Normalization"]))
+          normalization_technique = metric_properties["methodology"]["normalization"]["normalization_technique"]
+          return html.Div("normalization Technique: {}".format(normalization_technique)), html.H4("({}/5)".format(metric_scores["methodology"]["normalization"]))
     else:
         return [], []
 
@@ -799,7 +805,7 @@ def store_trust_analysis(solution_set_dropdown, config_weights, config_mappings)
                 "results":results,
                 "trust_score":trust_score,
                 "properties" : properties}
-        
+        print(data)
         return json.dumps(data,default=convert)
 
 for m in fairness_metrics + methodology_metrics + explainability_metrics + robustness_metrics:
@@ -855,10 +861,10 @@ def update_figure(data, trig):
       chart_list.append(bar_chart)
      
       #spider
-      spider_plt = px.line_polar(r=values, theta=pillars, line_close=True, title='<b style="font-size:42px;">{}/5</b>'.format(trust_score))
-      spider_plt.update_layout(title_x=0.5)
-      spider_plt.update_traces(fill='toself', fillcolor=TRUST_COLOR, marker_color=TRUST_COLOR, marker_line_color=TRUST_COLOR, marker_line_width=0, opacity=0.6)
-      chart_list.append(spider_plt)
+      radar_chart = px.line_polar(r=values, theta=pillars, line_close=True, title='<b style="font-size:42px;">{}/5</b>'.format(trust_score))
+      radar_chart.update_layout(title_x=0.5)
+      radar_chart.update_traces(fill='toself', fillcolor=TRUST_COLOR, marker_color=TRUST_COLOR, marker_line_color=TRUST_COLOR, marker_line_width=0, opacity=0.6)
+      chart_list.append(radar_chart)
      
       #barcharts
       for n, (pillar , sub_scores) in enumerate(results.items()):
@@ -875,7 +881,8 @@ def update_figure(data, trig):
               categories = nonNanCategories
               values = nonNanValues
           bar_chart_pillar = go.Figure(data=[go.Bar(x=categories, y=values, marker_color=colors[n])])
-          bar_chart_pillar.update_layout(title_text=title, title_x=0.5)
+          bar_chart_pillar.update_layout(title_text=title, title_x=0.5, xaxis_tickangle=XAXIS_TICKANGLE)
+            #fig.update_layout(barmode='group', xaxis_tickangle=-45)
           chart_list.append(bar_chart_pillar)
          
       #spider charts
@@ -892,10 +899,10 @@ def update_figure(data, trig):
                       nonNanValues.append(v)
               categories = nonNanCategories
               val = nonNanValues
-          spider_plt_pillar = px.line_polar(r=val, theta=categories, line_close=True, title=title)
-          spider_plt_pillar.update_traces(fill='toself', fillcolor=colors[n], marker_color=colors[n],marker_line_width=1.5, opacity=0.6)
-          spider_plt_pillar.update_layout(title_x=0.5)
-          chart_list.append(spider_plt_pillar)
+          radar_chart_pillar = px.line_polar(r=val, theta=categories, line_close=True, title=title)
+          radar_chart_pillar.update_traces(fill='toself', fillcolor=colors[n], marker_color=colors[n],marker_line_width=1.5, opacity=0.6)
+          radar_chart_pillar.update_layout(title_x=0.5)
+          chart_list.append(radar_chart_pillar)
       star_ratings = []
       star_ratings.append(show_star_rating(trust_score))
       star_ratings.append(show_star_rating(final_score["fairness"]))

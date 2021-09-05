@@ -180,7 +180,7 @@ def calc_robustness_score(model, train_data, test_data, config):
         Empirical_Robustness_Fast_Gradient_Attack = score_Fast_Gradient_Attack(model, train_data, test_data, FSG_attack_thresholds),
         Empirical_Robustness_Carlini_Wagner_Attack = score_Carlini_Wagner_Attack(model, train_data, test_data, CW_attack_thresholds),
         Empirical_Robustness_Deepfool_Attack = score_Deepfool_Attack(model, train_data, test_data, Deepfool_thresholds)
-                 )
+    )
     scores = dict((k, v.score) for k, v in output.items())
     properties = dict((k, v.properties) for k, v in output.items())
     

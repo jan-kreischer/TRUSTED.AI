@@ -1,8 +1,41 @@
 {
+    "score_Loss_Sensitivity": {
+        "thresholds": {
+            "value": [
+                2.5,
+                2,
+                1.5,
+                1,
+                0.5
+            ],
+            "description": "Thresholds of how to map loss sensitivity from 1-5. Better confidence score means higher robustness.",
+            "label": "Score Thresholds"
+        }
+    },
+    "score_Clever_Score": {
+        "thresholds": {
+            "value": [
+                0.2,
+                0.5,
+                1,
+                2.5,
+                5
+            ],
+            "description": "Thresholds of how to map CLEVER score from 1-5. Better confidence score means higher robustness.",
+            "label": "Score Thresholds"
+        }
+    },
     "score_Confidence_Score": {
-        "parameter_XY": {
-            "value": "The value of the parameter_XY",
-            "description": "The description of the paramter and its impact"
+        "thresholds": {
+            "value": [
+                0,
+                20,
+                40,
+                60,
+                80
+            ],
+            "description": "Thresholds of how to map confidence score from 1-5. Better confidence score means higher robustness.",
+            "label": "Score Thresholds"
         }
     },
     "score_Fast_Gradient_Attack": {

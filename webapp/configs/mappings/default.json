@@ -1,6 +1,54 @@
 {
     "fairness": {
-        "score_Statistical_Parity": {
+        "score_class_balance": {
+            "parameter_XY": {
+                "value": "The value of the parameter_XY",
+                "description": "The description of the paramter and its impact"
+            }
+        },
+        "score_statistical_parity_difference": {
+            "parameter_XY": {
+                "value": "The value of the parameter_XY",
+                "description": "The description of the paramter and its impact"
+            }
+        },
+        "score_equal_opportunity_difference": {
+            "parameter_XY": {
+                "value": "The value of the parameter_XY",
+                "description": "The description of the paramter and its impact"
+            }
+        },
+        "score_average_odds_difference": {
+            "parameter_XY": {
+                "value": "The value of the parameter_XY",
+                "description": "The description of the paramter and its impact"
+            }
+        },
+        "score_disparate_impact": {
+            "parameter_XY": {
+                "value": "The value of the parameter_XY",
+                "description": "The description of the paramter and its impact"
+            }
+        },
+        "score_theil_index": {
+            "parameter_XY": {
+                "value": "The value of the parameter_XY",
+                "description": "The description of the paramter and its impact"
+            }
+        },
+        "score_euclidean_distance": {
+            "parameter_XY": {
+                "value": "The value of the parameter_XY",
+                "description": "The description of the paramter and its impact"
+            }
+        },
+        "score_mahalanobis_distance": {
+            "parameter_XY": {
+                "value": "The value of the parameter_XY",
+                "description": "The description of the paramter and its impact"
+            }
+        },
+        "score_manhattan_distance": {
             "parameter_XY": {
                 "value": "The value of the parameter_XY",
                 "description": "The description of the paramter and its impact"
@@ -75,10 +123,43 @@
         }
     },
     "robustness": {
+        "score_Loss_Sensitivity": {
+            "thresholds": {
+                "value": [
+                    2.5,
+                    2,
+                    1.5,
+                    1,
+                    0.5
+                ],
+                "description": "Thresholds of how to map loss sensitivity from 1-5. Better confidence score means higher robustness.",
+                "label": "Score Thresholds"
+            }
+        },
+        "score_Clever_Score": {
+            "thresholds": {
+                "value": [
+                    0.2,
+                    0.5,
+                    1,
+                    2.5,
+                    5
+                ],
+                "description": "Thresholds of how to map CLEVER score from 1-5. Better confidence score means higher robustness.",
+                "label": "Score Thresholds"
+            }
+        },
         "score_Confidence_Score": {
-            "parameter_XY": {
-                "value": "The value of the parameter_XY",
-                "description": "The description of the paramter and its impact"
+            "thresholds": {
+                "value": [
+                    0,
+                    20,
+                    40,
+                    60,
+                    80
+                ],
+                "description": "Thresholds of how to map confidence score from 1-5. Better confidence score means higher robustness.",
+                "label": "Score Thresholds"
             }
         },
         "score_Fast_Gradient_Attack": {
@@ -125,19 +206,25 @@
         }
     },
     "methodology": {
-        "score_Normalization": {
+        "score_normalization": {
             "parameter_normalization_technique": {
                 "value": "The value of the parameter_XY",
                 "description": "The description of the paramter and its impact"
             }
         },
-        "score_Regularization": {
+        "score_regularization": {
             "parameter_regularization_technique": {
                 "value": "The value of the parameter_XY",
                 "description": "The description of the paramter and its impact"
             }
         },
-        "score_Train_Test_Split": {
+        "score_train_test_split": {
+            "parameter_split": {
+                "value": "The value of the parameter_XY",
+                "description": "The description of the paramter and its impact"
+            }
+        },
+        "score_factsheet_completeness": {
             "parameter_split": {
                 "value": "The value of the parameter_XY",
                 "description": "The description of the paramter and its impact"

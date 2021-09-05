@@ -17,7 +17,7 @@ from math import pi
 import dash_table
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
-from algorithms.trustworthiness_score import trusting_AI_scores, get_trust_score
+from algorithms.trustworthiness_analysis import trusting_AI_scores, get_trust_score
 from sites.explainability_panel import explainability_panel, exp_input_ids
 from sites.fairness_panel import fairness_panel ,fair_input_ids
 from sites.robustness_panel import robustness_panel, rob_input_ids
@@ -46,7 +46,7 @@ meth_panel_comp = [html.H3("Methodology", style={'text-align':'center'})] + meth
 meth_panel = html.Div(meth_panel_comp, style={'width': '22%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10})
 
 
-children.append(html.Div([html.H3("Pillars and Metrics\n Weighting",style={'text-align':'center'}),exp_panel,fair_panel,rob_panel,meth_panel],
+children.append(html.Div([html.H3("Pillar and Metric Weights",style={'text-align':'center'}),exp_panel,fair_panel,rob_panel,meth_panel],
                           style={"background-color":"lightyellow"}))
 
 button_div = html.Div([

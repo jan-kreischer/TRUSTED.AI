@@ -1,14 +1,17 @@
 {
     "fairness": {
-        "Statistical_Parity": 0.17,
-        "Disparate_Mistreatment": 0.17,
-        "Class_Imbalance": 1.0,
-        "Biased_Data": 0.17,
-        "Disparate_Treatment": 0.17,
-        "Disparate_Impact": 0.17
+        "class_balance": 0.2,
+        "statistical_parity_difference": 0.2,
+        "equal_opportunity_difference": 0.2,
+        "average_odds_difference": 0.2,
+        "disparate_impact": 0.2,
+        "theil_index": 0.2,
+        "euclidean_distance": 0.2,
+        "mahalanobis_distance": 0.2,
+        "manhattan_distance": 0.2
     },
     "explainability": {
-        "Algorithm_Class": 1.0,
+        "Algorithm_Class": 0.55,
         "Correlated_Features": 0.15,
         "Model_Size": 0.15,
         "Feature_Relevance": 0.15
@@ -25,7 +28,7 @@
     "methodology": {
         "Normalization": 0.17,
         "Treatment_of_Corrupt_Values": 0.17,
-        "Train_Test_Split": 5.0,
+        "Train_Test_Split": 0.17,
         "Regularization": 0.17,
         "Treatment_of_Categorical_Features": 0.17,
         "Feature_Filtering": 0.17
@@ -34,6 +37,6 @@
         "fairness": 0.25,
         "explainability": 0.25,
         "robustness": 0.25,
-        "methodology": 5.0
+        "methodology": 0.25
     }
 }

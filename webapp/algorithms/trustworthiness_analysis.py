@@ -11,10 +11,10 @@ import json
 from config import *
 from math import pi
 import sklearn.metrics as metrics
-from algorithms.fairness_score import calc_fairness_score
-from algorithms.explainability_score import calc_explainability_score
-from algorithms.robustness_score import calc_robustness_score
-from algorithms.methodology_score import calc_methodology_score
+from algorithms.fairness_analysis import calc_fairness_score
+from algorithms.explainability_analysis import calc_explainability_score
+from algorithms.robustness_analysis import calc_robustness_score
+from algorithms.methodology_analysis import calc_methodology_score
 import collections
 from helpers import read_solution
 

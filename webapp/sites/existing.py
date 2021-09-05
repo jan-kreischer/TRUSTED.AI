@@ -50,6 +50,8 @@ create_scenario_dialog = html.Div(
         ),
         dbc.Label("Name", html_for="scenario_name"),
         dbc.Input(type="text", id="scenario_name", placeholder="", debounce=True),
+        dbc.Label("Link", html_for="scenario_url"),
+        dbc.Input(type="url", id="scenario_url", placeholder="", debounce=True),
         dbc.Label("Description", html_for="scenario_name"),
         dcc.Textarea(
             id='scenario_description',
@@ -112,17 +114,20 @@ delete_scenario_dialog = html.Div(
 
 # --- Callbacks --- #
 @app.callback(
-    [Output("scenario_name", "value"),Output("scenario_description", "value")],
+    [Output("scenario_name", "value"), Output("scenario_url", "value"), Output("scenario_description", "value")],
     [Input('submit_create_scenario_dialog', 'n_clicks')],
-    [State('scenario_name', 'value'), State('scenario_description', 'value')], prevent_initial_call=True)
-def create_scenario(n_clicks, scenario_name, scenario_description):
+    [State('scenario_name', 'value'), State('scenario_url', 'value'), State('scenario_description', 'value')], prevent_initial_call=True)
+def create_scenario(n_clicks, scenario_name, scenario_url, scenario_description):
     if scenario_name:
         res = os.mkdir(os.path.join(SCENARIOS_FOLDER_PATH, scenario_name))
         f = open(os.path.join(SCENARIOS_FOLDER_PATH, scenario_name, SCENARIO_DESCRIPTION_FILE), "w")
         print(scenario_description)
         f.write(scenario_description)
         f.close()
-    return "", ""
+        f = open(os.path.join(SCENARIOS_FOLDER_PATH, scenario_name, SCENARIO_LINK_FILE), "w")
+        f.write(scenario_url)
+        f.close()
+    return "", "", ""
 
     
 # --- Callbacks --- #
@@ -156,15 +161,16 @@ def scenario_list():
     scenario_paths = [i[1] for i in scenarios]
     solution_sets = []
     for name, path in scenarios:
-        solution_set = [f.name for f in os.scandir(path) if f.is_dir()]
+        solution_set = [f.name for f in os.scandir(os.path.join(path, SOLUTIONS_FOLDER)) if f.is_dir()]
         solution_sets.append(solution_set)
     
     final_tree = []
     for i in range(len(scenario_names)):
-        final_tree.append(html.H3(scenario_names[i], id="scenario_{}".format(scenario_names[i])))
+        final_tree.append(html.H3(scenario_names[i], id="scenario_{}".format(scenario_names[i]), style={"text-transform": "capitalize"}))
+        final_tree.append(html.A(children=["Link"], href="{}".format(load_scenario_link(scenario_paths[i])), className="mt-2 mb-4", style={"font-style": "italic"}))
         final_tree.append(html.Div(load_scenario_description(scenario_paths[i]), className="mt-2 mb-4", style={"font-style": "italic"}))
         for j in range(len(solution_sets[i])):
-            final_tree.append(html.H5("-" + solution_sets[i][j]))
+            final_tree.append(html.H5("-" + solution_sets[i][j], style={"text-transform": "capitalize"}))
         final_tree.append(html.Hr())
     return final_tree  
 
@@ -176,7 +182,7 @@ layout = html.Div([
                     children=[ 
                         delete_scenario_dialog,
                         create_scenario_dialog,
-                        html.H1("Scenarios", className="text-center"),
+                        html.H1("Scenarios", className="text-center", style={"text-transform": "uppercase"}),
                         html.Div(children=scenario_list()),              
                    ]
                 ),

@@ -29,7 +29,7 @@ def get_solution_sets():
     problem_sets = [(f.name, f.path) for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir() and not f.name.startswith('.')]
     options = []
     for problem_set_name, problem_set_path in problem_sets:
-        solution_sets = [(f.name, f.path) for f in os.scandir(problem_set_path) if f.is_dir() and not f.name.startswith('.')]
+        solution_sets = [(f.name, f.path) for f in os.scandir(os.path.join(problem_set_path, SOLUTIONS_FOLDER)) if f.is_dir() and not f.name.startswith('.')]
         for solution_set_name, solution_set_path in solution_sets:
             options.append({"label": problem_set_name + " > " + solution_set_name, "value": solution_set_path})
     return options
@@ -148,6 +148,15 @@ def load_scenario_description(scenario_path):
         file.close()
     return scenario_description
  
+def load_scenario_link(scenario_path):
+    scenario_link = ""
+    path = os.path.join(scenario_path, SCENARIO_LINK_FILE)
+    if os.path.exists(path):
+        file = open(path, mode='r')
+        scenario_link = file.read()
+        file.close()
+    return scenario_link
+    
 def parse_contents(contents, filename):
     content_type, content_string = contents.split(',')
 
@@ -182,4 +191,21 @@ def parse_contents(contents, filename):
     columns = df.columns.values
     return table, columns
 
-def list_of
+#def list_of_methodology_metrics():
+#    methodology_metrics = []
+#    with open(os.path.join(METRICS_CONFIG_PATH, "config_methodology.json")) as file:
+#        methodology_config = json.load(file)
+#        for metric_name in methodology_config["parameters"]:
+#            metric_name = metric_name.split("_", 1)[1]
+#            methodology_metrics.append(metric_name.lower())
+#    return methodology_metrics
+
+def list_of_metrics(pillar):
+    metrics = []
+    with open(os.path.join(METRICS_CONFIG_PATH, "config_{}.json".format(pillar))) as file:
+        config_file = json.load(file)
+        for metric_name in config_file["parameters"]:
+            metric_name = metric_name.split("_", 1)[1]
+            metrics.append(metric_name.lower())
+    return metrics
+        
