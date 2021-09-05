@@ -49,7 +49,7 @@ for s in SECTIONS[1:]:
 # === METRICS ===
 fairness_metrics = ["class_balance", "statistical_parity_difference", "equal_opportunity_difference", "average_odds_difference", "disparate_impact", "theil_index", "euclidean_distance", "mahalanobis_distance", "manhattan_distance"]
 explainability_metrics = ['Algorithm_Class', 'Correlated_Features', 'Model_Size', 'Feature_Relevance']
-robustness_metrics = ["Empirical_Robustness_Fast_Gradient_Attack", "Empirical_Robustness_Deepfool_Attack", "Empirical_Robustness_Carlini_Wagner_Attack"]
+robustness_metrics = ["CLEVER_Score", "Loss_Sensitivity","Confidence_Score","Empirical_Robustness_Fast_Gradient_Attack", "Empirical_Robustness_Deepfool_Attack", "Empirical_Robustness_Carlini_Wagner_Attack"]
 methodology_metrics = [
     "normalization", 
     "train_test_split",
@@ -921,6 +921,12 @@ def robustness_details(data):
             sections.append(create_metric_details_section(metric_id, i, 2))
     return sections
 
+def robustness_detail_div(properties):
+    prop = []
+    for k, v in properties.items():
+        prop.append(html.Div("{}: {}".format(v[0], v[1])))
+    return html.Div(prop)
+
 @app.callback(
 Output("Empirical_Robustness_Deepfool_Attack_details", 'children'),
 Input('result', 'data'), prevent_initial_call=False)
@@ -931,10 +937,7 @@ def Deepfool_Attack_metric_detail(data):
       result = json.loads(data)
       properties = result["properties"]
       metric_properties = properties["robustness"]["Empirical_Robustness_Deepfool_Attack"]
-      prop = []
-      for p in metric_properties.values():
-          prop.append(html.Div(p))
-      return html.Div(prop)
+      return robustness_detail_div(metric_properties)
 
 @app.callback(
 Output("Empirical_Robustness_Carlini_Wagner_Attack_details", 'children'),
@@ -946,10 +949,7 @@ def Carlini_Wagner_Attack_metric_detail(data):
       result = json.loads(data)
       properties = result["properties"]
       metric_properties = properties["robustness"]["Empirical_Robustness_Carlini_Wagner_Attack"]
-      prop = []
-      for p in metric_properties.values():
-          prop.append(html.Div(p))
-      return html.Div(prop)
+      return robustness_detail_div(metric_properties)
 
 @app.callback(
 Output("Empirical_Robustness_Fast_Gradient_Attack_details", 'children'),
@@ -961,10 +961,43 @@ def Fast_Gradient_Attack_metric_detail(data):
       result = json.loads(data)
       properties = result["properties"]
       metric_properties = properties["robustness"]["Empirical_Robustness_Fast_Gradient_Attack"]
-      prop = []
-      for p in metric_properties.values():
-          prop.append(html.Div(p))
-      return html.Div(prop)
+      return robustness_detail_div(metric_properties)
+
+@app.callback(
+Output("Confidence_Score_details", 'children'),
+Input('result', 'data'), prevent_initial_call=False)
+def Confidence_Score_metric_detail(data):
+  if data is None:
+      return []
+  else:
+      result = json.loads(data)
+      properties = result["properties"]
+      metric_properties = properties["robustness"]["Confidence_Score"]
+      return robustness_detail_div(metric_properties)
+
+@app.callback(
+Output("Loss_Sensitivity_details", 'children'),
+Input('result', 'data'), prevent_initial_call=False)
+def Loss_Sensitivity_metric_detail(data):
+  if data is None:
+      return []
+  else:
+      result = json.loads(data)
+      properties = result["properties"]
+      metric_properties = properties["robustness"]["Loss_Sensitivity"]
+      return robustness_detail_div(metric_properties)
+
+@app.callback(
+Output("CLEVER_Score_details", 'children'),
+Input('result', 'data'), prevent_initial_call=False)
+def Clever_Score_metric_detail(data):
+  if data is None:
+      return []
+  else:
+      result = json.loads(data)
+      properties = result["properties"]
+      metric_properties = properties["robustness"]["CLEVER_Score"]
+      return robustness_detail_div(metric_properties)
  
 config_panel.get_callbacks(app)
 
