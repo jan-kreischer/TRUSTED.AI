@@ -26,10 +26,12 @@
         "Empirical_Robustness_Deepfool_Attack": 0.2
     },
     "methodology": {
-        "normalization": 0.25,
-        "regularization": 0.25,
-        "train_test_split": 0.25,
-        "factsheet_completeness": 0.25
+        "normalization": 0.1666,
+        "missing_data": 0.1666,
+        "regularization": 0.1666,
+        "train_test_split": 0.1666,
+        "test_accuracy": 0.1666,
+        "factsheet_completeness": 0.1666
     },
     "pillars": {
         "fairness": 0.25,

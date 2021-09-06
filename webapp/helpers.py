@@ -6,13 +6,51 @@ import pandas as pd
 import json
 import base64
 import io
+import numpy as np
 import dash_table
 import dash_core_components as dcc
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 from config import *
 from tensorflow.keras.models import load_model
-import tensorflow as tf
+import time
+import random
+import pickle
+import seaborn as sn
+import matplotlib.pyplot as plt
+from math import pi
+import sklearn.metrics as metrics
+import collections
+from helpers import *
+
+def get_performance_metrics(model, test_data, target_column):
+    
+    test_data = test_data.copy()
+    
+    if target_column:
+        X_test = test_data.drop(target_column, axis=1)
+        y_test = test_data[target_column]
+    else:
+        X_test = test_data.iloc[:,:DEFAULT_TARGET_COLUMN_INDEX]
+        y_test = test_data.iloc[:,DEFAULT_TARGET_COLUMN_INDEX: ]
+    
+    y_true =  y_test.values.flatten()
+    y_pred = model.predict(X_test)
+    y_pred_proba = model.predict_proba(X_test)
+    labels = np.unique(np.array([y_pred,y_true]).flatten())
+
+    performance_metrics = pd.DataFrame({
+        "accuracy" :  [metrics.accuracy_score(y_true, y_pred)],
+        #"global recall" :  [metrics.recall_score(y_true, y_pred, labels=labels, average="micro")],
+        "class weighted recall" : [metrics.recall_score(y_true, y_pred,average="weighted")],
+        #"global precision" : [metrics.precision_score(y_true, y_pred, labels=labels, average="micro")],
+        "class weighted precision" : [metrics.precision_score(y_true, y_pred,average="weighted")],
+        #"global f1 score" :  [metrics.f1_score(y_true, y_pred,average="micro")],
+        "class weighted f1 score" :  [metrics.f1_score(y_true, y_pred,average="weighted")],
+        "cross-entropy loss" : [metrics.log_loss(y_true, y_pred_proba)],
+        "ROC AUC" : [metrics.roc_auc_score(y_true, y_pred_proba,average="weighted", multi_class='ovr')]
+    }).round(decimals=2)
+    return performance_metrics
 
 def show_star_rating(rating):
     stars = []

@@ -6,6 +6,12 @@
         "description": "The description of the paramter and its impact"
       }
     },
+    "score_missing_data": {
+      "parameter_missing_data": {
+        "value": "The value of the parameter_XY",
+        "description": "The description of the paramter and its impact"
+      }
+    },
     "score_regularization": {
       "parameter_regularization_technique": {
         "value": "The value of the parameter_XY",
@@ -18,6 +24,12 @@
         "description": "The description of the paramter and its impact"
       }
     },
+    "score_test_accuracy": {
+      "parameter_normalization_technique": {
+        "value": "The value of the parameter_XY",
+        "description": "The description of the paramter and its impact"
+      }
+    },
     "score_factsheet_completeness": {
       "parameter_split": {
         "value": "The value of the parameter_XY",
@@ -26,9 +38,11 @@
     }
   },
     "weights": {
-        "normalization": 0.25,
-        "regularization": 0.25,
-        "train_test_split": 0.25,
-        "factsheet_completeness": 0.25 
+        "normalization": 0.1666,
+        "missing_data": 0.1666,
+        "regularization": 0.1666,
+        "train_test_split": 0.1666,
+        "test_accuracy": 0.1666,
+        "factsheet_completeness": 0.1666
     }
 }

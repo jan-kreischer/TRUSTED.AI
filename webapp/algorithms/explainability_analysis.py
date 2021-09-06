@@ -10,10 +10,6 @@ info = collections.namedtuple('info', 'description value')
 #for testing
 # import os
 
-
-# os.chdir(r"C:\Users\Besitzer\Documents\GitHub\Trusted-AI\Scenario")
-# from apps.algorithm.helper_functions import get_case_inputs
-
 # case = "case1"
 # # load case inputs
 # factsheet, model, X_test, X_train, y_test, y_train = get_case_inputs(case)

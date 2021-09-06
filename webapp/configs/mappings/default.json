@@ -212,6 +212,12 @@
                 "description": "The description of the paramter and its impact"
             }
         },
+        "score_missing_data": {
+            "parameter_missing_data": {
+                "value": "The value of the parameter_XY",
+                "description": "The description of the paramter and its impact"
+            }
+        },
         "score_regularization": {
             "parameter_regularization_technique": {
                 "value": "The value of the parameter_XY",
@@ -220,6 +226,12 @@
         },
         "score_train_test_split": {
             "parameter_split": {
+                "value": "The value of the parameter_XY",
+                "description": "The description of the paramter and its impact"
+            }
+        },
+        "score_test_accuracy": {
+            "parameter_normalization_technique": {
                 "value": "The value of the parameter_XY",
                 "description": "The description of the paramter and its impact"
             }

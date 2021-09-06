@@ -13,7 +13,6 @@ import glob
 import shutil
 from helpers import *
 from config import *
-from algorithms.helper_functions import get_performance_metrics
 from algorithms.trustworthiness_analysis import trusting_AI_scores, get_trust_score, get_final_score
 import dash_table
 import numpy as np

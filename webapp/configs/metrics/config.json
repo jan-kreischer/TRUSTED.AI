@@ -33,11 +33,12 @@
       "Class_Specific_Metrics": 0.5
     },
     "methodology": {
-      "Normalization": 0.2,
-      "Test_F1_score": 0.2,
-      "Train_Test_Split": 0.2,
-      "Regularization": 0.2,
-      "Test_Accuracy": 0.2
+        "normalization": 0.1666,
+        "missing_data": 0.1666,
+        "regularization": 0.1666,
+        "train_test_split": 0.1666,
+        "test_accuracy": 0.1666,
+        "factsheet_completeness": 0.1666
     }
   }
 }
