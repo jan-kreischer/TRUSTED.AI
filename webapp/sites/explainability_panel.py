@@ -15,7 +15,7 @@ exp_panel_comp = []
 input_ids = ["w_exp_pillar"]
 
 #weight panel
-comp_weight = [html.H4("Weights",style={'text-align':'center'})]
+comp_weight = []
 comp_weight.append(html.H5("Pillar Weight",style={'text-align':'center'}))
 
 comp_weight.append(html.Div(dcc.Input(id="w_exp_pillar",value=config_pillars["explainability"], type='text'), 
@@ -32,7 +32,7 @@ for key, val in config_explainability["weights"].items():
     input_id = "w_"+key
     input_ids.append(input_id)
     comp_weight.append(html.Div([
-        html.Div(html.Label(key.replace("_",' ')), style={'width': '40%', 'display': 'inline-block',"vertical-align": "top",'margin-left': "40%"}),
+        html.Div(html.Label(key.replace("_",' ').title()), style={'width': '40%', 'display': 'inline-block',"vertical-align": "top",'margin-left': "40%"}),
         html.Div(dcc.Input(id=input_id, value=val, type='text'), style={'width': '40%', 'display': 'inline-block',"vertical-align": "top",'margin-left': "40%"}),
         ]))
 # parameter panel

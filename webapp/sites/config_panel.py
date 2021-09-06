@@ -17,13 +17,13 @@ from math import pi
 import dash_table
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
-from algorithms.trustworthiness_analysis import trusting_AI_scores, get_trust_score
+from algorithms.trustworthiness import trusting_AI_scores, get_trust_score
 from sites.explainability_panel import explainability_panel, exp_input_ids
 from sites.fairness_panel import fairness_panel ,fair_input_ids
 from sites.robustness_panel import robustness_panel, rob_input_ids
 from sites.methodology_panel import methodology_panel, meth_input_ids
 import dash_daq as daq
-from config import METRICS_CONFIG_PATH
+from config import *
 
 children=[]
 

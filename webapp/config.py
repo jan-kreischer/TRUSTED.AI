@@ -8,6 +8,9 @@ MODEL_REGEX = "model.*"
 PICKLE_FILE_EXTENSIONS = [".sav", ".pkl", ".pickle"]
 JOBLIB_FILE_EXTENSIONS = [".joblib"]
 
+PILLARS = ['fairness', 'explainability', 'robustness', 'methodology']
+SECTIONS = ['trust'] + PILLARS
+
 # === FACTSHEET ===
 FACTSHEET_NAME = "factsheet.json"
 GENERAL_INPUTS = ["model_name", "purpose_description", "domain_description", "training_data_description", "model_information",    "data_normalization", "target_column", "contact_information"]
@@ -35,6 +38,7 @@ FAIRNESS_COLOR = '#06d6a0'
 EXPLAINABILITY_COLOR = '#ffd166'
 ROBUSTNESS_COLOR = '#ef476f'
 METHODOLOGY_COLOR = '#118ab2'
+CONFIG_COLOR = "rgba(255,228,181,0.5)"
 
 # === CONFIGURATION ===
 METRICS_CONFIG_PATH = "configs/metrics"

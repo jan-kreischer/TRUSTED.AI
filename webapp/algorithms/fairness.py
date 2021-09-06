@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 # functions for fairness score
+from helpers import *
 
 import numpy as np
 np.random.seed(0)
@@ -8,9 +9,6 @@ from aif360.datasets import GermanDataset
 from aif360.metrics import BinaryLabelDatasetMetric
 from aif360.datasets import BinaryLabelDataset, StandardDataset
 from aif360.algorithms.preprocessing import Reweighing
-
-import collections
-result = collections.namedtuple('result', 'score properties')
 
 # Load all necessary packages
 #import sys
@@ -53,6 +51,24 @@ else:
 
 
 # === Fairness Metrics ===
+def analyse():   
+    output = dict(
+        class_balance = class_balance_score(),
+        statistical_parity_difference = statistical_parity_difference_score(),
+        equal_opportunity_difference = equal_opportunity_difference_score(),
+        average_odds_difference = average_odds_difference_score(),
+        disparate_impact = disparate_impact_score(),
+        theil_index = theil_index_score(),
+        euclidean_distance = euclidean_distance_score(),
+        mahalanobis_distance = mahalanobis_distance_score(),
+        manhattan_distance = manhattan_distance_score()
+    )
+    
+    scores = dict((k, v.score) for k, v in output.items())
+    properties = dict((k, v.properties) for k, v in output.items())
+    
+    return  result(score=scores, properties=properties)
+
 # --- Class Balance ---
 def class_balance_metric():
     return result(score=np.random.randint(1,6), properties={"normalization_technique": "fairness"}) 
@@ -124,21 +140,4 @@ def manhattan_distance_score():
 def manhattan_distance_metric():
     return result(score=np.random.randint(1,6), properties={"normalization_technique": "fairness"}) 
 
-def calc_fairness_score():   
-    output = dict(
-        class_balance = class_balance_score(),
-        statistical_parity_difference = statistical_parity_difference_score(),
-        equal_opportunity_difference = equal_opportunity_difference_score(),
-        average_odds_difference = average_odds_difference_score(),
-        disparate_impact = disparate_impact_score(),
-        theil_index = theil_index_score(),
-        euclidean_distance = euclidean_distance_score(),
-        mahalanobis_distance = mahalanobis_distance_score(),
-        manhattan_distance = manhattan_distance_score()
-    )
-    
-    scores = dict((k, v.score) for k, v in output.items())
-    properties = dict((k, v.properties) for k, v in output.items())
-    
-    return  result(score=scores, properties=properties)
     

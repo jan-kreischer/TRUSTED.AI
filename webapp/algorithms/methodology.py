@@ -3,11 +3,35 @@ import numpy as np
 import collections
 from helpers import *
 
-
-result = collections.namedtuple('result', 'score properties')
-
-
 # === Methodology Metrics ===
+def analyse(model, training_dataset, test_dataset, factsheet, methodology_config):
+    metrics = list_of_metrics("methodology")
+    print(metrics)
+    output = dict(
+    #for metric in metrics:
+        #output[metric] = exec("%s_score(model, training_dataset, test_dataset, factsheet, methodology_config)" % metric)
+        normalization  = normalization_score(model, training_dataset, test_dataset, factsheet, methodology_config),
+        missing_data = missing_data_score(model, training_dataset, test_dataset, factsheet, methodology_config),
+        regularization   = regularization_score(model, training_dataset, test_dataset, factsheet, methodology_config),
+        train_test_split = train_test_split_score(model, training_dataset, test_dataset, factsheet, methodology_config),
+        test_accuracy = test_accuracy_score(model, training_dataset, test_dataset, factsheet, methodology_config),
+        f1_score = f1_score(model, training_dataset, test_dataset, factsheet, methodology_config),
+        factsheet_completeness= factsheet_completeness_score(model, training_dataset, test_dataset, factsheet, methodology_config)
+    )
+    
+    #for metric in metrics:
+    #    exec("{0} = {0}_score(model, training_dataset, test_dataset, factsheet, methodology_config)".format(metric))
+    #    print("METRIC {}".format(metric))
+    #    exec("print({0})".format(metric))
+
+        #treatment_of_corrupt_values     = f1_score(model, training_dataset, test_dataset, factsheet, methodology_config),
+        #feature_filtering    = test_accuracy_score(model, training_dataset, test_dataset, factsheet, methodology_config),
+        #treatment_of_categorical_features  = test_accuracy_score(model, training_dataset, test_dataset, factsheet, methodology_config)
+    scores = dict((k, v.score) for k, v in output.items())
+    properties = dict((k, v.properties) for k, v in output.items())
+    
+    return  result(score=scores, properties=properties)
+
 # --- Normalization ---
 def normalization_score(model, training_dataset, test_dataset, factsheet, methodology_config):
     normalization_technique = normalization_metric(factsheet)
@@ -109,33 +133,7 @@ def regularization_metric(factsheet):
         return NOT_SPECIFIED
     
 
-    
-# --- Factsheet Completeness ---
-
-def factsheet_completeness_score(model, training_dataset, test_dataset, factsheet, methodology_config):
-    score = 0
-    properties= dict()
-    n = len(GENERAL_INPUTS)
-    ctr = 0
-    for e in GENERAL_INPUTS:
-        if "general" in factsheet and e in factsheet["general"]:
-            ctr+=1
-            properties[e] = "present"
-        else:
-            properties[e] = "missing"
-    score = round(ctr/n*5)
-    return result(score=score, properties=properties)
-            
-    return result(score=np.random.randint(1,6), properties={}) 
-
-def factsheet_completeness_metric(factsheet):
-    print("hi")
-
-
-
-
-# --- Test Accuracy ---
-
+    # --- Test Accuracy ---
 def test_accuracy_score(model, training_dataset, test_dataset, factsheet, methodology_config):
     score = 0
     properties= dict()
@@ -155,8 +153,6 @@ def test_accuracy_score(model, training_dataset, test_dataset, factsheet, method
         score = 0
     return result(score=score, properties=properties) 
         
-        
-
 def test_accuracy_metric(model, test_dataset, factsheet):
     target_column = None
     if "general" in factsheet and "target_column" in factsheet["general"]:
@@ -174,31 +170,59 @@ def test_accuracy_metric(model, test_dataset, factsheet):
     accuracy = metrics.accuracy_score(y_true, y_pred).round(2)
     return accuracy
 
-
-
-def calc_methodology_score(model, training_dataset, test_dataset, factsheet, methodology_config):
-    metrics = list_of_metrics("methodology")
-    print(metrics)
-    output = dict(
-    #for metric in metrics:
-        #output[metric] = exec("%s_score(model, training_dataset, test_dataset, factsheet, methodology_config)" % metric)
-        normalization  = normalization_score(model, training_dataset, test_dataset, factsheet, methodology_config),
-        missing_data = missing_data_score(model, training_dataset, test_dataset, factsheet, methodology_config),
-        regularization   = regularization_score(model, training_dataset, test_dataset, factsheet, methodology_config),
-        train_test_split = train_test_split_score(model, training_dataset, test_dataset, factsheet, methodology_config),
-        test_accuracy = test_accuracy_score(model, training_dataset, test_dataset, factsheet, methodology_config),
-        factsheet_completeness= factsheet_completeness_score(model, training_dataset, test_dataset, factsheet, methodology_config)
-    )
+    # --- F1 Score ---
+def f1_score(model, training_dataset, test_dataset, factsheet, methodology_config):
+    score = 0
+    properties= dict()
+    f1_score = f1_metric(model, test_dataset, factsheet)
+    properties["f1_score"] = f1_score
+    if f1_score > 0.99 :
+        score = 5
+    elif f1_score > 0.95:
+        score = 4
+    elif f1_score > 0.90:
+        score = 3
+    elif f1_score > 0.85:
+        score = 2
+    elif f1_score > 0.80:
+        score = 1
+    else:
+        score = 0
+    return result(score=score, properties=properties) 
+        
+def f1_metric(model, test_dataset, factsheet):
+    target_column = None
+    if "general" in factsheet and "target_column" in factsheet["general"]:
+        target_column = factsheet["general"]["target_column"]
     
-    #for metric in metrics:
-    #    exec("{0} = {0}_score(model, training_dataset, test_dataset, factsheet, methodology_config)".format(metric))
-    #    print("METRIC {}".format(metric))
-    #    exec("print({0})".format(metric))
-
-        #treatment_of_corrupt_values     = f1_score(model, training_dataset, test_dataset, factsheet, methodology_config),
-        #feature_filtering    = test_accuracy_score(model, training_dataset, test_dataset, factsheet, methodology_config),
-        #treatment_of_categorical_features  = test_accuracy_score(model, training_dataset, test_dataset, factsheet, methodology_config)
-    scores = dict((k, v.score) for k, v in output.items())
-    properties = dict((k, v.properties) for k, v in output.items())
+    if target_column:
+        X_test = test_dataset.drop(target_column, axis=1)
+        y_test = test_dataset[target_column]
+    else:
+        X_test = test_dataset.iloc[:,:DEFAULT_TARGET_COLUMN_INDEX]
+        y_test = test_dataset.iloc[:,DEFAULT_TARGET_COLUMN_INDEX: ]
     
-    return  result(score=scores, properties=properties)
+    y_true =  y_test.values.flatten()
+    y_pred = model.predict(X_test)
+    f1_metric = metrics.f1_score(y_true, y_pred,average="weighted").round(2)
+    return f1_metric
+    
+# --- Factsheet Completeness ---
+def factsheet_completeness_score(model, training_dataset, test_dataset, factsheet, methodology_config):
+    score = 0
+    properties= dict()
+    n = len(GENERAL_INPUTS)
+    ctr = 0
+    for e in GENERAL_INPUTS:
+        if "general" in factsheet and e in factsheet["general"]:
+            ctr+=1
+            properties[e] = "present"
+        else:
+            properties[e] = "missing"
+    score = round(ctr/n*5)
+    return result(score=score, properties=properties)
+            
+    return result(score=np.random.randint(1,6), properties={}) 
+
+def factsheet_completeness_metric(factsheet):
+    print("hi")

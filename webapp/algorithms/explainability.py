@@ -7,27 +7,34 @@ import collections
 
 result = collections.namedtuple('result', 'score properties')
 info = collections.namedtuple('info', 'description value')
-#for testing
-# import os
 
-# case = "case1"
-# # load case inputs
-# factsheet, model, X_test, X_train, y_test, y_train = get_case_inputs(case)
-
-# # #get config
-# with open("sites/algorithm/config_explainability.json") as file:
-#         config = json.load(file)
+# === EX ===
+def analyse(clf, train_data, test_data, config, factsheet):
     
+    #function parameters
+    target_column = factsheet["general"].get("target_column")
+    clf_type_score = config["score_algorithm_class"]["clf_type_score"]["value"]
+    ms_thresholds = config["score_model_size"]["thresholds"]["value"]
+    cf_thresholds = config["score_correlated_features"]["thresholds"]["value"]
+    fr_thresholds = config["score_feature_relevance"]["thresholds"]["value"]
+    threshold_outlier = config["score_feature_relevance"]["threshold_outlier"]["value"]
+    penalty_outlier = config["score_feature_relevance"]["penalty_outlier"]["value"]
+    
+    output = dict(
+        algorithm_class     = algorithm_class_score(clf, clf_type_score),
+        correlated_features = correlated_features_score(train_data, test_data, thresholds=cf_thresholds, target_column=target_column ),
+        model_size          = model_size_score(train_data, ms_thresholds),
+        feature_relevance   = feature_relevance_score(clf, train_data ,target_column=target_column, thresholds=fr_thresholds,
+                                                     threshold_outlier =threshold_outlier,penalty_outlier=penalty_outlier )
+                 )
 
-# scenarios = list(map(lambda x: x["value"], get_solution_sets()))
-# test_data, train_data, clf, factsheet = read_scenario(scenarios[6])
-# target_column = factsheet["general"].get("target_column")
-# res = calc_explainability_score(clf, train_data, test_data, config,target_column)
-# res.score
+    scores = dict((k, v.score) for k, v in output.items())
+    properties = dict((k, v.properties) for k, v in output.items())
+    
+    return  result(score=scores, properties=properties)
 
-# functions for explainability score
 
-def score_Algorithm_Class(clf, clf_type_score):
+def algorithm_class_score(clf, clf_type_score):
 
     clf_name = type(clf).__name__
     exp_score = clf_type_score.get(clf_name,np.nan)
@@ -35,7 +42,7 @@ def score_Algorithm_Class(clf, clf_type_score):
     
     return  result(score=exp_score, properties=properties)
 
-def score_Correlated_Features(train_data, test_data, thresholds=[0.05, 0.16, 0.28, 0.4], target_column=None):
+def correlated_features_score(train_data, test_data, thresholds=[0.05, 0.16, 0.28, 0.4], target_column=None):
     
     test_data = test_data.copy()
     train_data = train_data.copy()
@@ -66,13 +73,13 @@ def score_Correlated_Features(train_data, test_data, thresholds=[0.05, 0.16, 0.2
     return  result(score=score, properties=properties)
 
 
-def score_Model_Size(test_data, thresholds = np.array([10,30,100,500])):
+def model_size_score(test_data, thresholds = np.array([10,30,100,500])):
     
     dist_score = 5- np.digitize(test_data.shape[1]-1 , thresholds, right=True) 
          
     return result(score=dist_score, properties={"n_features": info("number of features", test_data.shape[1])})
 
-def score_Feature_Relevance(clf, train_data, target_column=None, threshold_outlier = 0.03, penalty_outlier = 0.5, thresholds = [0.05, 0.1, 0.2, 0.3]):
+def feature_relevance_score(clf, train_data, target_column=None, threshold_outlier = 0.03, penalty_outlier = 0.5, thresholds = [0.05, 0.1, 0.2, 0.3]):
     
     pd.options.mode.chained_assignment = None  
     train_data = train_data.copy()
@@ -134,26 +141,3 @@ def score_Feature_Relevance(clf, train_data, target_column=None, threshold_outli
     # import seaborn as sns
     # sns.boxplot(data=importance)
     
-def calc_explainability_score(clf, train_data, test_data, config, factsheet):
-    
-    #function parameters
-    target_column = factsheet["general"].get("target_column")
-    clf_type_score = config["score_Algorithm_Class"]["clf_type_score"]["value"]
-    ms_thresholds = config["score_Model_Size"]["thresholds"]["value"]
-    cf_thresholds = config["score_Correlated_Features"]["thresholds"]["value"]
-    fr_thresholds = config["score_Feature_Relevance"]["thresholds"]["value"]
-    threshold_outlier = config["score_Feature_Relevance"]["threshold_outlier"]["value"]
-    penalty_outlier = config["score_Feature_Relevance"]["penalty_outlier"]["value"]
-    
-    output = dict(
-        Algorithm_Class     = score_Algorithm_Class(clf, clf_type_score),
-        Correlated_Features = score_Correlated_Features(train_data, test_data, thresholds=cf_thresholds, target_column=target_column ),
-        Model_Size          = score_Model_Size(train_data, ms_thresholds),
-        Feature_Relevance   = score_Feature_Relevance(clf, train_data ,target_column=target_column, thresholds=fr_thresholds,
-                                                     threshold_outlier =threshold_outlier,penalty_outlier=penalty_outlier )
-                 )
-
-    scores = dict((k, v.score) for k, v in output.items())
-    properties = dict((k, v.properties) for k, v in output.items())
-    
-    return  result(score=scores, properties=properties)

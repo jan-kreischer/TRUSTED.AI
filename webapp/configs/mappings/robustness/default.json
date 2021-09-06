@@ -1,5 +1,5 @@
 {
-    "score_Loss_Sensitivity": {
+    "score_loss_sensitivity": {
         "thresholds": {
             "value": [
                 2.5,
@@ -12,7 +12,7 @@
             "label": "Score Thresholds"
         }
     },
-    "score_Clever_Score": {
+    "score_clever_score": {
         "thresholds": {
             "value": [
                 0.2,
@@ -25,7 +25,7 @@
             "label": "Score Thresholds"
         }
     },
-    "score_Confidence_Score": {
+    "score_confidence_score": {
         "thresholds": {
             "value": [
                 0,
@@ -38,7 +38,7 @@
             "label": "Score Thresholds"
         }
     },
-    "score_Fast_Gradient_Attack": {
+    "score_fast_gradient_attack": {
         "thresholds": {
             "value": [
                 100,
@@ -52,7 +52,7 @@
             "label": "Score Thresholds"
         }
     },
-    "score_Carlini_Wagner_Attack": {
+    "score_carlini_wagner_attack": {
         "thresholds": {
             "value": [
                 100,
@@ -66,7 +66,7 @@
             "label": "Score Thresholds"
         }
     },
-    "score_Deepfool_Attack": {
+    "score_deepfool_attack": {
         "thresholds": {
             "value": [
                 100,

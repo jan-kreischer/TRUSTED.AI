@@ -1,6 +1,6 @@
 {
   "parameters": {
-    "score_Loss_Sensitivity": {
+    "score_loss_sensitivity": {
       "thresholds": {
         "value": [
           2.5,
@@ -13,7 +13,7 @@
         "label": "Score Thresholds"
       }
     },
-    "score_Clever_Score": {
+    "score_clever_score": {
       "thresholds": {
         "value": [
           0.2,
@@ -26,7 +26,7 @@
         "label": "Score Thresholds"
       }
     },
-    "score_Confidence_Score": {
+    "score_confidence_score": {
       "thresholds": {
         "value": [
           0,
@@ -39,7 +39,7 @@
         "label": "Score Thresholds"
       }
     },
-    "score_Fast_Gradient_Attack": {
+    "score_fast_gradient_attack": {
       "thresholds": {
         "value": [
           100,
@@ -53,7 +53,7 @@
         "label": "Score Thresholds"
       }
     },
-    "score_Carlini_Wagner_Attack": {
+    "score_carlini_wagner_attack": {
       "thresholds": {
         "value": [
           100,
@@ -67,7 +67,7 @@
         "label": "Score Thresholds"
       }
     },
-    "score_Deepfool_Attack": {
+    "score_deepfool_attack": {
       "thresholds": {
         "value": [
           100,
@@ -83,12 +83,12 @@
     }
   },
   "weights": {
-    "Confidence_Score": 0.20,
-      "Clique_Method"    : 0.20,
-        "Loss_Sensitivity"  : 0.20, 
-        "CLEVER_Score"   : 0.20,
-	"Empirical_Robustness_Fast_Gradient_Attack"   : 0.20,
-	"Empirical_Robustness_Carlini_Wagner_Attack"   : 0.20,
-	"Empirical_Robustness_Deepfool_Attack"   : 0.20
+    "confidence_score": 0.20,
+    "clique_method"    : 0.20,
+    "loss_sensitivity"  : 0.20, 
+    "clever_score"   : 0.20,
+    "empirical_robustness_fast_gradient_attack": 0.20,
+    "empirical_robustness_carlini_wagner_attack": 0.20,
+    "empirical_robustness_deepfool_attack": 0.20
   }
 }

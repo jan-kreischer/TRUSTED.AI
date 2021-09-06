@@ -15,9 +15,32 @@ import numpy.linalg as la
 info = collections.namedtuple('info', 'description value')
 result = collections.namedtuple('result', 'score properties')
 
-# functions for robustness score
+# === ROBUSTNESS ===
+def analyse(model, train_data, test_data, config):
 
-def score_Clever_Score(model, train_data, test_data, thresholds):
+    clever_score_thresholds = config["score_clever_score"]["thresholds"]["value"]
+    loss_sensitivity_thresholds = config["score_loss_sensitivity"]["thresholds"]["value"]
+    confidence_score_thresholds = config["score_confidence_score"]["thresholds"]["value"]
+    fsg_attack_thresholds = config["score_fast_gradient_attack"]["thresholds"]["value"]
+    cw_attack_thresholds = config["score_carlini_wagner_attack"]["thresholds"]["value"]
+    deepfool_thresholds = config["score_carlini_wagner_attack"]["thresholds"]["value"]
+    
+    output = dict(
+        confidence_score   = confidence_score(model, train_data, test_data, clever_score_thresholds),
+        clique_method      = class_specific_metrics_score(),
+        loss_sensitivity   = loss_sensitivity_score(model, train_data, test_data, loss_sensitivity_thresholds),
+        clever_score       = clever_score(model, train_data, test_data, clever_score_thresholds),
+        empirical_robustness_fast_gradient_attack = fast_gradient_attack_score(model, train_data, test_data, fsg_attack_thresholds),
+        empirical_robustness_carlini_wagner_attack = carlini_wagner_attack_score(model, train_data, test_data, cw_attack_thresholds),
+        empirical_robustness_deepfool_attack = deepfool_attack_score(model, train_data, test_data, deepfool_thresholds)
+    )
+    scores = dict((k, v.score) for k, v in output.items())
+    properties = dict((k, v.properties) for k, v in output.items())
+    
+    return  result(score=scores, properties=properties)
+
+
+def clever_score(model, train_data, test_data, thresholds):
     try:
         X_test = test_data.iloc[:,:-1]
         X_train = train_data.iloc[:, :-1]
@@ -38,7 +61,7 @@ def score_Clever_Score(model, train_data, test_data, thresholds):
         print(e)
         return result(score=np.nan, properties={})
 
-def score_Loss_Sensitivity(model, train_data, test_data, thresholds):
+def loss_sensitivity_score(model, train_data, test_data, thresholds):
     try:
         X_test = test_data.iloc[:,:-1]
         X_test = np.array(X_test)
@@ -52,7 +75,7 @@ def score_Loss_Sensitivity(model, train_data, test_data, thresholds):
         print(e)
         return result(score=np.nan, properties={})
 
-def score_Confidence_Score(model, train_data, test_data, thresholds):
+def confidence_score(model, train_data, test_data, thresholds):
     try:
         X_test = test_data.iloc[:,:-1]
         y_test = test_data.iloc[:,-1: ]
@@ -65,10 +88,10 @@ def score_Confidence_Score(model, train_data, test_data, thresholds):
     except:
         return result(score=np.nan, properties={})
 
-def score_Class_Specific_Metrics():
+def class_specific_metrics_score():
     return result(score=np.random.randint(1,6), properties={})
 
-def score_Fast_Gradient_Attack(model, train_data, test_data, thresholds):
+def fast_gradient_attack_score(model, train_data, test_data, thresholds):
     try:
         randomData = test_data.sample(50)
         randomX = randomData.iloc[:,:-1]
@@ -99,7 +122,7 @@ def score_Fast_Gradient_Attack(model, train_data, test_data, thresholds):
     except:
         return result(score=np.nan, properties={})
 
-def score_Carlini_Wagner_Attack(model, train_data, test_data, thresholds):
+def carlini_wagner_attack_score(model, train_data, test_data, thresholds):
     try:
         randomData = test_data.sample(5)
         randomX = randomData.iloc[:,:-1]
@@ -132,7 +155,7 @@ def score_Carlini_Wagner_Attack(model, train_data, test_data, thresholds):
     except:
         return result(score=np.nan, properties={})
 
-def score_Deepfool_Attack(model, train_data, test_data, thresholds):
+def deepfool_attack_score(model, train_data, test_data, thresholds):
     try:
         randomData = test_data.sample(4)
         randomX = randomData.iloc[:,:-1]
@@ -162,26 +185,3 @@ def score_Deepfool_Attack(model, train_data, test_data, thresholds):
                                   "difference": info("Proportional difference (After attack accuracy - Before attack accuracy)/Before attack accuracy", "{:.2f}%".format(100 * (before_attack - after_attack) / before_attack))})
     except:
         return result(score=np.nan, properties={})
-
-def calc_robustness_score(model, train_data, test_data, config):
-
-    Clever_Score_thresholds = config["score_Clever_Score"]["thresholds"]["value"]
-    Loss_sensitivity_thresholds = config["score_Loss_Sensitivity"]["thresholds"]["value"]
-    Confidence_score_thresholds = config["score_Confidence_Score"]["thresholds"]["value"]
-    FSG_attack_thresholds = config["score_Fast_Gradient_Attack"]["thresholds"]["value"]
-    CW_attack_thresholds = config["score_Carlini_Wagner_Attack"]["thresholds"]["value"]
-    Deepfool_thresholds = config["score_Carlini_Wagner_Attack"]["thresholds"]["value"]
-    
-    output = dict(
-        Confidence_Score  = score_Confidence_Score(model, train_data, test_data, Confidence_score_thresholds),
-        Clique_Method    = score_Class_Specific_Metrics(),
-        Loss_Sensitivity   = score_Loss_Sensitivity(model, train_data, test_data, Loss_sensitivity_thresholds),
-        CLEVER_Score   = score_Clever_Score(model, train_data, test_data, Clever_Score_thresholds),
-        Empirical_Robustness_Fast_Gradient_Attack = score_Fast_Gradient_Attack(model, train_data, test_data, FSG_attack_thresholds),
-        Empirical_Robustness_Carlini_Wagner_Attack = score_Carlini_Wagner_Attack(model, train_data, test_data, CW_attack_thresholds),
-        Empirical_Robustness_Deepfool_Attack = score_Deepfool_Attack(model, train_data, test_data, Deepfool_thresholds)
-    )
-    scores = dict((k, v.score) for k, v in output.items())
-    properties = dict((k, v.properties) for k, v in output.items())
-    
-    return  result(score=scores, properties=properties)

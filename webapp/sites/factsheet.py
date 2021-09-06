@@ -53,22 +53,17 @@ def create_factsheet(
     contact_information,
     protected_feature
 ):
-    print(training_data_description)
-    print(n_clicks)
     factsheet = {}
     if n_clicks is not None:
         factsheet["general"] = {}
         for e in GENERAL_INPUTS:
             if eval(e):
-                print("{0}, {1}".format(e, eval(e)))
                 factsheet["general"][e] = eval(e)
         
         factsheet["fairness"] = {}
         for e in FAIRNESS_INPUTS:
             if eval(e):
                 factsheet["fairness"][e] = eval(e)
-                
-        print(factsheet)
         return html.H3("Created Factsheet", className="text-center", style={"color": "Red"}), dict(content=json.dumps(factsheet), filename="factsheet.json"), "", "", "", "", "", "", "", "", ""
         
 

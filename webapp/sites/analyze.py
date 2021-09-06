@@ -13,7 +13,7 @@ import glob
 import shutil
 from helpers import *
 from config import *
-from algorithms.trustworthiness_analysis import trusting_AI_scores, get_trust_score, get_final_score
+from algorithms.trustworthiness import trusting_AI_scores, get_trust_score, get_final_score
 import dash_table
 import numpy as np
 from sites import config_panel
@@ -23,7 +23,7 @@ import warnings
 warnings.filterwarnings('ignore')
 
 # === CONFIG ===
-SECTIONS = ['trust', 'fairness', 'explainability', 'robustness', 'methodology']
+
 config_fairness, config_explainability, config_robustness, config_methodology, config_pillars = 0, 0, 0 ,0,0
 for config in ["config_pillars","config_fairness", "config_explainability", "config_robustness", "config_methodology"]:
     with open(os.path.join(METRICS_CONFIG_PATH, config + ".json")) as file:
@@ -48,8 +48,8 @@ for s in SECTIONS[1:]:
 
 # === METRICS ===
 fairness_metrics = list_of_metrics("fairness")
-explainability_metrics = ['Algorithm_Class', 'Correlated_Features', 'Model_Size', 'Feature_Relevance']
-robustness_metrics = ["CLEVER_Score", "Loss_Sensitivity","Confidence_Score","Empirical_Robustness_Fast_Gradient_Attack", "Empirical_Robustness_Deepfool_Attack", "Empirical_Robustness_Carlini_Wagner_Attack"]
+explainability_metrics = list_of_metrics("explainability")
+robustness_metrics = ["clever_score", "loss_sensitivity", "confidence_score", "empirical_robustness_fast_gradient_attack", "empirical_robustness_deepfool_attack", "empirical_robustness_carlini_wagner_attack"]
 methodology_metrics = list_of_metrics("methodology")
 
 # === SECTIONS ===
@@ -80,7 +80,7 @@ def trust_section():
             html.Hr(),
             html.Div([daq.BooleanSwitch(id='show_weighting',
                       on=False,
-                      label='Show Weighting',
+                      label='Show Weights',
                       labelPosition="top",
                       color = TRUST_COLOR,
                       style={"float": "right"}
@@ -98,125 +98,6 @@ def trust_section():
         html.Div([], id="trust_details"),
         html.Hr()
     ], id="trust_section", style={"display": "None"})
-
-def mapping_panel(pillar):
-    
-    with open('configs/mappings/{}/default.json'.format(pillar), 'r') as f:
-                mapping  = json.loads(f.read())
-    
-    # mapping = mappings_config[pillar]
-    
-    map_panel = []
-    input_ids = []
-    
-    #weight panel
-    map_panel.append(html.H4("Mappings",style={'text-align':'center'}))
-    # map_panel.append(dcc.Store(id='{}-mapping'.format(pillar)))
-    for metric, param in mapping.items():
-        map_panel.append(html.H5(metric.replace("_",' '),style={'text-align':'center'}))
-        for p, v in param.items():
-            input_id = "{}-{}".format(metric,p)
-            
-            input_ids.append(input_id)
-           
-            map_panel.append(html.Div(html.Label(v.get("label", p).replace("_",' '), title=v.get("description","")), style={"margin-left":"30%"})),
-            if p== "clf_type_score":
-                map_panel.append(html.Div(dcc.Textarea(id=input_id, name=pillar,value=str(v.get("value" "")).replace(",",',\n'), style={"width":300, "height":250}), style={"margin-left":"30%"}))
-            else:
-                map_panel.append(html.Div(dcc.Input(id=input_id, name=pillar,value=str(v.get("value" "")), type='text', style={"width":200}), style={"margin-left":"30%"}))
-            map_panel.append(html.Br())
-    map_panel.append(html.Hr())      
-    map_panel.append(html.Div([html.Label("Load saved mappings",style={"margin-left":10}),
-                            dcc.Dropdown(
-                                id='mapping-dropdown-{}'.format(pillar),
-                                options=list(map(lambda name:{'label': name[:-5], 'value': "configs/mappings/{}/{}".format(pillar,name)} ,os.listdir("configs/mappings/{}".format(pillar)))),
-                                value='configs/mappings/{}/default.json'.format(pillar),
-                                style={'width': 200},
-                                className = pillar
-                            )],style={"margin-left":"30%","margin-bottom":15}))
-                            
-                        
-    map_panel.append(html.Div(html.Button('Apply', id='apply-mapping-{}'.format(pillar), style={"background-color": "gold","margin-left":"30%","margin-bottom":15,"width":200})
-                     , style={'width': '100%', 'display': 'inline-block'}))
-    map_panel.append(html.Div(html.Button('Save', id='save-mapping-{}'.format(pillar), style={"background-color": "green","margin-left":"30%","width":200})
-                     , style={'width': '100%', 'display': 'inline-block'}))
-    return map_panel , input_ids
-
-def pillar_section(pillar, metrics):
-        metric_detail_sections = []
-        for i in range(len(metrics)):
-            metric_id = metrics[i].lower()
-            metric_detail_sections.append(create_metric_details_section(metric_id, i))
-
-        return html.Div([
-                html.Div([
-                    dbc.Button(
-                        html.I(className="fas fa-chevron-down"),
-                        id="toggle_{}_details".format(pillar),
-                        className="mb-3",
-                        n_clicks=0,
-                        style={"float": "right", "backgroundColor": SECONDARY_COLOR}
-                    ),
-                    daq.BooleanSwitch(id='toggle_{}_mapping'.format(pillar),
-                      on=False,
-                      label='Show Mappings',
-                      labelPosition="top",
-                      color = TRUST_COLOR,
-                      style={"float": "right"}
-                    ),
-                    html.H2("• {}".format(pillar.upper()), className="mb-5"),
-                    ], id="{}_section_heading".format(pillar.lower())),
-                    dbc.Collapse(html.Div(mapping_panel(pillar)[0]),
-                        id="{}_mapping".format(pillar),
-                        is_open=False,
-                        style={"background-color": "rgba(255,228,181,0.5)",'padding-bottom': 20, 'display': 'none'}
-                    ),
-                    html.Br(),
-                    html.Div([], id="{}_overview".format(pillar)),
-                    html.H3("{0}-Score".format(pillar), className="text-center"),
-                    html.Div([], id="{}_star_rating".format(pillar), className="star_rating, text-center"),
-                    html.B(["X/5"], id="{}_score".format(pillar), className="text-center", style={"display": "block","font-size":"32px"}),
-                    dcc.Graph(id='{}_spider'.format(pillar), style={'display': 'none'}),
-                    dcc.Graph(id='{}_bar'.format(pillar), style={'display': 'block'}),    
-                    dbc.Collapse(metric_detail_sections,
-                        id="{}_details".format(pillar),
-                        is_open=False,
-                    ),
-                    html.Hr(style={"size": "10"}),
-                    dbc.Modal(
-                    [   
-                        dbc.ModalHeader("Save {} Mapping".format(pillar)),
-                        dbc.ModalBody([
-                                       html.Div([
-                                        html.Div(html.Label("Please enter a name:"), style={'width': '40%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10}),
-                                        html.Div(dcc.Input(id="mapping-name-{}".format(pillar), type='text', placeholder="Alias for mapping", style={"width":"200px"}), 
-                                                 style={'width': '40%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10}),
-                                        ])
-                                      ]),
-                        dbc.ModalFooter(
-                                    dbc.Button(
-                                        "Save", id="save-{}-mapping".format(pillar), className="ml-auto", n_clicks=0, 
-                                        style={'background-color': 'green','font-weight': 'bold'}
-                                    )
-                                ),
-                    ],
-                    id="modal-{}-mapping".format(pillar),
-                    is_open=False,
-                    backdrop=True
-                    ),
-                    dbc.Modal(
-                    [
-                        dbc.ModalHeader("Success"),
-                        dbc.ModalBody([dbc.Alert(id="alert-success",children ="You successfully saved the Mapping", color="success"),
-                                      ]),
-                    ],
-                    id="modal-saved-{}".format(pillar),
-                    is_open=False,
-                    backdrop=True
-                    )                   
-
-                ], id="{}_section".format(pillar), style={"display": "None"})
-
 
 def alert_section(name):
     return html.Div([], id="{}_alert_section".format(name), className="text-center", style={"color":"Red"})
@@ -392,8 +273,6 @@ def update_output(submit_n_clicks, uploaded_solution_set, solution_set_path):
     
     if not solution_set_path:
         return "",[]
-    
-    print("UPDATE OUTPUT {}".format(submit_n_clicks))
     if submit_n_clicks:
         app.logger.info("Deletign {}".format(solution_set_path))
         try:
@@ -414,7 +293,6 @@ def update_output(submit_n_clicks, uploaded_solution_set, solution_set_path):
 def analyze_fairness(solution_set_path):
     if solution_set_path == "":
         return ["", ""]
-    print("Analyze Fairness {}".format(solution_set_path))
     if solution_set_path is not None:
         train_data =  read_train(solution_set_path)
         test_data =  read_test(solution_set_path)
@@ -433,17 +311,14 @@ def analyze_fairness(solution_set_path):
             target_column = ""
             if "general" in factsheet and "target_column" in factsheet["general"]:
                 target_column = factsheet["general"]["target_column"]
-            print("target_column {}".format(target_column))
             
             protected_feature = ""
             if "fairness" in factsheet and "protected_feature" in factsheet["fairness"]:
                 protected_feature = factsheet["fairness"]["protected_feature"]
-            print("protected_feature {}".format(protected_feature))
             
             privileged_class_definition = ""
             if "fairness" in factsheet and "privileged_class_definition" in factsheet["fairness"]:
                 privileged_class_definition = factsheet["fairness"]["privileged_class_definition"]
-            print("privileged_class_definition {}".format(privileged_class_definition))
             
             f.close()
         # Create a factsheet
@@ -491,6 +366,7 @@ def analyze_fairness(solution_set_path):
     else:
         return [], [html.H1("Nothing")]
 
+# === EXPLAINABILITY ===
 @app.callback(
     Output("explainability_details", 'children'),
     Input('result', 'data'), prevent_initial_call=True)
@@ -512,7 +388,7 @@ def explainability_details(data):
     Input('result', 'data'), prevent_initial_call=False)    
 def metric_detail(data):
   if data is None:
-      return []
+      return [], [], [], []
   else:
       output = []
       result = json.loads(data)
@@ -548,7 +424,6 @@ def metric_detail(data):
 
 
 def update_factsheet(factsheet_path, key, value):
-    print("update factsheet {0} with {1}  {2}".format(factsheet_path, key, value))
     jsonFile = open(factsheet_path, "r") # Open the JSON file for reading
     data = json.load(jsonFile) # Read the JSON into the buffer
     jsonFile.close() # Close the JSON file
@@ -565,11 +440,11 @@ def update_factsheet(factsheet_path, key, value):
 The following function updates
 '''
 @app.callback(
-    Output("class_balance_details", 'children'),
+    [Output("class_balance_details", 'children')],
     [Input("solution_set_label_select", 'value'), 
     State('training_data', 'data'),
     State("solution_set_dropdown", 'value')])
-def fairness_metrics_class_balance(label, jsonified_training_data, solution_set_path):
+def class_balance(label, jsonified_training_data, solution_set_path):
     training_data = read_train(solution_set_path)
     graph = dcc.Graph(figure=px.histogram(training_data, x=label, opacity=1, title="Label vs Label Occurence", color_discrete_sequence=[FAIRNESS_COLOR]))
     #compute_class_balance("hi")
@@ -584,7 +459,7 @@ The following function updates
     [Input("solution_set_label_select", 'value'), 
     State('training_data', 'data'),
     State("solution_set_dropdown", 'value')])
-def fairness_metrics_statistical_parity_difference(label, jsonified_training_data, solution_set_path):
+def statistical_parity_difference(label, jsonified_training_data, solution_set_path):
     training_data = read_train(solution_set_path)
     graph = dcc.Graph(figure=px.histogram(training_data, x=label, opacity=0.5, title="Label vs Label Occurence", color_discrete_sequence=['#00FF00']))
     #compute_class_balance("hi")
@@ -669,8 +544,6 @@ def explainability_score(analysis):
 def normalization(analysis, solution_set_path):
     if analysis and solution_set_path:
           analysis = json.loads(analysis)
-          print("ANALYSIS")
-          print(analysis)
           pillar_scores, metric_scores, metric_properties = analysis["final_score"] , analysis["results"], analysis["properties"]
           normalization_technique = metric_properties["methodology"]["normalization"]["normalization_technique"]
           return html.Div("normalization Technique: {}".format(normalization_technique)), html.H4("({}/5)".format(metric_scores["methodology"]["normalization"]))
@@ -831,7 +704,6 @@ def store_trust_analysis(solution_set_dropdown, config_weights, config_mappings)
                 "results":results,
                 "trust_score":trust_score,
                 "properties" : properties}
-        print(data)
         return json.dumps(data,default=convert)
 
 for m in fairness_metrics + methodology_metrics + explainability_metrics + robustness_metrics:
@@ -961,7 +833,7 @@ def robustness_detail_div(properties):
     return html.Div(prop)
 
 @app.callback(
-Output("Empirical_Robustness_Deepfool_Attack_details", 'children'),
+Output("empirical_robustness_deepfool_attack_details", 'children'),
 Input('result', 'data'), prevent_initial_call=False)
 def Deepfool_Attack_metric_detail(data):
   if data is None:
@@ -969,61 +841,61 @@ def Deepfool_Attack_metric_detail(data):
   else:
       result = json.loads(data)
       properties = result["properties"]
-      metric_properties = properties["robustness"]["Empirical_Robustness_Deepfool_Attack"]
+      metric_properties = properties["robustness"]["empirical_robustness_deepfool_attack"]
       return robustness_detail_div(metric_properties)
 
 @app.callback(
-Output("Empirical_Robustness_Carlini_Wagner_Attack_details", 'children'),
+Output("empirical_robustness_carlini_wagner_attack_details", 'children'),
 Input('result', 'data'), prevent_initial_call=False)
-def Carlini_Wagner_Attack_metric_detail(data):
+def carlini_wagner_attack_analysis(data):
   if data is None:
       return []
   else:
       result = json.loads(data)
       properties = result["properties"]
-      metric_properties = properties["robustness"]["Empirical_Robustness_Carlini_Wagner_Attack"]
+      metric_properties = properties["robustness"]["empirical_robustness_carlini_wagner_attack"]
       return robustness_detail_div(metric_properties)
 
 @app.callback(
-Output("Empirical_Robustness_Fast_Gradient_Attack_details", 'children'),
+Output("empirical_robustness_fast_gradient_attack_details", 'children'),
 Input('result', 'data'), prevent_initial_call=False)
-def Fast_Gradient_Attack_metric_detail(data):
+def fast_gradient_attack_analysis(data):
   if data is None:
       return []
   else:
       result = json.loads(data)
       properties = result["properties"]
-      metric_properties = properties["robustness"]["Empirical_Robustness_Fast_Gradient_Attack"]
+      metric_properties = properties["robustness"]["empirical_robustness_fast_gradient_attack"]
       return robustness_detail_div(metric_properties)
 
 @app.callback(
-Output("Confidence_Score_details", 'children'),
+Output("confidence_score_details", 'children'),
 Input('result', 'data'), prevent_initial_call=False)
-def Confidence_Score_metric_detail(data):
+def confidence_analysis(data):
   if data is None:
       return []
   else:
       result = json.loads(data)
       properties = result["properties"]
-      metric_properties = properties["robustness"]["Confidence_Score"]
+      metric_properties = properties["robustness"]["confidence_score"]
       return robustness_detail_div(metric_properties)
 
 @app.callback(
-Output("Loss_Sensitivity_details", 'children'),
+Output("loss_sensitivity_details", 'children'),
 Input('result', 'data'), prevent_initial_call=False)
-def Loss_Sensitivity_metric_detail(data):
+def loss_sensitivity_analysis(data):
   if data is None:
       return []
   else:
       result = json.loads(data)
       properties = result["properties"]
-      metric_properties = properties["robustness"]["Loss_Sensitivity"]
+      metric_properties = properties["robustness"]["loss_sensitivity"]
       return robustness_detail_div(metric_properties)
 
 @app.callback(
-Output("CLEVER_Score_details", 'children'),
+Output("clever_score_details", 'children'),
 Input('result', 'data'), prevent_initial_call=False)
-def Clever_Score_metric_detail(data):
+def clever_score(data):
   if data is None:
       return []
   else:
@@ -1033,8 +905,7 @@ def Clever_Score_metric_detail(data):
       return robustness_detail_div(metric_properties)
  
 config_panel.get_callbacks(app)
-
-
+        
 layout = html.Div([
     config_panel.layout,
     dbc.Container([

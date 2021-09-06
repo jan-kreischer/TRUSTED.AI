@@ -1,4 +1,5 @@
 import os
+import dash_daq as daq
 from config import SCENARIOS_FOLDER_PATH
 import glob
 import pickle
@@ -22,6 +23,9 @@ from math import pi
 import sklearn.metrics as metrics
 import collections
 from helpers import *
+
+import collections
+result = collections.namedtuple('result', 'score properties')
 
 def get_performance_metrics(model, test_data, target_column):
     
@@ -230,8 +234,7 @@ def list_of_metrics(pillar):
     metrics = []
     with open(os.path.join(METRICS_CONFIG_PATH, "config_{}.json".format(pillar))) as file:
         config_file = json.load(file)
-        for metric_name in config_file["parameters"]:
-            metric_name = metric_name.split("_", 1)[1]
+        for metric_name in config_file["weights"]:
             metrics.append(metric_name.lower())
     return metrics
 
@@ -250,4 +253,122 @@ def create_metric_details_section(metric_id, i, section_n = 1, is_open=False):
             is_open=is_open,          
         ),
         ], id="{}_section".format(metric_id), className="mb-5 mt-5")
+
+def pillar_section(pillar, metrics):
+        metric_detail_sections = []
+        for i in range(len(metrics)):
+            metric_id = metrics[i].lower()
+            metric_detail_sections.append(create_metric_details_section(metric_id, i))
+
+        return html.Div([
+                html.Div([
+                    dbc.Button(
+                        html.I(className="fas fa-chevron-down"),
+                        id="toggle_{}_details".format(pillar),
+                        className="mb-3",
+                        n_clicks=0,
+                        style={"float": "right", "backgroundColor": SECONDARY_COLOR}
+                    ),
+                    daq.BooleanSwitch(id='toggle_{}_mapping'.format(pillar),
+                      on=False,
+                      label='Show Mappings',
+                      labelPosition="top",
+                      color = TRUST_COLOR,
+                      style={"float": "right"}
+                    ),
+                    html.H2("• {}".format(pillar.upper()), className="mb-5"),
+                    ], id="{}_section_heading".format(pillar.lower())),
+                    dbc.Collapse(html.Div(mapping_panel(pillar)[0]),
+                        id="{}_mapping".format(pillar),
+                        is_open=False,
+                        style={"background-color": "rgba(255,228,181,0.5)",'padding-bottom': 20, 'display': 'none'}
+                    ),
+                    html.Br(),
+                    html.Div([], id="{}_overview".format(pillar)),
+                    html.H3("{0}-Score".format(pillar), className="text-center"),
+                    html.Div([], id="{}_star_rating".format(pillar), className="star_rating, text-center"),
+                    html.B(["X/5"], id="{}_score".format(pillar), className="text-center", style={"display": "block","font-size":"32px"}),
+                    dcc.Graph(id='{}_spider'.format(pillar), style={'display': 'none'}),
+                    dcc.Graph(id='{}_bar'.format(pillar), style={'display': 'block'}),    
+                    dbc.Collapse(metric_detail_sections,
+                        id="{}_details".format(pillar),
+                        is_open=False,
+                    ),
+                    html.Hr(style={"size": "10"}),
+                    dbc.Modal(
+                    [   
+                        dbc.ModalHeader("Save {} Mapping".format(pillar)),
+                        dbc.ModalBody([
+                                       html.Div([
+                                        html.Div(html.Label("Please enter a name:"), style={'width': '40%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10}),
+                                        html.Div(dcc.Input(id="mapping-name-{}".format(pillar), type='text', placeholder="Alias for mapping", style={"width":"200px"}), 
+                                                 style={'width': '40%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10}),
+                                        ])
+                                      ]),
+                        dbc.ModalFooter(
+                                    dbc.Button(
+                                        "Save", id="save-{}-mapping".format(pillar), className="ml-auto", n_clicks=0, 
+                                        style={'background-color': 'green','font-weight': 'bold'}
+                                    )
+                                ),
+                    ],
+                    id="modal-{}-mapping".format(pillar),
+                    is_open=False,
+                    backdrop=True
+                    ),
+                    dbc.Modal(
+                    [
+                        dbc.ModalHeader("Success"),
+                        dbc.ModalBody([dbc.Alert(id="alert-success",children ="You successfully saved the Mapping", color="success"),
+                                      ]),
+                    ],
+                    id="modal-saved-{}".format(pillar),
+                    is_open=False,
+                    backdrop=True
+                    )                   
+
+                ], id="{}_section".format(pillar), style={"display": "None"})
+    
+def mapping_panel(pillar):
+    
+    with open('configs/mappings/{}/default.json'.format(pillar), 'r') as f:
+                mapping  = json.loads(f.read())
+    
+    map_panel = []
+    input_ids = []
+    
+    #weight panel
+    map_panel.append(html.H4("Mappings",style={'text-align':'center'}))
+    # map_panel.append(dcc.Store(id='{}-mapping'.format(pillar)))
+    for metric, param in mapping.items():
+        map_panel.append(html.H5(metric.replace("_",' '),style={'text-align':'center'}))
+        for p, v in param.items():
+            input_id = "{}-{}".format(metric,p)
+            
+            input_ids.append(input_id)
+           
+            map_panel.append(html.Div(html.Label(v.get("label", p).replace("_",' '), title=v.get("description","")), style={"margin-left":"30%"})),
+            if p== "clf_type_score":
+                map_panel.append(html.Div(dcc.Textarea(id=input_id, name=pillar,value=str(v.get("value" "")).replace(",",',\n'), style={"width":300, "height":250}), style={"margin-left":"30%"}))
+            else:
+                map_panel.append(html.Div(dcc.Input(id=input_id, name=pillar,value=str(v.get("value" "")), type='text', style={"width":200}), style={"margin-left":"30%"}))
+            map_panel.append(html.Br())
+    map_panel.append(html.Hr())      
+    map_panel.append(html.Div([html.Label("Load saved mappings",style={"margin-left":10}),
+                            dcc.Dropdown(
+                                id='mapping-dropdown-{}'.format(pillar),
+                                options=list(map(lambda name:{'label': name[:-5], 'value': "configs/mappings/{}/{}".format(pillar,name)} ,os.listdir("configs/mappings/{}".format(pillar)))),
+                                value='configs/mappings/{}/default.json'.format(pillar),
+                                style={'width': 200},
+                                className = pillar
+                            )],style={"margin-left":"30%","margin-bottom":15}))
+                            
+                        
+    map_panel.append(html.Div(html.Button('Apply', id='apply-mapping-{}'.format(pillar), style={"background-color": "gold","margin-left":"30%","margin-bottom":15,"width":200})
+                     , style={'width': '100%', 'display': 'inline-block'}))
+    map_panel.append(html.Div(html.Button('Save', id='save-mapping-{}'.format(pillar), style={"background-color": "green","margin-left":"30%","width":200})
+                     , style={'width': '100%', 'display': 'inline-block'}))
+    return map_panel , input_ids
+
+
         

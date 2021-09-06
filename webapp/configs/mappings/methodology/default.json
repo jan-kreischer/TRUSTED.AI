@@ -29,6 +29,12 @@
             "description": "The description of the paramter and its impact"
         }
     },
+    "score_f1": {
+        "parameter_split": {
+            "value": "The value of the parameter_XY",
+            "description": "The description of the paramter and its impact"
+        }
+    },
     "score_factsheet_completeness": {
         "parameter_split": {
             "value": "The value of the parameter_XY",

@@ -121,7 +121,6 @@ def create_scenario(n_clicks, scenario_name, scenario_url, scenario_description)
     if scenario_name:
         res = os.mkdir(os.path.join(SCENARIOS_FOLDER_PATH, scenario_name))
         f = open(os.path.join(SCENARIOS_FOLDER_PATH, scenario_name, SCENARIO_DESCRIPTION_FILE), "w")
-        print(scenario_description)
         f.write(scenario_description)
         f.close()
         f = open(os.path.join(SCENARIOS_FOLDER_PATH, scenario_name, SCENARIO_LINK_FILE), "w")

@@ -56,7 +56,7 @@
         }
     },
     "explainability": {
-        "score_Algorithm_Class": {
+        "score_algorithm_class": {
             "clf_type_score": {
                 "value": {
                     "RandomForestClassifier": 3,
@@ -75,7 +75,7 @@
                 "label": "Score Mapping"
             }
         },
-        "score_Model_Size": {
+        "score_model_size": {
             "thresholds": {
                 "value": [
                     10,
@@ -87,7 +87,7 @@
                 "label": "Score Thresholds"
             }
         },
-        "score_Correlated_Features": {
+        "score_correlated_features": {
             "thresholds": {
                 "value": [
                     0.05,
@@ -99,7 +99,7 @@
                 "label": "Score Thresholds"
             }
         },
-        "score_Feature_Relevance": {
+        "score_feature_relevance": {
             "thresholds": {
                 "value": [
                     0.05,
@@ -123,7 +123,7 @@
         }
     },
     "robustness": {
-        "score_Loss_Sensitivity": {
+        "score_loss_sensitivity": {
             "thresholds": {
                 "value": [
                     2.5,
@@ -136,7 +136,7 @@
                 "label": "Score Thresholds"
             }
         },
-        "score_Clever_Score": {
+        "score_clever_score": {
             "thresholds": {
                 "value": [
                     0.2,
@@ -149,7 +149,7 @@
                 "label": "Score Thresholds"
             }
         },
-        "score_Confidence_Score": {
+        "score_confidence_score": {
             "thresholds": {
                 "value": [
                     0,
@@ -162,7 +162,7 @@
                 "label": "Score Thresholds"
             }
         },
-        "score_Fast_Gradient_Attack": {
+        "score_fast_gradient_attack": {
             "thresholds": {
                 "value": [
                     100,
@@ -176,7 +176,7 @@
                 "label": "Score Thresholds"
             }
         },
-        "score_Carlini_Wagner_Attack": {
+        "score_carlini_wagner_attack": {
             "thresholds": {
                 "value": [
                     100,
@@ -190,7 +190,7 @@
                 "label": "Score Thresholds"
             }
         },
-        "score_Deepfool_Attack": {
+        "score_deepfool_attack": {
             "thresholds": {
                 "value": [
                     100,
@@ -232,6 +232,12 @@
         },
         "score_test_accuracy": {
             "parameter_normalization_technique": {
+                "value": "The value of the parameter_XY",
+                "description": "The description of the paramter and its impact"
+            }
+        },
+        "score_f1": {
+            "parameter_split": {
                 "value": "The value of the parameter_XY",
                 "description": "The description of the paramter and its impact"
             }

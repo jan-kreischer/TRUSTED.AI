@@ -1,5 +1,5 @@
 {
-    "score_Algorithm_Class": {
+    "score_algorithm_class": {
         "clf_type_score": {
             "value": {
                 "RandomForestClassifier": 1,
@@ -18,7 +18,7 @@
             "label": "Score Mapping"
         }
     },
-    "score_Model_Size": {
+    "score_model_size": {
         "thresholds": {
             "value": [
                 10,
@@ -30,7 +30,7 @@
             "label": "Score Thresholds"
         }
     },
-    "score_Correlated_Features": {
+    "score_correlated_features": {
         "thresholds": {
             "value": [
                 0.05,
@@ -42,7 +42,7 @@
             "label": "Score Thresholds"
         }
     },
-    "score_Feature_Relevance": {
+    "score_feature_relevance": {
         "thresholds": {
             "value": [
                 0.05,

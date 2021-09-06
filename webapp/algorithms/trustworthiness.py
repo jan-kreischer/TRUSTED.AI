@@ -11,22 +11,20 @@ import json
 from config import *
 from math import pi
 import sklearn.metrics as metrics
-from algorithms.fairness_analysis import calc_fairness_score
-from algorithms.explainability_analysis import calc_explainability_score
-from algorithms.robustness_analysis import calc_robustness_score
-from algorithms.methodology_analysis import calc_methodology_score
+from algorithms.fairness import analyse as analyse_fairness
+from algorithms.explainability import analyse as analyse_explainability
+from algorithms.robustness import analyse as analyse_robustness
+from algorithms.methodology import analyse as analyse_methodology
 import collections
-from helpers import read_solution
-
-result = collections.namedtuple('result', 'score properties')
+from helpers import *
 
 # define algo
 def trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness, config_explainability, config_robustness, methodology_config):
     output = dict(
-        fairness       = calc_fairness_score(),
-        explainability = calc_explainability_score(model, train_data, test_data, config_explainability, factsheet),
-        robustness     = calc_robustness_score(model, train_data, test_data, config_robustness),
-        methodology    = calc_methodology_score(model, train_data, test_data, factsheet, methodology_config)
+        fairness       = analyse_fairness(),
+        explainability = analyse_explainability(model, train_data, test_data, config_explainability, factsheet),
+        robustness     = analyse_robustness(model, train_data, test_data, config_robustness),
+        methodology    = analyse_methodology(model, train_data, test_data, factsheet, methodology_config)
     )
     scores = dict((k, v.score) for k, v in output.items())
     properties = dict((k, v.properties) for k, v in output.items())

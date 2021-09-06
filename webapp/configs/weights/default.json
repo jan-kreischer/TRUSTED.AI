@@ -11,19 +11,19 @@
         "manhattan_distance": 0.2
     },
     "explainability": {
-        "Algorithm_Class": 0.55,
-        "Correlated_Features": 0.15,
-        "Model_Size": 0.15,
-        "Feature_Relevance": 0.15
+        "algorithm_class": 0.55,
+        "correlated_features": 0.15,
+        "model_size": 0.15,
+        "feature_relevance": 0.15
     },
     "robustness": {
-        "Confidence_Score": 0.2,
-        "Clique_Method": 0.2,
-        "Loss_Sensitivity": 0.2,
-        "CLEVER_Score": 0.2,
-        "Empirical_Robustness_Fast_Gradient_Attack": 0.2,
-        "Empirical_Robustness_Carlini_Wagner_Attack": 0.2,
-        "Empirical_Robustness_Deepfool_Attack": 0.2
+        "confidence_score": 0.2,
+        "clique_method": 0.2,
+        "loss_sensitivity": 0.2,
+        "clever_score": 0.2,
+        "empirical_robustness_fast_gradient_attack": 0.2,
+        "empirical_robustness_carlini_wagner_attack": 0.2,
+        "empirical_robustness_deepfool_attack": 0.2
     },
     "methodology": {
         "normalization": 0.1666,
@@ -31,6 +31,7 @@
         "regularization": 0.1666,
         "train_test_split": 0.1666,
         "test_accuracy": 0.1666,
+        "f1_score": 0.1666,
         "factsheet_completeness": 0.1666
     },
     "pillars": {
