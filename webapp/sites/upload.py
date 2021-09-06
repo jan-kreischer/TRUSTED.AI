@@ -279,7 +279,10 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
 
 layout = dbc.Container([
+    dbc.Col([html.H1("Upload", className="text-center")], width=12, className="mb-2 mt-1"),
+    
     dbc.Col([
+    html.Div([
         html.Div([
             create_info_modal("problem_set", "Scenario", "All different solutions found should belong to the same scenario", ""),
             html.Div(id="problem_set_alert"),
@@ -295,7 +298,7 @@ layout = dbc.Container([
     className="mb-4"
     ),
     
-    dbc.Col([
+    html.Div([
         html.Div([
             create_info_modal("solution_set", "Solution", "One specifically trained model including its training-, test data and factsheet can be seen as a solution set. Your solution set will be saved under the name you entered here.", ""),
             html.Div(id="model_name_alert"),
@@ -310,7 +313,7 @@ layout = dbc.Container([
     className="mb-4"
     ),
     
-    dbc.Col([
+    html.Div([
     html.Div([
         create_info_modal("general_description", "Description", "Please add a brief description for your solution.", "*e.g Detect multiple objects within an image, with bounding boxes. The model is trained to recognize 80 different classes of objects in the COCO Dataset. The model consists of a deep convolutional net base model for image feature extraction, together with additional convolutional layers specialized for the task of object detection, that was trained on the COCO data set. It is based on SSD MobileNetV1 using the TensorFlow framework.*"),
         html.H3("3. Description", className="text-center"),
@@ -321,7 +324,7 @@ layout = dbc.Container([
         )], className="mb-4"),
     ]),
     
-    dbc.Col([
+    html.Div([
         html.Div([
             create_info_modal("training_data", "Training Data", "Please upload the training data you used to train your model. Csv and pickle (pkl) files are accepted. Please place the label to the last column of the dataframe.", ""),
             html.Div(id="training_data_alert"),
@@ -349,19 +352,13 @@ layout = dbc.Container([
     
     # --- TEST DATA UPLOAD --- #
     
-    dbc.Col([
+    html.Div([
         html.Div([
             create_info_modal("test_data", "Test Data", "Please upload the test data you used to test your model. Csv and pickle (pkl) files are accepted. Please place the label to the last column of the dataframe.", ""),
             html.Div(id="test_data_alert"),
             html.H3(["5. Test Data", html.Sup("*")]),
-            html.H5("Please upload the test data")
-            #(csv and pickle files are accepted).
-            #"Please place the label to the last column of the dataframe."
-        ], className="text-center"),
-    ],
-            className="mb-4"),
-    
-    dcc.Upload(
+            html.H5("Please upload the test data"),
+                dcc.Upload(
         id='test_data_upload',
         children=[
             'Drag and Drop or Select a File'
@@ -374,32 +371,60 @@ layout = dbc.Container([
             'borderStyle': 'dashed',
             'borderRadius': '5px',
             'textAlign': 'center',
-            'margin': '10px'
+            'backgroundColor': '#FFFFFF'
         }
     ),
     html.Div(id='test_data_summary'),
-    
-    # --- Y COLUMN NAME --- #
-    
-    dbc.Col([
-        html.Div([
-            create_info_modal("target_column_name", "Target Column", "The target column contains the values that you want to predict with your model.", ""),
-            html.Div(id="target_column_alert"),
-            html.H3("6. Target Column"),
-            html.H5("Please select the target column")
+            #(csv and pickle files are accepted).
+            #"Please place the label to the last column of the dataframe."
         ], className="text-center"),
     ],
             className="mb-4"),
     
-    dcc.Dropdown(
+    #dcc.Upload(
+    #    id='test_data_upload',
+    #    children=[
+    #        'Drag and Drop or Select a File'
+    #    ],
+    #    style={
+    #        'width': '100%',
+    #        'height': '60px',
+    #        'lineHeight': '60px',
+    #        'borderWidth': '1px',
+    #       'borderStyle': 'dashed',
+    #       'borderRadius': '5px',
+    #        'textAlign': 'center',
+    #        'margin': '10px'
+    #    }
+    #),
+    #html.Div(id='test_data_summary'),
+    
+    # --- Y COLUMN NAME --- #
+    
+    html.Div([
+        html.Div([
+            create_info_modal("target_column_name", "Target Column", "The target column contains the values that you want to predict with your model.", ""),
+            html.Div(id="target_column_alert"),
+            html.H3("6. Target Column"),
+            html.H5("Please select the target column"),
+                dcc.Dropdown(
         id='target_column_dropdown',
         options=[],
         placeholder='Select Target Column'
     ),
+        ], className="text-center"),
+    ],
+            className="mb-4"),
+    
+    #dcc.Dropdown(
+    #    id='target_column_dropdown',
+    #    options=[],
+    #    placeholder='Select Target Column'
+    #),
       
     # --- FACTSHEET --- #
     
-    dbc.Col([
+    html.Div([
         html.Div([
             create_info_modal("factsheet", "Factsheet", "The factsheet contains the most important information about the methology used.", ""),
             html.Div(id="factsheet_alert"),
@@ -429,7 +454,8 @@ layout = dbc.Container([
     
     # --- MODEL --- #
     
-    dbc.Col([
+    html.Div([
+        
         html.Div([
             create_info_modal("model", "Model", "Please upload the model you want to assess.", ""),
             html.Div(id="model_alert"),
@@ -456,7 +482,12 @@ layout = dbc.Container([
     ),
     html.Div(id='model_summary'),
     html.Div(html.Span(id="upload_alert")),
-    html.Div(dbc.Button("Analyze",  id='upload_button', color="primary", className="mt-3"), className="text-center"),
+    html.Div(dbc.Button("Analyze",  id='upload_button', color="primary", className="mt-3 mb-3"), className="text-center"),
+            ], style={
+    "border": "1px solid #d8d8d8",
+    "borderRadius": "6px",
+    "backgroundColor": SECONDARY_COLOR
+}),
 ],
 fluid=False
 )

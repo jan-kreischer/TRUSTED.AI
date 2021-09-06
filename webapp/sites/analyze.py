@@ -1,3 +1,4 @@
+# === IMPORTS ===
 import dash_html_components as html
 import dash_bootstrap_components as dbc
 import dash_core_components as dcc
@@ -22,6 +23,7 @@ import plotly.graph_objects as go
 import warnings
 warnings.filterwarnings('ignore')
 
+# === CONFIG ===
 SECTIONS = ['trust', 'fairness', 'explainability', 'robustness', 'methodology']
 config_fairness, config_explainability, config_robustness, config_methodology, config_pillars = 0, 0, 0 ,0,0
 for config in ["config_pillars","config_fairness", "config_explainability", "config_robustness", "config_methodology"]:
@@ -47,7 +49,6 @@ for s in SECTIONS[1:]:
 
 # === METRICS ===
 fairness_metrics = list_of_metrics("fairness")
-#["class_balance", "statistical_parity_difference", "equal_opportunity_difference", "average_odds_difference", "disparate_impact", "theil_index", "euclidean_distance", "mahalanobis_distance", "manhattan_distance"]
 explainability_metrics = ['Algorithm_Class', 'Correlated_Features', 'Model_Size', 'Feature_Relevance']
 robustness_metrics = ["CLEVER_Score", "Loss_Sensitivity","Confidence_Score","Empirical_Robustness_Fast_Gradient_Attack", "Empirical_Robustness_Deepfool_Attack", "Empirical_Robustness_Carlini_Wagner_Attack"]
 methodology_metrics = list_of_metrics("methodology")
@@ -59,7 +60,7 @@ def general_section():
             html.I(className="fas fa-backspace"),
             id="delete_solution_button", 
             n_clicks=0,
-            style={"float": "right"}
+            style={"float": "right", "backgroundColor": SECONDARY_COLOR}
         ),
 daq.BooleanSwitch(id='toggle_charts',
                 on=False,
@@ -73,7 +74,6 @@ daq.BooleanSwitch(id='toggle_charts',
                 html.Div(["Performance Metrics Section"], id="performance_metrics_section"),
                 dcc.Store(id='input-mappings'),
                 ])
-
 
 def trust_section():
     return html.Div([ 
@@ -93,6 +93,7 @@ def trust_section():
         html.Div([], id="trust_overview"),
         html.H3("Overall Score", className="text-center mt-2"),
         html.Div([], id="trust_star_rating", className="star_rating, text-center"),
+        html.B(["X/5"], id="trust_score", className="text-center", style={"display": "block","font-size":"32px"}),
         dcc.Graph(id='spider', style={'display': 'none'}),
         dcc.Graph(id='bar', style={'display': 'block'}),
         html.Div([], id="trust_details"),
@@ -142,18 +143,11 @@ def mapping_panel(pillar):
                      , style={'width': '100%', 'display': 'inline-block'}))
     return map_panel , input_ids
 
-def pillar_section(pillar):
-        # sections = []
-        # for i in range(len(fairness_metrics)):
-        #     metric_id = fairness_metrics[i]
-        #     sections.append(create_metric_details_section(metric_id, i))
-        
-        #detail_sections = []
-        #metrics = eval("%s_metrics" % pillar)
-        #for i in range(len(metrics)):
-        #    metric_id = metrics[i]
-        #    print("{0} - {1}".format(i, metric_id))
-        #    detail_sections.append(create_metric_details_section(metric_id, i))
+def pillar_section(pillar, metrics):
+        metric_detail_sections = []
+        for i in range(len(metrics)):
+            metric_id = metrics[i].lower()
+            metric_detail_sections.append(create_metric_details_section(metric_id, i))
 
         return html.Div([
                 html.Div([
@@ -162,7 +156,7 @@ def pillar_section(pillar):
                         id="toggle_{}_details".format(pillar),
                         className="mb-3",
                         n_clicks=0,
-                        style={"float": "right"}
+                        style={"float": "right", "backgroundColor": SECONDARY_COLOR}
                     ),
                     daq.BooleanSwitch(id='toggle_{}_mapping'.format(pillar),
                       on=False,
@@ -182,9 +176,10 @@ def pillar_section(pillar):
                     html.Div([], id="{}_overview".format(pillar)),
                     html.H3("{0}-Score".format(pillar), className="text-center"),
                     html.Div([], id="{}_star_rating".format(pillar), className="star_rating, text-center"),
+                    html.B(["X/5"], id="{}_score".format(pillar), className="text-center", style={"display": "block","font-size":"32px"}),
                     dcc.Graph(id='{}_spider'.format(pillar), style={'display': 'none'}),
                     dcc.Graph(id='{}_bar'.format(pillar), style={'display': 'block'}),    
-                    dbc.Collapse([],
+                    dbc.Collapse(metric_detail_sections,
                         id="{}_details".format(pillar),
                         is_open=False,
                     ),
@@ -347,8 +342,6 @@ def toggle_charts(visibility_state):
               Input('solution_set_dropdown', 'nclicks'))
 def update_solution_set_dropdown(n_clicks):
     return get_solution_sets()
-
-
 
 
 @app.callback(Output('input-mappings', 'data'), 
@@ -583,17 +576,7 @@ def fairness_metrics_class_balance(label, jsonified_training_data, solution_set_
     #compute_class_balance("hi")
     update_factsheet(r"{}/factsheet.json".format(solution_set_path), "target_column", label)
     return [graph]
-    
-    #print("label {}".format(label))
-    #print("JSONIFIED TRAINING DATA {}".format(jsonified_training_data))
-    #training_data = pd.read_json(jsonified_training_data, orient='split')
-    #print("Training data")
-    #print(dff.head(5))
-    #figure = create_figure(dff)
-    #fig = px.histogram(train_data, x=label)
-    #graph = dcc.Graph(figure=px.histogram(training_data, x=label))
-    #return [html.H3("Selected {} as label column. Computing class balance now.".format(label)), graph]
-    
+       
 '''
 The following function updates
 '''
@@ -609,17 +592,6 @@ def fairness_metrics_statistical_parity_difference(label, jsonified_training_dat
     update_factsheet(r"{}/factsheet.json".format(solution_set_path), "target_column", label)
     return [graph]
     
-    #print("label {}".format(label))
-    #print("JSONIFIED TRAINING DATA {}".format(jsonified_training_data))
-    #training_data = pd.read_json(jsonified_training_data, orient='split')
-    #print("Training data")
-    #print(dff.head(5))
-    #figure = create_figure(dff)
-    #fig = px.histogram(train_data, x=label)
-    #graph = dcc.Graph(figure=px.histogram(training_data, x=label))
-    #return [html.H3("Selected {} as label column. Computing class balance now.".format(label)), graph]
-    
-
 @app.callback(
     [Output('training_data', 'data'),
      Output('test_data', 'data')],
@@ -634,52 +606,63 @@ def load_data(solution_set_path):
         return None, None
 
 # === METHODOLOGY ===
-def create_metric_details_section(metric_id, i, section_n = 1, is_open=False):
-    metric_name = metric_id.replace("_", " ")
-    return html.Div([
-
-        html.Div([
-            html.I(className="fas fa-chevron-down ml-4", id="toggle_{}_details".format(metric_id), style={"float": "right"}),
-            html.H4("(X/5)", id="{}_score".format(metric_name), style={"float": "right"}), 
-        html.H4("{2}.{0} {1}".format(i+1, metric_name, section_n)),
-        ]),
-            dbc.Collapse(
-            html.Div("{}_details".format(metric_name)),
-            id="{}_details".format(metric_id),
-            is_open=is_open,          
-        ),
-        ], id="{}_section".format(metric_id), className="mb-5 mt-5")
-
 @app.callback(
-    [Output("methodology_overview", 'children'),
-    Output("methodology_details", 'children')],
-    [Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
-def analyze_methodology(solution_set_path):
-    if solution_set_path:
-        sections = []
-        for i in range(len(methodology_metrics)):
-            metric_id = methodology_metrics[i]
-            sections.append(create_metric_details_section(metric_id, i))
-        return [], sections
+    [Output("trust_score", 'children')],
+    [Input('result', 'data')], prevent_initial_call=True)
+def trust_score(analysis):
+    if analysis:
+        analysis = json.loads(analysis)
+        score = analysis["trust_score"]
+        return ["{}/5".format(score)]
     else:
-        return [], []
- 
-
+        return ["{}/5".format(NO_SCORE)]
+    
+@app.callback(
+    [Output("methodology_score", 'children')],
+    [Input('result', 'data')], prevent_initial_call=True)
+def methodology_score(analysis):
+    if analysis:
+        analysis = json.loads(analysis)
+        score = analysis["final_score"]["methodology"]
+        return ["{}/5".format(score)]
+    else:
+        return ["{}/5".format(NO_SCORE)]
+  
+@app.callback(
+    [Output("fairness_score", 'children')],
+    [Input('result', 'data')], prevent_initial_call=True)
+def fairness_score(analysis):
+    if analysis:
+        analysis = json.loads(analysis)
+        score = analysis["final_score"]["fairness"]
+        return ["{}/5".format(score)]
+    else:
+        return ["{}/5".format(NO_SCORE)]
 
 @app.callback(
-    [Output("train_test_split_details", 'children'), Output("train_test_split_score", 'children')],
-    [Input('result', 'data'),
-     State('solution_set_dropdown', 'value')], prevent_initial_call=True)
-def train_test_split(data, solution_set_path):
-      if data is None:
-          return [], []
-      else:
-          result = json.loads(data)
-          final_score, results, properties = result["final_score"] , result["results"], result["properties"]
-          training_data_ratio = properties["methodology"]["Train_Test_Split"]["training_data_ratio"]
-          test_data_ratio = properties["methodology"]["Train_Test_Split"]["test_data_ratio"]
-          return html.Div("Train-Test-Split: {0}/{1}".format(training_data_ratio, test_data_ratio)), html.H4("({}/5)".format(5))
+    [Output("robustness_score", 'children')],
+    [Input('result', 'data')], prevent_initial_call=True)
+def robustness_score(analysis):
+    if analysis:
+        analysis = json.loads(analysis)
+        score = analysis["final_score"]["robustness"]
+        return ["{}/5".format(score)]
+    else:
+        return ["{}/5".format(NO_SCORE)]
     
+@app.callback(
+    [Output("explainability_score", 'children')],
+    [Input('result', 'data')], prevent_initial_call=True)
+def explainability_score(analysis):
+    if analysis:
+        analysis = json.loads(analysis)
+        score = analysis["final_score"]["explainability"]
+        return ["{}/5".format(score)]
+    else:
+        return ["{}/5".format(NO_SCORE)]
+    
+ 
+# --- Normalization ---
 @app.callback(
     [Output("normalization_details", 'children'), Output("normalization_score", 'children')],
     [Input('result', 'data'),
@@ -694,6 +677,50 @@ def normalization(analysis, solution_set_path):
           return html.Div("normalization Technique: {}".format(normalization_technique)), html.H4("({}/5)".format(metric_scores["methodology"]["normalization"]))
     else:
         return [], []
+
+# --- Regularization ---
+@app.callback(
+    [Output("regularization_details", 'children'), Output("regularization_score", 'children')],
+    [Input('result', 'data'),
+     State('solution_set_dropdown', 'value')], prevent_initial_call=True)
+def regularization(analysis, solution_set_path):
+    if analysis and solution_set_path:
+          analysis = json.loads(analysis)
+          _, metric_scores, metric_properties = analysis["final_score"] , analysis["results"], analysis["properties"]
+          metric_score = metric_scores["methodology"]["regularization"]
+          regularization_technique = metric_properties["methodology"]["regularization"]["regularization_technique"]
+          return html.Div("Regularization Technique: {}".format(regularization_technique)), html.H4("({}/5)".format(metric_score))
+    else:
+        return [], []
+    
+# --- Train Test Split ---
+@app.callback(
+    [Output("train_test_split_details", 'children'), Output("train_test_split_score", 'children')],
+    [Input('result', 'data'),
+     State('solution_set_dropdown', 'value')], prevent_initial_call=True)
+def train_test_split(analysis, solution_set_path):
+      if analysis is None:
+          return [], []
+      else:
+          analysis = json.loads(analysis)
+          final_score, results, properties = analysis["final_score"] , analysis["results"], analysis["properties"]
+          training_data_ratio = properties["methodology"]["train_test_split"]["training_data_ratio"]
+          test_data_ratio = properties["methodology"]["train_test_split"]["test_data_ratio"]
+          return html.Div("Train-Test-Split: {0}/{1}".format(training_data_ratio, test_data_ratio)), html.H4("({}/5)".format(5))
+
+# --- Factsheet Completeness ---
+@app.callback(
+    [Output("factsheet_completeness_details", 'children'), Output("factsheet_completeness_score", 'children')],
+    [Input('result', 'data'),
+     State('solution_set_dropdown', 'value')], prevent_initial_call=True)
+def factsheet_completeness(analysis, solution_set_path):
+      if analysis is None:
+          return [], []
+      else:
+          analysis = json.loads(analysis)
+          _, metric_scores, metric_properties = analysis["final_score"] , analysis["results"], analysis["properties"]
+          metric_score = metric_scores["methodology"]["factsheet_completeness"]
+          return html.Div("Train-Test-Split: {0}/{1}"), html.H4("({}/5)".format(metric_score))
 
 @app.callback(
     Output(component_id="trust_section", component_property='style'),
@@ -721,7 +748,7 @@ def analyze_solution_completeness(solution_set_path):
             html.I(className="fas fa-backspace"),
             id="delete_button", 
             n_clicks=0,
-            style={"float": "right"}
+            style={"float": "right", "backgroundColor": SECONDARY_COLOR}
         ),
         
         factsheet_path = "{}/factsheet.*".format(solution_set_path)
@@ -857,11 +884,11 @@ def update_figure(data, trig):
           y=values,
           marker_color=colors
               )])
-      bar_chart.update_layout(title_text='<b style="font-size: 48px;">{}/5</b>'.format(trust_score), title_x=0.5)
+      bar_chart.update_layout(title_text='', title_x=0.5,           paper_bgcolor='#FFFFFF', plot_bgcolor=SECONDARY_COLOR)
       chart_list.append(bar_chart)
      
       #spider
-      radar_chart = px.line_polar(r=values, theta=pillars, line_close=True, title='<b style="font-size:42px;">{}/5</b>'.format(trust_score))
+      radar_chart = px.line_polar(r=values, theta=pillars, line_close=True, title='')
       radar_chart.update_layout(title_x=0.5)
       radar_chart.update_traces(fill='toself', fillcolor=TRUST_COLOR, marker_color=TRUST_COLOR, marker_line_color=TRUST_COLOR, marker_line_width=0, opacity=0.6)
       chart_list.append(radar_chart)
@@ -869,7 +896,7 @@ def update_figure(data, trig):
       #barcharts
       for n, (pillar , sub_scores) in enumerate(results.items()):
           title = "<b style='font-size:32px;''>{}/5</b>".format(final_score[pillar])
-          categories = list(map(lambda x: x.replace("_",' '), sub_scores.keys()))
+          categories = list(map(lambda x: x.replace("_",' ').title(), sub_scores.keys()))
           values = list(map(float, sub_scores.values()))
           if np.isnan(values).any():
               nonNanCategories = list()
@@ -881,7 +908,7 @@ def update_figure(data, trig):
               categories = nonNanCategories
               values = nonNanValues
           bar_chart_pillar = go.Figure(data=[go.Bar(x=categories, y=values, marker_color=colors[n])])
-          bar_chart_pillar.update_layout(title_text=title, title_x=0.5, xaxis_tickangle=XAXIS_TICKANGLE)
+          bar_chart_pillar.update_layout(title_text='', title_x=0.5, xaxis_tickangle=XAXIS_TICKANGLE, paper_bgcolor='#FFFFFF', plot_bgcolor=SECONDARY_COLOR)
             #fig.update_layout(barmode='group', xaxis_tickangle=-45)
           chart_list.append(bar_chart_pillar)
          
@@ -899,7 +926,7 @@ def update_figure(data, trig):
                       nonNanValues.append(v)
               categories = nonNanCategories
               val = nonNanValues
-          radar_chart_pillar = px.line_polar(r=val, theta=categories, line_close=True, title=title)
+          radar_chart_pillar = px.line_polar(r=val, theta=categories, line_close=True, title='')
           radar_chart_pillar.update_traces(fill='toself', fillcolor=colors[n], marker_color=colors[n],marker_line_width=1.5, opacity=0.6)
           radar_chart_pillar.update_layout(title_x=0.5)
           chart_list.append(radar_chart_pillar)
@@ -1038,10 +1065,10 @@ layout = html.Div([
                 html.Div([
                     general_section(),
                     trust_section(),
-                    pillar_section("fairness"),
-                    pillar_section("explainability"),
-                    pillar_section("robustness"),
-                    pillar_section("methodology"),
+                    pillar_section("fairness", fairness_metrics),
+                    pillar_section("explainability", explainability_metrics),
+                    pillar_section("robustness", robustness_metrics),
+                    pillar_section("methodology", methodology_metrics),
                     dcc.Store(id='training_data', storage_type='session'),
                     dcc.Store(id='test_data', storage_type='session')
                 ], id="analysis_section")
@@ -1050,7 +1077,8 @@ layout = html.Div([
                 className="mt-2 pt-2 pb-2 mb-2",
                 style={
                     "border": "1px solid #d8d8d8",
-                    "borderRadius": "6px"
+                    "borderRadius": "6px",
+                    "backgroundColor": SECONDARY_COLOR
                 }   
             ),
         ], no_gutters=False)

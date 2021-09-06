@@ -12,14 +12,8 @@ import os
 import io
 import base64
 from app import app
-from config import SCENARIOS_FOLDER_PATH
+from config import *
 from helpers import create_info_modal
-
-general_inputs = ["model_name", "purpose_description", "domain_description", "training_data_description", "model_information",    "data_normalization", "target_column", "contact_information"]
-fairness_inputs = ["protected_feature", "privileged_class_definition"]
-explainability_inputs = ["protected_feature", "privileged_class_definition"]
-robustness_inputs = []
-methodology_inputs = ["data_normalization", "regularization"]
 
 @app.callback([Output('create_factsheet_alert', 'children'),
                Output("download_factsheet", "data"),
@@ -64,13 +58,13 @@ def create_factsheet(
     factsheet = {}
     if n_clicks is not None:
         factsheet["general"] = {}
-        for e in general_inputs:
+        for e in GENERAL_INPUTS:
             if eval(e):
                 print("{0}, {1}".format(e, eval(e)))
                 factsheet["general"][e] = eval(e)
         
         factsheet["fairness"] = {}
-        for e in fairness_inputs:
+        for e in FAIRNESS_INPUTS:
             if eval(e):
                 factsheet["fairness"][e] = eval(e)
                 
@@ -78,7 +72,8 @@ def create_factsheet(
         return html.H3("Created Factsheet", className="text-center", style={"color": "Red"}), dict(content=json.dumps(factsheet), filename="factsheet.json"), "", "", "", "", "", "", "", "", ""
         
 
-for m in general_inputs + fairness_inputs:
+#for m in GENERAL_INPUTS + FAIRNESS_INPUTS + EXPLAINABILITY_INPUTS + ROBUSTNESS_INPUTS + METHODOLOGY_INPUTS:
+for m in GENERAL_INPUTS + FAIRNESS_INPUTS:
     @app.callback(
         Output("{}_info_modal".format(m), "is_open"),
         [Input("{}_info_button".format(m), "n_clicks"), Input("{}_close".format(m), "n_clicks")],
@@ -105,8 +100,6 @@ layout = dbc.Container([
                 dcc.Input(id="model_name", type="text", placeholder="", value="", debounce=True, style={'width': '100%'}), 
             ], className="mb-4"),
             
-            
-
             #--- Purpose ---
             html.Div([
                 create_info_modal("purpose_description", "Purpose", "Please describe the purpose of your model.", "*e.g Detect multiple objects within an image, with bounding boxes. The model is trained to recognize 80 different classes of objects in the COCO Dataset. The model consists of a deep convolutional net base model for image feature extraction, together with additional convolutional layers specialized for the task of object detection, that was trained on the COCO data set. It is based on SSD MobileNetV1 using the TensorFlow framework.*"),
@@ -163,7 +156,7 @@ layout = dbc.Container([
                 value='',
                 style={'width': '100%', 'height': 150},
             )], className="mb-4"),
-            ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px"}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),
+            ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px", "backgroundColor": SECONDARY_COLOR}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),
                 
             html.Div([
             html.H2("• Fairness"),
@@ -178,16 +171,16 @@ layout = dbc.Container([
                 html.H3("Privileged Class Definition"),
                 dcc.Input(id="privileged_class_definition", type="text", placeholder="e.g lambda x: x >= 25", value="", debounce=True, style={'width': '100%'}),
             ], className="mb-4 mt-4"),
-            ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px"}, className="pt-3 pb-3 pl-3 pr-3 mb-4 mt-4"),
+            ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px", "backgroundColor": SECONDARY_COLOR}, className="pt-3 pb-3 pl-3 pr-3 mb-4 mt-4"),
                         
             html.Div([
                 html.H2("• Explainability")
-            ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px"}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),
+            ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px", "backgroundColor": SECONDARY_COLOR}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),
             
             html.Div([
 
                 html.H2("• Robustness")
-            ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px"}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),
+            ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px", "backgroundColor": SECONDARY_COLOR}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),
             
             html.Div([
                 html.H2("• Methodology"), 
@@ -218,8 +211,21 @@ layout = dbc.Container([
                         ],
                         value='none'
                 )], className="mb-4 mt-4"),
-            ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px"}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),  
-            
+                
+                html.Div([
+                    create_info_modal("missing_data", "Missing Data", "What technique did you use in order to deal with missing data.", ""),
+                    html.H3("Missing Data"),
+                dcc.Dropdown(
+                        id='missing_data',
+                        options=[
+                            {'label': 'None', 'value': 'none'},
+                            {'label': 'Lasso regression (L1)', 'value': 'lasso_regression'},
+                            {'label': 'Ridge regression (L2)', 'value': 'ridge_regression'},
+                            {'label': 'ElasticNet regression', 'value': 'elasticnet_regression'},
+                        ],
+                        value='none'
+                )], className="mb-4 mt-4"),
+            ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px", "backgroundColor": SECONDARY_COLOR}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),         
     ], 
     className=""
     ),

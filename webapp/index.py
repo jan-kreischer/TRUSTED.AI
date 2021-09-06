@@ -55,7 +55,7 @@ navbar = dbc.Navbar(
         ],
         fluid=False
     ),
-    color="#000080",
+    color=PRIMARY_COLOR,
     dark=True,
     className="mb-4",
 )

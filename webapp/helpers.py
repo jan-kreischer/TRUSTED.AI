@@ -71,9 +71,6 @@ def read_train(solution_set_path):
     
     return train
 
-def score_train_test_split():
-    return 2.5
-
 # Load .joblib or .pickle model
 def read_model(solution_set_path):
     model_file = glob.glob(os.path.join(solution_set_path, MODEL_REGEX))[0]
@@ -120,7 +117,7 @@ def create_info_modal(module_id, name, content, example):
             html.I(className="fas fa-info-circle"),
             id="{}_info_button".format(module_id), 
             n_clicks=0,
-            style={"float": "right"}
+            style={"float": "right", "backgroundColor": SECONDARY_COLOR}
         ),
         dbc.Modal(
             [
@@ -191,15 +188,6 @@ def parse_contents(contents, filename):
     columns = df.columns.values
     return table, columns
 
-#def list_of_methodology_metrics():
-#    methodology_metrics = []
-#    with open(os.path.join(METRICS_CONFIG_PATH, "config_methodology.json")) as file:
-#        methodology_config = json.load(file)
-#        for metric_name in methodology_config["parameters"]:
-#            metric_name = metric_name.split("_", 1)[1]
-#            methodology_metrics.append(metric_name.lower())
-#    return methodology_metrics
-
 def list_of_metrics(pillar):
     metrics = []
     with open(os.path.join(METRICS_CONFIG_PATH, "config_{}.json".format(pillar))) as file:
@@ -208,4 +196,20 @@ def list_of_metrics(pillar):
             metric_name = metric_name.split("_", 1)[1]
             metrics.append(metric_name.lower())
     return metrics
+
+def create_metric_details_section(metric_id, i, section_n = 1, is_open=False):
+    metric_name = metric_id.replace("_", " ")
+    return html.Div([
+
+        html.Div([
+            html.I(className="fas fa-chevron-down ml-4", id="toggle_{}_details".format(metric_id), style={"float": "right"}),
+            html.H4("(X/5)", id="{}_score".format(metric_id), style={"float": "right"}), 
+        html.H4("{2}.{0} {1}".format(i+1, metric_name, section_n)),
+        ]),
+            dbc.Collapse(
+            html.Div([NO_DETAILS]),
+            id="{}_details".format(metric_id),
+            is_open=is_open,          
+        ),
+        ], id="{}_section".format(metric_id), className="mb-5 mt-5")
         

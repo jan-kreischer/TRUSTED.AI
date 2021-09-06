@@ -37,11 +37,9 @@ def f1_score(model, training_dataset, test_dataset, factsheet, methodology_confi
 
 # --- Train-Test-Split ---
 def train_test_split_score(model, training_dataset, test_dataset, factsheet, methodology_config):
-    #train_test_split = metric_train_test_split(training_dataset, test_dataset)
     score = 0
     training_data_ratio, test_data_ratio = train_test_split_metric(training_dataset, test_dataset)
     properties= {"training_data_ratio": training_data_ratio, "test_data_ratio": test_data_ratio}
-    print("percentage_train {0}, percentage_test {1}".format(training_data_ratio, test_data_ratio))
     
     if is_between(79, training_data_ratio, 81):
         score = 5
@@ -68,12 +66,50 @@ def is_between(a, x, b):
 
 # --- Regularization ---
 def regularization_score(model, training_dataset, test_dataset, factsheet, methodology_config):
-    return result(score=np.random.randint(1,6), properties={}) 
+    score = 0
+    regularization = regularization_metric(factsheet)
+    properties= {"regularization_technique": regularization}
+    if regularization == "elasticnet_regression":
+        score = 5
+    elif regularization == "lasso_regression" or regularization == "lasso_regression":
+        score = 4
+    elif regularization == NOT_SPECIFIED:
+        score = 1
+    else:
+        score = 0
+    return result(score=score, properties=properties)
 
+def regularization_metric(factsheet):
+    if "methodology" in factsheet and "regularization" in factsheet["methodology"]:
+        return factsheet["methodology"]["regularization"]
+    else:
+        return NOT_SPECIFIED
+    
+
+    
 # --- Factsheet Completeness ---
 
 def factsheet_completeness_score(model, training_dataset, test_dataset, factsheet, methodology_config):
+    score = 0
+    properties= dict()
+    n = len(GENERAL_INPUTS)
+    ctr = 0
+    for e in GENERAL_INPUTS:
+        if "general" in factsheet and e in factsheet["general"]:
+            ctr+=1
+            properties[e] = "present"
+        else:
+            properties[e] = "missing"
+    score = round(ctr/n*5)
+    return result(score=score, properties=properties)
+            
     return result(score=np.random.randint(1,6), properties={}) 
+
+def factsheet_completeness_metric(factsheet):
+    print("hi")
+
+
+
 
 # --- Test Accuracy ---
 

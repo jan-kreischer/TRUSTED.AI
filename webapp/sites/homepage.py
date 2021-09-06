@@ -2,7 +2,7 @@ import dash_html_components as html
 import dash_bootstrap_components as dbc
 from app import server
 from app import app
-from config import TRUST_COLOR
+from config import *
 
 # needed only if running this as a single page app
 #external_stylesheets = [dbc.themes.LUX]
@@ -38,7 +38,7 @@ layout = dbc.Container([
             ],
             className="mt-2 mb-2",
             style={
-                "background-color": "#EEEEEE",
+                "background-color": SECONDARY_COLOR,
                 "height":  "300px"
             }      
         ),
