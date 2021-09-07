@@ -533,21 +533,61 @@ def explainability_score(analysis):
         return ["{}/5".format(score)]
     else:
         return ["{}/5".format(NO_SCORE)]
-    
- 
+
+@app.callback(
+    [Output("f1_score_details", 'children'), Output("f1_score_score", 'children')],
+    [Input('result', 'data')])
+def f1_score(data):
+    if data is None:
+        return [], []
+    else:
+        result = json.loads(data)
+        properties = result["properties"]
+        metric_properties = properties["methodology"]["f1_score"]
+        metric_scores = result["results"]
+        return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["methodology"]["f1_score"]))
+
+
 # --- Normalization ---
 @app.callback(
     [Output("normalization_details", 'children'), Output("normalization_score", 'children')],
-    [Input('result', 'data'),
-     State('solution_set_dropdown', 'value')], prevent_initial_call=True)
-def normalization(analysis, solution_set_path):
-    if analysis and solution_set_path:
-          analysis = json.loads(analysis)
-          pillar_scores, metric_scores, metric_properties = analysis["final_score"] , analysis["results"], analysis["properties"]
-          normalization_technique = metric_properties["methodology"]["normalization"]["normalization_technique"]
-          return html.Div("normalization Technique: {}".format(normalization_technique)), html.H4("({}/5)".format(metric_scores["methodology"]["normalization"]))
-    else:
+    [Input('result', 'data')])
+def normalization(data):
+    if data is None:
         return [], []
+    else:
+        result = json.loads(data)
+        properties = result["properties"]
+        metric_properties = properties["methodology"]["normalization"]
+        metric_scores = result["results"]
+        return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["methodology"]["normalization"]))
+
+@app.callback(
+    [Output("test_accuracy_details", 'children'), Output("test_accuracy_score", 'children')],
+    [Input('result', 'data')])
+def test_accuracy(data):
+    if data is None:
+        return [], []
+    else:
+        result = json.loads(data)
+        properties = result["properties"]
+        metric_properties = properties["methodology"]["test_accuracy"]
+        metric_scores = result["results"]
+        return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["methodology"]["test_accuracy"]))
+
+@app.callback(
+    [Output("missing_data_details", 'children'), Output("missing_data_score", 'children')],
+    [Input('result', 'data')])
+def missing_data(data):
+    if data is None:
+        return [], []
+    else:
+        result = json.loads(data)
+        properties = result["properties"]
+        metric_properties = properties["methodology"]["missing_data"]
+        metric_scores = result["results"]
+        return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["methodology"]["missing_data"]))
+
 
 # --- Regularization ---
 @app.callback(
@@ -567,17 +607,17 @@ def regularization(analysis, solution_set_path):
 # --- Train Test Split ---
 @app.callback(
     [Output("train_test_split_details", 'children'), Output("train_test_split_score", 'children')],
-    [Input('result', 'data'),
-     State('solution_set_dropdown', 'value')], prevent_initial_call=True)
-def train_test_split(analysis, solution_set_path):
-      if analysis is None:
-          return [], []
-      else:
-          analysis = json.loads(analysis)
-          final_score, results, properties = analysis["final_score"] , analysis["results"], analysis["properties"]
-          training_data_ratio = properties["methodology"]["train_test_split"]["training_data_ratio"]
-          test_data_ratio = properties["methodology"]["train_test_split"]["test_data_ratio"]
-          return html.Div("Train-Test-Split: {0}/{1}".format(training_data_ratio, test_data_ratio)), html.H4("({}/5)".format(5))
+    [Input('result', 'data')])
+def train_test_split(data):
+    if data is None:
+        return [], []
+    else:
+        result = json.loads(data)
+        properties = result["properties"]
+        metric_properties = properties["methodology"]["train_test_split"]
+        metric_scores = result["results"]
+        return metric_detail_div(metric_properties), html.H4(
+            "({}/5)".format(metric_scores["methodology"]["train_test_split"]))
 
 # --- Factsheet Completeness ---
 @app.callback(
@@ -825,7 +865,7 @@ def robustness_details(data):
             sections.append(create_metric_details_section(metric_id, i, 2))
     return sections
 
-def robustness_detail_div(properties):
+def metric_detail_div(properties):
     prop = []
     for k, v in properties.items():
         prop.append(html.Div("{}: {}".format(v[0], v[1])))
@@ -841,7 +881,7 @@ def Deepfool_Attack_metric_detail(data):
       result = json.loads(data)
       properties = result["properties"]
       metric_properties = properties["robustness"]["empirical_robustness_deepfool_attack"]
-      return robustness_detail_div(metric_properties)
+      return metric_detail_div(metric_properties)
 
 @app.callback(
 Output("empirical_robustness_carlini_wagner_attack_details", 'children'),
@@ -853,7 +893,7 @@ def carlini_wagner_attack_analysis(data):
       result = json.loads(data)
       properties = result["properties"]
       metric_properties = properties["robustness"]["empirical_robustness_carlini_wagner_attack"]
-      return robustness_detail_div(metric_properties)
+      return metric_detail_div(metric_properties)
 
 @app.callback(
 Output("empirical_robustness_fast_gradient_attack_details", 'children'),
@@ -865,7 +905,7 @@ def fast_gradient_attack_analysis(data):
       result = json.loads(data)
       properties = result["properties"]
       metric_properties = properties["robustness"]["empirical_robustness_fast_gradient_attack"]
-      return robustness_detail_div(metric_properties)
+      return metric_detail_div(metric_properties)
 
 @app.callback(
 Output("confidence_score_details", 'children'),
@@ -877,7 +917,7 @@ def confidence_analysis(data):
       result = json.loads(data)
       properties = result["properties"]
       metric_properties = properties["robustness"]["confidence_score"]
-      return robustness_detail_div(metric_properties)
+      return metric_detail_div(metric_properties)
 
 @app.callback(
 Output("loss_sensitivity_details", 'children'),
@@ -889,7 +929,7 @@ def loss_sensitivity_analysis(data):
       result = json.loads(data)
       properties = result["properties"]
       metric_properties = properties["robustness"]["loss_sensitivity"]
-      return robustness_detail_div(metric_properties)
+      return metric_detail_div(metric_properties)
 
 @app.callback(
 Output("clever_score_details", 'children'),
@@ -901,7 +941,7 @@ def clever_score(data):
       result = json.loads(data)
       properties = result["properties"]
       metric_properties = properties["robustness"]["CLEVER_Score"]
-      return robustness_detail_div(metric_properties)
+      return metric_detail_div(metric_properties)
  
 config_panel.get_callbacks(app)
     
