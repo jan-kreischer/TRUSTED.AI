@@ -22,9 +22,6 @@ import matplotlib.pyplot as plt
 from math import pi
 import sklearn.metrics as metrics
 import collections
-from helpers import *
-
-import collections
 result = collections.namedtuple('result', 'score properties')
 
 def get_performance_metrics(model, test_data, target_column):
@@ -67,21 +64,18 @@ def show_star_rating(rating):
             stars.append(html.I(className="far fa-star"))
     return stars
 
-def get_solution_sets():
-    problem_sets = [(f.name, f.path) for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir() and not f.name.startswith('.')]
-    options = []
-    for problem_set_name, problem_set_path in problem_sets:
-        solution_sets = [(f.name, f.path) for f in os.scandir(os.path.join(problem_set_path, SOLUTIONS_FOLDER)) if f.is_dir() and not f.name.startswith('.')]
-        for solution_set_name, solution_set_path in solution_sets:
-            options.append({"label": problem_set_name + " > " + solution_set_name, "value": solution_set_path})
-    return options
+# === SCENARIOS ===
 
-def list_of_scenarios():
-    problem_sets = [(f.name, f.path) for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir() and not f.name.startswith('.')]
+def get_solution_sets():
+    scenarios = [(f.name, f.path) for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir() and not f.name.startswith('.')]
     options = []
-    for problem_set_name, problem_set_path in problem_sets:
-        options.append({"label": problem_set_name, "value": problem_set_path})
+    for scenario_name, scenario_path in scenarios:
+        solution_sets = [(f.name, f.path) for f in os.scandir(os.path.join(scenario_path, SOLUTIONS_FOLDER)) if f.is_dir() and not f.name.startswith('.')]
+        for solution_set_name, solution_set_path in solution_sets:
+            options.append({"label": scenario_name + " > " + solution_set_name, "value": solution_set_path})
     return options
+def list_of_scenarios():
+    return [f.name for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir() and not f.name.startswith('.')]
 
 def read_test(solution_set_path):
     #test data
@@ -255,7 +249,10 @@ def create_metric_details_section(metric_id, i, section_n = 1, is_open=False):
         ], id="{}_section".format(metric_id), className="mb-5 mt-5")
 
 def pillar_section(pillar, metrics):
-        metric_detail_sections = []
+        #configuration_section = []
+        #configuration_section.append(html.H3("▶ {} Configuration".format(pillar)))
+        #configuration_section.append()
+        metric_detail_sections = [html.Div([], id="{}_configuration".format(pillar))]
         for i in range(len(metrics)):
             metric_id = metrics[i].lower()
             metric_detail_sections.append(create_metric_details_section(metric_id, i))
@@ -369,6 +366,3 @@ def mapping_panel(pillar):
     map_panel.append(html.Div(html.Button('Save', id='save-mapping-{}'.format(pillar), style={"background-color": "green","margin-left":"30%","width":200})
                      , style={'width': '100%', 'display': 'inline-block'}))
     return map_panel , input_ids
-
-
-        

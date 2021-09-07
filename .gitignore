@@ -5,17 +5,21 @@ site/
 .DS_Store
 
 webapp/scenarios/*
-!webapp/scenarios/IT Sec Anomaly Detection
-!webapp/scenarios/IT Sec Incident Classification
+!webapp/scenarios/compas_recidivism
+!webapp/scenarios/german_credit_scoring
+!webapp/scenarios/it_sec_anomaly_detection
+!webapp/scenarios/it_sec_incident_classification
 
-webapp/scenarios/IT Sec Anomaly Detection/*
-!webapp/scenarios/IT Sec Anomaly Detection/Solution*
-!webapp/scenarios/IT Sec Anomaly Detection/Jan*
-!webapp/scenarios/IT Sec Anomaly Detection/Joel*
-!webapp/scenarios/IT Sec Anomaly Detection/Melike*
+webapp/scenarios/compas_recidivism/solutions/*
+!webapp/scenarios/compas_recidivism/solutions/Solution*
 
-webapp/scenarios/IT Sec Incident Classification/*
-!webapp/scenarios/IT Sec Incident Classification/Solution*
-!webapp/scenarios/IT Sec Incident Classification/Jan*
-!webapp/scenarios/IT Sec Incident Classification/Joel*
-!webapp/scenarios/IT Sec Incident Classification/Melike*
+webapp/scenarios/german_credit_scoring/solutions/*
+!webapp/scenarios/german_credit_scoring/solutions/Solution*
+
+webapp/scenarios/it_sec_anomaly_detection/solutions/*
+!webapp/scenarios/it_sec_anomaly_detection/solutions/Solution*
+
+webapp/scenarios/it_sec_anomaly_detection/solutions/*
+!webapp/scenarios/it_sec_anomaly_detection/solutions/Solution*
+
+

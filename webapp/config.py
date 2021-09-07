@@ -52,7 +52,18 @@ NOT_SPECIFIED = "not specified"
 NO_DETAILS = "No details available."
 NO_SCORE = "X"
 
+# === METRICS ===
+import os
+import json
+def list_of_metrics(pillar):
+    metrics = []
+    with open(os.path.join(METRICS_CONFIG_PATH, "config_{}.json".format(pillar))) as file:
+        config_file = json.load(file)
+        for metric_name in config_file["weights"]:
+            metrics.append(metric_name.lower())
+    return metrics
 
-
-
-
+FAIRNESS_METRICS = list_of_metrics("fairness")
+EXPLAINABILITY_METRICS = list_of_metrics("explainability")
+ROBUSTNESS_METRICS = ["clever_score", "loss_sensitivity", "confidence_score", "empirical_robustness_fast_gradient_attack", "empirical_robustness_deepfool_attack", "empirical_robustness_carlini_wagner_attack"]
+METHODOLOGY_METRICS = list_of_metrics("methodology")

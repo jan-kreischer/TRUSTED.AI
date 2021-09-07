@@ -1,0 +1,1 @@
+The 'COMPAS Recidivism' dataset contains information about a criminal defendant’s likelihood to re-offend. This data is used by companies in order to train machine learning algorithms predicting the likelihood of recidivism. It can be shown that the data and algorithms used, are biased against certain groups.  

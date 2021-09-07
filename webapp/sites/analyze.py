@@ -47,10 +47,10 @@ for s in SECTIONS[1:]:
                 json.dump(mappings_config[s], outfile, indent=4)
 
 # === METRICS ===
-fairness_metrics = list_of_metrics("fairness")
-explainability_metrics = list_of_metrics("explainability")
-robustness_metrics = ["clever_score", "loss_sensitivity", "confidence_score", "empirical_robustness_fast_gradient_attack", "empirical_robustness_deepfool_attack", "empirical_robustness_carlini_wagner_attack"]
-methodology_metrics = list_of_metrics("methodology")
+fairness_metrics = FAIRNESS_METRICS
+explainability_metrics = EXPLAINABILITY_METRICS
+robustness_metrics = ROBUSTNESS_METRICS
+methodology_metrics = METHODOLOGY_METRICS
 
 # === SECTIONS ===
 def general_section():
@@ -287,12 +287,11 @@ def update_output(submit_n_clicks, uploaded_solution_set, solution_set_path):
     
 # === FAIRNESS ===
 @app.callback(
-    [Output("fairness_overview", 'children'),
-    Output("fairness_details", 'children')],
+    Output("fairness_configuration", 'children'),
     [Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
-def analyze_fairness(solution_set_path):
+def fairness_configuration(solution_set_path):
     if solution_set_path == "":
-        return ["", ""]
+        return []
     if solution_set_path is not None:
         train_data =  read_train(solution_set_path)
         test_data =  read_test(solution_set_path)
@@ -357,14 +356,14 @@ def analyze_fairness(solution_set_path):
             ),
         ])
 
-        sections = [html.Hr(), html.H3("▶ Fairness Configuration"), solution_set_label_select, protected_feature_select, privileged_class_definition, html.Hr(), html.H3("▶ Fairness Metrics")]
+        sections = [html.Hr(), html.H3("▶ Fairness Configuration"), solution_set_label_select, protected_feature_select, privileged_class_definition, html.Hr()]
         
-        for i in range(len(fairness_metrics)):
-            metric_id = fairness_metrics[i]
-            sections.append(create_metric_details_section(metric_id, i))
-        return [], sections
+        #for i in range(len(fairness_metrics)):
+        #    metric_id = fairness_metrics[i]
+        #    sections.append(create_metric_details_section(metric_id, i))
+        return sections
     else:
-        return [], [html.H1("Nothing")]
+        return []
 
 # === EXPLAINABILITY ===
 @app.callback(
@@ -905,7 +904,8 @@ def clever_score(data):
       return robustness_detail_div(metric_properties)
  
 config_panel.get_callbacks(app)
-        
+    
+# === LAYOUT ===
 layout = html.Div([
     config_panel.layout,
     dbc.Container([
