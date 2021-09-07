@@ -13,7 +13,7 @@ SECTIONS = ['trust'] + PILLARS
 
 # === FACTSHEET ===
 FACTSHEET_NAME = "factsheet.json"
-GENERAL_INPUTS = ["model_name", "purpose_description", "domain_description", "training_data_description", "model_information",    "data_normalization", "target_column", "contact_information"]
+GENERAL_INPUTS = ["model_name", "purpose_description", "domain_description", "training_data_description", "model_information",    "data_normalization", "target_column", "authors", "contact_information"]
 FAIRNESS_INPUTS = ["protected_feature", "privileged_class_definition"]
 EXPLAINABILITY_INPUTS = ["protected_feature", "privileged_class_definition"]
 ROBUSTNESS_INPUTS = []

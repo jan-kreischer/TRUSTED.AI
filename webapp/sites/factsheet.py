@@ -25,8 +25,10 @@ from helpers import create_info_modal
                Output('data_normalization', 'value'),
                Output('regularization', 'value'),
                Output('target_column', 'value'), 
+               Output('authors', 'value'), 
                Output('contact_information', 'value'),
-               Output('protected_feature', 'value')],
+               Output('protected_feature', 'value'),
+               Output('privileged_class_definition', 'value')],
               [
                Input('download_factsheet_button', 'n_clicks'),
                State('model_name', 'value'),
@@ -36,9 +38,11 @@ from helpers import create_info_modal
                State('model_information', 'value'), 
                State('data_normalization', 'value'),
                State('regularization', 'value'),
-               State('target_column_name', 'value'), 
+               State('target_column', 'value'), 
+               State('authors', 'value'),    
                State('contact_information', 'value'),
-               State('protected_feature', 'value')
+               State('protected_feature', 'value'),
+               State('privileged_class_definition', 'value')
 ], prevent_initial_call=True)             
 def create_factsheet(
     n_clicks,
@@ -50,8 +54,10 @@ def create_factsheet(
     data_normalization,
     regularization,
     target_column,
+    authors,
     contact_information,
-    protected_feature
+    protected_feature,
+    privileged_class_definition
 ):
     factsheet = {}
     if n_clicks is not None:
@@ -64,7 +70,7 @@ def create_factsheet(
         for e in FAIRNESS_INPUTS:
             if eval(e):
                 factsheet["fairness"][e] = eval(e)
-        return html.H3("Created Factsheet", className="text-center", style={"color": "Red"}), dict(content=json.dumps(factsheet), filename="factsheet.json"), "", "", "", "", "", "", "", "", ""
+        return html.H3("Created Factsheet", className="text-center", style={"color": "Red"}), dict(content=json.dumps(factsheet), filename="factsheet.json"), "", "", "", "", "", "", "", "", "", "", "", ""
         
 
 #for m in GENERAL_INPUTS + FAIRNESS_INPUTS + EXPLAINABILITY_INPUTS + ROBUSTNESS_INPUTS + METHODOLOGY_INPUTS:
@@ -141,8 +147,14 @@ layout = dbc.Container([
                 html.H3("Target Column Name"),
                 dcc.Input(id="target_column", type="text", placeholder="", value="", debounce=True, style={'width': '100%'}),
             ], className="mb-4 mt-4"),
+            
+            #--- Authors ---
+            html.Div([
+                create_info_modal("authors", "Authors", "Please enter the authors name", ""),
+                html.H3("Authors"),
+                dcc.Input(id="authors", type="text", placeholder="", value="", debounce=True, style={'width': '100%'})], className="mb-4"),
                 
-            #--- Domain ---
+            #--- Contact Information ---
             html.Div([
             create_info_modal("contact_information", "Contact Information", "Please enter some contact information in case someone needs help with using your model", ""),
             html.H3("Contact Information"),

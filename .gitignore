@@ -6,12 +6,16 @@ site/
 
 webapp/scenarios/*
 !webapp/scenarios/compas_recidivism
+!webapp/scenarios/credit_card_approval
 !webapp/scenarios/german_credit_scoring
 !webapp/scenarios/it_sec_anomaly_detection
 !webapp/scenarios/it_sec_incident_classification
 
 webapp/scenarios/compas_recidivism/solutions/*
 !webapp/scenarios/compas_recidivism/solutions/Solution*
+
+webapp/scenarios/credit_card_approval/solutions/*
+!webapp/scenarios/credit_card_approval/solutions/Solution*
 
 webapp/scenarios/german_credit_scoring/solutions/*
 !webapp/scenarios/german_credit_scoring/solutions/Solution*
