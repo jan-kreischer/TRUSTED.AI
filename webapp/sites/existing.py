@@ -21,9 +21,28 @@ def scenario_dropdown_options():
     return options
 
 def scenario_id_to_name(scenario_id):
+    """This function converts the scenario id into the matching name
+
+    Args:
+        n1: number of clicks on the open button.
+
+    Returns:
+        Returns false if the dialog was previously open and
+        returns true if the dialog was previously closed.
+
+    """
     return scenario_id.replace("_", " ").title()
 
 def scenario_name_to_id(scenario_name):
+    """This function converts the scenario name into a valid id
+
+    Args:
+        n1: number of clicks on the open button.
+
+    Returns:
+        Returns false if the dialog was previously open and
+
+    """
     return scenario_name.replace(" ", "_").lower()
 
 def load_scenario(scenario_name):
@@ -68,81 +87,27 @@ def load_scenario(scenario_name):
   
 
 def display_scenario(scenario_id, scenario_name, scenario_link, scenario_description, scenario_solutions):
-    sections = [html.H3("▶ {}".format(scenario_name), style={"text-transform": "capitalize"}),
-               html.A("Link", href=scenario_link, className="mt-2 mb-4", style={"font-style": "italic"}),
-               html.Div(scenario_description, className="mt-2 mb-4", style={"font-style": "italic"})]
+    sections = [html.H3("▶ {}".format(scenario_name), style={"text-transform": "none"}),
+               html.Div(scenario_description, className="mt-4 mb-1", style={"font-style": "italic"}),
+               html.A("Link To Dataset", href=scenario_link, className="mt-1 mb-4", style={"display": "block", "font-style": "italic", "color": PRIMARY_COLOR}),
+               html.H4("• Solutions", style={"text-transform": "none"})]
     for i in range(len(scenario_solutions)):
-        sections.append(html.H5("-" + scenario_solutions[i], style={"text-transform": "capitalize"}))
+        sections.append(html.H6("-" + scenario_solutions[i], style={"text-transform": "none"}))
     sections.append(html.Hr())
     return html.Div(sections, id="{}_scenario".format(scenario_id))
-    """Example Google style docstrings.
-
-    This module demonstrates documentation as specified by the `Google Python
-    Style Guide`_. Docstrings may extend over multiple lines. Sections are created
-    with a section header and a colon followed by a block of indented text.
-
-    Example:
-        Examples can be given using either the ``Example`` or ``Examples``
-        sections. Sections support any reStructuredText formatting, including
-        literal blocks::
-
-            $ python example_google.py
-
-    Section breaks are created by resuming unindented text. Section breaks
-    are also implicitly created anytime a new section starts.
-
-    Attributes:
-        module_level_variable1 (int): Module level variables may be documented in
-            either the ``Attributes`` section of the module docstring, or in an
-            inline docstring immediately following the variable.
-
-            Either form is acceptable, but the two should not be mixed. Choose
-            one convention to document module level variables and be consistent
-            with it.
-
-    Todo:
-        * For module TODOs
-        * You have to also use ``sphinx.ext.todo`` extension
-
-    .. _Google Python Style Guide:
-       http://google.github.io/styleguide/pyguide.html
-
-    """
-    print("display scenario")
-    
 
 def display_scenarios():
-    """Example Google style docstrings.
+    """This function open and closes the dialog window
+        where the user can create new scenarios
 
-    This module demonstrates documentation as specified by the `Google Python
-    Style Guide`_. Docstrings may extend over multiple lines. Sections are created
-    with a section header and a colon followed by a block of indented text.
+    Args:
+        n1: number of clicks on the open button.
+        n2: number of clicks on the submit button.
+        is_open: current state of the modal.
 
-    Example:
-        Examples can be given using either the ``Example`` or ``Examples``
-        sections. Sections support any reStructuredText formatting, including
-        literal blocks::
-
-            $ python example_google.py
-
-    Section breaks are created by resuming unindented text. Section breaks
-    are also implicitly created anytime a new section starts.
-
-    Attributes:
-        module_level_variable1 (int): Module level variables may be documented in
-            either the ``Attributes`` section of the module docstring, or in an
-            inline docstring immediately following the variable.
-
-            Either form is acceptable, but the two should not be mixed. Choose
-            one convention to document module level variables and be consistent
-            with it.
-
-    Todo:
-        * For module TODOs
-        * You have to also use ``sphinx.ext.todo`` extension
-
-    .. _Google Python Style Guide:
-       http://google.github.io/styleguide/pyguide.html
+    Returns:
+        Returns false if the dialog was previously open and
+        returns true if the dialog was previously closed.
 
     """
     scenario_ids = list_of_scenarios()
@@ -161,7 +126,20 @@ def display_scenarios():
     [Input("open_create_scenario_dialog", "n_clicks"), Input("submit_create_scenario_dialog", "n_clicks")],
     [State("create_scenario_dialog", "is_open")],
 )
-def toggle_create_scenario_dialog(n1, n2, is_open):
+def toggle_create_scenario_modal(n1, n2, is_open):
+    """This function open and closes the dialog window
+        where the user can create new scenarios
+
+    Args:
+        n1: number of clicks on the open button.
+        n2: number of clicks on the submit button.
+        is_open: current state of the modal.
+
+    Returns:
+        Returns false if the dialog was previously open and
+        returns true if the dialog was previously closed.
+
+    """
     if n1 or n2:
         return not is_open
     return is_open
@@ -172,8 +150,20 @@ def toggle_create_scenario_dialog(n1, n2, is_open):
     [Input("open_delete_scenario_dialog", "n_clicks"), Input("submit_delete_scenario_dialog", "n_clicks")],
     [State("delete_scenario_dialog", "is_open")],
 )
-def toggle_delete_scenario_dialog(n1, n2, is_open):
-    app.logger.info("Open delete")
+def toggle_delete_scenario_modal(n1, n2, is_open):
+    """This function open and closes the dialog window
+        where the user can delete existing scenarios
+
+    Args:
+        n1: number of clicks on the open button.
+        n2: number of clicks on the delete button.
+        is_open: current state of the modal.
+
+    Returns:
+        Returns false if the dialog was previously open and
+        returns true if the dialog was previously closed.
+
+    """
     if n1 or n2:
         return not is_open
     return is_open
@@ -192,15 +182,14 @@ def toggle_delete_scenario_dialog(n1, n2, is_open):
 def create_scenario(n_clicks, scenario_display, scenario_name, scenario_link, scenario_description):
     if scenario_name:
         # Create folder to contain all solutions
-        res = os.makedirs(os.path.join(SCENARIOS_FOLDER_PATH, scenario_name, "solutions"))
-        f = open(os.path.join(SCENARIOS_FOLDER_PATH, scenario_name, SCENARIO_DESCRIPTION_FILE), "w")
+        scenario_id = scenario_name_to_id(scenario_name)
+        res = os.makedirs(os.path.join(SCENARIOS_FOLDER_PATH, scenario_id, "solutions"))
+        f = open(os.path.join(SCENARIOS_FOLDER_PATH, scenario_id, SCENARIO_DESCRIPTION_FILE), "w")
         f.write(scenario_description)
         f.close()
-        f = open(os.path.join(SCENARIOS_FOLDER_PATH, scenario_name, SCENARIO_LINK_FILE), "w")
+        f = open(os.path.join(SCENARIOS_FOLDER_PATH, scenario_id, SCENARIO_LINK_FILE), "w")
         f.write(scenario_link)
         f.close()
-        scenario_id = scenario_name_to_id(scenario_name)
-        
         scenario_display = scenario_display + [display_scenario(scenario_id, scenario_name, scenario_link, scenario_description, [])]
         
     return scenario_display, "", "", ""
@@ -211,7 +200,6 @@ def create_scenario(n_clicks, scenario_display, scenario_name, scenario_link, sc
     [Input("submit_delete_scenario_dialog", "n_clicks")],
     [State("scenario_to_delete", 'value')], prevent_initial_call=True)
 def delete_scenario(n_clicks, path):
-    app.logger.info("Deleting {}".format(path))
     try:
         shutil.rmtree(path, ignore_errors=False)
     except Exception as e:
@@ -220,15 +208,15 @@ def delete_scenario(n_clicks, path):
     return ""
     
     
-@app.callback(
-    Output("modal", "is_open"),
-    [Input("open", "n_clicks"), Input("submit", "n_clicks")],
-    [State("modal", "is_open")],
-)
-def toggle_modal(n1, n2, is_open):
-    if n1 or n2:
-        return not is_open
-    return is_open
+#@app.callback(
+#    Output("modal", "is_open"),
+#    [Input("open", "n_clicks"), Input("submit", "n_clicks")],
+#    [State("modal", "is_open")],
+#)
+#def toggle_modal(n1, n2, is_open):
+#    if n1 or n2:
+#        return not is_open
+#    return is_open
 
 
 
