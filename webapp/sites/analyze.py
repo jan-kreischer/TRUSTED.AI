@@ -873,76 +873,87 @@ def metric_detail_div(properties):
     return html.Div(prop)
 
 @app.callback(
-Output("empirical_robustness_deepfool_attack_details", 'children'),
+[Output("empirical_robustness_deepfool_attack_details", 'children'), Output("empirical_robustness_deepfool_attack_score", 'children')],
 Input('result', 'data'), prevent_initial_call=False)
 def Deepfool_Attack_metric_detail(data):
   if data is None:
-      return []
+      return [], []
   else:
       result = json.loads(data)
       properties = result["properties"]
       metric_properties = properties["robustness"]["empirical_robustness_deepfool_attack"]
-      return metric_detail_div(metric_properties)
+      metric_scores = result["results"]
+      return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["empirical_robustness_deepfool_attack"]))
 
 @app.callback(
-Output("empirical_robustness_carlini_wagner_attack_details", 'children'),
+[Output("empirical_robustness_carlini_wagner_attack_details", 'children'), Output("empirical_robustness_carlini_wagner_attack_score", 'children')],
 Input('result', 'data'), prevent_initial_call=False)
 def carlini_wagner_attack_analysis(data):
   if data is None:
-      return []
+      return [], []
   else:
       result = json.loads(data)
       properties = result["properties"]
       metric_properties = properties["robustness"]["empirical_robustness_carlini_wagner_attack"]
-      return metric_detail_div(metric_properties)
+      metric_scores = result["results"]
+      return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["empirical_robustness_carlini_wagner_attack"]))
 
 @app.callback(
-Output("empirical_robustness_fast_gradient_attack_details", 'children'),
+[Output("empirical_robustness_fast_gradient_attack_details", 'children'), Output("empirical_robustness_fast_gradient_attack_score", 'children')],
 Input('result', 'data'), prevent_initial_call=False)
 def fast_gradient_attack_analysis(data):
   if data is None:
-      return []
+      return [], []
   else:
       result = json.loads(data)
       properties = result["properties"]
       metric_properties = properties["robustness"]["empirical_robustness_fast_gradient_attack"]
-      return metric_detail_div(metric_properties)
+      metric_scores = result["results"]
+      return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["empirical_robustness_fast_gradient_attack"]))
+
 
 @app.callback(
-Output("confidence_score_details", 'children'),
-Input('result', 'data'), prevent_initial_call=False)
+    [Output("confidence_score_details", 'children'), Output("confidence_score_score", 'children')],
+    Input('result', 'data'), prevent_initial_call=False)
 def confidence_analysis(data):
-  if data is None:
-      return []
-  else:
-      result = json.loads(data)
-      properties = result["properties"]
-      metric_properties = properties["robustness"]["confidence_score"]
-      return metric_detail_div(metric_properties)
+    if data is None:
+        return [], []
+    else:
+        result = json.loads(data)
+        properties = result["properties"]
+        metric_properties = properties["robustness"]["confidence_score"]
+        metric_scores = result["results"]
+        return metric_detail_div(metric_properties), html.H4(
+            "({}/5)".format(metric_scores["robustness"]["confidence_score"]))
 
 @app.callback(
-Output("loss_sensitivity_details", 'children'),
-Input('result', 'data'), prevent_initial_call=False)
+    [Output("loss_sensitivity_details", 'children'), Output("loss_sensitivity_score", 'children')],
+    Input('result', 'data'), prevent_initial_call=False)
 def loss_sensitivity_analysis(data):
-  if data is None:
-      return []
-  else:
-      result = json.loads(data)
-      properties = result["properties"]
-      metric_properties = properties["robustness"]["loss_sensitivity"]
-      return metric_detail_div(metric_properties)
+    if data is None:
+        return [], []
+    else:
+        result = json.loads(data)
+        properties = result["properties"]
+        metric_properties = properties["robustness"]["loss_sensitivity"]
+        metric_scores = result["results"]
+        return metric_detail_div(metric_properties), html.H4(
+            "({}/5)".format(metric_scores["robustness"]["loss_sensitivity"]))
+
 
 @app.callback(
-Output("clever_score_details", 'children'),
-Input('result', 'data'), prevent_initial_call=False)
+    [Output("clever_score_details", 'children'), Output("clever_score_score", 'children')],
+    Input('result', 'data'), prevent_initial_call=False)
 def clever_score(data):
-  if data is None:
-      return []
-  else:
-      result = json.loads(data)
-      properties = result["properties"]
-      metric_properties = properties["robustness"]["CLEVER_Score"]
-      return metric_detail_div(metric_properties)
+    if data is None:
+        return [], []
+    else:
+        result = json.loads(data)
+        properties = result["properties"]
+        metric_properties = properties["robustness"]["clever_score"]
+        metric_scores = result["results"]
+        return metric_detail_div(metric_properties), html.H4(
+            "({}/5)".format(metric_scores["robustness"]["clever_score"]))
  
 config_panel.get_callbacks(app)
     
