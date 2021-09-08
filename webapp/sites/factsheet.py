@@ -28,7 +28,8 @@ from helpers import create_info_modal
                Output('authors', 'value'), 
                Output('contact_information', 'value'),
                Output('protected_feature', 'value'),
-               Output('privileged_class_definition', 'value')],
+               Output('protected_group_definition', 'value'),
+               Output('favorable_outcome', 'value')],
               [
                Input('download_factsheet_button', 'n_clicks'),
                State('model_name', 'value'),
@@ -42,7 +43,8 @@ from helpers import create_info_modal
                State('authors', 'value'),    
                State('contact_information', 'value'),
                State('protected_feature', 'value'),
-               State('privileged_class_definition', 'value')
+               State('protected_group_definition', 'value'),
+               State('favorable_outcome', 'value') 
 ], prevent_initial_call=True)             
 def create_factsheet(
     n_clicks,
@@ -57,7 +59,8 @@ def create_factsheet(
     authors,
     contact_information,
     protected_feature,
-    privileged_class_definition
+    protected_group_definition,
+    favorable_outcome
 ):
     factsheet = {}
     if n_clicks is not None:
@@ -70,7 +73,7 @@ def create_factsheet(
         for e in FAIRNESS_INPUTS:
             if eval(e):
                 factsheet["fairness"][e] = eval(e)
-        return html.H3("Created Factsheet", className="text-center", style={"color": "Red"}), dict(content=json.dumps(factsheet), filename="factsheet.json"), "", "", "", "", "", "", "", "", "", "", "", ""
+        return html.H3("Created Factsheet", className="text-center", style={"color": "Red"}), dict(content=json.dumps(factsheet), filename="factsheet.json"), "", "", "", "", "", "", "", "", "", "", "", "", ""
         
 
 #for m in GENERAL_INPUTS + FAIRNESS_INPUTS + EXPLAINABILITY_INPUTS + ROBUSTNESS_INPUTS + METHODOLOGY_INPUTS:
@@ -174,10 +177,16 @@ layout = dbc.Container([
             ], ),
             
             html.Div([
-                create_info_modal("privileged_class_definition", "Privileged Class Definition", "Please enter the name of the target column within your dataset.", ""),
-                html.H3("Privileged Class Definition"),
-                dcc.Input(id="privileged_class_definition", type="text", placeholder="e.g lambda x: x >= 25", value="", debounce=True, style={'width': '100%'}),
+                create_info_modal("protected_group_definition", "Protected Group Definition", "Please enter the name of the target column within your dataset.", ""),
+                html.H3("Protected Group Definition"),
+                dcc.Input(id="protected_group_definition", type="text", placeholder="e.g lambda x: x >= 25", value="", debounce=True, style={'width': '100%'}),
             ], className="mb-4 mt-4"),
+                
+             html.Div([
+                create_info_modal("favorable_outcome", "Favorable Outcome", "Please enter a lambda expression defining values of the target column which are seen as favorable.", ""),
+                html.H3("Favorable Outcome"),
+                dcc.Input(id="favorable_outcome", type="text", placeholder="e.g lambda x: x[target_column] == 1", value="", debounce=True, style={'width': '100%'}),
+            ], className="mb-4 mt-4")
             ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px", "backgroundColor": SECONDARY_COLOR}, className="pt-3 pb-3 pl-3 pr-3 mb-4 mt-4"),
                         
             html.Div([

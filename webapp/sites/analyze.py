@@ -315,9 +315,9 @@ def fairness_configuration(solution_set_path):
             if "fairness" in factsheet and "protected_feature" in factsheet["fairness"]:
                 protected_feature = factsheet["fairness"]["protected_feature"]
             
-            privileged_class_definition = ""
-            if "fairness" in factsheet and "privileged_class_definition" in factsheet["fairness"]:
-                privileged_class_definition = factsheet["fairness"]["privileged_class_definition"]
+            protected_group_definition = ""
+            if "fairness" in factsheet and "protected_group_definition" in factsheet["fairness"]:
+                protected_group_definition = factsheet["fairness"]["protected_group_definition"]
             
             f.close()
         # Create a factsheet
@@ -345,18 +345,19 @@ def fairness_configuration(solution_set_path):
             ),
         ])
         
-        privileged_class_definition = html.Div([
-            "Define Privileged Class",
+        protected_group_definition = html.Div([
+            "Define Protected Group",
             html.Br(),
             dcc.Input(
-                id="privileged_class_definition",
+                id="protected_group_definition",
                 type="text",
-                placeholder="e.g lambda x: x >= 25",
+                placeholder="e.g lambda x: x[protected_feature] < 25",
                 style={'width': '100%'}
             ),
         ])
 
-        sections = [html.Hr(), html.H3("▶ Fairness Configuration"), solution_set_label_select, protected_feature_select, privileged_class_definition, html.Hr()]
+
+        sections = [html.Hr(), html.H3("▶ Fairness Configuration"), solution_set_label_select, protected_feature_select, protected_group_definition, html.Hr()]
         
         #for i in range(len(fairness_metrics)):
         #    metric_id = fairness_metrics[i]
