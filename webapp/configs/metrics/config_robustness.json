@@ -1,5 +1,18 @@
 {
   "parameters": {
+    "score_clique_method": {
+      "thresholds": {
+        "value": [
+          0.01,
+          0.1,
+          0.25,
+          0.5,
+          1
+        ],
+        "description": "Thresholds of how to map the result of the clique method from 1-5.",
+        "label": "Score Thresholds"
+      }
+    },
     "score_loss_sensitivity": {
       "thresholds": {
         "value": [
@@ -9,7 +22,7 @@
           1,
           0.5
         ],
-        "description": "Thresholds of how to map loss sensitivity from 1-5. Better confidence score means higher robustness.",
+        "description": "Thresholds of how to map loss sensitivity from 1-5. Smaller value means higher robustness.",
         "label": "Score Thresholds"
       }
     },
@@ -22,7 +35,7 @@
           2.5,
           5
         ],
-        "description": "Thresholds of how to map CLEVER score from 1-5. Better confidence score means higher robustness.",
+        "description": "Thresholds of how to map CLEVER score from 1-5.",
         "label": "Score Thresholds"
       }
     },

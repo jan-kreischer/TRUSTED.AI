@@ -6,7 +6,7 @@ import sklearn.metrics as metrics
 from art.attacks.evasion import FastGradientMethod, CarliniL2Method, DeepFool
 from art.estimators.classification import SklearnClassifier
 from sklearn.preprocessing import OneHotEncoder
-from art.metrics import clever_u
+from art.metrics import clever_u, RobustnessVerificationTreeModelsCliqueMethod
 from art.estimators.classification import KerasClassifier
 from art.metrics import loss_sensitivity
 import tensorflow as tf
@@ -18,6 +18,7 @@ result = collections.namedtuple('result', 'score properties')
 # === ROBUSTNESS ===
 def analyse(model, train_data, test_data, config):
 
+    clique_method_thresholds = config["score_clique_method"]["thresholds"]["value"]
     clever_score_thresholds = config["score_clever_score"]["thresholds"]["value"]
     loss_sensitivity_thresholds = config["score_loss_sensitivity"]["thresholds"]["value"]
     confidence_score_thresholds = config["score_confidence_score"]["thresholds"]["value"]
@@ -27,7 +28,7 @@ def analyse(model, train_data, test_data, config):
     
     output = dict(
         confidence_score   = confidence_score(model, train_data, test_data, clever_score_thresholds),
-        clique_method      = class_specific_metrics_score(),
+        clique_method      = clique_method(model, train_data, test_data, clique_method_thresholds),
         loss_sensitivity   = loss_sensitivity_score(model, train_data, test_data, loss_sensitivity_thresholds),
         clever_score       = clever_score(model, train_data, test_data, clever_score_thresholds),
         empirical_robustness_fast_gradient_attack = fast_gradient_attack_score(model, train_data, test_data, fsg_attack_thresholds),
@@ -88,8 +89,22 @@ def confidence_score(model, train_data, test_data, thresholds):
     except:
         return result(score=np.nan, properties={})
 
-def class_specific_metrics_score():
-    return result(score=np.random.randint(1,6), properties={})
+def clique_method(model, train_data, test_data, thresholds):
+    '''try:
+        X_test = test_data.iloc[:, :-1]
+        y_test = test_data.iloc[:, -1:]
+        classifier = SklearnClassifier(model)
+        rt = RobustnessVerificationTreeModelsCliqueMethod(classifier=classifier, verbose=True)
+
+        bound, error = rt.verify(x=X_test.to_numpy()[100:103], y=y_test[100:103].to_numpy(), eps_init=0.5, norm=1,
+                                 nb_search_steps=5, max_clique=2, max_level=2)
+        score = np.digitize(bound, thresholds)
+        return result(score=score, properties={
+            "error_bound": info("Average error bound", "{:.2f}".format(bound)),
+            "error": info("Error", "{:.1f}".format(error))})
+    except:
+        return result(score=np.nan, properties={})'''
+    return result(score=np.nan, properties={})
 
 def fast_gradient_attack_score(model, train_data, test_data, thresholds):
     try:
