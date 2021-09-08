@@ -20,31 +20,6 @@ def scenario_dropdown_options():
         options.append({"label": scenario_name, "value": scenario_id})
     return options
 
-def scenario_id_to_name(scenario_id):
-    """This function converts the scenario id into the matching name
-
-    Args:
-        n1: number of clicks on the open button.
-
-    Returns:
-        Returns false if the dialog was previously open and
-        returns true if the dialog was previously closed.
-
-    """
-    return scenario_id.replace("_", " ").title()
-
-def scenario_name_to_id(scenario_name):
-    """This function converts the scenario name into a valid id
-
-    Args:
-        n1: number of clicks on the open button.
-
-    Returns:
-        Returns false if the dialog was previously open and
-
-    """
-    return scenario_name.replace(" ", "_").lower()
-
 def load_scenario(scenario_name):
     """Example Google style docstrings.
 

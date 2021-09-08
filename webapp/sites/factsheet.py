@@ -146,7 +146,7 @@ layout = dbc.Container([
                        
             #--- Target Column Name ---
             html.Div([
-                create_info_modal("target_column", "Target Column Name", "Please enter the name of the target column within your dataset.", ""),
+                create_info_modal("target_column", "Target Column", "Please enter the name of the target column within your dataset.", ""),
                 html.H3("Target Column Name"),
                 dcc.Input(id="target_column", type="text", placeholder="", value="", debounce=True, style={'width': '100%'}),
             ], className="mb-4 mt-4"),

@@ -65,17 +65,48 @@ def show_star_rating(rating):
     return stars
 
 # === SCENARIOS ===
+def scenario_id_to_name(scenario_id):
+    """This function converts the scenario id into the matching name
+
+    Args:
+        n1: number of clicks on the open button.
+
+    Returns:
+        Returns false if the dialog was previously open and
+        returns true if the dialog was previously closed.
+
+    """
+    return scenario_id.replace("_", " ").title()
+
+def scenario_name_to_id(scenario_name):
+    """This function converts the scenario name into a valid id
+
+    Args:
+        n1: number of clicks on the open button.
+
+    Returns:
+        Returns false if the dialog was previously open and
+
+    """
+    return scenario_name.replace(" ", "_").lower()
 
 def get_solution_sets():
-    scenarios = [(f.name, f.path) for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir() and not f.name.startswith('.')]
+    scenario_ids = list_of_scenarios()
     options = []
-    for scenario_name, scenario_path in scenarios:
-        solution_sets = [(f.name, f.path) for f in os.scandir(os.path.join(scenario_path, SOLUTIONS_FOLDER)) if f.is_dir() and not f.name.startswith('.')]
-        for solution_set_name, solution_set_path in solution_sets:
-            options.append({"label": scenario_name + " > " + solution_set_name, "value": solution_set_path})
+    for scenario_id in scenario_ids:
+        scenario_name = scenario_id_to_name(scenario_id)
+        solutions = list_of_solutions(scenario_id)
+        for solution_id, solution_path in solutions:
+            solution_name = scenario_id_to_name(solution_id)
+            options.append({"label": scenario_name + " > " + solution_name, "value": solution_path})
     return options
+
 def list_of_scenarios():
     return [f.name for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir() and not f.name.startswith('.')]
+
+def list_of_solutions(scenario_id):
+    return [(f.name, f.path) for f in os.scandir(os.path.join(SCENARIOS_FOLDER_PATH, scenario_id, SOLUTIONS_FOLDER)) if f.is_dir() and not f.name.startswith('.')]
+    
 
 def read_test(solution_set_path):
     #test data
