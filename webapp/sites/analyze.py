@@ -218,10 +218,10 @@ def toggle_charts(visibility_state):
     if visibility_state == False:
         return {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
 
-@app.callback(Output('solution_set_dropdown', 'options'),
-              Input('solution_set_dropdown', 'nclicks'))
-def update_solution_set_dropdown(n_clicks):
-    return get_solution_sets()
+#@app.callback(Output('solution_set_dropdown', 'options'),
+#              Input('solution_set_dropdown', 'nclicks'))
+#def update_solution_set_dropdown(n_clicks):
+#    return get_solution_sets()
 
 
 @app.callback(Output('input-mappings', 'data'), 
@@ -978,7 +978,7 @@ layout = html.Div([
             
             dbc.Col([dcc.Dropdown(
                     id='solution_set_dropdown',
-                    options= get_solution_sets(),
+                    options= get_solution_options(),
                     value=None,
 
                     placeholder='Select Solution'

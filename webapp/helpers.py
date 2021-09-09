@@ -65,7 +65,7 @@ def show_star_rating(rating):
     return stars
 
 def id_to_name(identifier):
-    """This function converts the scenario id into the matching name
+    """This function converts scenario and solution ids into the matching names
 
     Args:
         n1: number of clicks on the open button.
@@ -78,7 +78,7 @@ def id_to_name(identifier):
     return identifier.replace("_", " ").title()
 
 def name_to_id(name):
-    """This function converts the scenario name into a valid id
+    """This function converts scenario and solution names into a valid ids
 
     Args:
         n1: number of clicks on the open button.
@@ -90,51 +90,38 @@ def name_to_id(name):
     return name.replace(" ", "_").lower()
 
 # === SCENARIOS ===
-def scenario_id_to_name(scenario_id):
-    """This function converts the scenario id into the matching name
+def get_scenario_ids():
+    scenario_ids = [f.name for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir() and not f.name.startswith('.')]
+    #sort scenario ids in place
+    scenario_ids.sort()
+    return scenario_ids
 
-    Args:
-        n1: number of clicks on the open button.
+def get_scenario_options():
+    scenario_ids = get_scenario_ids()
+    options = [{"label": id_to_name(scenario_id), "value": scenario_id} for scenario_id in scenario_ids]
+    return options
 
-    Returns:
-        Returns false if the dialog was previously open and
-        returns true if the dialog was previously closed.
+def get_scenario_path(scenario_id):
+    return os.path.join(SCENARIOS_FOLDER_PATH, scenario_id)
 
-    """
-    return scenario_id.replace("_", " ").title()
-
-def scenario_name_to_id(scenario_name):
-    """This function converts the scenario name into a valid id
-
-    Args:
-        n1: number of clicks on the open button.
-
-    Returns:
-        Returns false if the dialog was previously open and
-
-    """
-    return scenario_name.replace(" ", "_").lower()
-
-def get_solution_sets():
-    scenario_ids = list_of_scenarios()
+def get_solution_ids(scenario_id):
+    solution_ids = [(f.name, f.path) for f in os.scandir(get_solution_path(scenario_id, "")) if f.is_dir() and not f.name.startswith('.')]
+    solution_ids = sorted(solution_ids, key=lambda x: x[0])
+    return solution_ids
+    
+def get_solution_options():
+    scenario_ids = get_scenario_ids()
     options = []
     for scenario_id in scenario_ids:
-        scenario_name = scenario_id_to_name(scenario_id)
-        solutions = list_of_solutions(scenario_id)
+        scenario_name = id_to_name(scenario_id)
+        solutions = get_solution_ids(scenario_id)
         for solution_id, solution_path in solutions:
-            solution_name = scenario_id_to_name(solution_id)
+            solution_name = id_to_name(solution_id)
             options.append({"label": scenario_name + " > " + solution_name, "value": solution_path})
     return options
 
-def list_of_scenarios():
-    return [f.name for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir() and not f.name.startswith('.')]
-
-def scenario_options():
-    return [f.name for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir() and not f.name.startswith('.')]
-
-def list_of_solutions(scenario_id):
-    return [(f.name, f.path) for f in os.scandir(os.path.join(SCENARIOS_FOLDER_PATH, scenario_id, SOLUTIONS_FOLDER)) if f.is_dir() and not f.name.startswith('.')]
-    
+def get_solution_path(scenario_id, solution_id):
+    return os.path.join(SCENARIOS_FOLDER_PATH, scenario_id, SOLUTIONS_FOLDER, solution_id)
 
 def read_test(solution_set_path):
     #test data
