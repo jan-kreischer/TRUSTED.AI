@@ -1000,8 +1000,8 @@ layout = html.Div([
                     pillar_section("explainability", explainability_metrics),
                     pillar_section("robustness", robustness_metrics),
                     pillar_section("methodology", methodology_metrics),
-                    dcc.Store(id='training_data', storage_type='session'),
-                    dcc.Store(id='test_data', storage_type='session')
+                    dcc.Store(id='training_data'),
+                    dcc.Store(id='test_data')
                 ], id="analysis_section")
             ],
                 width=12, 
