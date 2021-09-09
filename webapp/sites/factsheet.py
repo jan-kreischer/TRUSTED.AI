@@ -29,7 +29,8 @@ from helpers import create_info_modal
                Output('contact_information', 'value'),
                Output('protected_feature', 'value'),
                Output('protected_group', 'value'),
-               Output('favorable_outcome', 'value')],
+               Output('favorable_outcome', 'value'),
+               Output('missing_data', 'value')],
               [
                Input('download_factsheet_button', 'n_clicks'),
                State('model_name', 'value'),
@@ -44,7 +45,8 @@ from helpers import create_info_modal
                State('contact_information', 'value'),
                State('protected_feature', 'value'),
                State('protected_group', 'value'),
-               State('favorable_outcome', 'value') 
+               State('favorable_outcome', 'value'),
+               State('missing_data', 'value')
 ], prevent_initial_call=True)             
 def create_factsheet(
     n_clicks,
@@ -60,7 +62,8 @@ def create_factsheet(
     contact_information,
     protected_feature,
     protected_group,
-    favorable_outcome
+    favorable_outcome,
+    missing_data
 ):
     factsheet = {}
     if n_clicks is not None:
@@ -73,7 +76,13 @@ def create_factsheet(
         for e in FAIRNESS_INPUTS:
             if eval(e):
                 factsheet["fairness"][e] = eval(e)
-        return html.H3("Created Factsheet", className="text-center", style={"color": "Red"}), dict(content=json.dumps(factsheet), filename="factsheet.json"), "", "", "", "", "", "", "", "", "", "", "", "", ""
+                factsheet["fairness"] = {}
+                
+        factsheet["methodology"] = {}
+        for e in METHODOLOGY_INPUTS:
+            if eval(e):
+                factsheet["methodology"][e] = eval(e)
+        return html.H3("Created Factsheet", className="text-center", style={"color": "Red"}), dict(content=json.dumps(factsheet, indent=4), filename="factsheet.json"), "", "", "", "", "", "", "", "", "", "", "", "", "", ""
         
 
 #for m in GENERAL_INPUTS + FAIRNESS_INPUTS + EXPLAINABILITY_INPUTS + ROBUSTNESS_INPUTS + METHODOLOGY_INPUTS:
@@ -209,7 +218,8 @@ layout = dbc.Container([
                         options=[
                             {'label': 'None', 'value': 'none'},
                             {'label': 'Normalization (Min-Max Scaling)', 'value': 'normalization'},
-                            {'label': 'Standardization (Z-score Normalization)', 'value': 'standardization'}
+                            {'label': 'Standardization (Z-score Normalization)', 'value': 'standardization'},
+                            {'label': 'Other', 'value': 'Other'}
                         ],
                         value='none'
                 )], className="mb-4 mt-4"),
@@ -224,6 +234,7 @@ layout = dbc.Container([
                             {'label': 'Lasso regression (L1)', 'value': 'lasso_regression'},
                             {'label': 'Ridge regression (L2)', 'value': 'ridge_regression'},
                             {'label': 'ElasticNet regression', 'value': 'elasticnet_regression'},
+                            {'label': 'Other', 'value': 'Other'}
                         ],
                         value='none'
                 )], className="mb-4 mt-4"),
@@ -231,16 +242,11 @@ layout = dbc.Container([
                 html.Div([
                     create_info_modal("missing_data", "Missing Data", "What technique did you use in order to deal with missing data.", ""),
                     html.H3("Missing Data"),
-                dcc.Dropdown(
-                        id='missing_data',
-                        options=[
-                            {'label': 'None', 'value': 'none'},
-                            {'label': 'Lasso regression (L1)', 'value': 'lasso_regression'},
-                            {'label': 'Ridge regression (L2)', 'value': 'ridge_regression'},
-                            {'label': 'ElasticNet regression', 'value': 'elasticnet_regression'},
-                        ],
-                        value='none'
-                )], className="mb-4 mt-4"),
+                dcc.Textarea(
+                    id='missing_data',
+                    value='',
+                    style={'width': '100%', 'height': 150},
+            )], className="mb-4 mt-4"),
             ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px", "backgroundColor": SECONDARY_COLOR}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),         
     ], 
     className=""
