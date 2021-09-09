@@ -11,19 +11,36 @@ webapp/scenarios/*
 !webapp/scenarios/it_sec_anomaly_detection
 !webapp/scenarios/it_sec_incident_classification
 
-#webapp/scenarios/compas_recidivism/solutions/*
-#!webapp/scenarios/compas_recidivism/solutions/Solution*
+webapp/scenarios/compas_recidivism/solutions/*
+!webapp/scenarios/compas_recidivism/alberto*
+!webapp/scenarios/compas_recidivism/jan*
+!webapp/scenarios/compas_recidivism/joel*
+!webapp/scenarios/compas_recidivism/melike*
 
-#webapp/scenarios/credit_card_approval/solutions/*
-#!webapp/scenarios/credit_card_approval/solutions/Solution*
+webapp/scenarios/credit_card_approval/solutions/*
+!webapp/scenarios/credit_card_approval/alberto*
+!webapp/scenarios/credit_card_approval/jan*
+!webapp/scenarios/credit_card_approval/joel*
+!webapp/scenarios/credit_card_approval/melike*
 
-#webapp/scenarios/german_credit_scoring/solutions/*
-#!webapp/scenarios/german_credit_scoring/solutions/Solution*
-
-#webapp/scenarios/it_sec_anomaly_detection/solutions/*
-#!webapp/scenarios/it_sec_anomaly_detection/solutions/Solution*
+webapp/scenarios/german_credit_scoring/solutions/*
+!webapp/scenarios/german_credit_scoring/alberto*
+!webapp/scenarios/german_credit_scoring/jan*
+!webapp/scenarios/german_credit_scoring/joel*
+!webapp/scenarios/german_credit_scoring/melike*
 
 webapp/scenarios/it_sec_anomaly_detection/solutions/*
-!webapp/scenarios/it_sec_anomaly_detection/solutions/Solution*
+!webapp/scenarios/it_sec_anomaly_detection/alberto*
+!webapp/scenarios/it_sec_anomaly_detection/jan*
+!webapp/scenarios/it_sec_anomaly_detection/joel*
+!webapp/scenarios/it_sec_anomaly_detection/melike*
+
+webapp/scenarios//solutions/*
+!webapp/scenarios/compas_recidivism/alberto*
+!webapp/scenarios/compas_recidivism/jan*
+!webapp/scenarios/compas_recidivism/joel*
+!webapp/scenarios/compas_recidivism/melike*
+
+
 
 
