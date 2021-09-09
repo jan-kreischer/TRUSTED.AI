@@ -79,24 +79,27 @@ def class_balance_score():
 
 # --- Statistical Parity Difference ---
 def statistical_parity_difference_score(model, training_dataset, test_dataset, factsheet):
-    score = 0
-    properties= {}
-    favored_majority_ratio, favored_minority_ratio, statistical_parity_difference = statistical_parity_difference_metric(model, training_dataset, test_dataset, factsheet)
-    print("statistical_parity_difference: {}".format(statistical_parity_difference))
-    if abs(statistical_parity_difference) < 0.01:
-        score = 5
-    elif abs(statistical_parity_difference) < 0.025:
-        score = 4
-    elif abs(statistical_parity_difference) < 0.050:
-        score = 3
-    elif abs(statistical_parity_difference) < 0.075:
-        score = 2
-    elif abs(statistical_parity_difference) < 0.100:
-        score = 1
-    else:
+    try: 
         score = 0
-
-    return result(score=score, properties=properties)
+        properties= {}
+        favored_majority_ratio, favored_minority_ratio, statistical_parity_difference = statistical_parity_difference_metric(model, training_dataset, test_dataset, factsheet)
+        print("statistical_parity_difference: {}".format(statistical_parity_difference))
+        if abs(statistical_parity_difference) < 0.01:
+            score = 5
+        elif abs(statistical_parity_difference) < 0.025:
+            score = 4
+        elif abs(statistical_parity_difference) < 0.050:
+            score = 3
+        elif abs(statistical_parity_difference) < 0.075:
+            score = 2
+        elif abs(statistical_parity_difference) < 0.100:
+            score = 1
+        else:
+            score = 0
+        return result(score=score, properties=properties)
+    except Exception as e:
+        print(e)
+        return result(score=np.nan, properties={})
 
 def statistical_parity_difference_metric(model, training_dataset, test_dataset, factsheet):
     target_column = ""
@@ -144,6 +147,7 @@ def statistical_parity_difference_metric(model, training_dataset, test_dataset, 
     favored_majority_ratio = favored_majority_size/majority_size
     print("{0}/{1} = {2}".format(favored_majority_size, majority_size, favored_majority_ratio))
     return favored_majority_ratio, favored_minority_ratio, favored_minority_ratio - favored_majority_ratio
+
 
 
 # --- Equal Opportunity Difference ---

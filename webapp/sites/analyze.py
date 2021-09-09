@@ -825,7 +825,7 @@ def update_figure(data, trig):
               categories = nonNanCategories
               values = nonNanValues
           bar_chart_pillar = go.Figure(data=[go.Bar(x=categories, y=values, marker_color=colors[n])])
-          bar_chart_pillar.update_yaxes(range=[-1, 5], fixedrange=True)
+          bar_chart_pillar.update_yaxes(range=[0, 5], fixedrange=True)
           #bar_chart_pillar.update_yaxes(fixedrange=True)
           #bar_chart_pillar.update_yaxes(range=[0, 8])
           bar_chart_pillar.update_layout(title_text='', title_x=0.5, xaxis_tickangle=XAXIS_TICKANGLE, paper_bgcolor='#FFFFFF', plot_bgcolor=SECONDARY_COLOR)
