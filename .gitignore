@@ -35,7 +35,7 @@ webapp/scenarios/it_sec_anomaly_detection/solutions/*
 !webapp/scenarios/it_sec_anomaly_detection/joel*
 !webapp/scenarios/it_sec_anomaly_detection/melike*
 
-webapp/scenarios//solutions/*
+webapp/scenarios/it_sec_incident_classification/solutions/*
 !webapp/scenarios/it_sec_incident_classification/alberto*
 !webapp/scenarios/it_sec_incident_classification/jan*
 !webapp/scenarios/it_sec_incident_classification/joel*
