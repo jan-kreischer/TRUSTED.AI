@@ -1,5 +1,1 @@
-{
-	"general": {
-		"target_column_name": "label"
-	}
-}
+{"general": {"model_name": "randomforest classifier joel", "purpose_description": "classify attack on iot devices", "domain_description": "security", "training_data_description": "raspery pie system information", "model_information": "randomforest classifier adaptation from albertos model", "data_normalization": "none", "target_column": "label", "authors": "joel, alberto", "contact_information": "joelleupp@gmail.com"}, "fairness": {}}

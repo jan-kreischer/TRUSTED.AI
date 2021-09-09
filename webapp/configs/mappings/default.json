@@ -222,7 +222,7 @@
         "score_normalization": {
             "mappings": {
                 "value": {
-                    "None": 0,
+                    "None": 1,
                     "training_normal": 2,
                     "training_and_test_normal": 3,
                     "training_standardized": 4,
@@ -235,7 +235,7 @@
         "score_missing_data": {
             "mappings": {
                 "value": {
-                    "null_values_exist": 0,
+                    "null_values_exist": 1,
                     "no_null_values": 5
                 },
                 "description": "Dictionary of how to map missing data to scores between 1-5.",

@@ -117,6 +117,8 @@ def regularization_score(model, training_dataset, test_dataset, factsheet, metho
         score = 5
     elif regularization == "lasso_regression" or regularization == "lasso_regression":
         score = 4
+    elif regularization == "Other":
+        score = 3
     elif regularization == NOT_SPECIFIED:
         score = 1
     else:
@@ -135,8 +137,10 @@ def test_accuracy_score(model, training_dataset, test_dataset, factsheet, thresh
     try:
         test_accuracy = test_accuracy_metric(model, test_dataset, factsheet)
         score = np.digitize(test_accuracy, thresholds)
-        return result(score=score, properties={"test_accuracy": info("Test Accuracy", "{:.2f}".format(test_accuracy))})
+        #return result(score=score, properties={"test_accuracy": info("Test Accuracy", "{:.2f}".format(test_accuracy))})
+        return result(score=np.nan, properties={})
     except Exception as e:
+        #_return result(score=np.nan, properties={})
         return result(score=np.nan, properties={})
         
 def test_accuracy_metric(model, test_dataset, factsheet):
@@ -165,9 +169,11 @@ def f1_score(model, training_dataset, test_dataset, factsheet, thresholds):
     try:
         f1_score = f1_metric(model, test_dataset, factsheet)
         score = np.digitize(f1_score, thresholds)
-        return result(score=score, properties={"f1_score": info("F1 Score", "{:.2f}".format(f1_score))})
+        #return result(score=score, properties={"f1_score": info("F1 Score", "{:.2f}".format(f1_score))})
+        return result(score=np.nan, properties={})
     except:
         return result(score=np.nan, properties={})
+         
         
 def f1_metric(model, test_dataset, factsheet):
     target_column = None
@@ -186,7 +192,7 @@ def f1_metric(model, test_dataset, factsheet):
     if isinstance(model, tf.keras.models.Sequential):
         y_pred = np.argmax(y_pred, axis=1)
     f1_metric = metrics.f1_score(y_true, y_pred,average="weighted").round(2)
-    return f1_metric
+    return result(score=np.nan, properties={})
     
 # --- Factsheet Completeness ---
 def factsheet_completeness_score(model, training_dataset, test_dataset, factsheet, methodology_config):
