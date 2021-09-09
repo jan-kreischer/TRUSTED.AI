@@ -33,11 +33,11 @@ for config in ["config_fairness", "config_explainability", "config_robustness", 
             exec("%s = json.load(file)" % config)
 
 #panels
-exp_panel_comp = [html.H3("Explainability", style={'text-align':'center'})] + explainability_panel
-exp_panel = html.Div(exp_panel_comp, style={'width': '22%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10,"background-color":"lightyellow"})
-
 fair_panel_comp = [html.H3("Fairness", style={'text-align':'center'})] + fairness_panel
 fair_panel = html.Div(fair_panel_comp, style={'width': '22%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10})
+
+exp_panel_comp = [html.H3("Explainability", style={'text-align':'center'})] + explainability_panel
+exp_panel = html.Div(exp_panel_comp, style={'width': '22%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10,"background-color":"lightyellow"})
 
 rob_panel_comp = [html.H3("Robustness", style={'text-align':'center'})] + robustness_panel
 rob_panel = html.Div(rob_panel_comp, style={'width': '22%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10})
@@ -46,7 +46,7 @@ meth_panel_comp = [html.H3("Methodology", style={'text-align':'center'})] + meth
 meth_panel = html.Div(meth_panel_comp, style={'width': '22%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10})
 
 
-children.append(html.Div([html.H3("Pillar and Metric Weights",style={'text-align':'center'}),exp_panel,fair_panel,rob_panel,meth_panel],
+children.append(html.Div([html.H3("Pillar and Metric Weights",style={'text-align':'center'}),fair_panel,exp_panel,rob_panel,meth_panel],
                           style={"background-color":"lightyellow"}))
 
 button_div = html.Div([

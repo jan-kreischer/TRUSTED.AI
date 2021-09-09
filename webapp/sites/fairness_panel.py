@@ -22,7 +22,7 @@ fairness_panel = [html.H4("Weights"),html.Br(),html.H4("Parameters")]
 exp_panel_comp = []
 input_ids = ["w_fair_pillar"]
 
-comp_weight = [html.H4("Weights",style={'text-align':'center'})]
+comp_weight = []
 comp_weight.append(html.H5("Pillar Weight",style={'text-align':'center'}))
 
 comp_weight.append(html.Div(dcc.Input(id="w_"+"fair_pillar",value=config_pillars["fairness"], type='text'), 
