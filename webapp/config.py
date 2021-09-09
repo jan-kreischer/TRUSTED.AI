@@ -2,6 +2,7 @@ DEBUG = True # Turns on debugging features in Flask
 BCRYPT_LOG_ROUNDS = 12 # Configuration for the Flask-Bcrypt extension
 MAIL_FROM_EMAIL = "robert@example.com" # For use in application emails
 SCENARIOS_FOLDER_PATH = "scenarios"
+SOLUTIONS_FOLDER = "solutions"
 TRAINING_DATA_FILE_NAME_REGEX = "train.*"
 TEST_DATA_FILE_NAME_REGEX = "test.*"
 MODEL_REGEX = "model.*"
@@ -25,8 +26,6 @@ PROTECTED_GROUP_DEFINITION_EXAMPLE = "e.g. lambda x: x[protected_feature] < 25"
 
 SCENARIO_DESCRIPTION_FILE = "description.md"
 SCENARIO_LINK_FILE = "link.md"
-
-SOLUTIONS_FOLDER = "solutions"
 
 # If no target column name is given, we assume 
 # that the last column to the right is containing the label (or predicted value)

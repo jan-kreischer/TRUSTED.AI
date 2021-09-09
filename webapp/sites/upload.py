@@ -70,30 +70,32 @@ def model_preview(content, name):
     return [html.Div(['Drag and Drop or Select File']), None]
 
 # --- Validation Callbacks --- #
-@app.callback(Output('problem_set_alert', 'children'),
+@app.callback(Output('scenario_alert', 'children'),
               [Input('upload_button', 'n_clicks'),
-               Input('problem_set', 'value'),
+               State('upload_scenario_id', 'value'),
                ], prevent_initial_call=True)
-def validate_problem_set(n_clicks, problem_set):
-    if n_clicks is not None:
-        if problem_set is not None:
-            return None
-        else:
-            return html.H6("No problem set was selected", style={"color":"Red"})
+def validate_scenario_id(n_clicks, scenario_id):
+    print("scenario_id {}".format(scenario_id))
+    if scenario_id is not None:
+        return None
+    else:
+        return html.H6("No scenario was selected", style={"color":"Red"})
   
-@app.callback(Output('model_name_alert', 'children'),
+@app.callback(Output('solution_name_alert', 'children'),
               [Input('upload_button', 'n_clicks'),
-               Input('problem_set', 'value'),
-               Input('model_name', 'value'),
+               Input('scenario_id', 'value'),
+               Input('solution_name', 'value'),
                ], prevent_initial_call=True)
-def validate_model_name(n_clicks, problem_set, model_name):
+def validate_solution_name(n_clicks, scenario_id, solution_name):
     if n_clicks is not None:
-        if not model_name:
+        if not solution_name:
             return html.H6("Please enter a name for your model", style={"color":"Red"})
         else:
             # check if a model with this name already exists for this problem set
-            model_path = problem_set + "/" + model_name
-            if os.path.isdir(model_path):
+            solution_id = name_to_id(solution_name)
+            solution_path = get_solution_path(scenario_id, solution_id)
+            print("solution_path {}".format(solution_path))
+            if os.path.isdir(solution_path):
                 return html.H6("A model with this name already exists", style={"color":"Red"})
             else:  
                 return None
@@ -149,21 +151,21 @@ def validate_model(n_clicks, model):
         
 @app.callback(Output('uploaded_solution_set_path', 'data'),
     [Input('upload_button', 'n_clicks'),
-    State('problem_set', 'value'),
-    State('model_name', 'value')], prevent_initial_call=True)
-def save_new_model_name(n_clicks, problem_set_path, model_name):
+    State('upload_scenario_id', 'value'),
+    State('solution_name', 'value')], prevent_initial_call=True)
+def save_new_solution_name(n_clicks, scenario_id, solution_name):
     if n_clicks is not None:
-        if problem_set_path and model_name:
-            print("Uploaded solution set path {}".format(os.path.join(problem_set_path, model_name)))
-            return {'path': os.path.join(problem_set_path, model_name)}
+        if scenario_id and solution_name:
+            print("Uploaded solution set path {}".format(os.path.join(scenario_id, solution_name)))
+            return {'path': os.path.join(scenario_id, solution_name)}
     else:
         return {'path': ""}
 
 @app.callback(Output('upload_alert', 'children'),
               [
                Input('upload_button', 'n_clicks'),
-               State('problem_set', 'value'),
-               State('model_name', 'value'),
+               State('upload_scenario_id', 'value'),
+               State('solution_name', 'value'),
                State('general_description', 'value'),
                State('training_data_upload', 'contents'),
                State('training_data_upload', 'filename'),
@@ -177,8 +179,8 @@ def save_new_model_name(n_clicks, problem_set_path, model_name):
 ], prevent_initial_call=True)             
 def upload_data(
     n_clicks,
-    problem_set,
-    model_name,
+    scenario_id,
+    solution_name,
     general_description,
     training_data,
     training_data_filename,
@@ -192,36 +194,37 @@ def upload_data(
     if n_clicks is None:
         return ""
     else:
-        if None in (problem_set, model_name, training_data, test_data, model):   
+        if None in (scenario_id, solution_name, training_data, test_data, model):   
             return html.H5("Please provide all necessary data", style={"color":"Red"},  className="text-center")
         else:
             # Create directory within the problem set to contain the data
-            path = os.path.join(problem_set, model_name)
+            solution_id = name_to_id(solution_name)
+            solution_path = get_solution_path(scenario_id, solution_id)
             # Check if directory does not exists yet
-            if not os.path.isdir(path):
-                os.mkdir(path)
+            if not os.path.isdir(solution_path):
+                os.mkdir(solution_path)
                 print("The new directory is created!")
                 #return html.H4("Successfully created new directory.", style={"color":"Green"},  className="text-center")
                 
                 # Upload all the data to the new directory.
                 # Saving Training Data
-                save_training_data(path, training_data_filename, training_data)
+                save_training_data(solution_path, training_data_filename, training_data)
                 
                 # Saving Test Data
-                save_test_data(path, test_data_filename, test_data)
+                save_test_data(solution_path, test_data_filename, test_data)
                 
                 # Saving Factsheet
-                save_factsheet(path, FACTSHEET_NAME, factsheet, target_column_name, general_description)
+                save_factsheet(solution_path, FACTSHEET_NAME, factsheet, target_column_name, general_description)
   
                 # Saving Model
-                save_model(path, model_filename, model)
+                save_model(solution_path, model_filename, model)
             else: 
                 return html.H4("Directory already exists", style={"color":"Red"}, className="text-center")
                       
             return dcc.Location(pathname="/analyze", id="someid_doesnt_matter")
             return html.H5("Upload Successful", className="text-center")
 
-modals = ["problem_set", "solution_set", "training_data", "test_data", "target_column_name" ,"factsheet", "model"]
+modals = ["upload_scenario_id", "solution_name", "general_description", "training_data", "test_data", "target_column_name" ,"factsheet", "model"]
 for m in modals:
     @app.callback(
         Output("{}_info_modal".format(m), "is_open"),
@@ -271,8 +274,7 @@ def save_factsheet(path, name, content, target_column_name, description):
         json.dump(factsheet, file, indent=4)
          
 # === SITE ===
-scenarios_folder_path = './scenarios' 
-problem_sets = [{'label': f.name, 'value': f.path} for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir()]
+#scenarios = [{'label': f.name, 'value': f.path} for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir()]
 
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
@@ -284,31 +286,30 @@ layout = dbc.Container([
     dbc.Col([
     html.Div([
         html.Div([
-            create_info_modal("problem_set", "Scenario", "All different solutions found should belong to the same scenario", ""),
-            html.Div(id="problem_set_alert"),
+            create_info_modal("upload_scenario_id", "Scenario", "All different solutions found should belong to the same scenario", ""),
+            html.Div(id="scenario_alert"),
             html.H3(["1. Scenario", html.Sup("*")]),
             html.H5("Please select the scenario your solution belongs to.")
         ], className="text-center"),
         dcc.Dropdown(
-            id='problem_set',
-            options=list_of_scenarios(),
+            id='upload_scenario_id',
+            options=get_scenario_options(),
         ),
-        html.Div(id='problem_set_path')
     ], 
     className="mb-4"
     ),
     
     html.Div([
         html.Div([
-            create_info_modal("solution_set", "Solution", "One specifically trained model including its training-, test data and factsheet can be seen as a solution set. Your solution set will be saved under the name you entered here.", ""),
-            html.Div(id="model_name_alert"),
+            create_info_modal("solution_name", "Solution", "One specifically trained model including its training-, test data and factsheet can be seen as a solution set. Your solution set will be saved under the name you entered here.", ""),
+            html.Div(id="solution_name_alert"),
             html.H3(["2. Solution", html.Sup("*")]),
             html.H5("Please enter a name for your solution.")
         ], 
         className="text-center"
         ),
 
-        dcc.Input(id="model_name", type="text", placeholder="", value="", debounce=True, style={'width': '100%', 'textAlign': 'center'})
+        dcc.Input(id="solution_name", type="text", placeholder="", value="", debounce=True, style={'width': '100%', 'textAlign': 'center', 'backgroundColor': '#FFFFFF'})
     ], 
     className="mb-4"
     ),
@@ -344,7 +345,8 @@ layout = dbc.Container([
             'borderStyle': 'dashed',
             'borderRadius': '5px',
             'textAlign': 'center',
-            'margin': '10px'
+            'margin': '10px',
+            'backgroundColor': '#FFFFFF'
         })],
         className="mb-4"
     ),
@@ -381,25 +383,7 @@ layout = dbc.Container([
     ],
             className="mb-4"),
     
-    #dcc.Upload(
-    #    id='test_data_upload',
-    #    children=[
-    #        'Drag and Drop or Select a File'
-    #    ],
-    #    style={
-    #        'width': '100%',
-    #        'height': '60px',
-    #        'lineHeight': '60px',
-    #        'borderWidth': '1px',
-    #       'borderStyle': 'dashed',
-    #       'borderRadius': '5px',
-    #        'textAlign': 'center',
-    #        'margin': '10px'
-    #    }
-    #),
-    #html.Div(id='test_data_summary'),
-    
-    # --- Y COLUMN NAME --- #
+    # --- TARGET COLUMN --- #
     
     html.Div([
         html.Div([
@@ -441,7 +425,8 @@ layout = dbc.Container([
             'borderStyle': 'dashed',
             'borderRadius': '5px',
             'textAlign': 'center',
-            'margin': '10px'
+            'margin': '10px',
+            'backgroundColor': '#FFFFFF'
         }
     ),
     html.Div(id='factsheet_summary'),
@@ -471,7 +456,8 @@ layout = dbc.Container([
             'borderStyle': 'dashed',
             'borderRadius': '5px',
             'textAlign': 'center',
-            'margin': '10px'
+            'margin': '10px',
+            'backgroundColor': '#FFFFFF'
         }
     ),
     html.Div(id='model_summary'),

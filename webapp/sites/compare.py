@@ -141,7 +141,7 @@ layout = html.Div([
             dcc.Store(id='result-1'),
             dbc.Col([dcc.Dropdown(
                 id='solution_set_dropdown-1',
-                options=get_solution_sets(),
+                options=get_solution_options(),
                 placeholder='Select Model A',
                 value=None,
             )], width=6, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
@@ -149,7 +149,7 @@ layout = html.Div([
             dcc.Store(id='result-2'),
             dbc.Col([dcc.Dropdown(
                 id='solution_set_dropdown-2',
-                options=get_solution_sets(),
+                options=get_solution_options(),
                 placeholder='Select Model B',
                 value=None,
             )], width=6, className="mb-1 mt-1"

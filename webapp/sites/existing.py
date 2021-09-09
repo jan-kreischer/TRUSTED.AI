@@ -13,10 +13,10 @@ from app import app
 # === FUNCTIONS ===
 
 def scenario_dropdown_options():
-    scenario_ids = list_of_scenarios()
+    scenario_ids = get_scenario_ids()
     options = []
     for scenario_id in scenario_ids:
-        scenario_name = scenario_id_to_name(scenario_id)
+        scenario_name = id_to_name(scenario_id)
         options.append({"label": scenario_name, "value": scenario_id})
     return options
 
@@ -85,10 +85,10 @@ def display_scenarios():
         returns true if the dialog was previously closed.
 
     """
-    scenario_ids = list_of_scenarios()
+    scenario_ids = get_scenario_ids()
     sections = []
     for scenario_id in scenario_ids:
-        scenario_name = scenario_id_to_name(scenario_id)
+        scenario_name = id_to_name(scenario_id)
         scenario_link, scenario_description, scenario_solutions = load_scenario(scenario_id)
         sections.append(display_scenario(scenario_id, scenario_name, scenario_link, scenario_description, scenario_solutions))
     return sections  
@@ -157,7 +157,7 @@ def toggle_delete_scenario_modal(n1, n2, is_open):
 def create_scenario(n_clicks, scenario_display, scenario_name, scenario_link, scenario_description):
     if scenario_name:
         # Create folder to contain all solutions
-        scenario_id = scenario_name_to_id(scenario_name)
+        scenario_id = name_to_id(scenario_name)
         res = os.makedirs(os.path.join(SCENARIOS_FOLDER_PATH, scenario_id, "solutions"))
         f = open(os.path.join(SCENARIOS_FOLDER_PATH, scenario_id, SCENARIO_DESCRIPTION_FILE), "w")
         f.write(scenario_description)
