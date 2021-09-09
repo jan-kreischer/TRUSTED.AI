@@ -36,10 +36,10 @@ webapp/scenarios/it_sec_anomaly_detection/solutions/*
 !webapp/scenarios/it_sec_anomaly_detection/melike*
 
 webapp/scenarios//solutions/*
-!webapp/scenarios/compas_recidivism/alberto*
-!webapp/scenarios/compas_recidivism/jan*
-!webapp/scenarios/compas_recidivism/joel*
-!webapp/scenarios/compas_recidivism/melike*
+!webapp/scenarios/it_sec_incident_classification/alberto*
+!webapp/scenarios/it_sec_incident_classification/jan*
+!webapp/scenarios/it_sec_incident_classification/joel*
+!webapp/scenarios/it_sec_incident_classification/melike*
 
 
 
