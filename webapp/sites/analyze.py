@@ -300,13 +300,16 @@ def fairness_configuration(solution_set_path):
         target_column=""
         factsheet = None
 
-        factsheet_path = os.path.join(solution_set_path,"factsheet.json") 
+        factsheet_path = os.path.join(solution_set_path, "factsheet.json") 
         # Check if a factsheet.json file already exists in the target directory
+
+
+
         if os.path.isfile(factsheet_path):
 
             f = open(factsheet_path,)
             factsheet = json.load(f)
-            
+                   
             target_column = ""
             if "general" in factsheet and "target_column" in factsheet["general"]:
                 target_column = factsheet["general"]["target_column"]
@@ -314,10 +317,11 @@ def fairness_configuration(solution_set_path):
             protected_feature = ""
             if "fairness" in factsheet and "protected_feature" in factsheet["fairness"]:
                 protected_feature = factsheet["fairness"]["protected_feature"]
+            print("protected_feature: {}".format(protected_feature))
             
-            protected_group_definition = ""
-            if "fairness" in factsheet and "protected_group_definition" in factsheet["fairness"]:
-                protected_group_definition = factsheet["fairness"]["protected_group_definition"]
+            protected_group = ""
+            if "fairness" in factsheet and "protected_group" in factsheet["fairness"]:
+                protected_group = factsheet["fairness"]["protected_group"]
             
             f.close()
         # Create a factsheet
@@ -352,6 +356,7 @@ def fairness_configuration(solution_set_path):
                 id="protected_group_definition",
                 type="text",
                 placeholder="e.g lambda x: x[protected_feature] < 25",
+                value=protected_group,
                 style={'width': '100%'}
             ),
         ])
@@ -443,7 +448,7 @@ The following function updates
     [Output("class_balance_details", 'children')],
     [Input("solution_set_label_select", 'value'), 
     State('training_data', 'data'),
-    State("solution_set_dropdown", 'value')])
+    State("solution_set_dropdown", 'value')], prevent_initial_call=True)
 def class_balance(label, jsonified_training_data, solution_set_path):
     training_data = read_train(solution_set_path)
     graph = dcc.Graph(figure=px.histogram(training_data, x=label, opacity=1, title="Label vs Label Occurence", color_discrete_sequence=[FAIRNESS_COLOR]))
@@ -795,6 +800,7 @@ def update_figure(data, trig):
           y=values,
           marker_color=colors
               )])
+      #bar_chart.update_xaxes(range=[0, 5])
       bar_chart.update_layout(title_text='', title_x=0.5,           paper_bgcolor='#FFFFFF', plot_bgcolor=SECONDARY_COLOR)
       chart_list.append(bar_chart)
      
@@ -819,6 +825,9 @@ def update_figure(data, trig):
               categories = nonNanCategories
               values = nonNanValues
           bar_chart_pillar = go.Figure(data=[go.Bar(x=categories, y=values, marker_color=colors[n])])
+          bar_chart_pillar.update_yaxes(range=[-1, 5], fixedrange=True)
+          #bar_chart_pillar.update_yaxes(fixedrange=True)
+          #bar_chart_pillar.update_yaxes(range=[0, 8])
           bar_chart_pillar.update_layout(title_text='', title_x=0.5, xaxis_tickangle=XAXIS_TICKANGLE, paper_bgcolor='#FFFFFF', plot_bgcolor=SECONDARY_COLOR)
             #fig.update_layout(barmode='group', xaxis_tickangle=-45)
           chart_list.append(bar_chart_pillar)

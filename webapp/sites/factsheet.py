@@ -28,7 +28,7 @@ from helpers import create_info_modal
                Output('authors', 'value'), 
                Output('contact_information', 'value'),
                Output('protected_feature', 'value'),
-               Output('protected_group_definition', 'value'),
+               Output('protected_group', 'value'),
                Output('favorable_outcome', 'value')],
               [
                Input('download_factsheet_button', 'n_clicks'),
@@ -43,7 +43,7 @@ from helpers import create_info_modal
                State('authors', 'value'),    
                State('contact_information', 'value'),
                State('protected_feature', 'value'),
-               State('protected_group_definition', 'value'),
+               State('protected_group', 'value'),
                State('favorable_outcome', 'value') 
 ], prevent_initial_call=True)             
 def create_factsheet(
@@ -59,7 +59,7 @@ def create_factsheet(
     authors,
     contact_information,
     protected_feature,
-    protected_group_definition,
+    protected_group,
     favorable_outcome
 ):
     factsheet = {}
@@ -177,26 +177,26 @@ layout = dbc.Container([
             ], ),
             
             html.Div([
-                create_info_modal("protected_group_definition", "Protected Group Definition", "Please enter the name of the target column within your dataset.", ""),
+                create_info_modal("protected_group", "Protected Group Definition", "Please enter the name of the target column within your dataset.", ""),
                 html.H3("Protected Group Definition"),
-                dcc.Input(id="protected_group_definition", type="text", placeholder="e.g lambda x: x >= 25", value="", debounce=True, style={'width': '100%'}),
+                dcc.Input(id="protected_group", type="text", placeholder=PROTECTED_GROUP_DEFINITION_EXAMPLE, value="", debounce=True, style={'width': '100%'}),
             ], className="mb-4 mt-4"),
                 
              html.Div([
                 create_info_modal("favorable_outcome", "Favorable Outcome", "Please enter a lambda expression defining values of the target column which are seen as favorable.", ""),
                 html.H3("Favorable Outcome"),
-                dcc.Input(id="favorable_outcome", type="text", placeholder="e.g lambda x: x[target_column] == 1", value="", debounce=True, style={'width': '100%'}),
+                dcc.Input(id="favorable_outcome", type="text", placeholder=FAVORABLE_OUTCOME_DEFINITION_EXAMPLE, value="", debounce=True, style={'width': '100%'}),
             ], className="mb-4 mt-4")
             ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px", "backgroundColor": SECONDARY_COLOR}, className="pt-3 pb-3 pl-3 pr-3 mb-4 mt-4"),
                         
-            html.Div([
-                html.H2("• Explainability")
-            ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px", "backgroundColor": SECONDARY_COLOR}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),
+            #html.Div([
+            #    html.H2("• Explainability")
+            #], style={"border": "1px solid #d8d8d8", "borderRadius": "6px", "backgroundColor": SECONDARY_COLOR}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),
             
-            html.Div([
-
-                html.H2("• Robustness")
-            ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px", "backgroundColor": SECONDARY_COLOR}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),
+            #html.Div([
+            #
+            #    html.H2("• Robustness")
+            #], style={"border": "1px solid #d8d8d8", "borderRadius": "6px", "backgroundColor": SECONDARY_COLOR}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),
             
             html.Div([
                 html.H2("• Methodology"), 

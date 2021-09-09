@@ -21,7 +21,7 @@ from helpers import *
 # define algo
 def trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness, config_explainability, config_robustness, methodology_config):
     output = dict(
-        fairness       = analyse_fairness(),
+        fairness       = analyse_fairness(model, train_data, test_data, factsheet, config_fairness),
         explainability = analyse_explainability(model, train_data, test_data, config_explainability, factsheet),
         robustness     = analyse_robustness(model, train_data, test_data, config_robustness),
         methodology    = analyse_methodology(model, train_data, test_data, factsheet, methodology_config)

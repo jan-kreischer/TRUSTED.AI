@@ -64,6 +64,31 @@ def show_star_rating(rating):
             stars.append(html.I(className="far fa-star"))
     return stars
 
+def id_to_name(identifier):
+    """This function converts the scenario id into the matching name
+
+    Args:
+        n1: number of clicks on the open button.
+
+    Returns:
+        Returns false if the dialog was previously open and
+        returns true if the dialog was previously closed.
+
+    """
+    return identifier.replace("_", " ").title()
+
+def name_to_id(name):
+    """This function converts the scenario name into a valid id
+
+    Args:
+        n1: number of clicks on the open button.
+
+    Returns:
+        Returns false if the dialog was previously open and
+
+    """
+    return name.replace(" ", "_").lower()
+
 # === SCENARIOS ===
 def scenario_id_to_name(scenario_id):
     """This function converts the scenario id into the matching name
@@ -397,3 +422,11 @@ def mapping_panel(pillar):
     map_panel.append(html.Div(html.Button('Save', id='save-mapping-{}'.format(pillar), style={"background-color": "green","margin-left":"30%","width":200})
                      , style={'width': '100%', 'display': 'inline-block'}))
     return map_panel , input_ids
+
+def metrics_list(metrics):
+    elements = []
+    for metric_id in metrics:
+        metric_name = id_to_name(metric_id)
+        elements.append(html.Li(metric_name, className="text-left"))
+    return html.Ul(elements)
+        
