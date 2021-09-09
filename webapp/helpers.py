@@ -129,6 +129,9 @@ def get_solution_sets():
 def list_of_scenarios():
     return [f.name for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir() and not f.name.startswith('.')]
 
+def scenario_options():
+    return [f.name for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir() and not f.name.startswith('.')]
+
 def list_of_solutions(scenario_id):
     return [(f.name, f.path) for f in os.scandir(os.path.join(SCENARIOS_FOLDER_PATH, scenario_id, SOLUTIONS_FOLDER)) if f.is_dir() and not f.name.startswith('.')]
     

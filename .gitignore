@@ -11,17 +11,17 @@ webapp/scenarios/*
 !webapp/scenarios/it_sec_anomaly_detection
 !webapp/scenarios/it_sec_incident_classification
 
-webapp/scenarios/compas_recidivism/solutions/*
-!webapp/scenarios/compas_recidivism/solutions/Solution*
+#webapp/scenarios/compas_recidivism/solutions/*
+#!webapp/scenarios/compas_recidivism/solutions/Solution*
 
-webapp/scenarios/credit_card_approval/solutions/*
-!webapp/scenarios/credit_card_approval/solutions/Solution*
+#webapp/scenarios/credit_card_approval/solutions/*
+#!webapp/scenarios/credit_card_approval/solutions/Solution*
 
-webapp/scenarios/german_credit_scoring/solutions/*
-!webapp/scenarios/german_credit_scoring/solutions/Solution*
+#webapp/scenarios/german_credit_scoring/solutions/*
+#!webapp/scenarios/german_credit_scoring/solutions/Solution*
 
-webapp/scenarios/it_sec_anomaly_detection/solutions/*
-!webapp/scenarios/it_sec_anomaly_detection/solutions/Solution*
+#webapp/scenarios/it_sec_anomaly_detection/solutions/*
+#!webapp/scenarios/it_sec_anomaly_detection/solutions/Solution*
 
 webapp/scenarios/it_sec_anomaly_detection/solutions/*
 !webapp/scenarios/it_sec_anomaly_detection/solutions/Solution*

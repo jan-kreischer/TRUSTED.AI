@@ -415,13 +415,7 @@ layout = dbc.Container([
         ], className="text-center"),
     ],
             className="mb-4"),
-    
-    #dcc.Dropdown(
-    #    id='target_column_dropdown',
-    #    options=[],
-    #    placeholder='Select Target Column'
-    #),
-      
+       
     # --- FACTSHEET --- #
     
     html.Div([
