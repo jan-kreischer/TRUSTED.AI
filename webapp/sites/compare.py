@@ -125,16 +125,17 @@ layout = html.Div([
             html.Br(),
             dbc.Col(html.Div(
                 [html.Br(),
-                html.H4("Applied Configurations", style = {"text-align":"center"}),
+                html.H4("Configurations", style = {"text-align":"center"}),
                 html.Div(html.Label("Weight Configuration"), style={ 'display': 'inline-block',"vertical-align": "top",'margin-left': "40%"}),
                 html.Br(),
                 html.Div(dcc.Dropdown(
                             id='config-dropdown-compare',
-                            options=list(map(lambda name:{'label': name[:-5], 'value': name} ,os.listdir("configs"))),
-                            value='default.json'
+                            options=list(map(lambda name:{'label': name[:-5], 'value': 'configs/weights/{}'.format(name)} ,os.listdir("configs/weights"))),
+                            value='configs/weights/default.json'
                         ), 
                          style={'width': "20%", 'display': 'inline-block',"vertical-align": "top",'margin-left': "40%"}),
-                html.Div(list(map(lambda pillar: map_dropdown(pillar) , pillars)))
+                html.Div(list(map(lambda pillar: map_dropdown(pillar) , pillars))),
+                html.Button('Apply', id='apply-config-compare', style={"background-color": "gold","margin-top":15,"margin-left":"40%","width":"20%"})
                     ],style={"background-color": "rgba(255,228,181,0.5)",'padding-bottom': 20," margin-left": "auto", "margin-right": "auto"}), 
                 width=12,style={'display': 'none'},id="compare-config"),
             dcc.Store(id='result-1'),
@@ -164,8 +165,8 @@ layout = html.Div([
                     pillar_section_1("explainability"),
                     pillar_section_1("robustness"),
                     pillar_section_1("methodology"),
-                    dcc.Store(id='training_data-1', storage_type='session'),
-                    dcc.Store(id='test_data-1', storage_type='session')
+                    dcc.Store(id='training_data-1'),
+                    dcc.Store(id='test_data-1')
                 ], id="analysis_section-1")
             ],
                 width=6,
@@ -183,8 +184,8 @@ layout = html.Div([
                     pillar_section_2("explainability"),
                     pillar_section_2("robustness"),
                     pillar_section_2("methodology"),
-                    dcc.Store(id='training_data-2', storage_type='session'),
-                    dcc.Store(id='test_data-2', storage_type='session')
+                    dcc.Store(id='training_data-2'),
+                    dcc.Store(id='test_data-2')
                 ], id="analysis_section-2")
             ],
                 width=6,
@@ -371,16 +372,20 @@ def toggle_pillar_section_visibility_2(path):
 
 @app.callback(Output('result-1', 'data'),
               [Input('solution_set_dropdown-1', 'value'),
-              Input("config-dropdown-compare", "value")])
-def store_result_1(solution_set_dropdown, config):
+              Input("apply-config-compare", "n_clicks")],
+              [State('config-dropdown-compare', 'value')] +  [State('{}-dropdown-compare'.format(pillar),"value") for pillar in pillars])
+def store_result_1(solution_set_dropdown, n, weight, map_fairness, map_explainability, map_robustness, map_methodology):
     if not solution_set_dropdown:
         return None
     
-    with open('configs/weights/' + config, 'r') as f:
+    with open(weight, 'r') as f:
         weights_config = json.loads(f.read())
     
-    with open('configs/mappings/default.json', 'r') as f:
-        mappings_config = json.loads(f.read())
+    mappings_config = dict()
+    
+    for pillar, map_conf in zip(pillars,[map_fairness, map_explainability, map_robustness, map_methodology]):
+        with open(map_conf, 'r') as f:
+            mappings_config[pillar] = json.loads(f.read())
     
     test, train, model, factsheet = read_solution(solution_set_dropdown)
     final_score, results, properties = get_final_score(model, train, test, weights_config, mappings_config, factsheet)
@@ -395,15 +400,23 @@ def store_result_1(solution_set_dropdown, config):
 
 @app.callback(Output('result-2', 'data'),
               [Input('solution_set_dropdown-2', 'value'),
-               Input("config-dropdown-compare", "value")])
-def store_result_2(solution_set_dropdown,config):
+               Input("apply-config-compare", "n_clicks")],
+              [State('config-dropdown-compare', 'value')] +  [State('{}-dropdown-compare'.format(pillar),"value") for pillar in pillars])
+def store_result_2(solution_set_dropdown, n, weight, map_fairness, map_explainability, map_robustness, map_methodology):
     if not solution_set_dropdown:
         return None
-    with open('configs/weights/' + config, 'r') as f:
+    
+    with open(weight, 'r') as f:
         weights_config = json.loads(f.read())
     
-    with open('configs/mappings/default.json', 'r') as f:
-        mappings_config = json.loads(f.read())
+    mappings_config = dict()
+    
+    for pillar, map_conf in zip(pillars,[map_fairness, map_explainability, map_robustness, map_methodology]):
+        with open(map_conf, 'r') as f:
+            mappings_config[pillar] = json.loads(f.read())
+    
+    # mappings_config = dict(fairness=config_fairness["parameters"], explainability=config_explainability["parameters"], 
+    #                robustness=config_robustness["parameters"], methodology=config_methodology["parameters"])
     
     test, train, model, factsheet = read_solution(solution_set_dropdown)
     final_score, results, properties = get_final_score(model, train, test, weights_config, mappings_config, factsheet)
@@ -602,8 +615,11 @@ def update_figure_2(data):
     return chart_list + star_ratings
 
 @app.callback(
-        Output("config-dropdown-compare", "options"),
-        Input("config-dropdown-compare", "value"))
+        [Output("config-dropdown-compare", "options")] + list(map(lambda pillar: Output('{}-dropdown-compare'.format(pillar), "options") , pillars)),
+        Input("toggle_config_compare","on"))
 def update_options(trig):
-    options = list(map(lambda name:{'label': name[:-5], 'value': name} ,os.listdir("configs/weights")))
-    return options
+    output = []
+    output.append(list(map(lambda name:{'label': name[:-5], 'value': 'configs/weights/{}'.format(name)} ,os.listdir("configs/weights"))))
+    output = output + list(map(lambda pillar: list(map(lambda name:{'label': name[:-5], 'value': "configs/mappings/{}/{}".format(pillar,name)} ,
+                                                       os.listdir("configs/mappings/{}".format(pillar)))), pillars))
+    return output
