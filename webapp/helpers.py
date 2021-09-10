@@ -281,13 +281,13 @@ def list_of_metrics(pillar):
             metrics.append(metric_name.lower())
     return metrics
 
-def create_metric_details_section(metric_id, i, section_n = 1, is_open=False):
+def create_metric_details_section(metric_id, i, section_n = 1, is_open=False, score="X"):
     metric_name = metric_id.replace("_", " ")
     return html.Div([
 
         html.Div([
             html.I(className="fas fa-chevron-down ml-4", id="toggle_{}_details".format(metric_id), style={"float": "right"}),
-            html.H4("(X/5)", id="{}_score".format(metric_id), style={"float": "right"}), 
+            html.H4("({}/5)".format(score),id="{}_score".format(metric_id), style={"float": "right"}), 
         html.H4("{2}.{0} {1}".format(i+1, metric_name, section_n)),
         ]),
             dbc.Collapse(
