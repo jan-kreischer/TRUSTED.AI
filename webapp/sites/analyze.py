@@ -385,7 +385,8 @@ def explainability_details(data):
     sections = [html.H3("▶ Explainability Metrics")]
     for i in range(len(metrics)):
             metric_id = metrics[i]
-            sections.append(create_metric_details_section(metric_id, i, 2))
+            score = result["results"]["explainability"][metric_id]
+            sections.append(create_metric_details_section(metric_id, i, 2, True,score))
     return sections
 
 @app.callback(
@@ -886,7 +887,7 @@ def robustness_details(data):
     for i in range(len(metrics)):
         metric_id = metrics[i]
         if properties["robustness"][metric_id] != {}:
-            sections.append(create_metric_details_section(metric_id, i, 2))
+            sections.append(create_metric_details_section(metric_id, i, 3))
     return sections
 
 def metric_detail_div(properties):
