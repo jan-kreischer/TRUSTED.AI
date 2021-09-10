@@ -13,6 +13,10 @@ class Factsheet:
     def __init__(self):
         print("init")
     
+    def set_question_fairness(self, question_fairness):
+        if question_fairness in list(range(1,5)):
+            self.properties["fairness"]["question_fairness"] = question_fairness
+        
     def set_protected_feature(self, protected_feature):
         self.properties["fairness"]["protected_feature"] = protected_feature
     

@@ -5,8 +5,7 @@ import pandas as pd
 def save_solution(scenario_id, solution_id, model, training_data, test_data, factsheet, to_webapp=False):
     if to_webapp:
         # save to the webapps scenario folder
-        directory = os.path.join(os.getcwd(), "solutions", solution_id)
-#"../webapp/scenarios"
+        directory = os.path.join(os.getcwd(), "..", "..", "webapp", "scenarios", scenario_id, "solutions", solution_id)
     else:
         # save to the main scenarios folder
         directory = os.path.join(os.getcwd(), "solutions", solution_id)

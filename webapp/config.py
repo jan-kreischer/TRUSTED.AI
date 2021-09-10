@@ -15,7 +15,7 @@ SECTIONS = ['trust'] + PILLARS
 # === FACTSHEET ===
 FACTSHEET_NAME = "factsheet.json"
 GENERAL_INPUTS = ["model_name", "purpose_description", "domain_description", "training_data_description", "model_information",    "data_normalization", "target_column", "authors", "contact_information"]
-FAIRNESS_INPUTS = ["protected_feature", "protected_group", "favorable_outcome"]
+FAIRNESS_INPUTS = ["question_fairness", "protected_feature", "protected_group", "favorable_outcome"]
 EXPLAINABILITY_INPUTS = ["protected_feature", "privileged_class_definition"]
 ROBUSTNESS_INPUTS = []
 METHODOLOGY_INPUTS = ["data_normalization", "regularization", "missing_data"]
@@ -53,6 +53,7 @@ XAXIS_TICKANGLE = 30
 NOT_SPECIFIED = "not specified"
 NO_DETAILS = "No details available."
 NO_SCORE = "X"
+NO_SCORE_FULL = "(X/5)"
 
 # === METRICS ===
 import os

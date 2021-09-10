@@ -27,6 +27,7 @@ from helpers import create_info_modal
                Output('target_column', 'value'), 
                Output('authors', 'value'), 
                Output('contact_information', 'value'),
+               Output('question_fairness', 'value'),
                Output('protected_feature', 'value'),
                Output('protected_group', 'value'),
                Output('favorable_outcome', 'value'),
@@ -43,6 +44,7 @@ from helpers import create_info_modal
                State('target_column', 'value'), 
                State('authors', 'value'),    
                State('contact_information', 'value'),
+               State('question_fairness', 'value'),
                State('protected_feature', 'value'),
                State('protected_group', 'value'),
                State('favorable_outcome', 'value'),
@@ -60,6 +62,7 @@ def create_factsheet(
     target_column,
     authors,
     contact_information,
+    question_fairness,
     protected_feature,
     protected_group,
     favorable_outcome,
@@ -178,7 +181,22 @@ layout = dbc.Container([
             ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px", "backgroundColor": SECONDARY_COLOR}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),
                 
             html.Div([
-            html.H2("• Fairness"),
+                html.H2("• Fairness"),
+                html.Div([
+                    create_info_modal("question_fairness", "Question Fairness", "Please enter the name of the target column within your dataset.", ""),
+                    dcc.Dropdown(
+                        id='question_fairness',
+                        options=[
+                            {'label': 'Very fair', 'value': 5},
+                            {'label': 'Fair', 'value': 4},
+                            {'label': 'Neutral', 'value': 3},
+                            {'label': 'Unfair', 'value': 2},
+                            {'label': 'Very unfair', 'value': 1}
+                        ],
+                        value=3
+                    )
+                ]),
+
             html.Div([
                 create_info_modal("protected_feature", "Protected Feature", "Please enter the name of the target column within your dataset.", ""),
                 html.H3("Protected Feature"),

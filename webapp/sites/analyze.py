@@ -428,13 +428,13 @@ def metric_detail(data):
       return output
 
 
-def update_factsheet(factsheet_path, key, value):
+def update_factsheet(factsheet_path, key_1, key_2, value):
     jsonFile = open(factsheet_path, "r") # Open the JSON file for reading
     data = json.load(jsonFile) # Read the JSON into the buffer
     jsonFile.close() # Close the JSON file
-
+    
     ## Working with buffered content
-    data[key] = value
+    data[key_1][key_2] = value
 
     ## Save our changes to JSON file
     jsonFile = open(factsheet_path, "w+")
@@ -452,24 +452,39 @@ The following function updates
 def class_balance(label, jsonified_training_data, solution_set_path):
     training_data = read_train(solution_set_path)
     graph = dcc.Graph(figure=px.histogram(training_data, x=label, opacity=1, title="Label vs Label Occurence", color_discrete_sequence=[FAIRNESS_COLOR]))
-    #compute_class_balance("hi")
-    update_factsheet(r"{}/factsheet.json".format(solution_set_path), "target_column", label)
+    update_factsheet(r"{}/factsheet.json".format(solution_set_path), ["general", "target_column"], label)
     return [graph]
        
 '''
 The following function updates
 '''
 @app.callback(
-    Output("statistical_parity_difference_details", 'children'),
-    [Input("solution_set_label_select", 'value'), 
-    State('training_data', 'data'),
-    State("solution_set_dropdown", 'value')])
-def statistical_parity_difference(label, jsonified_training_data, solution_set_path):
-    training_data = read_train(solution_set_path)
-    graph = dcc.Graph(figure=px.histogram(training_data, x=label, opacity=0.5, title="Label vs Label Occurence", color_discrete_sequence=['#00FF00']))
-    #compute_class_balance("hi")
-    update_factsheet(r"{}/factsheet.json".format(solution_set_path), "target_column", label)
-    return [graph]
+    [Output("statistical_parity_difference_details", 'children'), Output("statistical_parity_difference_score", 'children')],
+    [Input('result', 'data')], prevent_initial_call=True)
+def statistical_parity_difference(data):
+    if data is None:
+        return [NO_DETAILS], [NO_SCORE_FULL]
+    else:
+        result = json.loads(data)
+        print(result)
+        properties = result["properties"]
+        metric_properties = properties["fairness"]["statistical_parity_difference"]
+        metric_scores = result["results"]
+        return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["fairness"]["statistical_parity_difference"]))
+    
+    
+#@app.callback(
+#    [Output("f1_score_details", 'children'), Output("f1_score_score", 'children')],
+#    [Input('result', 'data')])
+#def f1_score(data):
+#    if data is None:
+#        return [], []
+#    else:
+#        result = json.loads(data)
+#        properties = result["properties"]
+#        metric_properties = properties["methodology"]["f1_score"]
+#        metric_scores = result["results"]
+#        return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["methodology"]["f1_score"]))
     
 @app.callback(
     [Output('training_data', 'data'),
@@ -878,7 +893,7 @@ def robustness_details(data):
 def metric_detail_div(properties):
     prop = []
     for k, v in properties.items():
-        prop.append(html.Div("{}: {}".format(v[0], v[1])))
+        prop.append(html.Div("{}: {}".format(k, v)))
     return html.Div(prop)
 
 @app.callback(

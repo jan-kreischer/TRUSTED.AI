@@ -71,18 +71,18 @@ def analyse(model, training_dataset, test_dataset, factsheet, fairness_config):
 
 # --- Class Balance ---
 def class_balance_metric():
-    return result(score=np.random.randint(1,6), properties={"normalization_technique": "fairness"}) 
+    return result(score=np.random.randint(1,6), properties={}) 
 
 def class_balance_score():
-    return result(score=np.random.randint(1,6), properties={"normalization_technique": "fairness"}) 
+    return result(score=np.random.randint(1,6), properties={}) 
 
 
 # --- Statistical Parity Difference ---
 def statistical_parity_difference_score(model, training_dataset, test_dataset, factsheet):
     try: 
-        score = 0
-        properties= {}
+        score = np.nan
         favored_majority_ratio, favored_minority_ratio, statistical_parity_difference = statistical_parity_difference_metric(model, training_dataset, test_dataset, factsheet)
+        properties = {"Favored Majority Ratio": favored_majority_ratio, "Favored Minority Ratio": favored_minority_ratio, "Statistical Parity Difference": statistical_parity_difference}
         print("statistical_parity_difference: {}".format(statistical_parity_difference))
         if abs(statistical_parity_difference) < 0.01:
             score = 5
@@ -149,60 +149,59 @@ def statistical_parity_difference_metric(model, training_dataset, test_dataset, 
     return favored_majority_ratio, favored_minority_ratio, favored_minority_ratio - favored_majority_ratio
 
 
-
 # --- Equal Opportunity Difference ---
 def equal_opportunity_difference_score():
-    return result(score=np.random.randint(1,6), properties={"normalization_technique": "fairness"}) 
+    return result(score=np.random.randint(1,6), properties={}) 
 
 def equal_opportunity_difference_metric():
-    return result(score=np.random.randint(1,6), properties={"normalization_technique": "fairness"}) 
+    return result(score=np.random.randint(1,6), properties={}) 
 
 
 # --- Average Odds Difference ---
 def average_odds_difference_score():
-    return result(score=np.random.randint(1,6), properties={"normalization_technique": "fairness"}) 
+    return result(score=np.random.randint(1,6), properties={}) 
 
 def average_odds_difference_metric():
-    return result(score=np.random.randint(1,6), properties={"normalization_technique": "fairness"}) 
+    return result(score=np.random.randint(1,6), properties={}) 
 
 
 # --- Disparate Impact ---
 def disparate_impact_score():
-    return result(score=np.random.randint(1,6), properties={"normalization_technique": "fairness"}) 
+    return result(score=np.random.randint(1,6), properties={}) 
 
 def disparate_impact_metric():
-    return result(score=np.random.randint(1,6), properties={"normalization_technique": "fairness"}) 
+    return result(score=np.random.randint(1,6), properties={}) 
 
 
 # --- Theil Index ---
 def theil_index_score():
-    return result(score=np.random.randint(1,6), properties={"normalization_technique": "fairness"}) 
+    return result(score=np.random.randint(1,6), properties={}) 
 
 def theil_index_metric():
-    return result(score=np.random.randint(1,6), properties={"normalization_technique": "fairness"}) 
+    return result(score=np.random.randint(1,6), properties={}) 
 
 
 # --- Euclidean Distance ---
 def euclidean_distance_score():
-    return result(score=np.random.randint(1,6), properties={"normalization_technique": "fairness"}) 
+    return result(score=np.random.randint(1,6), properties={}) 
 
 def euclidean_distance_metric():
-    return result(score=np.random.randint(1,6), properties={"normalization_technique": "fairness"}) 
+    return result(score=np.random.randint(1,6), properties={}) 
 
 
 # --- Mahalanobis Distance ---
 def mahalanobis_distance_score():
-    return result(score=np.random.randint(1,6), properties={"normalization_technique": "fairness"}) 
+    return result(score=np.random.randint(1,6), properties={}) 
 
 def mahalanobis_distance_metric():
-    return result(score=np.random.randint(1,6), properties={"normalization_technique": "fairness"}) 
+    return result(score=np.random.randint(1,6), properties={}) 
 
 
 # --- Manhattan Distance ---
 def manhattan_distance_score():
-    return result(score=np.random.randint(1,6), properties={"normalization_technique": "fairness"}) 
+    return result(score=np.random.randint(1,6), properties={}) 
 
 def manhattan_distance_metric():
-    return result(score=np.random.randint(1,6), properties={"normalization_technique": "fairness"}) 
+    return result(score=np.random.randint(1,6), properties={}) 
 
     
