@@ -8,7 +8,7 @@
                 
             } 
         },
-        "class_balance": ,
+        "class_balance": 0.2,
         "statistical_parity_difference": 0.2,
         "equal_opportunity_difference": 0.2,
         "average_odds_difference": 0.2,
@@ -20,15 +20,15 @@
       }
   },
   "explainability": { 
-      "weight": 0.25
+      "weight": 0.25,
       "metrics": {}
   },
   "robustness": {
-      "weight": 0.25
+      "weight": 0.25,
       "metrics": {}
   },
   "methodology": {
-      "weight": 0.25
+      "weight": 0.25,
       "metrics": {}
   }
 }

@@ -23,13 +23,13 @@ def save_solution(scenario_id, solution_id, model, training_data, test_data, fac
     
     # Persist training_data
     try:
-        training_data.to_csv(os.path.join(directory, "train.csv"), index=False)
+        training_data.to_csv(os.path.join(directory, "train.csv"), index=False, mode='w+')
     except Exception as e:
         print(e)
         
     # Persist test_data
     try:
-        test_data.to_csv(os.path.join(directory, "test.csv"), index=False)
+        test_data.to_csv(os.path.join(directory, "test.csv"), index=False, mode='w+')
     except Exception as e:
         print(e)         
         

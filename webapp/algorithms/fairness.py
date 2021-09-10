@@ -72,7 +72,13 @@ def analyse(model, training_dataset, test_dataset, factsheet, fairness_config):
 
 # --- Question Fairness ---
 def question_fairness_score(factsheet):
-    return result(score=np.nan, properties={}) 
+    try:
+        score = factsheet.get("fairness", {}).get("question_fairness", np.nan)
+        return result(score=score, properties={}) 
+    except Exception as e:
+        print(e)
+        return result(score=np.nan, properties={}) 
+    
 
 # --- Class Balance ---
 def class_balance_metric():

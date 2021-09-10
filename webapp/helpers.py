@@ -26,19 +26,22 @@ result = collections.namedtuple('result', 'score properties')
 
 def get_performance_metrics(model, test_data, target_column):
     
-    test_data = test_data.copy()
+    #test_data = test_data.copy()
     
     if target_column:
         X_test = test_data.drop(target_column, axis=1)
         y_test = test_data[target_column]
     else:
         X_test = test_data.iloc[:,:DEFAULT_TARGET_COLUMN_INDEX]
-        y_test = test_data.iloc[:,DEFAULT_TARGET_COLUMN_INDEX: ]
+        y_test = test_data.reset_index(drop=True).iloc[:,DEFAULT_TARGET_COLUMN_INDEX:]
     
-    y_true =  y_test.values.flatten()
-    y_pred = model.predict(X_test)
+    y_true = y_test.values.flatten()
+    y_pred = model.predict(X_test).flatten()
     y_pred_proba = model.predict_proba(X_test)
-    labels = np.unique(np.array([y_pred,y_true]).flatten())
+    print("y_true.shape: {}".format(y_true.shape))
+    print("y_pred.shape: {}".format(y_pred.shape))
+    print("y_pred_proba.shape: {}".format(y_pred_proba.shape))
+    #labels = np.unique(np.array([y_pred,y_true]).flatten())
 
     performance_metrics = pd.DataFrame({
         "accuracy" :  [metrics.accuracy_score(y_true, y_pred)],
@@ -46,10 +49,10 @@ def get_performance_metrics(model, test_data, target_column):
         "class weighted recall" : [metrics.recall_score(y_true, y_pred,average="weighted")],
         #"global precision" : [metrics.precision_score(y_true, y_pred, labels=labels, average="micro")],
         "class weighted precision" : [metrics.precision_score(y_true, y_pred,average="weighted")],
-        #"global f1 score" :  [metrics.f1_score(y_true, y_pred,average="micro")],
+        "global f1 score" :  [metrics.f1_score(y_true, y_pred,average="micro")],
         "class weighted f1 score" :  [metrics.f1_score(y_true, y_pred,average="weighted")],
-        "cross-entropy loss" : [metrics.log_loss(y_true, y_pred_proba)],
-        "ROC AUC" : [metrics.roc_auc_score(y_true, y_pred_proba,average="weighted", multi_class='ovr')]
+        #"cross-entropy loss" : [metrics.log_loss(y_true, y_pred_proba)],
+        #"ROC AUC" : [metrics.roc_auc_score(y_true, y_pred_proba,average="weighted", multi_class='ovr')]
     }).round(decimals=2)
     return performance_metrics
 

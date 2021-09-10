@@ -30,6 +30,7 @@ SCENARIO_LINK_FILE = "link.md"
 # If no target column name is given, we assume 
 # that the last column to the right is containing the label (or predicted value)
 DEFAULT_TARGET_COLUMN_INDEX = -1
+DEFAULT_TARGET_COLUMN_NAME = 'target_column'
 
 # === COLORS ===
 PRIMARY_COLOR = '#000080'

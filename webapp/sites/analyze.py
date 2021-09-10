@@ -716,9 +716,8 @@ def show_performance_metrics(solution_set_path):
         return []
     else:
         test_data, training_data, model, factsheet = read_solution(solution_set_path)
-        target_column = ""
-        if "general" in factsheet and "target_column" in factsheet["general"]:
-            target_column = factsheet["general"]["target_column"]
+
+        target_column = factsheet.get("general", {}).get("target_column", "")
         
         performance_metrics =  get_performance_metrics(model, test_data, target_column)
         performance_metrics_table = dash_table.DataTable(

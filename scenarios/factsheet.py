@@ -11,7 +11,7 @@ class Factsheet:
     };
     
     def __init__(self):
-        print("init")
+        print("")
     
     def set_question_fairness(self, question_fairness):
         if question_fairness in list(range(1,5)):
