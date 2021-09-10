@@ -269,12 +269,12 @@ def toggle_charts_2(visibility_state, solution_set):
 @app.callback(Output('solution_set_dropdown-1', 'options'),
               Input('solution_set_dropdown-1', 'nclicks'))
 def update_solution_set_dropdown_1(n_clicks):
-    return get_solution_sets()
+    return get_solution_options()
 
 @app.callback(Output('solution_set_dropdown-2', 'options'),
               Input('solution_set_dropdown-2', 'nclicks'))
 def update_solution_set_dropdown_2(n_clicks):
-    return get_solution_sets()
+    return get_solution_options()
 
 
 @app.callback(
