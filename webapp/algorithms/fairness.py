@@ -53,6 +53,7 @@ else:
 # === Fairness Metrics ===
 def analyse(model, training_dataset, test_dataset, factsheet, fairness_config):   
     output = dict(
+        question_fairness = question_fairness_score(factsheet),
         class_balance = class_balance_score(),
         statistical_parity_difference = statistical_parity_difference_score(model, training_dataset, test_dataset, factsheet),
         equal_opportunity_difference = equal_opportunity_difference_score(),
@@ -69,18 +70,22 @@ def analyse(model, training_dataset, test_dataset, factsheet, fairness_config):
     
     return  result(score=scores, properties=properties)
 
+# --- Question Fairness ---
+def question_fairness_score(factsheet):
+    return result(score=np.nan, properties={}) 
+
 # --- Class Balance ---
 def class_balance_metric():
-    return result(score=np.random.randint(1,6), properties={}) 
+    return result(score=np.nan, properties={}) 
 
 def class_balance_score():
-    return result(score=np.random.randint(1,6), properties={}) 
+    return result(score=np.nan, properties={}) 
 
 
 # --- Statistical Parity Difference ---
 def statistical_parity_difference_score(model, training_dataset, test_dataset, factsheet):
     try: 
-        score = np.nan
+        score = 1
         favored_majority_ratio, favored_minority_ratio, statistical_parity_difference = statistical_parity_difference_metric(model, training_dataset, test_dataset, factsheet)
         properties = {"Favored Majority Ratio": favored_majority_ratio, "Favored Minority Ratio": favored_minority_ratio, "Statistical Parity Difference": statistical_parity_difference}
         print("statistical_parity_difference: {}".format(statistical_parity_difference))
@@ -92,10 +97,8 @@ def statistical_parity_difference_score(model, training_dataset, test_dataset, f
             score = 3
         elif abs(statistical_parity_difference) < 0.075:
             score = 2
-        elif abs(statistical_parity_difference) < 0.100:
-            score = 1
         else:
-            score = 0
+            score = 1
         return result(score=score, properties=properties)
     except Exception as e:
         print(e)
@@ -151,57 +154,57 @@ def statistical_parity_difference_metric(model, training_dataset, test_dataset, 
 
 # --- Equal Opportunity Difference ---
 def equal_opportunity_difference_score():
-    return result(score=np.random.randint(1,6), properties={}) 
+    return result(score=np.nan, properties={}) 
 
 def equal_opportunity_difference_metric():
-    return result(score=np.random.randint(1,6), properties={}) 
+    return result(score=np.nanp, properties={}) 
 
 
 # --- Average Odds Difference ---
 def average_odds_difference_score():
-    return result(score=np.random.randint(1,6), properties={}) 
+    return result(score=np.nan, properties={}) 
 
 def average_odds_difference_metric():
-    return result(score=np.random.randint(1,6), properties={}) 
+    return result(score=np.nan, properties={}) 
 
 
 # --- Disparate Impact ---
 def disparate_impact_score():
-    return result(score=np.random.randint(1,6), properties={}) 
+    return result(score=np.nan, properties={}) 
 
 def disparate_impact_metric():
-    return result(score=np.random.randint(1,6), properties={}) 
+    return result(score=np.nan, properties={}) 
 
 
 # --- Theil Index ---
 def theil_index_score():
-    return result(score=np.random.randint(1,6), properties={}) 
+    return result(score=np.nan, properties={}) 
 
 def theil_index_metric():
-    return result(score=np.random.randint(1,6), properties={}) 
+    return result(score=np.nan, properties={}) 
 
 
 # --- Euclidean Distance ---
 def euclidean_distance_score():
-    return result(score=np.random.randint(1,6), properties={}) 
+    return result(score=np.nan, properties={}) 
 
 def euclidean_distance_metric():
-    return result(score=np.random.randint(1,6), properties={}) 
+    return result(score=np.nan, properties={}) 
 
 
 # --- Mahalanobis Distance ---
 def mahalanobis_distance_score():
-    return result(score=np.random.randint(1,6), properties={}) 
+    return result(score=np.nan, properties={}) 
 
 def mahalanobis_distance_metric():
-    return result(score=np.random.randint(1,6), properties={}) 
+    return result(score=np.nan, properties={}) 
 
 
 # --- Manhattan Distance ---
 def manhattan_distance_score():
-    return result(score=np.random.randint(1,6), properties={}) 
+    return result(score=np.nan, properties={}) 
 
 def manhattan_distance_metric():
-    return result(score=np.random.randint(1,6), properties={}) 
+    return result(score=np.nan, properties={}) 
 
     

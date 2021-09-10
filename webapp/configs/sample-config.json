@@ -1,0 +1,34 @@
+{
+  "fairness": {
+    "weight": 0.25,
+    "metrics": {
+        "question_fairness": {
+            "weight": 0.1,
+            "parameters": {
+                
+            } 
+        },
+        "class_balance": ,
+        "statistical_parity_difference": 0.2,
+        "equal_opportunity_difference": 0.2,
+        "average_odds_difference": 0.2,
+        "disparate_impact": 0.2,
+        "theil_index": 0.2,
+        "euclidean_distance": 0.2,
+        "mahalanobis_distance": 0.2,
+        "manhattan_distance": 0.2
+      }
+  },
+  "explainability": { 
+      "weight": 0.25
+      "metrics": {}
+  },
+  "robustness": {
+      "weight": 0.25
+      "metrics": {}
+  },
+  "methodology": {
+      "weight": 0.25
+      "metrics": {}
+  }
+}

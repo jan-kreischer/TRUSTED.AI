@@ -1,5 +1,11 @@
 {
     "fairness": {
+        "score_question_fairness": {
+            "parameter_XY": {
+                "value": "The value of the parameter_XY",
+                "description": "The description of the paramter and its impact"
+            }
+        },
         "score_class_balance": {
             "parameter_XY": {
                 "value": "The value of the parameter_XY",

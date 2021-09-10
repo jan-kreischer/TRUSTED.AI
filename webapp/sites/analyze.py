@@ -452,7 +452,7 @@ The following function updates
 def class_balance(label, jsonified_training_data, solution_set_path):
     training_data = read_train(solution_set_path)
     graph = dcc.Graph(figure=px.histogram(training_data, x=label, opacity=1, title="Label vs Label Occurence", color_discrete_sequence=[FAIRNESS_COLOR]))
-    update_factsheet(r"{}/factsheet.json".format(solution_set_path), ["general", "target_column"], label)
+    update_factsheet(r"{}/factsheet.json".format(solution_set_path), "general", "target_column", label)
     return [graph]
        
 '''
