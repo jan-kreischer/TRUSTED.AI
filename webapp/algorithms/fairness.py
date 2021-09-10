@@ -1,6 +1,9 @@
 # -*- coding: utf-8 -*-
 # functions for fairness score
 from helpers import *
+from scipy.stats import chisquare
+
+
 
 import numpy as np
 np.random.seed(0)
@@ -52,9 +55,11 @@ else:
 
 # === Fairness Metrics ===
 def analyse(model, training_dataset, test_dataset, factsheet, fairness_config):   
+    target_column = factsheet.get("general", {}).get("target_column", "")
+    
     output = dict(
         question_fairness = question_fairness_score(factsheet),
-        class_balance = class_balance_score(),
+        class_balance = class_balance_score(training_dataset, target_column),
         statistical_parity_difference = statistical_parity_difference_score(model, training_dataset, test_dataset, factsheet),
         equal_opportunity_difference = equal_opportunity_difference_score(),
         average_odds_difference = average_odds_difference_score(),
@@ -81,12 +86,31 @@ def question_fairness_score(factsheet):
     
 
 # --- Class Balance ---
-def class_balance_metric():
-    return result(score=np.nan, properties={}) 
+def class_balance_metric(training_data, target_column):
+    absolute_class_occurences = training_data[target_column].value_counts().sort_index().to_numpy()
+    significance_level = 0.05
+    p_value = chisquare(absolute_class_occurences, ddof=0, axis=0).pvalue
 
-def class_balance_score():
-    return result(score=np.nan, properties={}) 
+    print("P-Value of Chi Squared Test: {0}".format(p_value))
+    if p_value < significance_level:
+        print("The data does not follow a unit distribution")
+        return 0
+    else:
+        print("We can not reject the null hypothesis assuming that the data follows a unit distribution")
+        return 1
 
+
+def class_balance_score(training_data, target_column):
+    try:
+        class_balance = class_balance_metric(training_data, target_column)
+        if(class_balance == 1):
+            score = 5
+        else:
+            score = 1
+        return result(score=score, properties={})     
+    except Exception as e:
+        print(e)
+        return result(score=np.nan, properties={}) 
 
 # --- Statistical Parity Difference ---
 def statistical_parity_difference_score(model, training_dataset, test_dataset, factsheet):
