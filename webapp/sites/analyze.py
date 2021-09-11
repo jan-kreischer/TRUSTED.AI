@@ -68,7 +68,7 @@ daq.BooleanSwitch(id='toggle_charts',
                 color = TRUST_COLOR,   
                 style={"float": "right"}
             ),
-                html.Div([html.H2("• General")]),
+                html.Div([html.H2("• General Information Regarding the Model")]),
                 html.Div([], id="general_description"),
                 html.Div(["Performance Metrics Section"], id="performance_metrics_section"),
                 dcc.Store(id='input-mappings'),
@@ -259,10 +259,19 @@ def show_general_description(solution_set_path):
     if not solution_set_path:
         return ""
     factsheet = read_factsheet(solution_set_path)
-    description = ""
-    if "general" in factsheet and "description" in factsheet["general"]:
-        description = factsheet["general"]["description"]
-    return [html.H4("Description: "), description]
+    description = [html.H4("Description: ")]
+    if "general" in factsheet and "model_information" in factsheet["general"]:
+        description.append(factsheet["general"]["model_information"])
+
+    description_list= get_description(factsheet)
+    description_table = dash_table.DataTable(
+        id='table',
+        columns=[{"name": i, "id": i} for i in description_list.columns],
+        data=description_list.to_dict('records'),
+        style_table={"table-layout": "fixed", "width": "auto", 'overflowX': 'hidden'}
+    )
+    description.append(description_table)
+    return description
     
 @app.callback([Output('solution_set_dropdown', 'value'),
               Output('delete_solution_alert', 'children')],
@@ -711,7 +720,7 @@ def show_performance_metrics(solution_set_path):
                                 data=performance_metrics.to_dict('records'),
                                 style_table={"table-layout": "fixed", "width": "auto", 'overflowX': 'hidden'}
         )
-        return performance_metrics_table
+        return [html.H4(["Performance of the Model"]), performance_metrics_table]
 
 
 @app.callback(Output('result', 'data'), 

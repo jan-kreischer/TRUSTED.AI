@@ -25,9 +25,7 @@ import collections
 result = collections.namedtuple('result', 'score properties')
 
 def get_performance_metrics(model, test_data, target_column):
-    
-    #test_data = test_data.copy()
-    
+
     if target_column:
         X_test = test_data.drop(target_column, axis=1)
         y_test = test_data[target_column]
@@ -55,6 +53,21 @@ def get_performance_metrics(model, test_data, target_column):
         #"ROC AUC" : [metrics.roc_auc_score(y_true, y_pred_proba,average="weighted", multi_class='ovr')]
     }).round(decimals=2)
     return performance_metrics
+
+
+def get_description(factsheet):
+    description = {}
+    if "general" in factsheet:
+        if "model_name" in factsheet["general"]:
+            print("model_name")
+            description["Model Name"]= factsheet["general"]["model_name"]
+            print(factsheet["general"]["model_name"])
+        if "purpose_description" in factsheet["general"]:
+            description["Purpose of the Model"] = factsheet["general"]["purpose_description"]
+        if "training_data_description" in factsheet["general"]:
+            description["Training Data Description"] = factsheet["general"]["training_data_description"]
+    description = pd.DataFrame(description, index=[0])
+    return description
 
 def show_star_rating(rating):
     stars = []
