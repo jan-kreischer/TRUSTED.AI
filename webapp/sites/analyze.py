@@ -467,7 +467,6 @@ def statistical_parity_difference(data):
         return [NO_DETAILS], [NO_SCORE_FULL]
     else:
         result = json.loads(data)
-        print(result)
         properties = result["properties"]
         metric_properties = properties["fairness"]["statistical_parity_difference"]
         metric_scores = result["results"]
@@ -753,7 +752,7 @@ def store_trust_analysis(solution_set_dropdown, config_weights, config_mappings)
             
         test, train, model, factsheet = read_solution(solution_set_dropdown)
     
-        final_score, results, properties = get_final_score(model, train, test, weight_config, mappings_config, factsheet)
+        final_score, results, properties = get_final_score(model, train, test, weight_config, mappings_config, factsheet, solution_set_dropdown)
         trust_score = get_trust_score(final_score, weight_config["pillars"])
         
         def convert(o):

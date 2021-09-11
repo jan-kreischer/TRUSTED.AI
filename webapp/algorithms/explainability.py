@@ -70,14 +70,14 @@ def correlated_features_score(train_data, test_data, thresholds=[0.05, 0.16, 0.2
     score = 5-np.digitize(pct_drop, bins, right=True) 
     properties= {"pct_drop" : info("Percentage of highly correlated features", "{:.2f}%".format(100*pct_drop))}
     
-    return  result(score=score, properties=properties)
+    return  result(score=int(score), properties=properties)
 
 
 def model_size_score(test_data, thresholds = np.array([10,30,100,500])):
     
     dist_score = 5- np.digitize(test_data.shape[1]-1 , thresholds, right=True) 
          
-    return result(score=dist_score, properties={"n_features": info("number of features", test_data.shape[1])})
+    return result(score=int(dist_score), properties={"n_features": info("number of features", test_data.shape[1])})
 
 def feature_relevance_score(clf, train_data, target_column=None, threshold_outlier = 0.03, penalty_outlier = 0.5, thresholds = [0.05, 0.1, 0.2, 0.3]):
     
@@ -132,12 +132,12 @@ def feature_relevance_score(clf, train_data, target_column=None, threshold_outli
         dist_score -= penalty_outlier
     
     score =  max(dist_score,1)
-    properties = {"n_outliers":  info("number of outliers in the importance distribution",n_outliers),
+    properties = {"n_outliers":  info("number of outliers in the importance distribution",int(n_outliers)),
                   "pct_dist":  info("percentage of feature that make up over 60% of all features importance", "{:.2f}%".format(100*pct_dist)),
                   "importance":  info("feature importance", {"value": list(importance), "labels": list(feat_labels)})
                   }
     
-    return result(score=score, properties=properties)
+    return result(score=int(score), properties=properties)
     # import seaborn as sns
     # sns.boxplot(data=importance)
     
