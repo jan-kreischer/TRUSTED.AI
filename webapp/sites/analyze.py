@@ -427,20 +427,6 @@ def metric_detail(data):
                   prop.append(html.Br())
               output.append(html.Div(prop))
       return output
-
-
-def update_factsheet(factsheet_path, key_1, key_2, value):
-    jsonFile = open(factsheet_path, "r") # Open the JSON file for reading
-    data = json.load(jsonFile) # Read the JSON into the buffer
-    jsonFile.close() # Close the JSON file
-    
-    ## Working with buffered content
-    data[key_1][key_2] = value
-
-    ## Save our changes to JSON file
-    jsonFile = open(factsheet_path, "w+")
-    jsonFile.write(json.dumps(data))
-    jsonFile.close()
      
 '''
 The following function updates
@@ -453,7 +439,6 @@ The following function updates
 def class_balance(label, jsonified_training_data, solution_set_path):
     training_data = read_train(solution_set_path)
     graph = dcc.Graph(figure=px.histogram(training_data, x=label, opacity=1, title="Label vs Label Occurence", color_discrete_sequence=[FAIRNESS_COLOR]))
-    update_factsheet(r"{}/factsheet.json".format(solution_set_path), "general", "target_column", label)
     return [graph]
        
 '''
