@@ -893,7 +893,7 @@ def robustness_details(data):
 def metric_detail_div(properties):
     prop = []
     for k, v in properties.items():
-        prop.append(html.Div("{}: {}".format(k, v)))
+        prop.append(html.Div("{}: {}".format(v[0], v[1])))
     return html.Div(prop)
 
 @app.callback(
