@@ -90,7 +90,7 @@ def confidence_score(model, train_data, test_data, thresholds):
         return result(score=np.nan, properties={})
 
 def clique_method(model, train_data, test_data, thresholds):
-    '''try:
+    try:
         X_test = test_data.iloc[:, :-1]
         y_test = test_data.iloc[:, -1:]
         classifier = SklearnClassifier(model)
@@ -103,8 +103,8 @@ def clique_method(model, train_data, test_data, thresholds):
             "error_bound": info("Average error bound", "{:.2f}".format(bound)),
             "error": info("Error", "{:.1f}".format(error))})
     except:
-        return result(score=np.nan, properties={})'''
-    return result(score=np.nan, properties={})
+        return result(score=np.nan, properties={})
+    #return result(score=np.nan, properties={})
 
 def fast_gradient_attack_score(model, train_data, test_data, thresholds):
     try:

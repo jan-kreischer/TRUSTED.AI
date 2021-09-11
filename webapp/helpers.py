@@ -188,11 +188,9 @@ def read_factsheet(solution_set_path):
         return {}
 
 def write_into_factsheet(new_factsheet, solution_set_path):
-    print("ghbjkn-----------------------")
-    print(new_factsheet)
     factsheet_path = os.path.join(solution_set_path, FACTSHEET_NAME)
     with open(factsheet_path, 'w') as outfile:
-        json.dump(new_factsheet, outfile)
+        json.dump(new_factsheet, outfile, indent=4)
     return
 
 def read_solution(solution_set_path):
