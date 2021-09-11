@@ -136,6 +136,14 @@ def get_solution_options():
             options.append({"label": scenario_name + " > " + solution_name, "value": solution_path})
     return options
 
+def get_scenario_solutions_options(scenario_id):
+    options = []  
+    solutions = get_solution_ids(scenario_id)
+    for solution_id, solution_path in solutions:
+            solution_name = id_to_name(solution_id)
+            options.append({"label": solution_name, "value": solution_path})
+    return options
+
 def get_solution_path(scenario_id, solution_id):
     return os.path.join(SCENARIOS_FOLDER_PATH, scenario_id, SOLUTIONS_FOLDER, solution_id)
 

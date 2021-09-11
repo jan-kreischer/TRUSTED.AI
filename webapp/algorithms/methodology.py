@@ -137,8 +137,8 @@ def test_accuracy_score(model, training_dataset, test_dataset, factsheet, thresh
     try:
         test_accuracy = test_accuracy_metric(model, test_dataset, factsheet)
         score = np.digitize(test_accuracy, thresholds)
-        return result(score=float(score), properties={"test_accuracy": info("Test Accuracy", "{:.2f}".format(test_accuracy))})
-        #return result(score=np.nan, properties={})
+        #return result(score=float(score), properties={"test_accuracy": info("Test Accuracy", "{:.2f}".format(test_accuracy))})
+        return result(score=np.nan, properties={})
     except Exception as e:
         #_return result(score=np.nan, properties={})
         return result(score=np.nan, properties={})
@@ -169,8 +169,8 @@ def f1_score(model, training_dataset, test_dataset, factsheet, thresholds):
     try:
         f1_score = f1_metric(model, test_dataset, factsheet)
         score = np.digitize(f1_score, thresholds)
-        return result(score=float(score), properties={"f1_score": info("F1 Score", "{:.2f}".format(f1_score))})
-        #return result(score=np.nan, properties={})
+        #return result(score=float(score), properties={"f1_score": info("F1 Score", "{:.2f}".format(f1_score))})
+        return result(score=np.nan, properties={})
     except:
         return result(score=np.nan, properties={})
          

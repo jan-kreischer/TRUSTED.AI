@@ -972,6 +972,15 @@ def clever_score(data):
         return metric_detail_div(metric_properties), html.H4(
             "({}/5)".format(metric_scores["robustness"]["clever_score"]))
  
+@app.callback(
+    Output("solution_set_dropdown", 'options'),
+    Input('scenario_dropdown', 'value'), prevent_initial_call=False)
+def clever_score(scenario_id):
+    if scenario_id:
+        return get_scenario_solutions_options(scenario_id)
+    else:
+        return []
+
 config_panel.get_callbacks(app)
     
 # === LAYOUT ===
@@ -983,10 +992,17 @@ layout = html.Div([
             dcc.Store(id='result'),
             
             dbc.Col([html.H1("Analyze", className="text-center")], width=12, className="mb-2 mt-1"),
-            
+             dbc.Col([dcc.Dropdown(
+                    id='scenario_dropdown',
+                    options= get_scenario_options(),
+                    value = None,
+
+                    placeholder='Select Scenario'
+                )], width=12, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
+            ),
             dbc.Col([dcc.Dropdown(
                     id='solution_set_dropdown',
-                    options= get_solution_options(),
+                    options = get_scenario_solutions_options('it_sec_incident_classification'),
                     value=None,
 
                     placeholder='Select Solution'
