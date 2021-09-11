@@ -710,7 +710,6 @@ def show_performance_metrics(solution_set_path):
         return []
     else:
         test_data, training_data, model, factsheet = read_solution(solution_set_path)
-
         target_column = factsheet.get("general", {}).get("target_column", "")
         
         performance_metrics =  get_performance_metrics(model, test_data, target_column)
@@ -981,13 +980,24 @@ def clever_score(scenario_id):
     else:
         return []
 
+@app.callback(
+    [ Output("modal-report", "is_open")],
+    [Input('download_report_button', 'n_clicks'), Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
+def download_report(n_clicks, solution_set_path):
+    if n_clicks != None and solution_set_path != "":
+        test_data, training_data, model, factsheet = read_solution(solution_set_path)
+        target_column = factsheet.get("general", {}).get("target_column", "")
+        save_report_as_pdf(model, test_data, target_column, factsheet)
+        return [True]
+    else:
+        return [False]
+
 config_panel.get_callbacks(app)
     
 # === LAYOUT ===
 layout = html.Div([
     config_panel.layout,
     dbc.Container([
-     
         dbc.Row([
             dcc.Store(id='result'),
             
@@ -1008,7 +1018,13 @@ layout = html.Div([
                     placeholder='Select Solution'
                 )], width=12, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
             ),
-                
+            html.Div(dbc.Button("Download Report", id='download_report_button', color="primary", className="mt-3"),
+                         className="text-center"),
+            dbc.Modal([
+                    dbc.ModalHeader("Success"),
+                    dbc.ModalBody([dbc.Alert(id="report-success",children ="You successfully saved the report", color="success"),]),
+            ],
+                    id="modal-report", is_open=False, backdrop=True),
             dbc.Col([
                 dcc.ConfirmDialog(
                     id='delete_solution_confirm',
@@ -1016,7 +1032,7 @@ layout = html.Div([
                 ),
                 html.Div([], id="delete_solution_alert"),
                 html.Div([], id="analyze_alert_section"),
-                
+
                 html.Div([
                     general_section(),
                     trust_section(),
