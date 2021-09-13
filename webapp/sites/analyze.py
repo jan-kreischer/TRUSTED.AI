@@ -19,6 +19,7 @@ import numpy as np
 from sites import config_panel
 import plotly.express as px
 import plotly.graph_objects as go
+import dash
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -273,26 +274,26 @@ def show_general_description(solution_set_path):
     description.append(description_table)
     return description
     
-@app.callback([Output('solution_set_dropdown', 'value'),
-              Output('delete_solution_alert', 'children')],
-              [Input('delete_solution_confirm', 'submit_n_clicks'),
-               Input('uploaded_solution_set_path', 'data')],
-              State('solution_set_dropdown', 'value'))
-def update_output(submit_n_clicks, uploaded_solution_set, solution_set_path):
+# @app.callback([Output('solution_set_dropdown', 'value'),
+#               Output('delete_solution_alert', 'children')],
+#               [Input('delete_solution_confirm', 'submit_n_clicks'),
+#                Input('uploaded_solution_set_path', 'data')],
+#               State('solution_set_dropdown', 'value'))
+# def update_output(submit_n_clicks, uploaded_solution_set, solution_set_path):
     
-    if not solution_set_path:
-        return "",[]
-    if submit_n_clicks:
-        app.logger.info("Deletign {}".format(solution_set_path))
-        try:
-            shutil.rmtree(solution_set_path, ignore_errors=False)
-        except Exception as e:
-            print(e)
-            raise
-        return "", html.H3("Deleted solution", className="text-center", style={"color": "Red"})
-    else:
-        if uploaded_solution_set:
-            return uploaded_solution_set["path"], []
+#     if not solution_set_path:
+#         return "",[]
+#     if submit_n_clicks:
+#         app.logger.info("Deletign {}".format(solution_set_path))
+#         try:
+#             shutil.rmtree(solution_set_path, ignore_errors=False)
+#         except Exception as e:
+#             print(e)
+#             raise
+#         return "", html.H3("Deleted solution", className="text-center", style={"color": "Red"})
+#     else:
+#         if uploaded_solution_set:
+#             return uploaded_solution_set["path"], []
     
 # === FAIRNESS ===
 @app.callback(
@@ -726,26 +727,38 @@ def show_performance_metrics(solution_set_path):
           [Input('solution_set_dropdown', 'value'),
           Input("input-config","data"),Input('input-mappings', 'data')])
 def store_trust_analysis(solution_set_dropdown, config_weights, config_mappings):
-    
+        # print("this button was clicked:")
+        # print(dash.callback_context.triggered[0]['prop_id'])
+        
         if not solution_set_dropdown:
             return None
-    
+        
+        with open('configs/weights/default.json','r') as f:
+                default_weight = json.loads(f.read())
+        
+        with open('configs/mappings/default.json', 'r') as f:
+          default_map = json.loads(f.read()) 
+      
+        
         if not config_weights:
-            with open('configs/weights/default.json','r') as f:
-                weight_config = json.loads(f.read())
+           
+                weight_config = default_weight
         else:
             weight_config = json.loads(config_weights)
             
         if not config_mappings:
-            with open('configs/mappings/default.json', 'r') as f:
-                mappings_config = json.loads(f.read())
+            
+                mappings_config = default_map
         else:
             mappings_config = json.loads(config_mappings)
     
+        # print("similar mapping:"+ str(default_map == mappings_config))
+        # print("similar weight:"+ str(default_weight == weight_config))
             
         test, train, model, factsheet = read_solution(solution_set_dropdown)
     
         final_score, results, properties = get_final_score(model, train, test, weight_config, mappings_config, factsheet, solution_set_dropdown)
+        
         trust_score = get_trust_score(final_score, weight_config["pillars"])
         
         def convert(o):
@@ -991,7 +1004,19 @@ def download_report(n_clicks, solution_set_path):
         return [True]
     else:
         return [False]
+    
+@app.callback([Output("scenario_dropdown", 'value'), Output("solution_set_dropdown", 'value')],
+    Input('uploaded_solution_set_path', 'data'))
+def set_uploaded_model(solution_set_path):
+    
+    if solution_set_path:
+        scenario, solution = solution_set_path["path"].split(os.sep)
+        return scenario, solution
+    else:
+        return 'it_sec_incident_classification', 'scenarios\\it_sec_incident_classification\\solutions\\Jans Random Forest Classifier'
 
+    
+    
 config_panel.get_callbacks(app)
     
 # === LAYOUT ===

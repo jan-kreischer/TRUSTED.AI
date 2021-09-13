@@ -378,19 +378,21 @@ def pillar_section(pillar, metrics):
 
         return html.Div([
                 html.Div([
+                    html.Div([html.Label("show Details"),
                     dbc.Button(
                         html.I(className="fas fa-chevron-down"),
                         id="toggle_{}_details".format(pillar),
                         className="mb-3",
                         n_clicks=0,
-                        style={"float": "right", "backgroundColor": SECONDARY_COLOR}
-                    ),
+                        style={"backgroundColor": SECONDARY_COLOR}
+                    )
+                    ],style={"float": "right"}),
                     daq.BooleanSwitch(id='toggle_{}_mapping'.format(pillar),
                       on=False,
                       label='Show Mappings',
                       labelPosition="top",
                       color = TRUST_COLOR,
-                      style={"float": "right"}
+                      style={"float": "right","margin-right":"31%"}
                     ),
                     html.H2("• {}".format(pillar.upper()), className="mb-5"),
                     ], id="{}_section_heading".format(pillar.lower())),

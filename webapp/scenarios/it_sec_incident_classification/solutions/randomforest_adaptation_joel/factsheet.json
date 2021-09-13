@@ -33,7 +33,7 @@
         },
         "robustness": {
             "confidence_score": 5,
-            "clique_method": 0,
+            "clique_method": NaN,
             "loss_sensitivity": NaN,
             "clever_score": NaN,
             "empirical_robustness_fast_gradient_attack": NaN,
@@ -45,8 +45,8 @@
             "missing_data": 5,
             "regularization": 0,
             "train_test_split": 1,
-            "test_accuracy": 0.0,
-            "f1_score": 0.0,
+            "test_accuracy": NaN,
+            "f1_score": NaN,
             "factsheet_completeness": 4
         }
     },
@@ -197,16 +197,7 @@
                     "63.71%"
                 ]
             },
-            "clique_method": {
-                "error_bound": [
-                    "Average error bound",
-                    "0.00"
-                ],
-                "error": [
-                    "Error",
-                    "1.0"
-                ]
-            },
+            "clique_method": {},
             "loss_sensitivity": {},
             "clever_score": {},
             "empirical_robustness_fast_gradient_attack": {},
@@ -251,18 +242,8 @@
                     "5.00"
                 ]
             },
-            "test_accuracy": {
-                "test_accuracy": [
-                    "Test Accuracy",
-                    "0.59"
-                ]
-            },
-            "f1_score": {
-                "f1_score": [
-                    "F1 Score",
-                    "0.49"
-                ]
-            },
+            "test_accuracy": {},
+            "f1_score": {},
             "factsheet_completeness": {
                 "model_name": "present",
                 "purpose_description": "present",
