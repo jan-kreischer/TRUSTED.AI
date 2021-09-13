@@ -22,12 +22,11 @@ import matplotlib.pyplot as plt
 from math import pi
 import sklearn.metrics as metrics
 import collections
+from reportlab.pdfgen import canvas
 result = collections.namedtuple('result', 'score properties')
 
 def get_performance_metrics(model, test_data, target_column):
-    
-    #test_data = test_data.copy()
-    
+
     if target_column:
         X_test = test_data.drop(target_column, axis=1)
         y_test = test_data[target_column]
@@ -55,6 +54,21 @@ def get_performance_metrics(model, test_data, target_column):
         #"ROC AUC" : [metrics.roc_auc_score(y_true, y_pred_proba,average="weighted", multi_class='ovr')]
     }).round(decimals=2)
     return performance_metrics
+
+
+def get_description(factsheet):
+    description = {}
+    if "general" in factsheet:
+        if "model_name" in factsheet["general"]:
+            print("model_name")
+            description["Model Name"]= factsheet["general"]["model_name"]
+            print(factsheet["general"]["model_name"])
+        if "purpose_description" in factsheet["general"]:
+            description["Purpose of the Model"] = factsheet["general"]["purpose_description"]
+        if "training_data_description" in factsheet["general"]:
+            description["Training Data Description"] = factsheet["general"]["training_data_description"]
+    description = pd.DataFrame(description, index=[0])
+    return description
 
 def show_star_rating(rating):
     stars = []
@@ -123,6 +137,14 @@ def get_solution_options():
             options.append({"label": scenario_name + " > " + solution_name, "value": solution_path})
     return options
 
+def get_scenario_solutions_options(scenario_id):
+    options = []  
+    solutions = get_solution_ids(scenario_id)
+    for solution_id, solution_path in solutions:
+            solution_name = id_to_name(solution_id)
+            options.append({"label": solution_name, "value": solution_path})
+    return options
+
 def get_solution_path(scenario_id, solution_id):
     return os.path.join(SCENARIOS_FOLDER_PATH, scenario_id, SOLUTIONS_FOLDER, solution_id)
 
@@ -186,6 +208,54 @@ def read_factsheet(solution_set_path):
         return factsheet
     else:
         return {}
+
+def write_into_factsheet(new_factsheet, solution_set_path):
+    factsheet_path = os.path.join(solution_set_path, FACTSHEET_NAME)
+    with open(factsheet_path, 'w') as outfile:
+        json.dump(new_factsheet, outfile, indent=4)
+    return
+
+
+def save_report_as_pdf(model, test_data, target_column, factsheet):
+    l = ["general", "fairness", "methodology"]
+    c = canvas.Canvas("report.pdf")
+    c.setFont("Times-Roman", 12)
+    c.setFillColor('#000080')
+    c.drawString(50, 800, "TRUSTED AI")
+    c.setStrokeColor('#000080')
+    c.setLineWidth(.8)
+    c.drawString(280, 750, "REPORT")
+    y = 700
+    for element in l:
+        if factsheet[element] != {}:
+            c.setFillColor('#000080')
+            y = y - 10
+            c.drawString(50, y, id_to_name(element))
+            y = y - 15
+            c.line(20, y, 580, y)
+            y = y - 25
+        for k in factsheet[element].keys():
+            c.setFillColor('#000000')
+            c.drawString(50, y, id_to_name(k)+":")
+            c.drawString(200, y, factsheet[element][k])
+            y = y - 25
+
+    perf = get_performance_metrics(model, test_data, target_column)
+    c.setFillColor('#000080')
+    y = y - 10
+    c.drawString(50, y, "Performance of the Model")
+    y = y - 15
+    c.line(20, y, 580, y)
+    y = y - 25
+    c.setFillColor('#000000')
+
+    for p in perf.columns:
+        c.drawString(50, y, id_to_name(p) + ":")
+        c.drawString(200, y, perf[p].to_string(index=False))
+        y = y - 25
+    c.showPage()
+    c.save()
+    return
 
 def read_solution(solution_set_path):
     test = read_test(solution_set_path)

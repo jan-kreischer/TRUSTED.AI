@@ -1,1 +1,366 @@
-{"general": {"name": "Case 4", "description": "Logistic Regression- Classification", "target_column": 73}, "target_column": 73}
+{
+    "general": {
+        "model_name": "Melike's Logistic Regression",
+        "purpose_description": "Attack Classification",
+        "domain_description": "IT Security",
+        "training_data_description": "Alberto's classification data",
+        "model_information": "Sklearn Logistic Regression Classifier for IT Security Incident Classification scenario",
+        "target_column": 73,
+        "authors": "Melike"
+    },
+    "fairness": {},
+    "methodology": {
+        "regularization": "none"
+    },
+    "scores": {
+        "fairness": {
+            "question_fairness": NaN,
+            "class_balance": 5,
+            "statistical_parity_difference": NaN,
+            "equal_opportunity_difference": NaN,
+            "average_odds_difference": NaN,
+            "disparate_impact": NaN,
+            "theil_index": NaN,
+            "euclidean_distance": NaN,
+            "mahalanobis_distance": NaN,
+            "manhattan_distance": NaN
+        },
+        "explainability": {
+            "algorithm_class": 3,
+            "correlated_features": 2,
+            "model_size": 3,
+            "feature_relevance": 1
+        },
+        "robustness": {
+            "confidence_score": 5,
+            "clique_method": NaN,
+            "loss_sensitivity": NaN,
+            "clever_score": NaN,
+            "empirical_robustness_fast_gradient_attack": 2,
+            "empirical_robustness_carlini_wagner_attack": 0,
+            "empirical_robustness_deepfool_attack": 3
+        },
+        "methodology": {
+            "normalization": 4,
+            "missing_data": 5,
+            "regularization": 0,
+            "train_test_split": 5,
+            "test_accuracy": 2.0,
+            "f1_score": 1.0,
+            "factsheet_completeness": 4
+        }
+    },
+    "properties": {
+        "fairness": {
+            "question_fairness": {},
+            "class_balance": {},
+            "statistical_parity_difference": {},
+            "equal_opportunity_difference": {},
+            "average_odds_difference": {},
+            "disparate_impact": {},
+            "theil_index": {},
+            "euclidean_distance": {},
+            "mahalanobis_distance": {},
+            "manhattan_distance": {}
+        },
+        "explainability": {
+            "algorithm_class": {
+                "clf_name": [
+                    "model type",
+                    "LogisticRegression"
+                ]
+            },
+            "correlated_features": {
+                "pct_drop": [
+                    "Percentage of highly correlated features",
+                    "39.73%"
+                ]
+            },
+            "model_size": {
+                "n_features": [
+                    "number of features",
+                    74
+                ]
+            },
+            "feature_relevance": {
+                "n_outliers": [
+                    "number of outliers in the importance distribution",
+                    3
+                ],
+                "pct_dist": [
+                    "percentage of feature that make up over 60% of all features importance",
+                    "0.00%"
+                ],
+                "importance": [
+                    "feature importance",
+                    {
+                        "value": [
+                            1.8529267781913703,
+                            1.652457512663054,
+                            1.6191607936541006,
+                            1.3623305005360553,
+                            1.265147812863464,
+                            1.2556368694224727,
+                            1.155087680721816,
+                            1.0467156336101762,
+                            1.0240061381333265,
+                            0.9615320252311726,
+                            0.9080332831598187,
+                            0.8913931676905227,
+                            0.8761423652689772,
+                            0.8449135545479248,
+                            0.8426475977500766,
+                            0.8283089882460344,
+                            0.7939130851655302,
+                            0.7067921019928888,
+                            0.7058547767842498,
+                            0.6684129169663625,
+                            0.643474828352887,
+                            0.6234216134760528,
+                            0.5042577464849959,
+                            0.5035756109644137,
+                            0.5027019420767954,
+                            0.4943285408733252,
+                            0.4919638027458728,
+                            0.4883567466408682,
+                            0.4879165605501629,
+                            0.4733168359522423,
+                            0.43856462654558415,
+                            0.43719317833073473,
+                            0.43224558133664814,
+                            0.4285305456403429,
+                            0.42566062650669667,
+                            0.4227538896405718,
+                            0.38754836909619944,
+                            0.37624018763153666,
+                            0.37234412921421123,
+                            0.3715043542677438,
+                            0.32724817499562814,
+                            0.31916250761103365,
+                            0.3095260898529155,
+                            0.30737186809599026,
+                            0.30552525471936187,
+                            0.2688819191197843,
+                            0.24284494285004488,
+                            0.23713127929103517,
+                            0.2341005372571463,
+                            0.23178438600543164,
+                            0.22119651566372744,
+                            0.2187174697415666,
+                            0.21794263079535794,
+                            0.20982778026495452,
+                            0.20593198082546307,
+                            0.19686280138285978,
+                            0.19550002539638858,
+                            0.18701262552717138,
+                            0.17619078903144977,
+                            0.13790016289047777,
+                            0.12560786112944344,
+                            0.10992214222849568,
+                            0.10414746355327192,
+                            0.09387168093203013,
+                            0.07837184885631159,
+                            0.0732114799236477,
+                            0.06971992083088349,
+                            0.061482639461442785,
+                            0.058129864619694833,
+                            0.05386482787704846,
+                            0.03618354815903689,
+                            0.030261903145506537,
+                            0.0069743827361544546
+                        ],
+                        "labels": [
+                            59,
+                            19,
+                            62,
+                            71,
+                            20,
+                            38,
+                            16,
+                            45,
+                            50,
+                            37,
+                            34,
+                            21,
+                            7,
+                            55,
+                            17,
+                            22,
+                            58,
+                            30,
+                            18,
+                            4,
+                            60,
+                            6,
+                            51,
+                            23,
+                            61,
+                            35,
+                            10,
+                            70,
+                            36,
+                            47,
+                            49,
+                            54,
+                            40,
+                            11,
+                            65,
+                            33,
+                            64,
+                            72,
+                            2,
+                            43,
+                            52,
+                            29,
+                            5,
+                            31,
+                            13,
+                            1,
+                            67,
+                            26,
+                            32,
+                            12,
+                            14,
+                            28,
+                            53,
+                            27,
+                            9,
+                            3,
+                            66,
+                            63,
+                            41,
+                            48,
+                            39,
+                            44,
+                            15,
+                            46,
+                            0,
+                            25,
+                            8,
+                            57,
+                            24,
+                            68,
+                            69,
+                            56,
+                            42
+                        ]
+                    }
+                ]
+            }
+        },
+        "robustness": {
+            "confidence_score": {
+                "confidence_score": [
+                    "Average confidence score",
+                    "85.88%"
+                ]
+            },
+            "clique_method": {},
+            "loss_sensitivity": {},
+            "clever_score": {},
+            "empirical_robustness_fast_gradient_attack": {
+                "before_attack": [
+                    "Before attack accuracy",
+                    "86.00%"
+                ],
+                "after_attack": [
+                    "After attack accuracy",
+                    "18.00%"
+                ],
+                "difference": [
+                    "Proportional difference (After attack accuracy - Before attack accuracy)/Before attack accuracy",
+                    "79.07%"
+                ]
+            },
+            "empirical_robustness_carlini_wagner_attack": {
+                "before_attack": [
+                    "Before attack accuracy",
+                    "100.00%"
+                ],
+                "after_attack": [
+                    "After attack accuracy",
+                    "0.00%"
+                ],
+                "difference": [
+                    "Proportional difference (After attack accuracy - Before attack accuracy)/Before attack accuracy",
+                    "100.00%"
+                ]
+            },
+            "empirical_robustness_deepfool_attack": {
+                "before_attack": [
+                    "Before attack accuracy",
+                    "50.00%"
+                ],
+                "after_attack": [
+                    "After attack accuracy",
+                    "25.00%"
+                ],
+                "difference": [
+                    "Proportional difference (After attack accuracy - Before attack accuracy)/Before attack accuracy",
+                    "50.00%"
+                ]
+            }
+        },
+        "methodology": {
+            "normalization": {
+                "Training_mean": [
+                    "Mean of the training data",
+                    "-0.00"
+                ],
+                "Training_std": [
+                    "Standard deviation of the training data",
+                    "1.00"
+                ],
+                "Test_mean": [
+                    "Mean of the test data",
+                    "-0.03"
+                ],
+                "Test_std": [
+                    "Standard deviation of the test data",
+                    "0.88"
+                ]
+            },
+            "missing_data": {
+                "null_values": [
+                    "Number of the null values",
+                    "0"
+                ]
+            },
+            "regularization": {
+                "regularization_technique": "none"
+            },
+            "train_test_split": {
+                "training_data_ratio": [
+                    "The ratio of the train data",
+                    "80.00"
+                ],
+                "test_data_ratio": [
+                    "The ratio of the test data",
+                    "20.00"
+                ]
+            },
+            "test_accuracy": {
+                "test_accuracy": [
+                    "Test Accuracy",
+                    "0.85"
+                ]
+            },
+            "f1_score": {
+                "f1_score": [
+                    "F1 Score",
+                    "0.84"
+                ]
+            },
+            "factsheet_completeness": {
+                "model_name": "present",
+                "purpose_description": "present",
+                "domain_description": "present",
+                "training_data_description": "present",
+                "model_information": "present",
+                "target_column": "present",
+                "authors": "present",
+                "contact_information": "missing"
+            }
+        }
+    }
+}

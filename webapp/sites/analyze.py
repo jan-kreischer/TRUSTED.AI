@@ -68,7 +68,7 @@ daq.BooleanSwitch(id='toggle_charts',
                 color = TRUST_COLOR,   
                 style={"float": "right"}
             ),
-                html.Div([html.H2("• General")]),
+                html.Div([html.H2("• General Information Regarding the Model")]),
                 html.Div([], id="general_description"),
                 html.Div(["Performance Metrics Section"], id="performance_metrics_section"),
                 dcc.Store(id='input-mappings'),
@@ -259,10 +259,19 @@ def show_general_description(solution_set_path):
     if not solution_set_path:
         return ""
     factsheet = read_factsheet(solution_set_path)
-    description = ""
-    if "general" in factsheet and "description" in factsheet["general"]:
-        description = factsheet["general"]["description"]
-    return [html.H4("Description: "), description]
+    description = [html.H4("Description: ")]
+    if "general" in factsheet and "model_information" in factsheet["general"]:
+        description.append(factsheet["general"]["model_information"])
+
+    description_list= get_description(factsheet)
+    description_table = dash_table.DataTable(
+        id='table',
+        columns=[{"name": i, "id": i} for i in description_list.columns],
+        data=description_list.to_dict('records'),
+        style_table={"table-layout": "fixed", "width": "auto", 'overflowX': 'hidden'}
+    )
+    description.append(description_table)
+    return description
     
 @app.callback([Output('solution_set_dropdown', 'value'),
               Output('delete_solution_alert', 'children')],
@@ -427,20 +436,6 @@ def metric_detail(data):
                   prop.append(html.Br())
               output.append(html.Div(prop))
       return output
-
-
-def update_factsheet(factsheet_path, key_1, key_2, value):
-    jsonFile = open(factsheet_path, "r") # Open the JSON file for reading
-    data = json.load(jsonFile) # Read the JSON into the buffer
-    jsonFile.close() # Close the JSON file
-    
-    ## Working with buffered content
-    data[key_1][key_2] = value
-
-    ## Save our changes to JSON file
-    jsonFile = open(factsheet_path, "w+")
-    jsonFile.write(json.dumps(data))
-    jsonFile.close()
      
 '''
 The following function updates
@@ -453,7 +448,6 @@ The following function updates
 def class_balance(label, jsonified_training_data, solution_set_path):
     training_data = read_train(solution_set_path)
     graph = dcc.Graph(figure=px.histogram(training_data, x=label, opacity=1, title="Label vs Label Occurence", color_discrete_sequence=[FAIRNESS_COLOR]))
-    update_factsheet(r"{}/factsheet.json".format(solution_set_path), "general", "target_column", label)
     return [graph]
        
 '''
@@ -467,7 +461,6 @@ def statistical_parity_difference(data):
         return [NO_DETAILS], [NO_SCORE_FULL]
     else:
         result = json.loads(data)
-        print(result)
         properties = result["properties"]
         metric_properties = properties["fairness"]["statistical_parity_difference"]
         metric_scores = result["results"]
@@ -717,7 +710,6 @@ def show_performance_metrics(solution_set_path):
         return []
     else:
         test_data, training_data, model, factsheet = read_solution(solution_set_path)
-
         target_column = factsheet.get("general", {}).get("target_column", "")
         
         performance_metrics =  get_performance_metrics(model, test_data, target_column)
@@ -727,7 +719,7 @@ def show_performance_metrics(solution_set_path):
                                 data=performance_metrics.to_dict('records'),
                                 style_table={"table-layout": "fixed", "width": "auto", 'overflowX': 'hidden'}
         )
-        return performance_metrics_table
+        return [html.H4(["Performance of the Model"]), performance_metrics_table]
 
 
 @app.callback(Output('result', 'data'), 
@@ -753,7 +745,7 @@ def store_trust_analysis(solution_set_dropdown, config_weights, config_mappings)
             
         test, train, model, factsheet = read_solution(solution_set_dropdown)
     
-        final_score, results, properties = get_final_score(model, train, test, weight_config, mappings_config, factsheet)
+        final_score, results, properties = get_final_score(model, train, test, weight_config, mappings_config, factsheet, solution_set_dropdown)
         trust_score = get_trust_score(final_score, weight_config["pillars"])
         
         def convert(o):
@@ -893,7 +885,7 @@ def robustness_details(data):
 def metric_detail_div(properties):
     prop = []
     for k, v in properties.items():
-        prop.append(html.Div("{}: {}".format(k, v)))
+        prop.append(html.Div("{}: {}".format(v[0], v[1])))
     return html.Div(prop)
 
 @app.callback(
@@ -979,27 +971,60 @@ def clever_score(data):
         return metric_detail_div(metric_properties), html.H4(
             "({}/5)".format(metric_scores["robustness"]["clever_score"]))
  
+@app.callback(
+    Output("solution_set_dropdown", 'options'),
+    Input('scenario_dropdown', 'value'), prevent_initial_call=False)
+def clever_score(scenario_id):
+    if scenario_id:
+        return get_scenario_solutions_options(scenario_id)
+    else:
+        return []
+
+@app.callback(
+    [ Output("modal-report", "is_open")],
+    [Input('download_report_button', 'n_clicks'), Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
+def download_report(n_clicks, solution_set_path):
+    if n_clicks != None and solution_set_path != "":
+        test_data, training_data, model, factsheet = read_solution(solution_set_path)
+        target_column = factsheet.get("general", {}).get("target_column", "")
+        save_report_as_pdf(model, test_data, target_column, factsheet)
+        return [True]
+    else:
+        return [False]
+
 config_panel.get_callbacks(app)
     
 # === LAYOUT ===
 layout = html.Div([
     config_panel.layout,
     dbc.Container([
-     
         dbc.Row([
             dcc.Store(id='result'),
             
             dbc.Col([html.H1("Analyze", className="text-center")], width=12, className="mb-2 mt-1"),
-            
+             dbc.Col([dcc.Dropdown(
+                    id='scenario_dropdown',
+                    options= get_scenario_options(),
+                    value = None,
+
+                    placeholder='Select Scenario'
+                )], width=12, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
+            ),
             dbc.Col([dcc.Dropdown(
                     id='solution_set_dropdown',
-                    options= get_solution_options(),
+                    options = get_scenario_solutions_options('it_sec_incident_classification'),
                     value=None,
 
                     placeholder='Select Solution'
                 )], width=12, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
             ),
-                
+            html.Div(dbc.Button("Download Report", id='download_report_button', color="primary", className="mt-3"),
+                         className="text-center"),
+            dbc.Modal([
+                    dbc.ModalHeader("Success"),
+                    dbc.ModalBody([dbc.Alert(id="report-success",children ="You successfully saved the report", color="success"),]),
+            ],
+                    id="modal-report", is_open=False, backdrop=True),
             dbc.Col([
                 dcc.ConfirmDialog(
                     id='delete_solution_confirm',
@@ -1007,7 +1032,7 @@ layout = html.Div([
                 ),
                 html.Div([], id="delete_solution_alert"),
                 html.Div([], id="analyze_alert_section"),
-                
+
                 html.Div([
                     general_section(),
                     trust_section(),

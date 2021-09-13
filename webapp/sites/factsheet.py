@@ -21,8 +21,7 @@ from helpers import create_info_modal
                Output('purpose_description', 'value'),
                Output('domain_description', 'value'),
                Output('training_data_description', 'value'),
-               Output('model_information', 'value'), 
-               Output('data_normalization', 'value'),
+               Output('model_information', 'value'),
                Output('regularization', 'value'),
                Output('target_column', 'value'), 
                Output('authors', 'value'), 
@@ -30,16 +29,14 @@ from helpers import create_info_modal
                Output('question_fairness', 'value'),
                Output('protected_feature', 'value'),
                Output('protected_group', 'value'),
-               Output('favorable_outcome', 'value'),
-               Output('missing_data', 'value')],
+               Output('favorable_outcome', 'value')],
               [
                Input('download_factsheet_button', 'n_clicks'),
                State('model_name', 'value'),
                State('purpose_description', 'value'),
                State('domain_description', 'value'),
                State('training_data_description', 'value'),
-               State('model_information', 'value'), 
-               State('data_normalization', 'value'),
+               State('model_information', 'value'),
                State('regularization', 'value'),
                State('target_column', 'value'), 
                State('authors', 'value'),    
@@ -47,8 +44,7 @@ from helpers import create_info_modal
                State('question_fairness', 'value'),
                State('protected_feature', 'value'),
                State('protected_group', 'value'),
-               State('favorable_outcome', 'value'),
-               State('missing_data', 'value')
+               State('favorable_outcome', 'value')
 ], prevent_initial_call=True)             
 def create_factsheet(
     n_clicks,
@@ -57,7 +53,6 @@ def create_factsheet(
     domain_description,
     training_data_description,
     model_information,
-    data_normalization,
     regularization,
     target_column,
     authors,
@@ -65,8 +60,7 @@ def create_factsheet(
     question_fairness,
     protected_feature,
     protected_group,
-    favorable_outcome,
-    missing_data
+    favorable_outcome
 ):
     factsheet = {}
     if n_clicks is not None:
@@ -85,11 +79,12 @@ def create_factsheet(
         for e in METHODOLOGY_INPUTS:
             if eval(e):
                 factsheet["methodology"][e] = eval(e)
-        return html.H3("Created Factsheet", className="text-center", style={"color": "Red"}), dict(content=json.dumps(factsheet, indent=4), filename="factsheet.json"), "", "", "", "", "", "", "", "", "", "", "", "", "", ""
-        
+        return html.H3("Created Factsheet", className="text-center", style={"color": "Red"}), dict(content=json.dumps(factsheet, indent=4), filename="factsheet.json"), "", "", "", "", "", "", "", "", "", "", "", "", ""
+    return "", "", "", "", "", "", "", "", "", "", "", "", "", "", ""
+
 
 #for m in GENERAL_INPUTS + FAIRNESS_INPUTS + EXPLAINABILITY_INPUTS + ROBUSTNESS_INPUTS + METHODOLOGY_INPUTS:
-for m in GENERAL_INPUTS + FAIRNESS_INPUTS:
+for m in GENERAL_INPUTS + FAIRNESS_INPUTS + METHODOLOGY_INPUTS:
     @app.callback(
         Output("{}_info_modal".format(m), "is_open"),
         [Input("{}_info_button".format(m), "n_clicks"), Input("{}_close".format(m), "n_clicks")],
@@ -226,24 +221,9 @@ layout = dbc.Container([
             #], style={"border": "1px solid #d8d8d8", "borderRadius": "6px", "backgroundColor": SECONDARY_COLOR}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),
             
             html.Div([
-                html.H2("• Methodology"), 
-                #--- Normalization ---
+                html.H2("• Methodology"),
                 html.Div([
-                    create_info_modal("data_normalization", "Data Normalization", "Please select the normalization technique you used to prepare your data", ""),
-                    html.H3("Data Normalization"),
-                    dcc.Dropdown(
-                        id='data_normalization',
-                        options=[
-                            {'label': 'None', 'value': 'none'},
-                            {'label': 'Normalization (Min-Max Scaling)', 'value': 'normalization'},
-                            {'label': 'Standardization (Z-score Normalization)', 'value': 'standardization'},
-                            {'label': 'Other', 'value': 'Other'}
-                        ],
-                        value='none'
-                )], className="mb-4 mt-4"),
-                
-                html.Div([
-                    create_info_modal("regression", "Regression", "Please select the regression technique used during training", ""),
+                    create_info_modal("regularization", "Regularization", "Please select the regularization technique used during training", ""),
                     html.H3("Regularization"),
                 dcc.Dropdown(
                         id='regularization',
@@ -256,15 +236,6 @@ layout = dbc.Container([
                         ],
                         value='none'
                 )], className="mb-4 mt-4"),
-                
-                html.Div([
-                    create_info_modal("missing_data", "Missing Data", "What technique did you use in order to deal with missing data.", ""),
-                    html.H3("Missing Data"),
-                dcc.Textarea(
-                    id='missing_data',
-                    value='',
-                    style={'width': '100%', 'height': 150},
-            )], className="mb-4 mt-4"),
             ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px", "backgroundColor": SECONDARY_COLOR}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),         
     ], 
     className=""
