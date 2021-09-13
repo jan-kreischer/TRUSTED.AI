@@ -111,6 +111,15 @@ def map_dropdown(pillar):
         ]
         )
 
+@app.callback(
+    [Output("solution_set_dropdown-1", 'options'),Output("solution_set_dropdown-2", 'options')],
+    Input('scenario_dropdown', 'value'), prevent_initial_call=False)
+def clever_score(scenario_id):
+    if scenario_id:
+        return get_scenario_solutions_options(scenario_id), get_scenario_solutions_options(scenario_id)
+    else:
+        return [], []
+
 layout = html.Div([
     dbc.Container([
         dbc.Row([
@@ -140,17 +149,25 @@ layout = html.Div([
                 width=12,style={'display': 'none'},id="compare-config"),
             dcc.Store(id='result-1'),
             dbc.Col([dcc.Dropdown(
+                    id='scenario_dropdown',
+                    options= get_scenario_options(),
+                    value = None,
+
+                    placeholder='Select Scenario'
+                )], width=12, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
+            ),
+            dbc.Col([dcc.Dropdown(
                 id='solution_set_dropdown-1',
-                options=get_solution_options(),
-                placeholder='Select Model A',
+                options=get_scenario_solutions_options('it_sec_incident_classification'),
+                placeholder='Select Solution A',
                 value=None,
             )], width=6, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
             ),
             dcc.Store(id='result-2'),
             dbc.Col([dcc.Dropdown(
                 id='solution_set_dropdown-2',
-                options=get_solution_options(),
-                placeholder='Select Model B',
+                options=get_scenario_solutions_options('it_sec_incident_classification'),
+                placeholder='Select Solution B',
                 value=None,
             )], width=6, className="mb-1 mt-1"
             ),
@@ -266,15 +283,15 @@ def toggle_charts_2(visibility_state, solution_set):
             'display': 'block'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {
                    'display': 'none'}
 
-@app.callback(Output('solution_set_dropdown-1', 'options'),
-              Input('solution_set_dropdown-1', 'nclicks'))
-def update_solution_set_dropdown_1(n_clicks):
-    return get_solution_options()
+# @app.callback(Output('solution_set_dropdown-1', 'options'),
+#               Input('solution_set_dropdown-1', 'nclicks'))
+# def update_solution_set_dropdown_1(n_clicks):
+#     return get_solution_options()
 
-@app.callback(Output('solution_set_dropdown-2', 'options'),
-              Input('solution_set_dropdown-2', 'nclicks'))
-def update_solution_set_dropdown_2(n_clicks):
-    return get_solution_options()
+# @app.callback(Output('solution_set_dropdown-2', 'options'),
+#               Input('solution_set_dropdown-2', 'nclicks'))
+# def update_solution_set_dropdown_2(n_clicks):
+#     return get_solution_options()
 
 
 @app.callback(
