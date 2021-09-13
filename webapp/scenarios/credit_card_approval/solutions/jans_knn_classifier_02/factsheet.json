@@ -1,0 +1,1 @@
+{"general": {"target_column": "Target"}, "fairness": {"question_fairness": 3, "protected_feature": "Group", "protected_group": "lambda x: x[protected_feature] == 1", "favorable_outcome": "lambda x: x[target_column]==1"}, "target_column": "Target"}

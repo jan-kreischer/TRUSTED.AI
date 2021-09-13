@@ -1,1 +1,10 @@
 {"general": {"name": "Case 5", "description": "Anomaly detection DBSCAN"}}
+
+{"general": {},
+ "fairness: {"protected_feature": "Age"},
+ "explainability": {},
+ "robustness": {},
+ "methodology": {
+     
+ },
+}
