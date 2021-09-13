@@ -46,6 +46,7 @@ with open('configs/mappings/default.json', 'w') as outfile:
 for s in SECTIONS[1:]:
     with open('configs/mappings/{}/default.json'.format(s), 'w') as outfile:
                 json.dump(mappings_config[s], outfile, indent=4)
+charts = []
 
 # === METRICS ===
 fairness_metrics = FAIRNESS_METRICS
@@ -823,6 +824,7 @@ def update_figure(data, trig):
       #bar_chart.update_xaxes(range=[0, 5])
       bar_chart.update_layout(title_text='', title_x=0.5,           paper_bgcolor='#FFFFFF', plot_bgcolor=SECONDARY_COLOR)
       chart_list.append(bar_chart)
+      charts.append(bar_chart)
      
       #spider
       radar_chart = px.line_polar(r=values, theta=pillars, line_close=True, title='')
@@ -851,6 +853,7 @@ def update_figure(data, trig):
           bar_chart_pillar.update_layout(title_text='', title_x=0.5, xaxis_tickangle=XAXIS_TICKANGLE, paper_bgcolor='#FFFFFF', plot_bgcolor=SECONDARY_COLOR)
             #fig.update_layout(barmode='group', xaxis_tickangle=-45)
           chart_list.append(bar_chart_pillar)
+          charts.append(bar_chart_pillar)
          
       #spider charts
       for n, (pillar , sub_scores) in enumerate(results.items()):
@@ -940,6 +943,19 @@ def fast_gradient_attack_analysis(data):
       metric_scores = result["results"]
       return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["empirical_robustness_fast_gradient_attack"]))
 
+@app.callback(
+[Output("clique_method_details", 'children'), Output("clique_method_score", 'children')],
+Input('result', 'data'), prevent_initial_call=False)
+def clique_method_analysis(data):
+  if data is None:
+      return [], []
+  else:
+      result = json.loads(data)
+      properties = result["properties"]
+      metric_properties = properties["robustness"]["clique_method"]
+      metric_scores = result["results"]
+      return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["clique_method"]))
+
 
 @app.callback(
     [Output("confidence_score_details", 'children'), Output("confidence_score_score", 'children')],
@@ -1000,7 +1016,7 @@ def download_report(n_clicks, solution_set_path):
     if n_clicks != None and solution_set_path != "":
         test_data, training_data, model, factsheet = read_solution(solution_set_path)
         target_column = factsheet.get("general", {}).get("target_column", "")
-        save_report_as_pdf(model, test_data, target_column, factsheet)
+        save_report_as_pdf(model, test_data, target_column, factsheet,  charts)
         return [True]
     else:
         return [False]

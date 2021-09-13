@@ -22,7 +22,18 @@ import matplotlib.pyplot as plt
 from math import pi
 import sklearn.metrics as metrics
 import collections
+import reportlab
 from reportlab.pdfgen import canvas
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.rl_config import defaultPageSize
+from reportlab.lib.units import inch
+from reportlab.graphics.shapes import *
+from reportlab.lib.colors import *
+from base64 import b64encode
+
+PAGE_HEIGHT=defaultPageSize[1]; PAGE_WIDTH=defaultPageSize[0]
+
 result = collections.namedtuple('result', 'score properties')
 
 def get_performance_metrics(model, test_data, target_column):
@@ -215,46 +226,64 @@ def write_into_factsheet(new_factsheet, solution_set_path):
         json.dump(new_factsheet, outfile, indent=4)
     return
 
+def title_style(canvas, doc):
+    canvas.saveState()
+    canvas.setFont('Times-Bold',16)
+    canvas.setFillColor('#000080')
+    canvas.drawString(50, 800, "TRUSTED AI")
+    canvas.drawCentredString(PAGE_WIDTH/2.0, PAGE_HEIGHT-88, "Report")
+    canvas.setFont('Times-Roman',9)
+    canvas.restoreState()
 
-def save_report_as_pdf(model, test_data, target_column, factsheet):
+def create_report_section(Story, title , keys, values):
+    Story.append(Spacer(1, 0.2 * inch))
+    p = Paragraph(id_to_name(title))
+    Story.append(p)
+    Story.append(Spacer(1, 0.1 * inch))
+    d = Drawing(PAGE_WIDTH, 1)
+    d.add(Line(0, 0, PAGE_WIDTH-130, 0, strokeColor='#000080', strokeWidth=.8))
+    Story.append(d)
+    Story.append(Spacer(1, 0.1 * inch))
+    for k, v in zip(keys, values):
+        m = "{}: {}".format(id_to_name(k), v)
+        p = Paragraph(m)
+        Story.append(p)
+        Story.append(Spacer(1, 0.2 * inch))
+    return Story
+
+def add_charts_to_report(Story, charts):
+    for chart in charts:
+        img_bytes = chart.to_image(format="png")
+        encoding = b64encode(img_bytes).decode()
+        img_b64 = "data:image/png;base64," + encoding
+        im = reportlab.platypus.Image(img_b64)
+        Story.append(im)
+    return Story
+
+def save_report_as_pdf(model, test_data, target_column, factsheet, charts):
+    doc = SimpleDocTemplate("report.pdf")
+    Story = [Spacer(1, 0.2 * inch)]
     l = ["general", "fairness", "methodology"]
-    c = canvas.Canvas("report.pdf")
-    c.setFont("Times-Roman", 12)
-    c.setFillColor('#000080')
-    c.drawString(50, 800, "TRUSTED AI")
-    c.setStrokeColor('#000080')
-    c.setLineWidth(.8)
-    c.drawString(280, 750, "REPORT")
-    y = 700
+
     for element in l:
-        if factsheet[element] != {}:
-            c.setFillColor('#000080')
-            y = y - 10
-            c.drawString(50, y, id_to_name(element))
-            y = y - 15
-            c.line(20, y, 580, y)
-            y = y - 25
-        for k in factsheet[element].keys():
-            c.setFillColor('#000000')
-            c.drawString(50, y, id_to_name(k)+":")
-            c.drawString(200, y, factsheet[element][k])
-            y = y - 25
-
+        if factsheet[element]!= {}:
+            Story = create_report_section(Story, element, factsheet[element].keys(),factsheet[element].values())
     perf = get_performance_metrics(model, test_data, target_column)
-    c.setFillColor('#000080')
-    y = y - 10
-    c.drawString(50, y, "Performance of the Model")
-    y = y - 15
-    c.line(20, y, 580, y)
-    y = y - 25
-    c.setFillColor('#000000')
+    Story = create_report_section(Story,  "Performance of the Model", perf.columns, perf.values.flatten())
 
-    for p in perf.columns:
-        c.drawString(50, y, id_to_name(p) + ":")
-        c.drawString(200, y, perf[p].to_string(index=False))
-        y = y - 25
-    c.showPage()
-    c.save()
+    methodology_properties = [p for k, p in factsheet["properties"]["methodology"].items()]
+    k = []
+    v = []
+    for l in methodology_properties:
+        for m in l.values():
+            k.append(m[0])
+            v.append(m[1])
+
+    Story = create_report_section(Story, "Methodology Properties",  k, v)
+
+    Story = add_charts_to_report(Story, charts)
+
+    doc.build(Story, onFirstPage=title_style)
     return
 
 def read_solution(solution_set_path):

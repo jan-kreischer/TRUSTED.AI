@@ -112,7 +112,8 @@ def is_between(a, x, b):
 def regularization_score(model, training_dataset, test_dataset, factsheet, methodology_config):
     score = 0
     regularization = regularization_metric(factsheet)
-    properties= {"regularization_technique": regularization}
+    properties = {"regularization_technique": info("Regularization technique", regularization)}
+
     if regularization == "elasticnet_regression":
         score = 5
     elif regularization == "lasso_regression" or regularization == "lasso_regression":
@@ -203,9 +204,9 @@ def factsheet_completeness_score(model, training_dataset, test_dataset, factshee
     for e in GENERAL_INPUTS:
         if "general" in factsheet and e in factsheet["general"]:
             ctr+=1
-            properties[e] = "present"
+            properties[e] = info(e, "present")
         else:
-            properties[e] = "missing"
+            properties[e] = info(e, "missing")
     score = round(ctr/n*5)
     return result(score=score, properties=properties)
             
