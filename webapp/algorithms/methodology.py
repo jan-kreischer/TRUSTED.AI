@@ -10,8 +10,8 @@ info = collections.namedtuple('info', 'description value')
 # === Methodology Metrics ===
 def analyse(model, training_dataset, test_dataset, factsheet, methodology_config):
 
-    accuracy_thresholds = methodology_config["score_test_accuracy"]["thresholds"]["value"]
-    f1_score_thresholds = methodology_config["score_f1"]["thresholds"]["value"]
+    #_accuracy_thresholds = methodology_config["score_test_accuracy"]["thresholds"]["value"]
+    #_f1_score_thresholds = methodology_config["score_f1"]["thresholds"]["value"]
     normalization_mapping = methodology_config["score_normalization"]["mappings"]["value"]
     missing_data_mapping = methodology_config["score_missing_data"]["mappings"]["value"]
     train_test_split_mapping = methodology_config["score_train_test_split"]["mappings"]["value"]
@@ -24,8 +24,8 @@ def analyse(model, training_dataset, test_dataset, factsheet, methodology_config
         missing_data = missing_data_score(model, training_dataset, test_dataset, factsheet, missing_data_mapping),
         regularization   = regularization_score(model, training_dataset, test_dataset, factsheet, methodology_config),
         train_test_split = train_test_split_score(model, training_dataset, test_dataset, factsheet, train_test_split_mapping),
-        test_accuracy = test_accuracy_score(model, training_dataset, test_dataset, factsheet, accuracy_thresholds),
-        f1_score = f1_score(model, training_dataset, test_dataset, factsheet, f1_score_thresholds),
+        #test_accuracy = test_accuracy_score(model, training_dataset, test_dataset, factsheet, accuracy_thresholds),
+        #f1_score = f1_score(model, training_dataset, test_dataset, factsheet, f1_score_thresholds),
         factsheet_completeness= factsheet_completeness_score(model, training_dataset, test_dataset, factsheet, methodology_config)
     )
     

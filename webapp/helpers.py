@@ -496,7 +496,7 @@ def mapping_panel(pillar):
            
             map_panel.append(html.Div(html.Label(v.get("label", p).replace("_",' '), title=v.get("description","")), style={"margin-left":"30%"})),
             if p== "clf_type_score":
-                map_panel.append(html.Div(dcc.Textarea(id=input_id, name=pillar,value=str(v.get("value" "")).replace(",",',\n'), style={"width":300, "height":250}), style={"margin-left":"30%"}))
+                map_panel.append(html.Div(dcc.Textarea(id=input_id, name=pillar,value=str(v.get("value" "")).replace(",",',\n'), style={"width":300, "height":150}), style={"margin-left":"30%"}))
             else:
                 map_panel.append(html.Div(dcc.Input(id=input_id, name=pillar,value=str(v.get("value" "")), type='text', style={"width":200}), style={"margin-left":"30%"}))
             map_panel.append(html.Br())
