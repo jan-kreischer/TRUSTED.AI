@@ -1026,7 +1026,8 @@ def download_report(n_clicks, solution_set_path):
 def set_uploaded_model(solution_set_path):
     
     if solution_set_path:
-        scenario, solution = solution_set_path["path"].split(os.sep)
+        print(solution_set_path)
+        scenario, solution = solution_set_path.split(os.sep)
         return scenario, solution
     else:
         return 'it_sec_incident_classification', 'scenarios\\it_sec_incident_classification\\solutions\\Jans Random Forest Classifier'

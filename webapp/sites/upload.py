@@ -157,9 +157,9 @@ def save_new_solution_name(n_clicks, scenario_id, solution_name):
     if n_clicks is not None:
         if scenario_id and solution_name:
             print("Uploaded solution set path {}".format(os.path.join(scenario_id, solution_name)))
-            return {'path': os.path.join(scenario_id, solution_name)}
+            return os.path.join(scenario_id, solution_name)
     else:
-        return {'path': ""}
+        return None
 
 @app.callback(Output('upload_alert', 'children'),
               [

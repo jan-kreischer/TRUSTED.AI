@@ -11,12 +11,13 @@ from art.estimators.classification import KerasClassifier
 from art.metrics import loss_sensitivity
 import tensorflow as tf
 import numpy.linalg as la
+import json
 
 info = collections.namedtuple('info', 'description value')
 result = collections.namedtuple('result', 'score properties')
 
 # === ROBUSTNESS ===
-def analyse(model, train_data, test_data, config):
+def analyse(model, train_data, test_data, config, factsheet):
 
     clique_method_thresholds = config["score_clique_method"]["thresholds"]["value"]
     clever_score_thresholds = config["score_clever_score"]["thresholds"]["value"]
@@ -28,7 +29,7 @@ def analyse(model, train_data, test_data, config):
     
     output = dict(
         confidence_score   = confidence_score(model, train_data, test_data, clever_score_thresholds),
-        clique_method      = clique_method(model, train_data, test_data, clique_method_thresholds),
+        clique_method      = clique_method(model, train_data, test_data, clique_method_thresholds, factsheet ),
         loss_sensitivity   = loss_sensitivity_score(model, train_data, test_data, loss_sensitivity_thresholds),
         clever_score       = clever_score(model, train_data, test_data, clever_score_thresholds),
         empirical_robustness_fast_gradient_attack = fast_gradient_attack_score(model, train_data, test_data, fsg_attack_thresholds),
@@ -89,7 +90,17 @@ def confidence_score(model, train_data, test_data, thresholds):
     except:
         return result(score=np.nan, properties={})
 
-def clique_method(model, train_data, test_data, thresholds):
+def clique_method(model, train_data, test_data, thresholds, factsheet):
+    
+    with open('configs/mappings/robustness/default.json', 'r') as f:
+          default_map = json.loads(f.read())
+    
+    if thresholds == default_map["score_clique_method"]["thresholds"]["value"]:
+        if "scores" in factsheet.keys() and "properties" in factsheet.keys():
+            score = factsheet["scores"]["robustness"]["clique_method"]
+            properties = factsheet["properties"]["robustness"]["clique_method"]
+            return result(score=score, properties=properties)
+    
     try:
         X_test = test_data.iloc[:, :-1]
         y_test = test_data.iloc[:, -1:]
