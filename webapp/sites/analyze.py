@@ -487,7 +487,7 @@ def statistical_parity_difference(data):
      Output('test_data', 'data')],
     [Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
 def load_data(solution_set_path):
-    if solution_set_path != "":
+    if solution_set_path:
         training_data = read_train(solution_set_path)
         test_data = read_test(solution_set_path)
         #compute_train_test_split(solution_set_path)
@@ -670,8 +670,9 @@ def toggle_pillar_section_visibility(path):
 def analyze_solution_completeness(solution_set_path):
     button = []
     alerts = []
-    style={'display': 'block'}
+    style={'display': 'none'}
     if solution_set_path is not None:
+        style={'display': 'block'}
         button = dbc.Button(
             html.I(className="fas fa-backspace"),
             id="delete_button", 
@@ -1030,8 +1031,8 @@ def set_uploaded_model(solution_set_path):
         scenario, solution = solution_set_path.split(os.sep)
         return scenario, solution
     else:
-        return 'it_sec_incident_classification', 'scenarios\\it_sec_incident_classification\\solutions\\Jans Random Forest Classifier'
-
+        #return 'it_sec_incident_classification', 'scenarios\\it_sec_incident_classification\\solutions\\Jans Random Forest Classifier'
+        return None, None
     
     
 config_panel.get_callbacks(app)
@@ -1044,7 +1045,8 @@ layout = html.Div([
             dcc.Store(id='result'),
             
             dbc.Col([html.H1("Analyze", className="text-center")], width=12, className="mb-2 mt-1"),
-             dbc.Col([dcc.Dropdown(
+             dbc.Col([html.H5("Scenario"),
+                 dcc.Dropdown(
                     id='scenario_dropdown',
                     options= get_scenario_options(),
                     value = None,
@@ -1052,7 +1054,8 @@ layout = html.Div([
                     placeholder='Select Scenario'
                 )], width=12, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
             ),
-            dbc.Col([dcc.Dropdown(
+            dbc.Col([html.H5("Solution"),
+                dcc.Dropdown(
                     id='solution_set_dropdown',
                     options = get_scenario_solutions_options('it_sec_incident_classification'),
                     value=None,
