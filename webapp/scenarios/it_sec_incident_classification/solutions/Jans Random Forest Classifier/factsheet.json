@@ -43,7 +43,7 @@
         "methodology": {
             "normalization": 1,
             "missing_data": 5,
-            "regularization": 0,
+            "regularization": 1,
             "train_test_split": 5,
             "test_accuracy": NaN,
             "f1_score": NaN,

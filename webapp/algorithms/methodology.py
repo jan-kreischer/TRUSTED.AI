@@ -110,7 +110,7 @@ def is_between(a, x, b):
 
 # --- Regularization ---
 def regularization_score(model, training_dataset, test_dataset, factsheet, methodology_config):
-    score = 0
+    score = 1
     regularization = regularization_metric(factsheet)
     properties = {"regularization_technique": info("Regularization technique", regularization)}
 
@@ -121,9 +121,9 @@ def regularization_score(model, training_dataset, test_dataset, factsheet, metho
     elif regularization == "Other":
         score = 3
     elif regularization == NOT_SPECIFIED:
-        score = 1
+        score = np.nan
     else:
-        score = 0
+        score = 1
     return result(score=score, properties=properties)
 
 def regularization_metric(factsheet):

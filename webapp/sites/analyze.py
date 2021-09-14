@@ -21,6 +21,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import dash
 import warnings
+from dash_extensions.snippets import send_file
 warnings.filterwarnings('ignore')
 
 # === CONFIG ===
@@ -1011,16 +1012,18 @@ def clever_score(scenario_id):
         return []
 
 @app.callback(
-    [ Output("modal-report", "is_open")],
-    [Input('download_report_button', 'n_clicks'), Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
-def download_report(n_clicks, solution_set_path):
-    if n_clicks != None and solution_set_path != "":
+    [Output("modal-report", "is_open"),Output("download-report", "data")],
+    Input('download_report_button', 'n_clicks'), [State('solution_set_dropdown', 'value'),State("modal-report", "is_open")], prevent_initial_call=True)
+def download_report(n_clicks, solution_set_path, is_open):
+    if n_clicks and solution_set_path:
         test_data, training_data, model, factsheet = read_solution(solution_set_path)
         target_column = factsheet.get("general", {}).get("target_column", "")
         save_report_as_pdf(model, test_data, target_column, factsheet,  charts)
-        return [True]
+        data = send_file("report.pdf")
+        del data["mime_type"]
+        return is_open, data
     else:
-        return [False]
+        return is_open, data
     
 @app.callback([Output("scenario_dropdown", 'value'), Output("solution_set_dropdown", 'value')],
     Input('uploaded_solution_set_path', 'data'))
@@ -1034,6 +1037,12 @@ def set_uploaded_model(solution_set_path):
         #return 'it_sec_incident_classification', 'scenarios\\it_sec_incident_classification\\solutions\\Jans Random Forest Classifier'
         return None, None
     
+# @app.callback(Output("download-report", "data"), [Input("download_report_button", "n_clicks")])
+# def func2(n_clicks):
+#     if n_clicks:
+#         data = send_file("report.pdf")
+#         del data["mime_type"]
+#         return data
     
 config_panel.get_callbacks(app)
     
@@ -1063,8 +1072,6 @@ layout = html.Div([
                     placeholder='Select Solution'
                 )], width=12, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
             ),
-            html.Div(dbc.Button("Download Report", id='download_report_button', color="primary", className="mt-3"),
-                         className="text-center"),
             dbc.Modal([
                     dbc.ModalHeader("Success"),
                     dbc.ModalBody([dbc.Alert(id="report-success",children ="You successfully saved the report", color="success"),]),
@@ -1086,7 +1093,10 @@ layout = html.Div([
                     pillar_section("robustness", robustness_metrics),
                     pillar_section("methodology", methodology_metrics),
                     dcc.Store(id='training_data'),
-                    dcc.Store(id='test_data')
+                    dcc.Store(id='test_data'),
+                    html.Div([dbc.Button("Download Report", id='download_report_button', color="primary", className="mt-3"),
+                              dcc.Download(id="download-report", type="application/pdf")],
+                         className="text-center"),
                 ], id="analysis_section")
             ],
                 width=12, 

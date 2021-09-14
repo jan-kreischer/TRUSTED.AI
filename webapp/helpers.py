@@ -31,6 +31,7 @@ from reportlab.lib.units import inch
 from reportlab.graphics.shapes import *
 from reportlab.lib.colors import *
 from base64 import b64encode
+import timeit
 
 PAGE_HEIGHT=defaultPageSize[1]; PAGE_WIDTH=defaultPageSize[0]
 
@@ -261,6 +262,9 @@ def add_charts_to_report(Story, charts):
     return Story
 
 def save_report_as_pdf(model, test_data, target_column, factsheet, charts):
+    charts = []
+    start = timeit.timeit()
+    print("creating report")
     doc = SimpleDocTemplate("report.pdf")
     Story = [Spacer(1, 0.2 * inch)]
     l = ["general", "fairness", "methodology"]
@@ -284,7 +288,9 @@ def save_report_as_pdf(model, test_data, target_column, factsheet, charts):
     Story = add_charts_to_report(Story, charts)
 
     doc.build(Story, onFirstPage=title_style)
-    return
+    end = timeit.timeit()
+    print(end - start)  
+    
 
 def read_solution(solution_set_path):
     test = read_test(solution_set_path)
