@@ -45,8 +45,6 @@
             "missing_data": 5,
             "regularization": 0,
             "train_test_split": 1,
-            "test_accuracy": NaN,
-            "f1_score": NaN,
             "factsheet_completeness": 4
         }
     },
@@ -254,8 +252,6 @@
                     "5.00"
                 ]
             },
-            "test_accuracy": {},
-            "f1_score": {},
             "factsheet_completeness": {
                 "model_name": [
                     "model_name",

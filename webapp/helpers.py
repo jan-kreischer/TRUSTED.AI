@@ -37,6 +37,33 @@ PAGE_HEIGHT=defaultPageSize[1]; PAGE_WIDTH=defaultPageSize[0]
 
 result = collections.namedtuple('result', 'score properties')
 
+def draw_bar_plot(categories, values, ax, color='lightblue', title='Trusting AI Final Score',size=12):
+    
+    # drop top and right spine
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    #plt.grid(True,axis='y',zorder=0)
+    
+    # create barplot
+    x_pos = np.arange(len(categories))
+    plt.bar(x_pos, values,zorder=4,color=color)
+
+    for i, v in enumerate(values):
+        plt.text(i , v+0.1 , str(v),color='dimgray', fontweight='bold',ha='center')
+
+    # Create names on the x-axis
+    plt.xticks(x_pos, categories,size=size,wrap=True)
+
+    plt.yticks([1,2,3,4], ["1","2","3","4"], size=12)
+    plt.ylim(0,4)
+    
+    if isinstance(color, list):
+        plt.title(title, size=11, y=1.1)
+    else:
+        plt.title(title, size=11, y=1.1,
+             bbox=dict(facecolor=color, edgecolor=color, pad=2.0))
+        plt.title(title, size=11, y=1.1)
+
 def get_performance_metrics(model, test_data, target_column):
 
     if target_column:
@@ -258,11 +285,25 @@ def add_charts_to_report(Story, charts):
         encoding = b64encode(img_bytes).decode()
         img_b64 = "data:image/png;base64," + encoding
         im = reportlab.platypus.Image(img_b64)
+        im._restrictSize(4 * inch, 4 * inch)
         Story.append(im)
     return Story
 
-def save_report_as_pdf(model, test_data, target_column, factsheet, charts):
-    charts = []
+def add_matplotlib_to_report(Story, charts):
+    for chart in charts:
+        img_bytes = io.BytesIO()
+        fig.savefig(img_bytes)
+        img_bytes.seek(0)   
+        img_bytes = chart.to_image(format="png")
+        encoding = b64encode(img_bytes).decode()
+        img_b64 = "data:image/png;base64," + encoding
+        im = reportlab.platypus.Image(img_b64)
+        im._restrictSize(4 * inch, 4 * inch)
+        Story.append(im)
+    return Story
+
+
+def save_report_as_pdf(result, model, test_data, target_column, factsheet, charts):
     start = timeit.timeit()
     print("creating report")
     doc = SimpleDocTemplate("report.pdf")
@@ -275,7 +316,7 @@ def save_report_as_pdf(model, test_data, target_column, factsheet, charts):
     perf = get_performance_metrics(model, test_data, target_column)
     Story = create_report_section(Story,  "Performance of the Model", perf.columns, perf.values.flatten())
 
-    methodology_properties = [p for k, p in factsheet["properties"]["methodology"].items()]
+    methodology_properties = [p for k, p in result["properties"]["methodology"].items()]
     k = []
     v = []
     for l in methodology_properties:
@@ -502,7 +543,7 @@ def mapping_panel(pillar):
            
             map_panel.append(html.Div(html.Label(v.get("label", p).replace("_",' '), title=v.get("description","")), style={"margin-left":"30%"})),
             if p== "clf_type_score":
-                map_panel.append(html.Div(dcc.Textarea(id=input_id, name=pillar,value=str(v.get("value" "")).replace(",",',\n'), style={"width":300, "height":150}), style={"margin-left":"30%"}))
+                map_panel.append(html.Div(dcc.Textarea(id=input_id, name=pillar,value=str(v.get("value" "")), style={"width":300, "height":150}), style={"margin-left":"30%"}))
             else:
                 map_panel.append(html.Div(dcc.Input(id=input_id, name=pillar,value=str(v.get("value" "")), type='text', style={"width":200}), style={"margin-left":"30%"}))
             map_panel.append(html.Br())

@@ -21,9 +21,11 @@ import plotly.express as px
 import plotly.graph_objects as go
 import dash
 import warnings
+import plotly
 from dash_extensions.snippets import send_file
 warnings.filterwarnings('ignore')
 
+# plotly.io.orca.config.executable = r"C:\Users\Besitzer\AppData\Roaming\npm\node_modules\orca"
 # === CONFIG ===
 
 config_fairness, config_explainability, config_robustness, config_methodology, config_pillars = 0, 0, 0 ,0,0
@@ -806,6 +808,10 @@ for m in fairness_metrics + methodology_metrics + explainability_metrics + robus
        Output('methodology_star_rating', 'children')],
       [Input('result', 'data'),Input("hidden-trigger", "value")])  
 def update_figure(data, trig):
+      
+      global charts
+      charts = []
+      
       if data is None:
           return [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, "", "", "", "", ""]
       result = json.loads(data)
@@ -1013,12 +1019,17 @@ def clever_score(scenario_id):
 
 @app.callback(
     [Output("modal-report", "is_open"),Output("download-report", "data")],
-    Input('download_report_button', 'n_clicks'), [State('solution_set_dropdown', 'value'),State("modal-report", "is_open")], prevent_initial_call=True)
-def download_report(n_clicks, solution_set_path, is_open):
+    Input('download_report_button', 'n_clicks'), 
+    [State('solution_set_dropdown', 'value'),
+     State("modal-report", "is_open"),
+     State('result', 'data')], prevent_initial_call=True)
+def download_report(n_clicks, solution_set_path, is_open, data):
     if n_clicks and solution_set_path:
+        result = json.loads(data)
         test_data, training_data, model, factsheet = read_solution(solution_set_path)
         target_column = factsheet.get("general", {}).get("target_column", "")
-        save_report_as_pdf(model, test_data, target_column, factsheet,  charts)
+        print(charts)
+        save_report_as_pdf(result, model, test_data, target_column, factsheet,  charts)
         data = send_file("report.pdf")
         del data["mime_type"]
         return is_open, data

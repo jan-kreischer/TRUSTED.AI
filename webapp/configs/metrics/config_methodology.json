@@ -50,12 +50,10 @@
     }
   },
     "weights": {
-        "normalization": 0.1666,
-        "missing_data": 0.1666,
-        "regularization": 0.1666,
-        "train_test_split": 0.1666,
-        "test_accuracy": 0.1666,
-        "f1_score": 0.1666,
-        "factsheet_completeness": 0.1666
+        "normalization": 0.2,
+        "missing_data": 0.2,
+        "regularization": 0.2,
+        "train_test_split": 0.2,
+        "factsheet_completeness": 0.2
     }
 }
