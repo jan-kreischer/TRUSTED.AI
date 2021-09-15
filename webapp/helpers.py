@@ -31,7 +31,9 @@ from reportlab.lib.units import inch
 from reportlab.graphics.shapes import *
 from reportlab.lib.colors import *
 from base64 import b64encode
+from textwrap import wrap
 import timeit
+from reportlab.lib.utils import ImageReader
 
 PAGE_HEIGHT=defaultPageSize[1]; PAGE_WIDTH=defaultPageSize[0]
 
@@ -54,15 +56,20 @@ def draw_bar_plot(categories, values, ax, color='lightblue', title='Trusting AI 
     # Create names on the x-axis
     plt.xticks(x_pos, categories,size=size,wrap=True)
 
-    plt.yticks([1,2,3,4], ["1","2","3","4"], size=12)
-    plt.ylim(0,4)
+    plt.yticks([1,2,3,4, 5], ["1","2","3","4","5"], size=12)
+    plt.ylim(0,5)
+    
+    if len(categories) > 4:
+        plt.xticks(rotation=15)
     
     if isinstance(color, list):
         plt.title(title, size=11, y=1.1)
     else:
-        plt.title(title, size=11, y=1.1,
-             bbox=dict(facecolor=color, edgecolor=color, pad=2.0))
+        # plt.title(title, size=11, y=1.1,
+        #      bbox=dict(facecolor=color, edgecolor=color, pad=2.0))
         plt.title(title, size=11, y=1.1)
+    return plt
+   
 
 def get_performance_metrics(model, test_data, target_column):
 
@@ -290,20 +297,36 @@ def add_charts_to_report(Story, charts):
     return Story
 
 def add_matplotlib_to_report(Story, charts):
-    for chart in charts:
-        img_bytes = io.BytesIO()
-        fig.savefig(img_bytes)
-        img_bytes.seek(0)   
-        img_bytes = chart.to_image(format="png")
-        encoding = b64encode(img_bytes).decode()
-        img_b64 = "data:image/png;base64," + encoding
-        im = reportlab.platypus.Image(img_b64)
-        im._restrictSize(4 * inch, 4 * inch)
-        Story.append(im)
+   # Story.append(reportlab.platypus.Paragraph("<h1>Charts</h1>"))
+    for i, fig in enumerate(charts):
+        # img_bytes = io.BytesIO()
+        # fig.savefig(img_bytes)
+        # img_bytes.seek(0)   
+        # encoding = b64encode(img_bytes).decode()
+        # img_b64 = "data:image/png;base64," + encoding
+        # im = reportlab.platypus.Image(img_b64)
+        # im._restrictSize(4 * inch, 4 * inch)
+        #fig.set_size_inches(18.5, 10.5)
+        imgdata = io.BytesIO()
+        fig.savefig(imgdata, format='png',dpi=300,bbox_inches='tight')
+        imgdata.seek(0)  # rewind the data
+        im = reportlab.platypus.Image(imgdata)
+        if i ==1:
+            im._restrictSize(7 * inch, 5 * inch)
+            Story.append(im)
+        else:
+            im._restrictSize(6 * inch, 4 * inch)
+            Story.append(reportlab.platypus.Paragraph("<br/><br/>"))
+            Story.append(im)
+       
+       
+       
     return Story
 
 
 def save_report_as_pdf(result, model, test_data, target_column, factsheet, charts):
+    
+    
     start = timeit.timeit()
     print("creating report")
     doc = SimpleDocTemplate("report.pdf")
@@ -326,8 +349,42 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
 
     Story = create_report_section(Story, "Methodology Properties",  k, v)
 
-    Story = add_charts_to_report(Story, charts)
+    #Story = add_charts_to_report(Story, charts)
+    plots = []
+    
+    final_score = result["final_score"]
+    pillars = list(final_score.keys())
+    values = list(final_score.values())
+    pillar_colors = ['yellow','cornflowerblue','lightgrey','lightseagreen']
+    
+    my_dpi=96
+    fig = plt.figure(figsize=(600/my_dpi, 400/my_dpi), dpi=my_dpi)
+    ax = plt.subplot(111)
+    draw_bar_plot(pillars,values, ax, color= pillar_colors)
+    plots.append(fig)
 
+    
+    results = result["results"]
+    my_dpi=96
+    fig = plt.figure(figsize=(1200/my_dpi, 800/my_dpi), dpi=my_dpi)
+    my_palette = ['yellow','cornflowerblue','lightgrey','lightseagreen']
+    plt.subplots_adjust(hspace=0.5,wspace=0.2)
+    
+    for n, (pillar , sub_scores) in enumerate(results.items()):
+        title = pillar
+        categories = list(map(lambda x: x.replace("_",' '), sub_scores.keys())) 
+        categories= [ '\n'.join(wrap(l, 12,break_long_words=False)) for l in categories ]
+        values = list(sub_scores.values())
+        nan_val = np.isnan(values)
+        values = np.array(values)[~nan_val]
+        categories = np.array(categories)[~nan_val]
+        ax = plt.subplot(2,2,n+1)
+        draw_bar_plot(categories,values, ax, color=my_palette[n], title=title,size=9)
+    fig.suptitle('Pillar Metrics', fontsize=16)
+    plots.append(fig)
+    Story.append(reportlab.platypus.PageBreak())
+    Story = add_matplotlib_to_report(Story, plots)
+    
     doc.build(Story, onFirstPage=title_style)
     end = timeit.timeit()
     print(end - start)  
