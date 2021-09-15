@@ -343,11 +343,31 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
     k = []
     v = []
     for l in methodology_properties:
-        for m in l.values():
-            k.append(m[0])
-            v.append(m[1])
-
+        if l!= {}:
+            for i,m in l.items():
+                if type(m) == list:
+                    k.append(m[0])
+                    v.append(m[1])
+                else: 
+                    k.append(i)
+                    v.append(m)
+                    
     Story = create_report_section(Story, "Methodology Properties",  k, v)
+    
+    explainability_properties = [p for k, p in result["properties"]["explainability"].items()] 
+    k = []
+    v = []
+    for l in explainability_properties:
+        if l!= {}:
+            for i,m in l.items():
+             if i !="importance":
+                if type(m) == list:
+                    k.append(m[0])
+                    v.append(m[1])
+                else: 
+                    k.append(i)
+                    v.append(m)
+    Story = create_report_section(Story, "Explainability Properties",  k, v)
 
     #Story = add_charts_to_report(Story, charts)
     plots = []
@@ -355,7 +375,7 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
     final_score = result["final_score"]
     pillars = list(final_score.keys())
     values = list(final_score.values())
-    pillar_colors = ['yellow','cornflowerblue','lightgrey','lightseagreen']
+    pillar_colors = ['#06d6a0','#ffd166','#ef476f','#118ab2']
     
     my_dpi=96
     fig = plt.figure(figsize=(600/my_dpi, 400/my_dpi), dpi=my_dpi)
@@ -367,7 +387,7 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
     results = result["results"]
     my_dpi=96
     fig = plt.figure(figsize=(1200/my_dpi, 800/my_dpi), dpi=my_dpi)
-    my_palette = ['yellow','cornflowerblue','lightgrey','lightseagreen']
+    my_palette = ['#06d6a0','#ffd166','#ef476f','#118ab2']
     plt.subplots_adjust(hspace=0.5,wspace=0.2)
     
     for n, (pillar , sub_scores) in enumerate(results.items()):
