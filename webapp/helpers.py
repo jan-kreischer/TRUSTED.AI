@@ -339,10 +339,11 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
     perf = get_performance_metrics(model, test_data, target_column)
     Story = create_report_section(Story,  "Performance of the Model", perf.columns, perf.values.flatten())
 
-    methodology_properties = [p for k, p in result["properties"]["methodology"].items()]
+    
+    fairness_properties = [p for k, p in result["properties"]["fairness"].items()]
     k = []
     v = []
-    for l in methodology_properties:
+    for l in fairness_properties:
         if l!= {}:
             for i,m in l.items():
                 if type(m) == list:
@@ -352,7 +353,7 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
                     k.append(i)
                     v.append(m)
                     
-    Story = create_report_section(Story, "Methodology Properties",  k, v)
+    Story = create_report_section(Story, "Fairness Properties",  k, v)
     
     explainability_properties = [p for k, p in result["properties"]["explainability"].items()] 
     k = []
@@ -368,6 +369,36 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
                     k.append(i)
                     v.append(m)
     Story = create_report_section(Story, "Explainability Properties",  k, v)
+    
+    robustness_properties = [p for k, p in result["properties"]["robustness"].items()]
+    k = []
+    v = []
+    for l in robustness_properties:
+        if l!= {}:
+            for i,m in l.items():
+                if type(m) == list:
+                    k.append(m[0])
+                    v.append(m[1])
+                else: 
+                    k.append(i)
+                    v.append(m)
+                    
+    Story = create_report_section(Story, "Robustness Properties",  k, v)
+    
+    methodology_properties = [p for k, p in result["properties"]["methodology"].items()]
+    k = []
+    v = []
+    for l in methodology_properties:
+        if l!= {}:
+            for i,m in l.items():
+                if type(m) == list:
+                    k.append(m[0])
+                    v.append(m[1])
+                else: 
+                    k.append(i)
+                    v.append(m)
+                    
+    Story = create_report_section(Story, "Methodology Properties",  k, v)
 
     #Story = add_charts_to_report(Story, charts)
     plots = []
