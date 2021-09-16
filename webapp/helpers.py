@@ -87,8 +87,7 @@ def get_performance_metrics(model, test_data, target_column):
     else:
         y_pred = model.predict(X_test).flatten()
     #y_pred_proba = model.predict_proba(X_test)
-    print("y_true.shape: {}".format(y_true.shape))
-    print("y_pred.shape: {}".format(y_pred.shape))
+   
     #print("y_pred_proba.shape: {}".format(y_pred_proba.shape))
     #labels = np.unique(np.array([y_pred,y_true]).flatten())
 
@@ -110,9 +109,9 @@ def get_description(factsheet):
     description = {}
     if "general" in factsheet:
         if "model_name" in factsheet["general"]:
-            print("model_name")
+           
             description["Model Name"]= factsheet["general"]["model_name"]
-            print(factsheet["general"]["model_name"])
+           
         if "purpose_description" in factsheet["general"]:
             description["Purpose of the Model"] = factsheet["general"]["purpose_description"]
         if "training_data_description" in factsheet["general"]:

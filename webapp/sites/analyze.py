@@ -1070,7 +1070,6 @@ def download_report(n_clicks, solution_set_path, is_open, data, weight, map_f, m
         result = json.loads(data)
         test_data, training_data, model, factsheet = read_solution(solution_set_path)
         target_column = factsheet.get("general", {}).get("target_column", "")
-        print(charts)
         save_report_as_pdf(result, model, test_data, target_column, factsheet,  charts, configs)
         data = send_file("report.pdf")
         del data["mime_type"]
@@ -1145,8 +1144,6 @@ layout = html.Div([
                     pillar_section("explainability", explainability_metrics),
                     pillar_section("robustness", robustness_metrics),
                     pillar_section("methodology", methodology_metrics),
-                    html.Div(dbc.Button("Download Report", id='download_report_button', color="primary", className="mt-3"),
-                         className="text-center"),
                     dcc.Store(id='training_data'),
                     dcc.Store(id='test_data'),
                     html.Div([dbc.Button("Download Report", id='download_report_button', color="primary", className="mt-3"),

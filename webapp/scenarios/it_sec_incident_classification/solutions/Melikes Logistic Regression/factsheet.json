@@ -1,10 +1,10 @@
 {
     "general": {
         "model_name": "Melike's Logistic Regression",
-        "purpose_description": "Attack Classification",
+        "purpose_description": "IoT Attack Classification",
         "domain_description": "IT Security",
-        "training_data_description": "Alberto's classification data",
-        "model_information": "Sklearn Logistic Regression Classifier for IT Security Incident Classification scenario",
+        "training_data_description": "Alberto's original Raspery Pie data",
+        "model_information": "Sklearn Logistic Regression Classifier for IoT Security Incident Classification scenario",
         "target_column": 73,
         "authors": "Melike"
     },
@@ -37,13 +37,13 @@
             "loss_sensitivity": NaN,
             "clever_score": NaN,
             "empirical_robustness_fast_gradient_attack": 2,
-            "empirical_robustness_carlini_wagner_attack": 0,
+            "empirical_robustness_carlini_wagner_attack": 1,
             "empirical_robustness_deepfool_attack": 3
         },
         "methodology": {
             "normalization": 4,
             "missing_data": 5,
-            "regularization": 0,
+            "regularization": 1,
             "train_test_split": 5,
             "factsheet_completeness": 4
         }

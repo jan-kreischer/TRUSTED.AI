@@ -33,7 +33,7 @@
         },
         "robustness": {
             "confidence_score": 5,
-            "clique_method": 0,
+            "clique_method": 1,
             "loss_sensitivity": NaN,
             "clever_score": NaN,
             "empirical_robustness_fast_gradient_attack": NaN,
@@ -43,7 +43,7 @@
         "methodology": {
             "normalization": 1,
             "missing_data": 5,
-            "regularization": 0,
+            "regularization": 1,
             "train_test_split": 1,
             "factsheet_completeness": 4
         }
