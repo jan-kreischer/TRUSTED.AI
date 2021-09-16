@@ -82,7 +82,6 @@ daq.BooleanSwitch(id='toggle_charts',
 def trust_section():
     return html.Div([ 
         html.Div([
-            html.Hr(),
             html.Div([daq.BooleanSwitch(id='show_weighting',
                       on=False,
                       label='Show Weights',
@@ -264,16 +263,9 @@ def store_mappings_config(n1, n2, n3, n4, *args):
 def show_general_description(scenario_id, solution_set_path):
     description = []
     if scenario_id and solution_set_path:
-        description.append(html.H5("Scenario"))
         scenario_factsheet = read_scenario_factsheet(scenario_id)
-        scenario_description = pd.DataFrame.from_dict(scenario_factsheet, orient="index", columns=["value"])
-        #scenario_description.index.set_names(['Scenario'])
-        scenario_description = scenario_description.reset_index()
-        print(scenario_description.columns)
-        #scenario_description.index.rename('Scenario', inplace=True)
-        scenario_description['index'] = scenario_description['index'].str.capitalize()
-        scenario_description['value'] = scenario_description['value'].str.capitalize()
-        
+        scenario_description = get_scenario_description(scenario_id)
+        scenario_description_header = html.H5("Scenario Description")
         scenario_description_table = dash_table.DataTable(
             id='scenario_description_table',
             columns=[{"name": i, "id": i} for i in scenario_description.columns],
@@ -290,29 +282,76 @@ def show_general_description(scenario_id, solution_set_path):
                 #'lineHeight': '15px'
             },
             style_header={
+                'backgroundColor': SECONDARY_COLOR,
                 #"display": "none",
                 #"visibility": "hidden"
             },
-            style_cell={'textAlign': 'left'},
+            style_cell={
+                'textAlign': 'left',
+                'backgroundColor': SECONDARY_COLOR,
+            },
+            style_cell_conditional=[
+                {
+                    'if': {'column_id': 'key'},
+                    'fontWeight': 'bold',
+                    'width': '30%'
+                } 
+            ],
             style_as_list_view=True,
+            css=[
+              {
+                 'selector': 'tr:first-child',
+                 'rule': 'display: none',
+              },
+            ],
         )
-        description.append(scenario_description_table)
-        description.append(html.H5("Solution Description: "))
-        print("scenario_factsheet {}".format(scenario_factsheet))  
-        print("print type scenario factsheet {}".format(type(scenario_factsheet)))
+        description.append(html.Div([scenario_description_header, scenario_description_table], className="mt-4 mb-4"))
+        
+
         factsheet = read_factsheet(solution_set_path)
 
-        if "general" in factsheet and "model_information" in factsheet["general"]:
-            description.append(factsheet["general"]["model_information"])
-
-        description_list= get_description(factsheet)
-        description_table = dash_table.DataTable(
-            id='table',
-            columns=[{"name": i, "id": i} for i in description_list.columns],
-            data=description_list.to_dict('records'),
-            style_table={"table-layout": "fixed", "width": "auto", 'overflowX': 'hidden'}
+        solution_description_header = html.H5("Model Information")
+        solution_description= get_solution_description(factsheet)
+        solution_description_table = dash_table.DataTable(
+            id='solution_description_table',
+            columns=[{"name": i, "id": i} for i in solution_description.columns],
+            data=solution_description.to_dict('records'),
+            style_table={
+                                    #"table-layout": "fixed",
+                                    "width": "100%",
+                                    'overflowX': 'hidden',
+                                    'textAlign': 'left'
+                                },
+                                style_data={
+                                    'whiteSpace': 'normal',
+                                    'height': 'auto',
+                                    #'lineHeight': '15px'
+                                },
+                                style_header={
+                                    'backgroundColor': SECONDARY_COLOR,
+                                    #"display": "none",
+                                    #"visibility": "hidden"
+                                },
+                                style_cell={
+                                    'textAlign': 'left',
+                                    'backgroundColor': SECONDARY_COLOR,
+                                },
+                                style_cell_conditional=[
+                                    {
+                                        'if': {'column_id': 'key'},
+                                        'fontWeight': 'bold',
+                                        'width': '30%'
+                                    } 
+                                ],
+                                style_as_list_view=True,
+                                css=[
+                                  {
+                                     'selector': 'tr:first-child',
+                                     'rule': 'display: none',
+                                  },
+                                ],
         )
-        description.append(description_table)
+        description.append(html.Div([solution_description_header, solution_description_table], className="mt-4 mb-4"))
         return description
     else:
         return ""
@@ -759,12 +798,45 @@ def show_performance_metrics(solution_set_path):
         
         performance_metrics =  get_performance_metrics(model, test_data, target_column)
         performance_metrics_table = dash_table.DataTable(
-                                id='table',
+                                id='performance_metrics_table',
                                 columns=[{"name": i, "id": i} for i in performance_metrics.columns],
                                 data=performance_metrics.to_dict('records'),
-                                style_table={"table-layout": "fixed", "width": "auto", 'overflowX': 'hidden'}
+                                style_table={
+                                    #"table-layout": "fixed",
+                                    "width": "100%",
+                                    'overflowX': 'hidden',
+                                    'textAlign': 'left'
+                                },
+                                style_data={
+                                    'whiteSpace': 'normal',
+                                    'height': 'auto',
+                                    #'lineHeight': '15px'
+                                },
+                                style_header={
+                                    'backgroundColor': SECONDARY_COLOR,
+                                    #"display": "none",
+                                    #"visibility": "hidden"
+                                },
+                                style_cell={
+                                    'textAlign': 'left',
+                                    'backgroundColor': SECONDARY_COLOR,
+                                },
+                                style_cell_conditional=[
+                                    {
+                                        'if': {'column_id': 'key'},
+                                        'fontWeight': 'bold',
+                                        'width': '30%'
+                                    } 
+                                ],
+                                style_as_list_view=True,
+                                css=[
+                                  {
+                                     'selector': 'tr:first-child',
+                                     'rule': 'display: none',
+                                  },
+                                ],
         )
-        return [html.H4(["Performance of the Model"]), performance_metrics_table]
+        return html.Div([html.H5("Performance Metrics"), performance_metrics_table], className="mt-4 mb-4")
 
 
 @app.callback(Output('result', 'data'), 

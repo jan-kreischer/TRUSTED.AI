@@ -87,36 +87,69 @@ def get_performance_metrics(model, test_data, target_column):
     else:
         y_pred = model.predict(X_test).flatten()
     #y_pred_proba = model.predict_proba(X_test)
-   
+    print("y_true.shape: {}".format(y_true.shape))
+    print("y_pred.shape: {}".format(y_pred.shape))
     #print("y_pred_proba.shape: {}".format(y_pred_proba.shape))
-    #labels = np.unique(np.array([y_pred,y_true]).flatten())
+    labels = np.unique(np.array([y_pred,y_true]).flatten())
 
     performance_metrics = pd.DataFrame({
         "accuracy" :  [metrics.accuracy_score(y_true, y_pred)],
-        #"global recall" :  [metrics.recall_score(y_true, y_pred, labels=labels, average="micro")],
+        "global recall" :  [metrics.recall_score(y_true, y_pred, labels=labels, average="micro")],
         "class weighted recall" : [metrics.recall_score(y_true, y_pred,average="weighted")],
-        #"global precision" : [metrics.precision_score(y_true, y_pred, labels=labels, average="micro")],
+        "global precision" : [metrics.precision_score(y_true, y_pred, labels=labels, average="micro")],
         "class weighted precision" : [metrics.precision_score(y_true, y_pred,average="weighted")],
         "global f1 score" :  [metrics.f1_score(y_true, y_pred,average="micro")],
         "class weighted f1 score" :  [metrics.f1_score(y_true, y_pred,average="weighted")],
         #"cross-entropy loss" : [metrics.log_loss(y_true, y_pred_proba)],
         #"ROC AUC" : [metrics.roc_auc_score(y_true, y_pred_proba,average="weighted", multi_class='ovr')]
     }).round(decimals=2)
+    
+    #performance_metrics = pd.Data
+    #print("------------------ {}".format(performance_metrics.transpose().columns))
+    performance_metrics = performance_metrics.transpose()
+    performance_metrics = performance_metrics.reset_index()
+    performance_metrics['index'] = performance_metrics['index'].str.title()
+    performance_metrics.rename(columns={"index":"key", 0:"value"}, inplace=True)
     return performance_metrics
 
 
-def get_description(factsheet):
+def get_scenario_description(scenario_id):
+    scenario_factsheet = read_scenario_factsheet(scenario_id)
+    data = []
+    data.insert(0, {'key': 'name', 'value': id_to_name(scenario_id)})
+    scenario_description = pd.DataFrame.from_dict(scenario_factsheet, orient="index", columns=["value"])
+    #scenario_description.index.set_names(['Scenario'])
+    scenario_description = scenario_description.reset_index()
+    print(scenario_description.columns)
+    #scenario_description.index.rename('Scenario', inplace=True)
+    print(scenario_description.columns)
+    scenario_description.rename(columns={'index': 'key'}, inplace=True)
+    scenario_description = pd.concat([pd.DataFrame(data), scenario_description], ignore_index=True)
+    scenario_description['key'] = scenario_description['key'].str.capitalize()
+    return scenario_description
+
+
+def get_solution_description(factsheet):
     description = {}
-    if "general" in factsheet:
-        if "model_name" in factsheet["general"]:
+    for e in GENERAL_INPUTS:
+        if e == "target_column":
+            continue
+        
+        description[id_to_name(e)] = factsheet.get("general", {}).get(e, " ")
+    #if "general" in factsheet:
+        #if "model_name" in factsheet["general"]:
            
-            description["Model Name"]= factsheet["general"]["model_name"]
+            #description["Model Name"]= factsheet["general"]["model_name"]
            
-        if "purpose_description" in factsheet["general"]:
-            description["Purpose of the Model"] = factsheet["general"]["purpose_description"]
-        if "training_data_description" in factsheet["general"]:
-            description["Training Data Description"] = factsheet["general"]["training_data_description"]
+        #if "purpose_description" in factsheet["general"]:
+        #    description["Purpose of the Model"] = factsheet["general"]["purpose_description"]
+        #if "training_data_description" in factsheet["general"]:
+        #    description["Training Data Description"] = factsheet["general"]["training_data_description"]
     description = pd.DataFrame(description, index=[0])
+    description = description.transpose()
+    description = description.reset_index()
+    description['index'] = description['index'].str.title()
+    description.rename(columns={"index": "key", 0: "value"}, inplace=True)
     return description
 
 def show_star_rating(rating):
