@@ -68,7 +68,7 @@ daq.BooleanSwitch(id='toggle_charts',
                 color = TRUST_COLOR,   
                 style={"float": "right"}
             ),
-                html.Div([html.H2("• General Information Regarding the Model")]),
+                html.Div([html.H2("• General Information")]),
                 html.Div([], id="general_description"),
                 html.Div(["Performance Metrics Section"], id="performance_metrics_section"),
                 dcc.Store(id='input-mappings'),
@@ -254,24 +254,63 @@ def store_mappings_config(n1, n2, n3, n4, *args):
     return json.dumps(config_file)
     
 @app.callback(Output('general_description', 'children'),
-              Input('solution_set_dropdown', 'value'), prevent_initial_call=True)
-def show_general_description(solution_set_path):
-    if not solution_set_path:
-        return ""
-    factsheet = read_factsheet(solution_set_path)
-    description = [html.H4("Description: ")]
-    if "general" in factsheet and "model_information" in factsheet["general"]:
-        description.append(factsheet["general"]["model_information"])
+              [Input('scenario_dropdown', 'value'),
+              Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
+def show_general_description(scenario_id, solution_set_path):
+    description = []
+    if scenario_id and solution_set_path:
+        description.append(html.H5("Scenario"))
+        scenario_factsheet = read_scenario_factsheet(scenario_id)
+        scenario_description = pd.DataFrame.from_dict(scenario_factsheet, orient="index", columns=["value"])
+        #scenario_description.index.set_names(['Scenario'])
+        scenario_description = scenario_description.reset_index()
+        print(scenario_description.columns)
+        #scenario_description.index.rename('Scenario', inplace=True)
+        scenario_description['index'] = scenario_description['index'].str.capitalize()
+        scenario_description['value'] = scenario_description['value'].str.capitalize()
+        
+        scenario_description_table = dash_table.DataTable(
+            id='scenario_description_table',
+            columns=[{"name": i, "id": i} for i in scenario_description.columns],
+            data=scenario_description.to_dict('records'),
+            style_table={
+                #"table-layout": "fixed",
+                "width": "100%",
+                'overflowX': 'hidden',
+                'textAlign': 'left'
+            },
+            style_data={
+                'whiteSpace': 'normal',
+                'height': 'auto',
+                #'lineHeight': '15px'
+            },
+            style_header={
+                #"display": "none",
+                #"visibility": "hidden"
+            },
+            style_cell={'textAlign': 'left'},
+            style_as_list_view=True,
+        )
+        description.append(scenario_description_table)
+        description.append(html.H5("Solution Description: "))
+        print("scenario_factsheet {}".format(scenario_factsheet))  
+        print("print type scenario factsheet {}".format(type(scenario_factsheet)))
+        factsheet = read_factsheet(solution_set_path)
 
-    description_list= get_description(factsheet)
-    description_table = dash_table.DataTable(
-        id='table',
-        columns=[{"name": i, "id": i} for i in description_list.columns],
-        data=description_list.to_dict('records'),
-        style_table={"table-layout": "fixed", "width": "auto", 'overflowX': 'hidden'}
-    )
-    description.append(description_table)
-    return description
+        if "general" in factsheet and "model_information" in factsheet["general"]:
+            description.append(factsheet["general"]["model_information"])
+
+        description_list= get_description(factsheet)
+        description_table = dash_table.DataTable(
+            id='table',
+            columns=[{"name": i, "id": i} for i in description_list.columns],
+            data=description_list.to_dict('records'),
+            style_table={"table-layout": "fixed", "width": "auto", 'overflowX': 'hidden'}
+        )
+        description.append(description_table)
+        return description
+    else:
+        return ""
     
 @app.callback([Output('solution_set_dropdown', 'value'),
               Output('delete_solution_alert', 'children')],
@@ -974,7 +1013,7 @@ def clever_score(data):
 @app.callback(
     Output("solution_set_dropdown", 'options'),
     Input('scenario_dropdown', 'value'), prevent_initial_call=False)
-def clever_score(scenario_id):
+def show_scenario_solution_options(scenario_id):
     if scenario_id:
         return get_scenario_solutions_options(scenario_id)
     else:
@@ -1018,8 +1057,6 @@ layout = html.Div([
                     placeholder='Select Solution'
                 )], width=12, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
             ),
-            html.Div(dbc.Button("Download Report", id='download_report_button', color="primary", className="mt-3"),
-                         className="text-center"),
             dbc.Modal([
                     dbc.ModalHeader("Success"),
                     dbc.ModalBody([dbc.Alert(id="report-success",children ="You successfully saved the report", color="success"),]),
@@ -1040,6 +1077,8 @@ layout = html.Div([
                     pillar_section("explainability", explainability_metrics),
                     pillar_section("robustness", robustness_metrics),
                     pillar_section("methodology", methodology_metrics),
+                    html.Div(dbc.Button("Download Report", id='download_report_button', color="primary", className="mt-3"),
+                         className="text-center"),
                     dcc.Store(id='training_data'),
                     dcc.Store(id='test_data')
                 ], id="analysis_section")

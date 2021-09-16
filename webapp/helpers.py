@@ -197,6 +197,7 @@ def read_model(solution_set_path):
         print("loading joblib model")
         return joblib.load(model_file)
 
+# === FACTSHEET ===
 '''
     This function reads the factsheet into a dictionary
 '''
@@ -208,7 +209,32 @@ def read_factsheet(solution_set_path):
         return factsheet
     else:
         return {}
-
+    
+'''
+    This function reads the factsheet into a dictionary
+'''
+def read_scenario_factsheet(scenario_id):
+    factsheet_path = os.path.join(SCENARIOS_FOLDER_PATH, scenario_id, FACTSHEET_NAME)
+    if os.path.isfile(factsheet_path):
+        with open(factsheet_path,'rb') as f:
+            factsheet = json.loads(f.read())
+        return factsheet
+    else:
+        return {}
+    
+'''
+    This function reads the factsheet into a dictionary
+'''
+def write_scenario_factsheet(scenario_id):
+    factsheet_path = os.path.join(SCENARIOS_FOLDER_PATH, scenario_id, FACTSHEET_NAME)
+    if os.path.isfile(factsheet_path):
+        with open(factsheet_path,'rb') as f:
+            factsheet = json.loads(f.read())
+        return factsheet
+    else:
+        return {}
+    
+    
 def write_into_factsheet(new_factsheet, solution_set_path):
     factsheet_path = os.path.join(solution_set_path, FACTSHEET_NAME)
     with open(factsheet_path, 'w') as outfile:
@@ -291,23 +317,23 @@ def create_info_modal(module_id, name, content, example):
 )
     return modal
 
-def load_scenario_description(scenario_path):
-    scenario_description = ""
-    path = os.path.join(scenario_path, SCENARIO_DESCRIPTION_FILE)
-    if os.path.exists(path):
-        file = open(path, mode='r')
-        scenario_description = file.read()
-        file.close()
-    return scenario_description
+#def load_scenario_description(scenario_path):
+#    scenario_description = ""
+#    path = os.path.join(scenario_path, SCENARIO_DESCRIPTION_FILE)
+#    if os.path.exists(path):
+#        file = open(path, mode='r')
+#        scenario_description = file.read()
+#        file.close()
+#    return scenario_description
  
-def load_scenario_link(scenario_path):
-    scenario_link = ""
-    path = os.path.join(scenario_path, SCENARIO_LINK_FILE)
-    if os.path.exists(path):
-        file = open(path, mode='r')
-        scenario_link = file.read()
-        file.close()
-    return scenario_link
+#def load_scenario_link(scenario_path):
+#    scenario_link = ""
+#    path = os.path.join(scenario_path, SCENARIO_LINK_FILE)
+#    if os.path.exists(path):
+#        file = open(path, mode='r')
+#        scenario_link = file.read()
+#        file.close()
+#    return scenario_link
     
 def parse_contents(contents, filename):
     content_type, content_string = contents.split(',')
