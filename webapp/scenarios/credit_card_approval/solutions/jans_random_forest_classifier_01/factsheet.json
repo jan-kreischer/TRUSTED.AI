@@ -1,1 +1,193 @@
-{"general": {"target_column": "Target"}, "fairness": {"question_fairness": 3, "protected_feature": "Group", "protected_group": "lambda x: x[protected_feature] == 1", "favorable_outcome": "lambda x: x[target_column] == 1"}, "explainability": {}, "robustness": {}, "methodology": {}}
+{
+    "general": {
+        "target_column": "Target"
+    },
+    "fairness": {
+        "question_fairness": 3,
+        "protected_feature": "Group",
+        "protected_group": "lambda x: x[protected_feature] == 1",
+        "favorable_outcome": "lambda x: x[target_column] == 1"
+    },
+    "explainability": {},
+    "robustness": {},
+    "methodology": {},
+    "scores": {
+        "fairness": {
+            "question_fairness": 3,
+            "class_balance": 1,
+            "statistical_parity_difference": 1,
+            "equal_opportunity_difference": NaN,
+            "average_odds_difference": NaN,
+            "disparate_impact": NaN,
+            "theil_index": NaN,
+            "euclidean_distance": NaN,
+            "mahalanobis_distance": NaN,
+            "manhattan_distance": NaN
+        },
+        "explainability": {
+            "algorithm_class": 3,
+            "correlated_features": 5,
+            "model_size": 5,
+            "feature_relevance": 1
+        },
+        "robustness": {
+            "confidence_score": 5,
+            "clique_method": 0,
+            "loss_sensitivity": NaN,
+            "clever_score": NaN,
+            "empirical_robustness_fast_gradient_attack": NaN,
+            "empirical_robustness_carlini_wagner_attack": NaN,
+            "empirical_robustness_deepfool_attack": NaN
+        },
+        "methodology": {
+            "normalization": 1,
+            "missing_data": 5,
+            "regularization": 1,
+            "train_test_split": 5,
+            "test_accuracy": NaN,
+            "f1_score": NaN,
+            "factsheet_completeness": 1
+        }
+    },
+    "properties": {
+        "fairness": {
+            "question_fairness": {},
+            "class_balance": {},
+            "statistical_parity_difference": {
+                "Favored Majority Ratio": 0.19776821164374975,
+                "Favored Minority Ratio": 0.572176297096332,
+                "Statistical Parity Difference": 0.37440808545258225
+            },
+            "equal_opportunity_difference": {},
+            "average_odds_difference": {},
+            "disparate_impact": {},
+            "theil_index": {},
+            "euclidean_distance": {},
+            "mahalanobis_distance": {},
+            "manhattan_distance": {}
+        },
+        "explainability": {
+            "algorithm_class": {
+                "clf_name": [
+                    "model type",
+                    "RandomForestClassifier"
+                ]
+            },
+            "correlated_features": {
+                "pct_drop": [
+                    "Percentage of highly correlated features",
+                    "0.00%"
+                ]
+            },
+            "model_size": {
+                "n_features": [
+                    "number of features",
+                    6
+                ]
+            },
+            "feature_relevance": {
+                "n_outliers": [
+                    "number of outliers in the importance distribution",
+                    1
+                ],
+                "pct_dist": [
+                    "percentage of feature that make up over 60% of all features importance",
+                    "0.00%"
+                ],
+                "importance": [
+                    "feature importance",
+                    {
+                        "value": [
+                            0.7487806085161614,
+                            0.20987423819333784,
+                            0.029107337319072432,
+                            0.012167451615456456,
+                            7.036435597195948e-05
+                        ],
+                        "labels": [
+                            "Income",
+                            "Group",
+                            "Own_Housing",
+                            "Own_Car",
+                            "Num_Children"
+                        ]
+                    }
+                ]
+            }
+        },
+        "robustness": {
+            "confidence_score": {
+                "confidence_score": [
+                    "Average confidence score",
+                    "93.19%"
+                ]
+            },
+            "clique_method": {
+                "error_bound": [
+                    "Average error bound",
+                    "0.00"
+                ],
+                "error": [
+                    "Error",
+                    "1.0"
+                ]
+            },
+            "loss_sensitivity": {},
+            "clever_score": {},
+            "empirical_robustness_fast_gradient_attack": {},
+            "empirical_robustness_carlini_wagner_attack": {},
+            "empirical_robustness_deepfool_attack": {}
+        },
+        "methodology": {
+            "normalization": {
+                "Training_mean": [
+                    "Mean of the training data",
+                    "14485.76"
+                ],
+                "Training_std": [
+                    "Standard deviation of the training data",
+                    "4584.53"
+                ],
+                "Test_mean": [
+                    "Mean of the test data",
+                    "14544.39"
+                ],
+                "Test_std": [
+                    "Standard deviation of the test data",
+                    "4566.49"
+                ]
+            },
+            "missing_data": {
+                "null_values": [
+                    "Number of the null values",
+                    "0"
+                ]
+            },
+            "regularization": {
+                "regularization_technique": "not specified"
+            },
+            "train_test_split": {
+                "training_data_ratio": [
+                    "The ratio of the train data",
+                    "80.00"
+                ],
+                "test_data_ratio": [
+                    "The ratio of the test data",
+                    "20.00"
+                ]
+            },
+            "test_accuracy": {},
+            "f1_score": {},
+            "factsheet_completeness": {
+                "model_name": "missing",
+                "purpose_description": "missing",
+                "domain_description": "missing",
+                "training_data_description": "missing",
+                "model_information": "missing",
+                "target_column": "present",
+                "authors": "missing",
+                "contact_information": "missing"
+            }
+        }
+    }
+}

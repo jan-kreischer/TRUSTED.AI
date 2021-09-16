@@ -20,7 +20,7 @@ def scenario_dropdown_options():
         options.append({"label": scenario_name, "value": scenario_id})
     return options
 
-def load_scenario(scenario_name):
+def load_scenario(scenario_id):
     """Example Google style docstrings.
 
     This module demonstrates documentation as specified by the `Google Python
@@ -54,14 +54,30 @@ def load_scenario(scenario_name):
        http://google.github.io/styleguide/pyguide.html
 
     """
-    scenario_path = os.path.join(SCENARIOS_FOLDER_PATH, scenario_name)
-    scenario_link = load_scenario_link(scenario_path)
-    scenario_description = load_scenario_description(scenario_path)
-    scenario_solutions = [f.name for f in os.scandir(os.path.join(SCENARIOS_FOLDER_PATH, scenario_name, SOLUTIONS_FOLDER)) if f.is_dir() and not f.name.startswith('.')]
+    scenario_path = get_scenario_path(scenario_id)
+    scenario_factsheet = read_scenario_factsheet(scenario_id)
+    scenario_description = scenario_factsheet.get("description", "")
+    scenario_link = scenario_factsheet.get("link", "")
+    #scenario_link = load_scenario_link(scenario_path)
+    #scenario_description = load_scenario_description(scenario_path)
+    scenario_solutions = [f.name for f in os.scandir(os.path.join(scenario_path, SOLUTIONS_FOLDER)) if f.is_dir() and not f.name.startswith('.')]
     return scenario_link, scenario_description, scenario_solutions
   
 
 def display_scenario(scenario_id, scenario_name, scenario_link, scenario_description, scenario_solutions):
+    """This function open and closes the dialog window
+    where the user can create new scenarios
+
+    Args:
+        n1: number of clicks on the open button.
+        n2: number of clicks on the submit button.
+        is_open: current state of the modal.
+
+    Returns:
+        Returns false if the dialog was previously open and
+        returns true if the dialog was previously closed.
+
+    """
     sections = [html.H3("▶ {}".format(scenario_name), style={"text-transform": "none"}),
                html.Div(scenario_description, className="mt-4 mb-1", style={"font-style": "italic"}),
                html.A("Link To Dataset", href=scenario_link, className="mt-1 mb-4", style={"display": "block", "font-style": "italic", "color": PRIMARY_COLOR}),
