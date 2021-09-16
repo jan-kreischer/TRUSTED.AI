@@ -86,8 +86,7 @@ def missing_data_score(model, training_dataset, test_dataset, factsheet, mapping
 def train_test_split_score(model, training_dataset, test_dataset, factsheet, mappings):
     try:
         training_data_ratio, test_data_ratio = train_test_split_metric(training_dataset, test_dataset)
-        properties= {"training_data_ratio": info("The ratio of the train data", "{:.2f}".format(training_data_ratio)),
-                     "test_data_ratio": info("The ratio of the test data", "{:.2f}".format(test_data_ratio))}
+        properties= {"train_test_split": info("Train test split", "{:.2f}/{:.2f}".format(training_data_ratio, test_data_ratio))}
         for k in mappings.keys():
             thresholds = re.findall(r'\d+-\d+', k)
             for boundary in thresholds:
@@ -204,9 +203,9 @@ def factsheet_completeness_score(model, training_dataset, test_dataset, factshee
     for e in GENERAL_INPUTS:
         if "general" in factsheet and e in factsheet["general"]:
             ctr+=1
-            properties[e] = info(e, "present")
+            properties[e] = info("(Factsheet Property) {}".format(e), "present")
         else:
-            properties[e] = info(e, "missing")
+            properties[e] = info("(Factsheet Property) {}".format(e), "missing")
     score = round(ctr/n*5)
     return result(score=score, properties=properties)
             

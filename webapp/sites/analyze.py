@@ -1022,14 +1022,17 @@ def clever_score(scenario_id):
     Input('download_report_button', 'n_clicks'), 
     [State('solution_set_dropdown', 'value'),
      State("modal-report", "is_open"),
-     State('result', 'data')], prevent_initial_call=True)
-def download_report(n_clicks, solution_set_path, is_open, data):
+     State('result', 'data'),
+     State("config-dropdown", "value")
+     ] + list(map(lambda x: State("mapping-dropdown-{}".format(x), 'value' ), SECTIONS[1:])) , prevent_initial_call=True)
+def download_report(n_clicks, solution_set_path, is_open, data, weight, map_f, map_e, map_r, map_m):
     if n_clicks and solution_set_path:
+        configs = [weight, map_f, map_e, map_r, map_m]
         result = json.loads(data)
         test_data, training_data, model, factsheet = read_solution(solution_set_path)
         target_column = factsheet.get("general", {}).get("target_column", "")
         print(charts)
-        save_report_as_pdf(result, model, test_data, target_column, factsheet,  charts)
+        save_report_as_pdf(result, model, test_data, target_column, factsheet,  charts, configs)
         data = send_file("report.pdf")
         del data["mime_type"]
         return is_open, data

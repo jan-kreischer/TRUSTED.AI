@@ -324,14 +324,14 @@ def add_matplotlib_to_report(Story, charts):
     return Story
 
 
-def save_report_as_pdf(result, model, test_data, target_column, factsheet, charts):
-    
-    
+def save_report_as_pdf(result, model, test_data, target_column, factsheet, charts, configs):
+      
     start = timeit.timeit()
     print("creating report")
+    weight, map_f, map_e, map_r, map_m = configs
     doc = SimpleDocTemplate("report.pdf")
     Story = [Spacer(1, 0.2 * inch)]
-    l = ["general", "fairness", "methodology"]
+    l = ["general"]
 
     for element in l:
         if factsheet[element]!= {}:
@@ -399,7 +399,7 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
                     v.append(m)
                     
     Story = create_report_section(Story, "Methodology Properties",  k, v)
-
+    
     #Story = add_charts_to_report(Story, charts)
     plots = []
     
@@ -411,7 +411,8 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
     my_dpi=96
     fig = plt.figure(figsize=(600/my_dpi, 400/my_dpi), dpi=my_dpi)
     ax = plt.subplot(111)
-    draw_bar_plot(pillars,values, ax, color= pillar_colors)
+    trust_score = result["trust_score"]
+    draw_bar_plot(pillars,values, ax, color= pillar_colors, title="Overall Trust Score {}/5 \n(config: {})".format(trust_score, weight.split("/")[-1][:-5]))
     plots.append(fig)
 
     
@@ -422,7 +423,7 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
     plt.subplots_adjust(hspace=0.5,wspace=0.2)
     
     for n, (pillar , sub_scores) in enumerate(results.items()):
-        title = pillar
+        title = "{} \n(config: {})".format(pillar,configs[n+1].split("/")[-1][:-5])
         categories = list(map(lambda x: x.replace("_",' '), sub_scores.keys())) 
         categories= [ '\n'.join(wrap(l, 12,break_long_words=False)) for l in categories ]
         values = list(sub_scores.values())
@@ -434,6 +435,11 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
     fig.suptitle('Pillar Metrics', fontsize=16)
     plots.append(fig)
     Story.append(reportlab.platypus.PageBreak())
+    p = Paragraph("Charts - Trust Scores")
+    Story.append(p)
+    d = Drawing(PAGE_WIDTH, 1)
+    d.add(Line(0, 0, PAGE_WIDTH-130, 0, strokeColor='#000080', strokeWidth=.8))
+    Story.append(d)
     Story = add_matplotlib_to_report(Story, plots)
     
     doc.build(Story, onFirstPage=title_style)
@@ -594,7 +600,7 @@ def pillar_section(pillar, metrics):
                     dcc.Graph(id='{}_bar'.format(pillar), style={'display': 'block'}),    
                     dbc.Collapse(metric_detail_sections,
                         id="{}_details".format(pillar),
-                        is_open=False,
+                        is_open= False,
                     ),
                     html.Hr(style={"size": "10"}),
                     dbc.Modal(
