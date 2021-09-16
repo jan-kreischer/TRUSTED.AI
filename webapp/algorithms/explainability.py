@@ -16,13 +16,14 @@ def analyse(clf, train_data, test_data, config, factsheet):
     clf_type_score = config["score_algorithm_class"]["clf_type_score"]["value"]
     ms_thresholds = config["score_model_size"]["thresholds"]["value"]
     cf_thresholds = config["score_correlated_features"]["thresholds"]["value"]
+    high_cor = config["score_correlated_features"]["high_cor"]["value"]
     fr_thresholds = config["score_feature_relevance"]["thresholds"]["value"]
     threshold_outlier = config["score_feature_relevance"]["threshold_outlier"]["value"]
     penalty_outlier = config["score_feature_relevance"]["penalty_outlier"]["value"]
     
     output = dict(
         algorithm_class     = algorithm_class_score(clf, clf_type_score),
-        correlated_features = correlated_features_score(train_data, test_data, thresholds=cf_thresholds, target_column=target_column ),
+        correlated_features = correlated_features_score(train_data, test_data, thresholds=cf_thresholds, target_column=target_column, high_cor=high_cor ),
         model_size          = model_size_score(train_data, ms_thresholds),
         feature_relevance   = feature_relevance_score(clf, train_data ,target_column=target_column, thresholds=fr_thresholds,
                                                      threshold_outlier =threshold_outlier,penalty_outlier=penalty_outlier )
@@ -42,7 +43,7 @@ def algorithm_class_score(clf, clf_type_score):
     
     return  result(score=exp_score, properties=properties)
 
-def correlated_features_score(train_data, test_data, thresholds=[0.05, 0.16, 0.28, 0.4], target_column=None):
+def correlated_features_score(train_data, test_data, thresholds=[0.05, 0.16, 0.28, 0.4], target_column=None, high_cor=0.9):
     
     test_data = test_data.copy()
     train_data = train_data.copy()
@@ -62,7 +63,7 @@ def correlated_features_score(train_data, test_data, thresholds=[0.05, 0.16, 0.2
     upper = corr_matrix.where(np.triu(np.ones(corr_matrix.shape), k=1).astype(np.bool))
     
     # Find features with correlation greater than 0.95
-    to_drop = [column for column in upper.columns if any(upper[column] > 0.95)]
+    to_drop = [column for column in upper.columns if any(upper[column] > high_cor)]
     
     pct_drop = len(to_drop)/len(df_comb.columns)
     

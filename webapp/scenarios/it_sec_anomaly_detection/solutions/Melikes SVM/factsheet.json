@@ -42,10 +42,8 @@
         "methodology": {
             "normalization": 4,
             "missing_data": 5,
-            "regularization": 0,
+            "regularization": 1,
             "train_test_split": 2,
-            "test_accuracy": NaN,
-            "f1_score": NaN,
             "factsheet_completeness": 4
         }
     },
@@ -130,8 +128,6 @@
                     "10.00"
                 ]
             },
-            "test_accuracy": {},
-            "f1_score": {},
             "factsheet_completeness": {
                 "model_name": "present",
                 "purpose_description": "present",

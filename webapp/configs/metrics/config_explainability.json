@@ -32,6 +32,11 @@
       }
     },
     "score_correlated_features": {
+	  "high_cor": {
+		"value": 0.9,
+		"description": "Threshold value to classify a correlation as highly correlated. Default value is 0.9 meaning every correlation equal or higher than 0.9 would be considered highly correlated",
+        "label": "High Correlation Threshold"
+	  },
       "thresholds": {
         "value": [
           0.05,
@@ -39,7 +44,7 @@
           0.25,
           0.4
         ],
-        "description": "Thresholds of how to map the percentage of highly correlated features (>=0.95) to a score from 1-5. Example if 0.05 is the first number it means that training dataset with 5% or less highly correlated variables would get the best score(5) and if 0.4 was the last number it would mean that a training dataset 40% or more highly correlated features would get the worst score (1), analog for the numbers in between",
+        "description": "Thresholds of how to map the percentage of highly correlated features (>= high_cor or default 0.9) to a score from 1-5. Example if 0.05 is the first number it means that training dataset with 5% or less highly correlated variables would get the best score(5) and if 0.4 was the last number it would mean that a training dataset 40% or more highly correlated features would get the worst score (1), analog for the numbers in between",
         "label": "Score Thresholds"
       }
     },

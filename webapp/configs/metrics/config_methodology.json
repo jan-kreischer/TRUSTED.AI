@@ -42,32 +42,6 @@
         "label": "Score Thresholds"
       }
     },
-    "score_test_accuracy": {
-      "thresholds": {
-        "value": [
-          0.80,
-          0.85,
-          0.90,
-          0.95,
-          0.99
-        ],
-        "description": "Thresholds of how to map the test accuracy to a score between 1-5.",
-        "label": "Score Thresholds"
-      }
-    },
-    "score_f1": {
-      "thresholds": {
-        "value": [
-          0.80,
-          0.85,
-          0.90,
-          0.95,
-          0.99
-        ],
-        "description": "Thresholds of how to map the f1 score to a score between 1-5.",
-        "label": "Score Thresholds"
-      }
-    },
     "score_factsheet_completeness": {
       "parameter_split": {
         "value": "The value of the parameter_XY",
@@ -76,12 +50,10 @@
     }
   },
     "weights": {
-        "normalization": 0.1666,
-        "missing_data": 0.1666,
-        "regularization": 0.1666,
-        "train_test_split": 0.1666,
-        "test_accuracy": 0.1666,
-        "f1_score": 0.1666,
-        "factsheet_completeness": 0.1666
+        "normalization": 0.2,
+        "missing_data": 0.2,
+        "regularization": 0.2,
+        "train_test_split": 0.2,
+        "factsheet_completeness": 0.2
     }
 }

@@ -45,8 +45,6 @@
             "missing_data": 5,
             "regularization": 0,
             "train_test_split": 5,
-            "test_accuracy": 1.0,
-            "f1_score": 1.0,
             "factsheet_completeness": 4
         }
     },
@@ -139,18 +137,6 @@
                 "test_data_ratio": [
                     "The ratio of the test data",
                     "20.00"
-                ]
-            },
-            "test_accuracy": {
-                "test_accuracy": [
-                    "Test Accuracy",
-                    "0.84"
-                ]
-            },
-            "f1_score": {
-                "f1_score": [
-                    "F1 Score",
-                    "0.84"
                 ]
             },
             "factsheet_completeness": {

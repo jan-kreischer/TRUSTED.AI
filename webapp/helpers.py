@@ -22,8 +22,54 @@ import matplotlib.pyplot as plt
 from math import pi
 import sklearn.metrics as metrics
 import collections
+import reportlab
 from reportlab.pdfgen import canvas
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.rl_config import defaultPageSize
+from reportlab.lib.units import inch
+from reportlab.graphics.shapes import *
+from reportlab.lib.colors import *
+from base64 import b64encode
+from textwrap import wrap
+import timeit
+from reportlab.lib.utils import ImageReader
+
+PAGE_HEIGHT=defaultPageSize[1]; PAGE_WIDTH=defaultPageSize[0]
+
 result = collections.namedtuple('result', 'score properties')
+
+def draw_bar_plot(categories, values, ax, color='lightblue', title='Trusting AI Final Score',size=12):
+    
+    # drop top and right spine
+    ax.spines['right'].set_visible(False)
+    ax.spines['top'].set_visible(False)
+    #plt.grid(True,axis='y',zorder=0)
+    
+    # create barplot
+    x_pos = np.arange(len(categories))
+    plt.bar(x_pos, values,zorder=4,color=color)
+
+    for i, v in enumerate(values):
+        plt.text(i , v+0.1 , str(v),color='dimgray', fontweight='bold',ha='center')
+
+    # Create names on the x-axis
+    plt.xticks(x_pos, categories,size=size,wrap=True)
+
+    plt.yticks([1,2,3,4, 5], ["1","2","3","4","5"], size=12)
+    plt.ylim(0,5)
+    
+    if len(categories) > 4:
+        plt.xticks(rotation=15)
+    
+    if isinstance(color, list):
+        plt.title(title, size=11, y=1.1)
+    else:
+        # plt.title(title, size=11, y=1.1,
+        #      bbox=dict(facecolor=color, edgecolor=color, pad=2.0))
+        plt.title(title, size=11, y=1.1)
+    return plt
+   
 
 def get_performance_metrics(model, test_data, target_column):
 
@@ -33,13 +79,17 @@ def get_performance_metrics(model, test_data, target_column):
     else:
         X_test = test_data.iloc[:,:DEFAULT_TARGET_COLUMN_INDEX]
         y_test = test_data.reset_index(drop=True).iloc[:,DEFAULT_TARGET_COLUMN_INDEX:]
-    
+
     y_true = y_test.values.flatten()
-    y_pred = model.predict(X_test).flatten()
-    y_pred_proba = model.predict_proba(X_test)
+    if (isinstance(model, tf.keras.Sequential)):
+        y_pred_proba = model.predict(X_test)
+        y_pred = np.argmax(y_pred_proba, axis=1)
+    else:
+        y_pred = model.predict(X_test).flatten()
+    #y_pred_proba = model.predict_proba(X_test)
     print("y_true.shape: {}".format(y_true.shape))
     print("y_pred.shape: {}".format(y_pred.shape))
-    print("y_pred_proba.shape: {}".format(y_pred_proba.shape))
+    #print("y_pred_proba.shape: {}".format(y_pred_proba.shape))
     #labels = np.unique(np.array([y_pred,y_true]).flatten())
 
     performance_metrics = pd.DataFrame({
@@ -241,47 +291,192 @@ def write_into_factsheet(new_factsheet, solution_set_path):
         json.dump(new_factsheet, outfile, indent=4)
     return
 
+def title_style(canvas, doc):
+    canvas.saveState()
+    canvas.setFont('Times-Bold',16)
+    canvas.setFillColor('#000080')
+    canvas.drawString(50, 800, "TRUSTED AI")
+    canvas.drawCentredString(PAGE_WIDTH/2.0, PAGE_HEIGHT-88, "Report")
+    canvas.setFont('Times-Roman',9)
+    canvas.restoreState()
 
-def save_report_as_pdf(model, test_data, target_column, factsheet):
-    l = ["general", "fairness", "methodology"]
-    c = canvas.Canvas("report.pdf")
-    c.setFont("Times-Roman", 12)
-    c.setFillColor('#000080')
-    c.drawString(50, 800, "TRUSTED AI")
-    c.setStrokeColor('#000080')
-    c.setLineWidth(.8)
-    c.drawString(280, 750, "REPORT")
-    y = 700
+def create_report_section(Story, title , keys, values):
+    Story.append(Spacer(1, 0.2 * inch))
+    p = Paragraph(id_to_name(title))
+    Story.append(p)
+    Story.append(Spacer(1, 0.1 * inch))
+    d = Drawing(PAGE_WIDTH, 1)
+    d.add(Line(0, 0, PAGE_WIDTH-130, 0, strokeColor='#000080', strokeWidth=.8))
+    Story.append(d)
+    Story.append(Spacer(1, 0.1 * inch))
+    for k, v in zip(keys, values):
+        m = "{}: {}".format(id_to_name(k), v)
+        p = Paragraph(m)
+        Story.append(p)
+        Story.append(Spacer(1, 0.2 * inch))
+    return Story
+
+def add_charts_to_report(Story, charts):
+    for chart in charts:
+        img_bytes = chart.to_image(format="png")
+        encoding = b64encode(img_bytes).decode()
+        img_b64 = "data:image/png;base64," + encoding
+        im = reportlab.platypus.Image(img_b64)
+        im._restrictSize(4 * inch, 4 * inch)
+        Story.append(im)
+    return Story
+
+def add_matplotlib_to_report(Story, charts):
+   # Story.append(reportlab.platypus.Paragraph("<h1>Charts</h1>"))
+    for i, fig in enumerate(charts):
+        # img_bytes = io.BytesIO()
+        # fig.savefig(img_bytes)
+        # img_bytes.seek(0)   
+        # encoding = b64encode(img_bytes).decode()
+        # img_b64 = "data:image/png;base64," + encoding
+        # im = reportlab.platypus.Image(img_b64)
+        # im._restrictSize(4 * inch, 4 * inch)
+        #fig.set_size_inches(18.5, 10.5)
+        imgdata = io.BytesIO()
+        fig.savefig(imgdata, format='png',dpi=300,bbox_inches='tight')
+        imgdata.seek(0)  # rewind the data
+        im = reportlab.platypus.Image(imgdata)
+        if i ==1:
+            im._restrictSize(7 * inch, 5 * inch)
+            Story.append(im)
+        else:
+            im._restrictSize(6 * inch, 4 * inch)
+            Story.append(reportlab.platypus.Paragraph("<br/><br/>"))
+            Story.append(im)
+       
+       
+       
+    return Story
+
+
+def save_report_as_pdf(result, model, test_data, target_column, factsheet, charts, configs):
+      
+    start = timeit.timeit()
+    print("creating report")
+    weight, map_f, map_e, map_r, map_m = configs
+    doc = SimpleDocTemplate("report.pdf")
+    Story = [Spacer(1, 0.2 * inch)]
+    l = ["general"]
+
     for element in l:
-        if factsheet[element] != {}:
-            c.setFillColor('#000080')
-            y = y - 10
-            c.drawString(50, y, id_to_name(element))
-            y = y - 15
-            c.line(20, y, 580, y)
-            y = y - 25
-        for k in factsheet[element].keys():
-            c.setFillColor('#000000')
-            c.drawString(50, y, id_to_name(k)+":")
-            c.drawString(200, y, factsheet[element][k])
-            y = y - 25
-
+        if factsheet[element]!= {}:
+            Story = create_report_section(Story, element, factsheet[element].keys(),factsheet[element].values())
     perf = get_performance_metrics(model, test_data, target_column)
-    c.setFillColor('#000080')
-    y = y - 10
-    c.drawString(50, y, "Performance of the Model")
-    y = y - 15
-    c.line(20, y, 580, y)
-    y = y - 25
-    c.setFillColor('#000000')
+    Story = create_report_section(Story,  "Performance of the Model", perf.columns, perf.values.flatten())
 
-    for p in perf.columns:
-        c.drawString(50, y, id_to_name(p) + ":")
-        c.drawString(200, y, perf[p].to_string(index=False))
-        y = y - 25
-    c.showPage()
-    c.save()
-    return
+    
+    fairness_properties = [p for k, p in result["properties"]["fairness"].items()]
+    k = []
+    v = []
+    for l in fairness_properties:
+        if l!= {}:
+            for i,m in l.items():
+                if type(m) == list:
+                    k.append(m[0])
+                    v.append(m[1])
+                else: 
+                    k.append(i)
+                    v.append(m)
+                    
+    Story = create_report_section(Story, "Fairness Properties",  k, v)
+    
+    explainability_properties = [p for k, p in result["properties"]["explainability"].items()] 
+    k = []
+    v = []
+    for l in explainability_properties:
+        if l!= {}:
+            for i,m in l.items():
+             if i !="importance":
+                if type(m) == list:
+                    k.append(m[0])
+                    v.append(m[1])
+                else: 
+                    k.append(i)
+                    v.append(m)
+    Story = create_report_section(Story, "Explainability Properties",  k, v)
+    
+    robustness_properties = [p for k, p in result["properties"]["robustness"].items()]
+    k = []
+    v = []
+    for l in robustness_properties:
+        if l!= {}:
+            for i,m in l.items():
+                if type(m) == list:
+                    k.append(m[0])
+                    v.append(m[1])
+                else: 
+                    k.append(i)
+                    v.append(m)
+                    
+    Story = create_report_section(Story, "Robustness Properties",  k, v)
+    
+    methodology_properties = [p for k, p in result["properties"]["methodology"].items()]
+    k = []
+    v = []
+    for l in methodology_properties:
+        if l!= {}:
+            for i,m in l.items():
+                if type(m) == list:
+                    k.append(m[0])
+                    v.append(m[1])
+                else: 
+                    k.append(i)
+                    v.append(m)
+                    
+    Story = create_report_section(Story, "Methodology Properties",  k, v)
+    
+    #Story = add_charts_to_report(Story, charts)
+    plots = []
+    
+    final_score = result["final_score"]
+    pillars = list(final_score.keys())
+    values = list(final_score.values())
+    pillar_colors = ['#06d6a0','#ffd166','#ef476f','#118ab2']
+
+    plt.switch_backend('Agg')
+    my_dpi=96
+    fig = plt.figure(figsize=(600/my_dpi, 400/my_dpi), dpi=my_dpi)
+    ax = plt.subplot(111)
+    trust_score = result["trust_score"]
+    draw_bar_plot(pillars,values, ax, color= pillar_colors, title="Overall Trust Score {}/5 \n(config: {})".format(trust_score, weight.split("/")[-1][:-5]))
+    plots.append(fig)
+
+    
+    results = result["results"]
+    my_dpi=96
+    fig = plt.figure(figsize=(1200/my_dpi, 800/my_dpi), dpi=my_dpi)
+    my_palette = ['#06d6a0','#ffd166','#ef476f','#118ab2']
+    plt.subplots_adjust(hspace=0.5,wspace=0.2)
+    
+    for n, (pillar , sub_scores) in enumerate(results.items()):
+        title = "{} \n(config: {})".format(pillar,configs[n+1].split("/")[-1][:-5])
+        categories = list(map(lambda x: x.replace("_",' '), sub_scores.keys())) 
+        categories= [ '\n'.join(wrap(l, 12,break_long_words=False)) for l in categories ]
+        values = list(sub_scores.values())
+        nan_val = np.isnan(values)
+        values = np.array(values)[~nan_val]
+        categories = np.array(categories)[~nan_val]
+        ax = plt.subplot(2,2,n+1)
+        draw_bar_plot(categories,values, ax, color=my_palette[n], title=title,size=9)
+    fig.suptitle('Pillar Metrics', fontsize=16)
+    plots.append(fig)
+    Story.append(reportlab.platypus.PageBreak())
+    p = Paragraph("Charts - Trust Scores")
+    Story.append(p)
+    d = Drawing(PAGE_WIDTH, 1)
+    d.add(Line(0, 0, PAGE_WIDTH-130, 0, strokeColor='#000080', strokeWidth=.8))
+    Story.append(d)
+    Story = add_matplotlib_to_report(Story, plots)
+    
+    doc.build(Story, onFirstPage=title_style)
+    end = timeit.timeit()
+    print(end - start)  
+    
 
 def read_solution(solution_set_path):
     test = read_test(solution_set_path)
@@ -404,19 +599,21 @@ def pillar_section(pillar, metrics):
 
         return html.Div([
                 html.Div([
+                    html.Div([html.Label("show Details"),
                     dbc.Button(
                         html.I(className="fas fa-chevron-down"),
                         id="toggle_{}_details".format(pillar),
                         className="mb-3",
                         n_clicks=0,
-                        style={"float": "right", "backgroundColor": SECONDARY_COLOR}
-                    ),
+                        style={"backgroundColor": SECONDARY_COLOR}
+                    )
+                    ],style={"float": "right"}),
                     daq.BooleanSwitch(id='toggle_{}_mapping'.format(pillar),
                       on=False,
                       label='Show Mappings',
                       labelPosition="top",
                       color = TRUST_COLOR,
-                      style={"float": "right"}
+                      style={"float": "right","margin-right":"31%"}
                     ),
                     html.H2("• {}".format(pillar.upper()), className="mb-5"),
                     ], id="{}_section_heading".format(pillar.lower())),
@@ -434,7 +631,7 @@ def pillar_section(pillar, metrics):
                     dcc.Graph(id='{}_bar'.format(pillar), style={'display': 'block'}),    
                     dbc.Collapse(metric_detail_sections,
                         id="{}_details".format(pillar),
-                        is_open=False,
+                        is_open= False,
                     ),
                     html.Hr(style={"size": "10"}),
                     dbc.Modal(
@@ -491,7 +688,7 @@ def mapping_panel(pillar):
            
             map_panel.append(html.Div(html.Label(v.get("label", p).replace("_",' '), title=v.get("description","")), style={"margin-left":"30%"})),
             if p== "clf_type_score":
-                map_panel.append(html.Div(dcc.Textarea(id=input_id, name=pillar,value=str(v.get("value" "")).replace(",",',\n'), style={"width":300, "height":250}), style={"margin-left":"30%"}))
+                map_panel.append(html.Div(dcc.Textarea(id=input_id, name=pillar,value=str(v.get("value" "")), style={"width":300, "height":150}), style={"margin-left":"30%"}))
             else:
                 map_panel.append(html.Div(dcc.Input(id=input_id, name=pillar,value=str(v.get("value" "")), type='text', style={"width":200}), style={"margin-left":"30%"}))
             map_panel.append(html.Br())

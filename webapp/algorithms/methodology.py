@@ -10,8 +10,8 @@ info = collections.namedtuple('info', 'description value')
 # === Methodology Metrics ===
 def analyse(model, training_dataset, test_dataset, factsheet, methodology_config):
 
-    accuracy_thresholds = methodology_config["score_test_accuracy"]["thresholds"]["value"]
-    f1_score_thresholds = methodology_config["score_f1"]["thresholds"]["value"]
+    #_accuracy_thresholds = methodology_config["score_test_accuracy"]["thresholds"]["value"]
+    #_f1_score_thresholds = methodology_config["score_f1"]["thresholds"]["value"]
     normalization_mapping = methodology_config["score_normalization"]["mappings"]["value"]
     missing_data_mapping = methodology_config["score_missing_data"]["mappings"]["value"]
     train_test_split_mapping = methodology_config["score_train_test_split"]["mappings"]["value"]
@@ -24,8 +24,8 @@ def analyse(model, training_dataset, test_dataset, factsheet, methodology_config
         missing_data = missing_data_score(model, training_dataset, test_dataset, factsheet, missing_data_mapping),
         regularization   = regularization_score(model, training_dataset, test_dataset, factsheet, methodology_config),
         train_test_split = train_test_split_score(model, training_dataset, test_dataset, factsheet, train_test_split_mapping),
-        test_accuracy = test_accuracy_score(model, training_dataset, test_dataset, factsheet, accuracy_thresholds),
-        f1_score = f1_score(model, training_dataset, test_dataset, factsheet, f1_score_thresholds),
+        #test_accuracy = test_accuracy_score(model, training_dataset, test_dataset, factsheet, accuracy_thresholds),
+        #f1_score = f1_score(model, training_dataset, test_dataset, factsheet, f1_score_thresholds),
         factsheet_completeness= factsheet_completeness_score(model, training_dataset, test_dataset, factsheet, methodology_config)
     )
     
@@ -86,8 +86,7 @@ def missing_data_score(model, training_dataset, test_dataset, factsheet, mapping
 def train_test_split_score(model, training_dataset, test_dataset, factsheet, mappings):
     try:
         training_data_ratio, test_data_ratio = train_test_split_metric(training_dataset, test_dataset)
-        properties= {"training_data_ratio": info("The ratio of the train data", "{:.2f}".format(training_data_ratio)),
-                     "test_data_ratio": info("The ratio of the test data", "{:.2f}".format(test_data_ratio))}
+        properties= {"train_test_split": info("Train test split", "{:.2f}/{:.2f}".format(training_data_ratio, test_data_ratio))}
         for k in mappings.keys():
             thresholds = re.findall(r'\d+-\d+', k)
             for boundary in thresholds:
@@ -110,9 +109,10 @@ def is_between(a, x, b):
 
 # --- Regularization ---
 def regularization_score(model, training_dataset, test_dataset, factsheet, methodology_config):
-    score = 0
+    score = 1
     regularization = regularization_metric(factsheet)
-    properties= {"regularization_technique": regularization}
+    properties = {"regularization_technique": info("Regularization technique", regularization)}
+
     if regularization == "elasticnet_regression":
         score = 5
     elif regularization == "lasso_regression" or regularization == "lasso_regression":
@@ -120,9 +120,9 @@ def regularization_score(model, training_dataset, test_dataset, factsheet, metho
     elif regularization == "Other":
         score = 3
     elif regularization == NOT_SPECIFIED:
-        score = 1
+        score = np.nan
     else:
-        score = 0
+        score = 1
     return result(score=score, properties=properties)
 
 def regularization_metric(factsheet):
@@ -203,9 +203,9 @@ def factsheet_completeness_score(model, training_dataset, test_dataset, factshee
     for e in GENERAL_INPUTS:
         if "general" in factsheet and e in factsheet["general"]:
             ctr+=1
-            properties[e] = "present"
+            properties[e] = info("(Factsheet Property) {}".format(e), "present")
         else:
-            properties[e] = "missing"
+            properties[e] = info("(Factsheet Property) {}".format(e), "missing")
     score = round(ctr/n*5)
     return result(score=score, properties=properties)
             

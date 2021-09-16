@@ -19,9 +19,13 @@ import numpy as np
 from sites import config_panel
 import plotly.express as px
 import plotly.graph_objects as go
+import dash
 import warnings
+import plotly
+from dash_extensions.snippets import send_file
 warnings.filterwarnings('ignore')
 
+# plotly.io.orca.config.executable = r"C:\Users\Besitzer\AppData\Roaming\npm\node_modules\orca"
 # === CONFIG ===
 
 config_fairness, config_explainability, config_robustness, config_methodology, config_pillars = 0, 0, 0 ,0,0
@@ -45,6 +49,7 @@ with open('configs/mappings/default.json', 'w') as outfile:
 for s in SECTIONS[1:]:
     with open('configs/mappings/{}/default.json'.format(s), 'w') as outfile:
                 json.dump(mappings_config[s], outfile, indent=4)
+charts = []
 
 # === METRICS ===
 fairness_metrics = FAIRNESS_METRICS
@@ -312,26 +317,26 @@ def show_general_description(scenario_id, solution_set_path):
     else:
         return ""
     
-@app.callback([Output('solution_set_dropdown', 'value'),
-              Output('delete_solution_alert', 'children')],
-              [Input('delete_solution_confirm', 'submit_n_clicks'),
-               Input('uploaded_solution_set_path', 'data')],
-              State('solution_set_dropdown', 'value'))
-def update_output(submit_n_clicks, uploaded_solution_set, solution_set_path):
+# @app.callback([Output('solution_set_dropdown', 'value'),
+#               Output('delete_solution_alert', 'children')],
+#               [Input('delete_solution_confirm', 'submit_n_clicks'),
+#                Input('uploaded_solution_set_path', 'data')],
+#               State('solution_set_dropdown', 'value'))
+# def update_output(submit_n_clicks, uploaded_solution_set, solution_set_path):
     
-    if not solution_set_path:
-        return "",[]
-    if submit_n_clicks:
-        app.logger.info("Deletign {}".format(solution_set_path))
-        try:
-            shutil.rmtree(solution_set_path, ignore_errors=False)
-        except Exception as e:
-            print(e)
-            raise
-        return "", html.H3("Deleted solution", className="text-center", style={"color": "Red"})
-    else:
-        if uploaded_solution_set:
-            return uploaded_solution_set["path"], []
+#     if not solution_set_path:
+#         return "",[]
+#     if submit_n_clicks:
+#         app.logger.info("Deletign {}".format(solution_set_path))
+#         try:
+#             shutil.rmtree(solution_set_path, ignore_errors=False)
+#         except Exception as e:
+#             print(e)
+#             raise
+#         return "", html.H3("Deleted solution", className="text-center", style={"color": "Red"})
+#     else:
+#         if uploaded_solution_set:
+#             return uploaded_solution_set["path"], []
     
 # === FAIRNESS ===
 @app.callback(
@@ -524,7 +529,7 @@ def statistical_parity_difference(data):
      Output('test_data', 'data')],
     [Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
 def load_data(solution_set_path):
-    if solution_set_path != "":
+    if solution_set_path:
         training_data = read_train(solution_set_path)
         test_data = read_test(solution_set_path)
         #compute_train_test_split(solution_set_path)
@@ -707,8 +712,9 @@ def toggle_pillar_section_visibility(path):
 def analyze_solution_completeness(solution_set_path):
     button = []
     alerts = []
-    style={'display': 'block'}
+    style={'display': 'none'}
     if solution_set_path is not None:
+        style={'display': 'block'}
         button = dbc.Button(
             html.I(className="fas fa-backspace"),
             id="delete_button", 
@@ -765,26 +771,38 @@ def show_performance_metrics(solution_set_path):
           [Input('solution_set_dropdown', 'value'),
           Input("input-config","data"),Input('input-mappings', 'data')])
 def store_trust_analysis(solution_set_dropdown, config_weights, config_mappings):
-    
+        # print("this button was clicked:")
+        # print(dash.callback_context.triggered[0]['prop_id'])
+        
         if not solution_set_dropdown:
             return None
-    
+        
+        with open('configs/weights/default.json','r') as f:
+                default_weight = json.loads(f.read())
+        
+        with open('configs/mappings/default.json', 'r') as f:
+          default_map = json.loads(f.read()) 
+      
+        
         if not config_weights:
-            with open('configs/weights/default.json','r') as f:
-                weight_config = json.loads(f.read())
+           
+                weight_config = default_weight
         else:
             weight_config = json.loads(config_weights)
             
         if not config_mappings:
-            with open('configs/mappings/default.json', 'r') as f:
-                mappings_config = json.loads(f.read())
+            
+                mappings_config = default_map
         else:
             mappings_config = json.loads(config_mappings)
     
+        # print("similar mapping:"+ str(default_map == mappings_config))
+        # print("similar weight:"+ str(default_weight == weight_config))
             
         test, train, model, factsheet = read_solution(solution_set_dropdown)
     
         final_score, results, properties = get_final_score(model, train, test, weight_config, mappings_config, factsheet, solution_set_dropdown)
+        
         trust_score = get_trust_score(final_score, weight_config["pillars"])
         
         def convert(o):
@@ -829,6 +847,10 @@ for m in fairness_metrics + methodology_metrics + explainability_metrics + robus
        Output('methodology_star_rating', 'children')],
       [Input('result', 'data'),Input("hidden-trigger", "value")])  
 def update_figure(data, trig):
+      
+      global charts
+      charts = []
+      
       if data is None:
           return [{}, {}, {}, {}, {}, {}, {}, {}, {}, {}, "", "", "", "", ""]
       result = json.loads(data)
@@ -849,6 +871,7 @@ def update_figure(data, trig):
       #bar_chart.update_xaxes(range=[0, 5])
       bar_chart.update_layout(title_text='', title_x=0.5,           paper_bgcolor='#FFFFFF', plot_bgcolor=SECONDARY_COLOR)
       chart_list.append(bar_chart)
+      charts.append(bar_chart)
      
       #spider
       radar_chart = px.line_polar(r=values, theta=pillars, line_close=True, title='')
@@ -877,6 +900,7 @@ def update_figure(data, trig):
           bar_chart_pillar.update_layout(title_text='', title_x=0.5, xaxis_tickangle=XAXIS_TICKANGLE, paper_bgcolor='#FFFFFF', plot_bgcolor=SECONDARY_COLOR)
             #fig.update_layout(barmode='group', xaxis_tickangle=-45)
           chart_list.append(bar_chart_pillar)
+          charts.append(bar_chart_pillar)
          
       #spider charts
       for n, (pillar , sub_scores) in enumerate(results.items()):
@@ -966,6 +990,19 @@ def fast_gradient_attack_analysis(data):
       metric_scores = result["results"]
       return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["empirical_robustness_fast_gradient_attack"]))
 
+@app.callback(
+[Output("clique_method_details", 'children'), Output("clique_method_score", 'children')],
+Input('result', 'data'), prevent_initial_call=False)
+def clique_method_analysis(data):
+  if data is None:
+      return [], []
+  else:
+      result = json.loads(data)
+      properties = result["properties"]
+      metric_properties = properties["robustness"]["clique_method"]
+      metric_scores = result["results"]
+      return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["clique_method"]))
+
 
 @app.callback(
     [Output("confidence_score_details", 'children'), Output("confidence_score_score", 'children')],
@@ -1020,17 +1057,46 @@ def show_scenario_solution_options(scenario_id):
         return []
 
 @app.callback(
-    [ Output("modal-report", "is_open")],
-    [Input('download_report_button', 'n_clicks'), Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
-def download_report(n_clicks, solution_set_path):
-    if n_clicks != None and solution_set_path != "":
+    [Output("modal-report", "is_open"),Output("download-report", "data")],
+    Input('download_report_button', 'n_clicks'), 
+    [State('solution_set_dropdown', 'value'),
+     State("modal-report", "is_open"),
+     State('result', 'data'),
+     State("config-dropdown", "value")
+     ] + list(map(lambda x: State("mapping-dropdown-{}".format(x), 'value' ), SECTIONS[1:])) , prevent_initial_call=True)
+def download_report(n_clicks, solution_set_path, is_open, data, weight, map_f, map_e, map_r, map_m):
+    if n_clicks and solution_set_path:
+        configs = [weight, map_f, map_e, map_r, map_m]
+        result = json.loads(data)
         test_data, training_data, model, factsheet = read_solution(solution_set_path)
         target_column = factsheet.get("general", {}).get("target_column", "")
-        save_report_as_pdf(model, test_data, target_column, factsheet)
-        return [True]
+        print(charts)
+        save_report_as_pdf(result, model, test_data, target_column, factsheet,  charts, configs)
+        data = send_file("report.pdf")
+        del data["mime_type"]
+        return is_open, data
     else:
-        return [False]
-
+        return is_open, data
+    
+@app.callback([Output("scenario_dropdown", 'value'), Output("solution_set_dropdown", 'value')],
+    Input('uploaded_solution_set_path', 'data'))
+def set_uploaded_model(solution_set_path):
+    
+    if solution_set_path:
+        print(solution_set_path)
+        scenario, solution = solution_set_path.split(os.sep)
+        return scenario, solution
+    else:
+        #return 'it_sec_incident_classification', 'scenarios\\it_sec_incident_classification\\solutions\\Jans Random Forest Classifier'
+        return None, None
+    
+# @app.callback(Output("download-report", "data"), [Input("download_report_button", "n_clicks")])
+# def func2(n_clicks):
+#     if n_clicks:
+#         data = send_file("report.pdf")
+#         del data["mime_type"]
+#         return data
+    
 config_panel.get_callbacks(app)
     
 # === LAYOUT ===
@@ -1041,7 +1107,8 @@ layout = html.Div([
             dcc.Store(id='result'),
             
             dbc.Col([html.H1("Analyze", className="text-center")], width=12, className="mb-2 mt-1"),
-             dbc.Col([dcc.Dropdown(
+             dbc.Col([html.H5("Scenario"),
+                 dcc.Dropdown(
                     id='scenario_dropdown',
                     options= get_scenario_options(),
                     value = None,
@@ -1049,7 +1116,8 @@ layout = html.Div([
                     placeholder='Select Scenario'
                 )], width=12, style={"marginLeft": "0 px", "marginRight": "0 px"}, className="mb-1 mt-1"
             ),
-            dbc.Col([dcc.Dropdown(
+            dbc.Col([html.H5("Solution"),
+                dcc.Dropdown(
                     id='solution_set_dropdown',
                     options = get_scenario_solutions_options('it_sec_incident_classification'),
                     value=None,
@@ -1080,7 +1148,10 @@ layout = html.Div([
                     html.Div(dbc.Button("Download Report", id='download_report_button', color="primary", className="mt-3"),
                          className="text-center"),
                     dcc.Store(id='training_data'),
-                    dcc.Store(id='test_data')
+                    dcc.Store(id='test_data'),
+                    html.Div([dbc.Button("Download Report", id='download_report_button', color="primary", className="mt-3"),
+                              dcc.Download(id="download-report", type="application/pdf")],
+                         className="text-center"),
                 ], id="analysis_section")
             ],
                 width=12, 
