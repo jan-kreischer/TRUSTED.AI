@@ -79,13 +79,17 @@ def get_performance_metrics(model, test_data, target_column):
     else:
         X_test = test_data.iloc[:,:DEFAULT_TARGET_COLUMN_INDEX]
         y_test = test_data.reset_index(drop=True).iloc[:,DEFAULT_TARGET_COLUMN_INDEX:]
-    
+
     y_true = y_test.values.flatten()
-    y_pred = model.predict(X_test).flatten()
-    y_pred_proba = model.predict_proba(X_test)
+    if (isinstance(model, tf.keras.Sequential)):
+        y_pred_proba = model.predict(X_test)
+        y_pred = np.argmax(y_pred_proba, axis=1)
+    else:
+        y_pred = model.predict(X_test).flatten()
+    #y_pred_proba = model.predict_proba(X_test)
     print("y_true.shape: {}".format(y_true.shape))
     print("y_pred.shape: {}".format(y_pred.shape))
-    print("y_pred_proba.shape: {}".format(y_pred_proba.shape))
+    #print("y_pred_proba.shape: {}".format(y_pred_proba.shape))
     #labels = np.unique(np.array([y_pred,y_true]).flatten())
 
     performance_metrics = pd.DataFrame({
@@ -407,7 +411,8 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
     pillars = list(final_score.keys())
     values = list(final_score.values())
     pillar_colors = ['#06d6a0','#ffd166','#ef476f','#118ab2']
-    
+
+    plt.switch_backend('Agg')
     my_dpi=96
     fig = plt.figure(figsize=(600/my_dpi, 400/my_dpi), dpi=my_dpi)
     ax = plt.subplot(111)
