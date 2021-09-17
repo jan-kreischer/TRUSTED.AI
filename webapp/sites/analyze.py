@@ -75,7 +75,10 @@ daq.BooleanSwitch(id='toggle_charts',
             ),
                 html.Div([html.H2("• General Information")]),
                 html.Div([], id="general_description"),
-                html.Div(["Performance Metrics Section"], id="performance_metrics_section"),
+                dbc.Row([
+                    dbc.Col(html.Div(["Performance Metrics Section"], id="performance_metrics_section")),
+                    dbc.Col(html.Div(["Properties Section"], id="properties_section"))
+                ]),
                 dcc.Store(id='input-mappings'),
                 ])
 
