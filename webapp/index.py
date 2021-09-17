@@ -42,7 +42,7 @@ navbar = dbc.Navbar(
             dbc.Collapse(
                 dbc.Nav(
                     [                
-                        dbc.NavItem(dbc.NavLink("Existing", href="/existing")),
+                        dbc.NavItem(dbc.NavLink("Scenarios", href="/existing")),
                         dbc.NavItem(dbc.NavLink("Factsheet", href="/factsheet")),
                         dbc.NavItem(dbc.NavLink("Upload", href="/upload")),
                         dbc.NavItem(dbc.NavLink("Analyze", href="/analyze")),

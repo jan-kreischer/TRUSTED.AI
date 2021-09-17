@@ -128,6 +128,23 @@ def get_scenario_description(scenario_id):
     scenario_description['key'] = scenario_description['key'].str.capitalize()
     return scenario_description
 
+def get_properties_section(factsheet):
+    if "properties" in factsheet:
+        factsheet = factsheet["properties"]
+
+        properties = pd.DataFrame({
+            "Model Type": [factsheet["explainability"]["algorithm_class"]["clf_name"][1]],
+            "Train test split": [factsheet["methodology"]["train_test_split"]["train_test_split"][1]],
+            "Regularization Technique": [factsheet["methodology"]["regularization"]["regularization_technique"][1]],
+            "Normalization Technique": [factsheet["methodology"]["normalization"]["normalization"][1]],
+            "Number of Features": [factsheet["explainability"]["model_size"]["n_features"][1]],
+        })
+        properties = properties.transpose()
+        properties = properties.reset_index()
+        properties['index'] = properties['index'].str.title()
+        properties.rename(columns={"index": "key", 0: "value"}, inplace=True)
+    return properties
+
 
 def get_solution_description(factsheet):
     description = {}

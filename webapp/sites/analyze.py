@@ -798,7 +798,7 @@ def show_performance_metrics(solution_set_path):
     else:
         test_data, training_data, model, factsheet = read_solution(solution_set_path)
         target_column = factsheet.get("general", {}).get("target_column", "")
-        
+
         performance_metrics =  get_performance_metrics(model, test_data, target_column)
         performance_metrics_table = dash_table.DataTable(
                                 id='performance_metrics_table',
@@ -840,6 +840,56 @@ def show_performance_metrics(solution_set_path):
                                 ],
         )
         return html.Div([html.H5("Performance Metrics"), performance_metrics_table], className="mt-4 mb-4")
+
+
+@app.callback(Output('properties_section', 'children'),
+              Input('solution_set_dropdown', 'value'), prevent_initial_call=True)
+def show_properties(solution_set_path):
+    if not solution_set_path:
+        return []
+    else:
+        test_data, training_data, model, factsheet = read_solution(solution_set_path)
+        properties = get_properties_section(factsheet)
+        properties_table = dash_table.DataTable(
+            id='properties_table',
+            columns=[{"name": i, "id": i} for i in properties.columns],
+            data=properties.to_dict('records'),
+            style_table={
+                # "table-layout": "fixed",
+                "width": "100%",
+                'overflowX': 'hidden',
+                'textAlign': 'left'
+            },
+            style_data={
+                'whiteSpace': 'normal',
+                'height': 'auto',
+                # 'lineHeight': '15px'
+            },
+            style_header={
+                'backgroundColor': SECONDARY_COLOR,
+                # "display": "none",
+                # "visibility": "hidden"
+            },
+            style_cell={
+                'textAlign': 'left',
+                'backgroundColor': SECONDARY_COLOR,
+            },
+            style_cell_conditional=[
+                {
+                    'if': {'column_id': 'key'},
+                    'fontWeight': 'bold',
+                    'width': '30%'
+                }
+            ],
+            style_as_list_view=True,
+            css=[
+                {
+                    'selector': 'tr:first-child',
+                    'rule': 'display: none',
+                },
+            ],
+        )
+        return html.Div([html.H5("Properties"), properties_table], className="mt-4 mb-4")
 
 
 @app.callback(Output('result', 'data'), 
