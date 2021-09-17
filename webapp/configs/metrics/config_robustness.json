@@ -103,5 +103,14 @@
     "empirical_robustness_fast_gradient_attack": 0.20,
     "empirical_robustness_carlini_wagner_attack": 0.20,
     "empirical_robustness_deepfool_attack": 0.20
+  },
+    "metrics": {
+    "confidence_score": "Description of the metric",
+    "clique_method"    : "Description of the metric",
+    "loss_sensitivity"  :"Description of the metric", 
+    "clever_score"   : "Description of the metric",
+    "empirical_robustness_fast_gradient_attack": "Description of the metric",
+    "empirical_robustness_carlini_wagner_attack": "Description of the metric",
+    "empirical_robustness_deepfool_attack": "Description of the metric"
   }
 }

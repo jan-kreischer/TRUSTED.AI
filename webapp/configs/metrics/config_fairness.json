@@ -72,5 +72,17 @@
     "euclidean_distance": 0.2,
     "mahalanobis_distance": 0.2,
     "manhattan_distance": 0.2
+  },
+    "metrics": {
+    "question_fairness": "Description of the metric",
+    "class_balance": "Description of the metric",
+    "statistical_parity_difference": "Description of the metric",
+    "equal_opportunity_difference": "Description of the metric",
+    "average_odds_difference": "Description of the metric",
+    "disparate_impact": "Description of the metric",
+    "theil_index": "Description of the metric",
+    "euclidean_distance": "Description of the metric",
+    "mahalanobis_distance": "Description of the metric",
+    "manhattan_distance": "Description of the metric"
   }
 }

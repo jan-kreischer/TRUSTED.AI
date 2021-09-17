@@ -40,6 +40,8 @@ weight_config = dict(fairness=config_fairness["weights"], explainability=config_
 mappings_config = dict(fairness=config_fairness["parameters"], explainability=config_explainability["parameters"], 
                    robustness=config_robustness["parameters"], methodology=config_methodology["parameters"])
 
+metric_description = {**config_fairness["metrics"], **config_explainability["metrics"], **config_robustness["metrics"], **config_methodology["metrics"]}
+
 with open('configs/weights/default.json', 'w') as outfile:
                 json.dump(weight_config, outfile, indent=4)
 
@@ -1018,7 +1020,8 @@ def update_figure(data, trig):
                       nonNanValues.append(v)
               categories = nonNanCategories
               values = nonNanValues
-          bar_chart_pillar = go.Figure(data=[go.Bar(x=categories, y=values, marker_color=colors[n])])
+          desc = list(map(lambda x: metric_description[x.lower().replace(' ','_')], categories))
+          bar_chart_pillar = go.Figure(data=[go.Bar(x=categories, y=values, customdata = desc, marker_color=colors[n],hovertemplate = "(%{x}: %{y})<br>%{customdata}")])
           bar_chart_pillar.update_yaxes(range=[0, 5], fixedrange=True)
           #bar_chart_pillar.update_yaxes(fixedrange=True)
           #bar_chart_pillar.update_yaxes(range=[0, 8])
