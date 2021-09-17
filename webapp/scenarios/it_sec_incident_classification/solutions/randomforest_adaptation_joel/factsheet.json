@@ -27,7 +27,7 @@
         },
         "explainability": {
             "algorithm_class": 3,
-            "correlated_features": 5,
+            "correlated_features": 2,
             "model_size": 3,
             "feature_relevance": 2
         },
@@ -71,7 +71,7 @@
             "correlated_features": {
                 "pct_drop": [
                     "Percentage of highly correlated features",
-                    "0.00%"
+                    "29.55%"
                 ]
             },
             "model_size": {
@@ -198,7 +198,7 @@
             "clique_method": {
                 "error_bound": [
                     "Average error bound",
-                    "0.00"
+                    "0.16"
                 ],
                 "error": [
                     "Error",
@@ -228,6 +228,10 @@
                 "Test_std": [
                     "Standard deviation of the test data",
                     "3933.36"
+                ],
+                "normalization": [
+                    "Normalization",
+                    "None"
                 ]
             },
             "missing_data": {
@@ -243,46 +247,42 @@
                 ]
             },
             "train_test_split": {
-                "training_data_ratio": [
-                    "The ratio of the train data",
-                    "95.00"
-                ],
-                "test_data_ratio": [
-                    "The ratio of the test data",
-                    "5.00"
+                "train_test_split": [
+                    "Train test split",
+                    "95.00/5.00"
                 ]
             },
             "factsheet_completeness": {
                 "model_name": [
-                    "model_name",
+                    "(Factsheet Property) model_name",
                     "present"
                 ],
                 "purpose_description": [
-                    "purpose_description",
+                    "(Factsheet Property) purpose_description",
                     "present"
                 ],
                 "domain_description": [
-                    "domain_description",
+                    "(Factsheet Property) domain_description",
                     "present"
                 ],
                 "training_data_description": [
-                    "training_data_description",
+                    "(Factsheet Property) training_data_description",
                     "present"
                 ],
                 "model_information": [
-                    "model_information",
+                    "(Factsheet Property) model_information",
                     "present"
                 ],
                 "target_column": [
-                    "target_column",
+                    "(Factsheet Property) target_column",
                     "present"
                 ],
                 "authors": [
-                    "authors",
+                    "(Factsheet Property) authors",
                     "present"
                 ],
                 "contact_information": [
-                    "contact_information",
+                    "(Factsheet Property) contact_information",
                     "missing"
                 ]
             }
