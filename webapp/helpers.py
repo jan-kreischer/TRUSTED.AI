@@ -676,6 +676,7 @@ def pillar_section(pillar, metrics):
                     html.H3("{0}-Score".format(pillar), className="text-center"),
                     html.Div([], id="{}_star_rating".format(pillar), className="star_rating, text-center"),
                     html.B(["X/5"], id="{}_score".format(pillar), className="text-center", style={"display": "block","font-size":"32px"}),
+                    html.Div([], id="{}_available_metrics".format(pillar),className = pillar),
                     dcc.Graph(id='{}_spider'.format(pillar), style={'display': 'none'}),
                     dcc.Graph(id='{}_bar'.format(pillar), style={'display': 'block'}),    
                     dbc.Collapse(metric_detail_sections,

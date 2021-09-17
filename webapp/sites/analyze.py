@@ -121,6 +121,22 @@ for pillar in SECTIONS[1:]:
             return not is_open
         else:
             return is_open
+    
+    
+    @app.callback(
+        Output("{}_available_metrics".format(pillar), "children"),
+        Input("result", "data"), State("{}_available_metrics".format(pillar), "className"))
+    def update_metric_availability(data, pillar):
+        if not data:
+            return []
+        else:
+            result = json.loads(data)
+            trust_score = result["results"][pillar]
+            all_metrics = list(trust_score.keys())
+            calculated_metrics = list(filter(lambda k: not np.isnan(trust_score[k]), trust_score))
+            return html.Div([html.P("Available metrics: {}".format(", ".join(list(map(lambda x: x.replace("_", " ").title() ,all_metrics))))),
+                             html.P("Metrics available for the given solution: {}".format(", ".join(list(map(lambda x: x.replace("_", " ").title() ,calculated_metrics)))))])
+             
         
     @app.callback(
             Output("mapping-dropdown-{}".format(pillar), "options"),
