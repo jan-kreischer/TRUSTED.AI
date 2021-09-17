@@ -1021,7 +1021,7 @@ def update_figure(data, trig):
               categories = nonNanCategories
               values = nonNanValues
           desc = list(map(lambda x: metric_description[x.lower().replace(' ','_')], categories))
-          bar_chart_pillar = go.Figure(data=[go.Bar(x=categories, y=values, customdata = desc, marker_color=colors[n],hovertemplate = "(%{x}: %{y})<br>%{customdata}")])
+          bar_chart_pillar = go.Figure(data=[go.Bar(x=categories, y=values, customdata = desc, marker_color=colors[n],hovertemplate = "(%{x}: %{y})<br>%{customdata}<extra></extra>")])
           bar_chart_pillar.update_yaxes(range=[0, 5], fixedrange=True)
           #bar_chart_pillar.update_yaxes(fixedrange=True)
           #bar_chart_pillar.update_yaxes(range=[0, 8])
