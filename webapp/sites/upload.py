@@ -83,7 +83,7 @@ def validate_scenario_id(n_clicks, scenario_id):
   
 @app.callback(Output('solution_name_alert', 'children'),
               [Input('upload_button', 'n_clicks'),
-               Input('scenario_id', 'value'),
+               Input('upload_scenario_id', 'value'),
                Input('solution_name', 'value'),
                ], prevent_initial_call=True)
 def validate_solution_name(n_clicks, scenario_id, solution_name):
@@ -218,6 +218,7 @@ def upload_data(
   
                 # Saving Model
                 save_model(solution_path, model_filename, model)
+
             else: 
                 return html.H4("Directory already exists", style={"color":"Red"}, className="text-center")
                       
