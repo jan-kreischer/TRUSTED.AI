@@ -852,12 +852,13 @@ def show_properties(solution_set_path):
     else:
         test_data, training_data, model, factsheet = read_solution(solution_set_path)
         properties = get_properties_section(factsheet)
+        if properties is None:
+            return []
         properties_table = dash_table.DataTable(
             id='properties_table',
             columns=[{"name": i, "id": i} for i in properties.columns],
             data=properties.to_dict('records'),
             style_table={
-                # "table-layout": "fixed",
                 "width": "100%",
                 'overflowX': 'hidden',
                 'textAlign': 'left'
@@ -865,12 +866,9 @@ def show_properties(solution_set_path):
             style_data={
                 'whiteSpace': 'normal',
                 'height': 'auto',
-                # 'lineHeight': '15px'
             },
             style_header={
                 'backgroundColor': SECONDARY_COLOR,
-                # "display": "none",
-                # "visibility": "hidden"
             },
             style_cell={
                 'textAlign': 'left',
