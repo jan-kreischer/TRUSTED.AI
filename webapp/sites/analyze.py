@@ -134,8 +134,9 @@ for pillar in SECTIONS[1:]:
             trust_score = result["results"][pillar]
             all_metrics = list(trust_score.keys())
             calculated_metrics = list(filter(lambda k: not np.isnan(trust_score[k]), trust_score))
-            return html.Div([html.P("Available metrics: {}".format(", ".join(list(map(lambda x: x.replace("_", " ").title() ,all_metrics))))),
-                             html.P("Metrics available for the given solution: {}".format(", ".join(list(map(lambda x: x.replace("_", " ").title() ,calculated_metrics)))))])
+            return html.Div([html.Br(),
+                        dcc.Markdown("Total available metrics: *{}*".format(", ".join(list(map(lambda x: x.replace("_", " ").title() ,all_metrics))))),
+                             dcc.Markdown("Metrics available for the given solution ({}/{}): *{}*".format(len(calculated_metrics),len(all_metrics),", ".join(list(map(lambda x: x.replace("_", " ").title() ,calculated_metrics)))))])
              
         
     @app.callback(

@@ -140,8 +140,7 @@
                     0.01,
                     0.1,
                     0.25,
-                    0.5,
-                    1
+                    0.5
                 ],
                 "description": "Thresholds of how to map the result of the clique method from 1-5.",
                 "label": "Score Thresholds"
@@ -150,7 +149,6 @@
         "score_loss_sensitivity": {
             "thresholds": {
                 "value": [
-                    2.5,
                     2,
                     1.5,
                     1,
@@ -166,8 +164,7 @@
                     0.2,
                     0.5,
                     1,
-                    2.5,
-                    5
+                    2.5
                 ],
                 "description": "Thresholds of how to map CLEVER score from 1-5.",
                 "label": "Score Thresholds"
@@ -176,7 +173,6 @@
         "score_confidence_score": {
             "thresholds": {
                 "value": [
-                    0,
                     20,
                     40,
                     60,
@@ -189,12 +185,10 @@
         "score_fast_gradient_attack": {
             "thresholds": {
                 "value": [
-                    100,
                     80,
                     60,
                     40,
-                    20,
-                    0
+                    20
                 ],
                 "description": "Thresholds of how to map difference between before-after attack accuracies from 1-5. Example: If the before attack accuracy is 85% and after attack accuracy is again 85% it means model is so robust that attack was not successful at all. The difference is 0 and hence this would result in a score of 5 (best score). However if the before attack accuracy was 100% and after attack accuracy is 0% then the model is not robust. The difference is 100% and it would result in score 0 (worst score)",
                 "label": "Score Thresholds"
@@ -203,12 +197,10 @@
         "score_carlini_wagner_attack": {
             "thresholds": {
                 "value": [
-                    100,
                     80,
                     60,
                     40,
-                    20,
-                    0
+                    20
                 ],
                 "description": "Thresholds of how to map difference between before-after attack accuracies from 1-5. Example: If the before attack accuracy is 85% and after attack accuracy is again 85% it means model is so robust that attack was not successful at all. The difference is 0 and hence this would result in a score of 5 (best score). However if the before attack accuracy was 100% and after attack accuracy is 0% then the model is not robust. The difference is 100% and it would result in score 0 (worst score)",
                 "label": "Score Thresholds"
@@ -217,12 +209,10 @@
         "score_deepfool_attack": {
             "thresholds": {
                 "value": [
-                    100,
                     80,
                     60,
                     40,
-                    20,
-                    0
+                    20
                 ],
                 "description": "Thresholds of how to map difference between before-after attack accuracies from 1-5. Example: If the before attack accuracy is 85% and after attack accuracy is again 85% it means model is so robust that attack was not successful at all. The difference is 0 and hence this would result in a score of 5 (best score). However if the before attack accuracy was 100% and after attack accuracy is 0% then the model is not robust. The difference is 100% and it would result in score 0 (worst score)",
                 "label": "Score Thresholds"
