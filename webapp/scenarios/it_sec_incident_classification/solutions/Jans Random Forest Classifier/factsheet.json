@@ -33,7 +33,7 @@
         },
         "robustness": {
             "confidence_score": 5,
-            "clique_method": 2,
+            "clique_method": 3,
             "loss_sensitivity": NaN,
             "clever_score": NaN,
             "empirical_robustness_fast_gradient_attack": NaN,

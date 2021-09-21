@@ -27,7 +27,7 @@
         },
         "explainability": {
             "algorithm_class": 2,
-            "correlated_features": 2,
+            "correlated_features": 1,
             "model_size": 3,
             "feature_relevance": NaN
         },
@@ -36,14 +36,14 @@
             "clique_method": NaN,
             "loss_sensitivity": NaN,
             "clever_score": NaN,
-            "empirical_robustness_fast_gradient_attack": 3,
-            "empirical_robustness_carlini_wagner_attack": 5,
-            "empirical_robustness_deepfool_attack": 4
+            "empirical_robustness_fast_gradient_attack": 4,
+            "empirical_robustness_carlini_wagner_attack": 2,
+            "empirical_robustness_deepfool_attack": 5
         },
         "methodology": {
             "normalization": 4,
             "missing_data": 5,
-            "regularization": 0,
+            "regularization": 1,
             "train_test_split": 5,
             "factsheet_completeness": 4
         }
@@ -71,7 +71,7 @@
             "correlated_features": {
                 "pct_drop": [
                     "Percentage of highly correlated features",
-                    "39.73%"
+                    "58.90%"
                 ]
             },
             "model_size": {
@@ -95,29 +95,29 @@
             "empirical_robustness_fast_gradient_attack": {
                 "before_attack": [
                     "Before attack accuracy",
-                    "92.00%"
+                    "88.00%"
                 ],
                 "after_attack": [
                     "After attack accuracy",
-                    "38.00%"
+                    "54.00%"
                 ],
                 "difference": [
                     "Proportional difference (After attack accuracy - Before attack accuracy)/Before attack accuracy",
-                    "58.70%"
+                    "38.64%"
                 ]
             },
             "empirical_robustness_carlini_wagner_attack": {
                 "before_attack": [
                     "Before attack accuracy",
-                    "60.00%"
+                    "100.00%"
                 ],
                 "after_attack": [
                     "After attack accuracy",
-                    "60.00%"
+                    "40.00%"
                 ],
                 "difference": [
                     "Proportional difference (After attack accuracy - Before attack accuracy)/Before attack accuracy",
-                    "0.00%"
+                    "60.00%"
                 ]
             },
             "empirical_robustness_deepfool_attack": {
@@ -127,11 +127,11 @@
                 ],
                 "after_attack": [
                     "After attack accuracy",
-                    "50.00%"
+                    "75.00%"
                 ],
                 "difference": [
                     "Proportional difference (After attack accuracy - Before attack accuracy)/Before attack accuracy",
-                    "33.33%"
+                    "0.00%"
                 ]
             }
         },
@@ -152,6 +152,10 @@
                 "Test_std": [
                     "Standard deviation of the test data",
                     "0.88"
+                ],
+                "normalization": [
+                    "Normalization",
+                    "Training data are standardized"
                 ]
             },
             "missing_data": {
@@ -161,27 +165,50 @@
                 ]
             },
             "regularization": {
-                "regularization_technique": "none"
+                "regularization_technique": [
+                    "Regularization technique",
+                    "none"
+                ]
             },
             "train_test_split": {
-                "training_data_ratio": [
-                    "The ratio of the train data",
-                    "80.00"
-                ],
-                "test_data_ratio": [
-                    "The ratio of the test data",
-                    "20.00"
+                "train_test_split": [
+                    "Train test split",
+                    "80.00/20.00"
                 ]
             },
             "factsheet_completeness": {
-                "model_name": "present",
-                "purpose_description": "present",
-                "domain_description": "present",
-                "training_data_description": "present",
-                "model_information": "present",
-                "target_column": "present",
-                "authors": "present",
-                "contact_information": "missing"
+                "model_name": [
+                    "(Factsheet Property) model_name",
+                    "present"
+                ],
+                "purpose_description": [
+                    "(Factsheet Property) purpose_description",
+                    "present"
+                ],
+                "domain_description": [
+                    "(Factsheet Property) domain_description",
+                    "present"
+                ],
+                "training_data_description": [
+                    "(Factsheet Property) training_data_description",
+                    "present"
+                ],
+                "model_information": [
+                    "(Factsheet Property) model_information",
+                    "present"
+                ],
+                "target_column": [
+                    "(Factsheet Property) target_column",
+                    "present"
+                ],
+                "authors": [
+                    "(Factsheet Property) authors",
+                    "present"
+                ],
+                "contact_information": [
+                    "(Factsheet Property) contact_information",
+                    "missing"
+                ]
             }
         }
     }

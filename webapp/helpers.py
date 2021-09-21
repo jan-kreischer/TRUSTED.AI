@@ -143,7 +143,8 @@ def get_properties_section(factsheet):
         properties = properties.reset_index()
         properties['index'] = properties['index'].str.title()
         properties.rename(columns={"index": "key", 0: "value"}, inplace=True)
-    return properties
+        return properties
+    return None
 
 
 def get_solution_description(factsheet):

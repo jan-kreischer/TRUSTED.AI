@@ -868,12 +868,13 @@ def show_properties(solution_set_path):
     else:
         test_data, training_data, model, factsheet = read_solution(solution_set_path)
         properties = get_properties_section(factsheet)
+        if properties is None:
+            return []
         properties_table = dash_table.DataTable(
             id='properties_table',
             columns=[{"name": i, "id": i} for i in properties.columns],
             data=properties.to_dict('records'),
             style_table={
-                # "table-layout": "fixed",
                 "width": "100%",
                 'overflowX': 'hidden',
                 'textAlign': 'left'
@@ -881,12 +882,9 @@ def show_properties(solution_set_path):
             style_data={
                 'whiteSpace': 'normal',
                 'height': 'auto',
-                # 'lineHeight': '15px'
             },
             style_header={
                 'backgroundColor': SECONDARY_COLOR,
-                # "display": "none",
-                # "visibility": "hidden"
             },
             style_cell={
                 'textAlign': 'left',
@@ -941,7 +939,6 @@ def store_trust_analysis(solution_set_dropdown, config_weights, config_mappings)
     
         # print("similar mapping:"+ str(default_map == mappings_config))
         # print("similar weight:"+ str(default_weight == weight_config))
-            
         test, train, model, factsheet = read_solution(solution_set_dropdown)
     
         final_score, results, properties = get_final_score(model, train, test, weight_config, mappings_config, factsheet, solution_set_dropdown)
@@ -1226,11 +1223,10 @@ def download_report(n_clicks, solution_set_path, is_open, data, weight, map_f, m
 def set_uploaded_model(solution_set_path):
     
     if solution_set_path:
-        print(solution_set_path)
         scenario, solution = solution_set_path.split(os.sep)
+        solution = os.path.join("scenarios", scenario, "solutions", solution)
         return scenario, solution
     else:
-        #return 'it_sec_incident_classification', 'scenarios\\it_sec_incident_classification\\solutions\\Jans Random Forest Classifier'
         return None, None
     
 # @app.callback(Output("download-report", "data"), [Input("download_report_button", "n_clicks")])

@@ -32,7 +32,7 @@
             "feature_relevance": 2
         },
         "robustness": {
-            "confidence_score": 5,
+            "confidence_score": 4,
             "clique_method": 1,
             "loss_sensitivity": NaN,
             "clever_score": NaN,
@@ -198,7 +198,7 @@
             "clique_method": {
                 "error_bound": [
                     "Average error bound",
-                    "0.16"
+                    "0.001"
                 ],
                 "error": [
                     "Error",

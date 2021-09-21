@@ -28,7 +28,7 @@ def analyse(model, train_data, test_data, config, factsheet):
     deepfool_thresholds = config["score_carlini_wagner_attack"]["thresholds"]["value"]
     
     output = dict(
-        confidence_score   = confidence_score(model, train_data, test_data, clever_score_thresholds),
+        confidence_score   = confidence_score(model, train_data, test_data, confidence_score_thresholds),
         clique_method      = clique_method(model, train_data, test_data, clique_method_thresholds, factsheet ),
         loss_sensitivity   = loss_sensitivity_score(model, train_data, test_data, loss_sensitivity_thresholds),
         clever_score       = clever_score(model, train_data, test_data, clever_score_thresholds),
@@ -57,7 +57,7 @@ def clever_score(model, train_data, test_data, thresholds):
             temp = clever_u(classifier=classifier, x=x, nb_batches=1, batch_size=1, radius=500, norm=1)
             if min_score > temp:
                 min_score = temp
-        score = np.digitize(min_score, thresholds)
+        score = np.digitize(min_score, thresholds) + 1
         return result(score=int(score), properties={"clever_score": info("CLEVER Score", "{:.2f}".format(min_score))})
     except Exception as e:
         print(e)
@@ -71,7 +71,7 @@ def loss_sensitivity_score(model, train_data, test_data, thresholds):
 
         classifier = KerasClassifier(model=model, use_logits=False)
         l_s = loss_sensitivity(classifier, X_test, y)
-        score = np.digitize(l_s, thresholds)
+        score = np.digitize(l_s, thresholds, right=True) + 1
         return result(score=int(score), properties={"loss_sensitivity": info("Average gradient value of the loss function", "{:.2f}".format(l_s))})
     except Exception as e:
         print(e)
@@ -85,13 +85,13 @@ def confidence_score(model, train_data, test_data, thresholds):
 
         confidence = metrics.confusion_matrix(y_test, y_pred)/metrics.confusion_matrix(y_test, y_pred).sum(axis=1) 
         confidence_score = np.average(confidence.diagonal())*100
-        score = np.digitize(confidence_score, thresholds, right=True)
+        score = np.digitize(confidence_score, thresholds, right=True) + 1
         return result(score=int(score), properties={"confidence_score": info("Average confidence score", "{:.2f}%".format(confidence_score))})
     except:
         return result(score=np.nan, properties={})
 
 def clique_method(model, train_data, test_data, thresholds, factsheet):
-    
+
     with open('configs/mappings/robustness/default.json', 'r') as f:
           default_map = json.loads(f.read())
     
@@ -109,7 +109,7 @@ def clique_method(model, train_data, test_data, thresholds, factsheet):
 
         bound, error = rt.verify(x=X_test.to_numpy()[100:103], y=y_test[100:103].to_numpy(), eps_init=0.5, norm=1,
                                  nb_search_steps=5, max_clique=2, max_level=2)
-        score = np.digitize(bound, thresholds)
+        score = np.digitize(bound, thresholds) + 1
         return result(score=int(score), properties={
             "error_bound": info("Average error bound", "{:.2f}".format(bound)),
             "error": info("Error", "{:.1f}".format(error))})
@@ -141,7 +141,7 @@ def fast_gradient_attack_score(model, train_data, test_data, thresholds):
         print("Accuracy on before_attacks: {}%".format(before_attack * 100))
         print("Accuracy on after_attack: {}%".format(after_attack * 100))
 
-        score = np.digitize((before_attack - after_attack)/before_attack*100, thresholds)
+        score = np.digitize((before_attack - after_attack)/before_attack*100, thresholds) + 1
         return result(score=int(score), properties={"before_attack": info("Before attack accuracy", "{:.2f}%".format(100 * before_attack)),
                                   "after_attack": info("After attack accuracy", "{:.2f}%".format(100 * after_attack)),
                                   "difference": info("Proportional difference (After attack accuracy - Before attack accuracy)/Before attack accuracy", "{:.2f}%".format(100 * (before_attack - after_attack) / before_attack))})
@@ -170,7 +170,7 @@ def carlini_wagner_attack_score(model, train_data, test_data, thresholds):
         after_attack = metrics.accuracy_score(randomY,predictions)
         print("Accuracy on before_attacks: {}%".format(before_attack * 100))
         print("Accuracy on after_attack: {}%".format(after_attack * 100))
-        score = np.digitize((before_attack - after_attack)/before_attack*100, thresholds)
+        score = np.digitize((before_attack - after_attack)/before_attack*100, thresholds) + 1
         return result(score=int(score),
                       properties={
                           "before_attack": info("Before attack accuracy", "{:.2f}%".format(100 * before_attack)),
@@ -204,7 +204,7 @@ def deepfool_attack_score(model, train_data, test_data, thresholds):
         print("Accuracy on before_attacks: {}%".format(before_attack * 100))
         print("Accuracy on after_attack: {}%".format(after_attack * 100))
 
-        score = np.digitize((before_attack - after_attack)/before_attack*100, thresholds)
+        score = np.digitize((before_attack - after_attack)/before_attack*100, thresholds) + 1
         return result(score=int(score),
                       properties={"before_attack": info("Before attack accuracy", "{:.2f}%".format(100 * before_attack)),
                                   "after_attack": info("After attack accuracy", "{:.2f}%".format(100 * after_attack)),

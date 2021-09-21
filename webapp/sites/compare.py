@@ -24,11 +24,33 @@ import plotly.graph_objects as go
 
 
 # === SECTIONS ===
+def general_section_1():
+    return html.Div([
+                html.Div([html.H2("• General Information")]),
+                html.Div([], id="general_description-1"),
+                dbc.Row([
+                    dbc.Col(html.Div(["Performance Metrics Section"], id="performance_metrics_section-1")),
+                    dbc.Col(html.Div(["Properties Section"], id="properties_section-1"))
+                ])
+                ])
+
+def general_section_2():
+    return html.Div([
+                html.Div([html.H2("• General Information")]),
+                html.Div([], id="general_description-2"),
+                dbc.Row([
+                    dbc.Col(html.Div(["Performance Metrics Section"], id="performance_metrics_section-2")),
+                    dbc.Col(html.Div(["Properties Section"], id="properties_section-2"))
+                ])
+                ])
+
 def trust_section_1():
     return html.Div([
         html.Div(id='boolean-switch-output'),
         html.Div([daq.BooleanSwitch(id='toggle_charts-1',
                                     on=False,
+                                    label='Alternative Style',
+                                    labelPosition="top",
                                     color="green",
                                     style={"float": "right"}
                                     )], className="mt-2"),
@@ -66,7 +88,7 @@ def trust_section_2():
 def pillar_section_1(pillar):
     return html.Div([
         html.Div([], id="{}_overview-1".format(pillar)),
-        html.H3("{0}-Score-1".format(pillar), className="text-center"),
+        html.H3("{0} Score".format(pillar), className="text-center"),
         html.Div([], id="{}_star_rating-1".format(pillar), className="star_rating, text-center"),
         dcc.Graph(id='{}_spider-1'.format(pillar), style={'display': 'none'}),
         dcc.Graph(id='{}_bar-1'.format(pillar), style={'display': 'block'}),
@@ -82,7 +104,7 @@ def pillar_section_1(pillar):
 def pillar_section_2(pillar):
     return html.Div([
         html.Div([], id="{}_overview-2".format(pillar)),
-        html.H3("{0}-Score-2".format(pillar), className="text-center"),
+        html.H3("{0} Score".format(pillar), className="text-center"),
         html.Div([], id="{}_star_rating-2".format(pillar), className="star_rating, text-center"),
         dcc.Graph(id='{}_spider-2'.format(pillar), style={'display': 'none'}),
         dcc.Graph(id='{}_bar-2'.format(pillar), style={'display': 'block'}),
@@ -113,12 +135,14 @@ def map_dropdown(pillar):
 
 @app.callback(
     [Output("solution_set_dropdown-1", 'options'),Output("solution_set_dropdown-2", 'options')],
-    Input('scenario_dropdown', 'value'), prevent_initial_call=False)
-def clever_score(scenario_id):
+    Input('scenario_dropdown_compare', 'value'), prevent_initial_call=False)
+def load_solution_sets(scenario_id):
     if scenario_id:
         return get_scenario_solutions_options(scenario_id), get_scenario_solutions_options(scenario_id)
     else:
         return [], []
+
+
 
 layout = html.Div([
     dbc.Container([
@@ -149,7 +173,7 @@ layout = html.Div([
                 width=12,style={'display': 'none'},id="compare-config"),
             dcc.Store(id='result-1'),
             dbc.Col([dcc.Dropdown(
-                    id='scenario_dropdown',
+                    id='scenario_dropdown_compare',
                     options= get_scenario_options(),
                     value = None,
 
@@ -177,6 +201,7 @@ layout = html.Div([
             dbc.Col([
                 html.Div([], id="toggle_charts_section-1"),
                 html.Div([
+                    general_section_1(),
                     trust_section_1(),
                     pillar_section_1("fairness"),
                     pillar_section_1("explainability"),
@@ -190,12 +215,14 @@ layout = html.Div([
                 className="mt-2 pt-2 pb-2 mb-2",
                 style={
                     "border": "1px solid #d8d8d8",
-                    "borderRadius": "6px"
+                    "borderRadius": "6px",
+                    "backgroundColor": SECONDARY_COLOR
                 }
             ),
             dbc.Col([
                 html.Div([], id="toggle_charts_section-2"),
                 html.Div([
+                    general_section_2(),
                     trust_section_2(),
                     pillar_section_2("fairness"),
                     pillar_section_2("explainability"),
@@ -209,7 +236,8 @@ layout = html.Div([
                 className="mt-2 pt-2 pb-2 mb-2",
                 style={
                     "border": "1px solid #d8d8d8",
-                    "borderRadius": "6px"
+                    "borderRadius": "6px",
+                    "backgroundColor": SECONDARY_COLOR
                 }
             ),
         ], no_gutters=False)
@@ -446,6 +474,294 @@ def store_result_2(solution_set_dropdown, n, weight, map_fairness, map_explainab
             "properties": properties}
     return json.dumps(data, default=convert)
 
+
+@app.callback(Output('general_description-1', 'children'),
+              [Input('scenario_dropdown_compare', 'value'),
+               Input('solution_set_dropdown-1', 'value')], prevent_initial_call=True)
+def show_general_description_1(scenario_id, solution_set_path):
+    description = []
+    if scenario_id and solution_set_path:
+        factsheet = read_factsheet(solution_set_path)
+
+        solution_description_header = html.H5("Model Information")
+        solution_description = get_solution_description(factsheet)
+        solution_description_table = dash_table.DataTable(
+            id='solution_description_table-1',
+            columns=[{"name": i, "id": i} for i in solution_description.columns],
+            data=solution_description.to_dict('records'),
+            style_table={
+                # "table-layout": "fixed",
+                "width": "100%",
+                'overflowX': 'hidden',
+                'textAlign': 'left'
+            },
+            style_data={
+                'whiteSpace': 'normal',
+                'height': 'auto',
+                # 'lineHeight': '15px'
+            },
+            style_header={
+                'backgroundColor': SECONDARY_COLOR,
+                # "display": "none",
+                # "visibility": "hidden"
+            },
+            style_cell={
+                'textAlign': 'left',
+                'backgroundColor': SECONDARY_COLOR,
+            },
+            style_cell_conditional=[
+                {
+                    'if': {'column_id': 'key'},
+                    'fontWeight': 'bold',
+                    'width': '30%'
+                }
+            ],
+            style_as_list_view=True,
+            css=[
+                {
+                    'selector': 'tr:first-child',
+                    'rule': 'display: none',
+                },
+            ],
+        )
+        description.append(html.Div([solution_description_header, solution_description_table], className="mt-4 mb-4"))
+        return description
+    else:
+        return ""
+
+@app.callback(Output('general_description-2', 'children'),
+              [Input('scenario_dropdown_compare', 'value'),
+               Input('solution_set_dropdown-2', 'value')], prevent_initial_call=True)
+def show_general_description_2(scenario_id, solution_set_path):
+    description = []
+    if scenario_id and solution_set_path:
+        factsheet = read_factsheet(solution_set_path)
+
+        solution_description_header = html.H5("Model Information")
+        solution_description = get_solution_description(factsheet)
+        solution_description_table = dash_table.DataTable(
+            id='solution_description_table-2',
+            columns=[{"name": i, "id": i} for i in solution_description.columns],
+            data=solution_description.to_dict('records'),
+            style_table={
+                "width": "100%",
+                'overflowX': 'hidden',
+                'textAlign': 'left'
+            },
+            style_data={
+                'whiteSpace': 'normal',
+                'height': 'auto',
+            },
+            style_header={
+                'backgroundColor': SECONDARY_COLOR,
+            },
+            style_cell={
+                'textAlign': 'left',
+                'backgroundColor': SECONDARY_COLOR,
+            },
+            style_cell_conditional=[
+                {
+                    'if': {'column_id': 'key'},
+                    'fontWeight': 'bold',
+                    'width': '30%'
+                }
+            ],
+            style_as_list_view=True,
+            css=[
+                {
+                    'selector': 'tr:first-child',
+                    'rule': 'display: none',
+                },
+            ],
+        )
+        description.append(html.Div([solution_description_header, solution_description_table], className="mt-4 mb-4"))
+        return description
+    else:
+        return ""
+
+@app.callback(Output('performance_metrics_section-1', 'children'),
+          Input('solution_set_dropdown-1', 'value'), prevent_initial_call=True)
+def show_performance_metrics_1(solution_set_path):
+    if not solution_set_path:
+        return []
+    else:
+        test_data, training_data, model, factsheet = read_solution(solution_set_path)
+        target_column = factsheet.get("general", {}).get("target_column", "")
+
+        performance_metrics =  get_performance_metrics(model, test_data, target_column)
+        performance_metrics_table = dash_table.DataTable(
+                                id='performance_metrics_table-1',
+                                columns=[{"name": i, "id": i} for i in performance_metrics.columns],
+                                data=performance_metrics.to_dict('records'),
+                                style_table={
+                                    "width": "100%",
+                                    'overflowX': 'hidden',
+                                    'textAlign': 'left'
+                                },
+                                style_data={
+                                    'whiteSpace': 'normal',
+                                    'height': 'auto',
+                                },
+                                style_header={
+                                    'backgroundColor': SECONDARY_COLOR,
+                                },
+                                style_cell={
+                                    'textAlign': 'left',
+                                    'backgroundColor': SECONDARY_COLOR,
+                                },
+                                style_cell_conditional=[
+                                    {
+                                        'if': {'column_id': 'key'},
+                                        'fontWeight': 'bold',
+                                        'width': '30%'
+                                    }
+                                ],
+                                style_as_list_view=True,
+                                css=[
+                                  {
+                                     'selector': 'tr:first-child',
+                                     'rule': 'display: none',
+                                  },
+                                ],
+        )
+        return html.Div([html.H5("Performance Metrics"), performance_metrics_table], className="mt-4 mb-4")
+
+@app.callback(Output('performance_metrics_section-2', 'children'),
+          Input('solution_set_dropdown-2', 'value'), prevent_initial_call=True)
+def show_performance_metrics_2(solution_set_path):
+    if not solution_set_path:
+        return []
+    else:
+        test_data, training_data, model, factsheet = read_solution(solution_set_path)
+        target_column = factsheet.get("general", {}).get("target_column", "")
+
+        performance_metrics =  get_performance_metrics(model, test_data, target_column)
+        performance_metrics_table = dash_table.DataTable(
+                                id='performance_metrics_table-2',
+                                columns=[{"name": i, "id": i} for i in performance_metrics.columns],
+                                data=performance_metrics.to_dict('records'),
+                                style_table={
+                                    "width": "100%",
+                                    'overflowX': 'hidden',
+                                    'textAlign': 'left'
+                                },
+                                style_data={
+                                    'whiteSpace': 'normal',
+                                    'height': 'auto',
+                                },
+                                style_header={
+                                    'backgroundColor': SECONDARY_COLOR,
+                                },
+                                style_cell={
+                                    'textAlign': 'left',
+                                    'backgroundColor': SECONDARY_COLOR,
+                                },
+                                style_cell_conditional=[
+                                    {
+                                        'if': {'column_id': 'key'},
+                                        'fontWeight': 'bold',
+                                        'width': '30%'
+                                    }
+                                ],
+                                style_as_list_view=True,
+                                css=[
+                                  {
+                                     'selector': 'tr:first-child',
+                                     'rule': 'display: none',
+                                  },
+                                ],
+        )
+        return html.Div([html.H5("Performance Metrics"), performance_metrics_table], className="mt-4 mb-4")
+
+@app.callback(Output('properties_section-1', 'children'),
+              Input('solution_set_dropdown-1', 'value'), prevent_initial_call=True)
+def show_properties_1(solution_set_path):
+    if not solution_set_path:
+        return []
+    else:
+        test_data, training_data, model, factsheet = read_solution(solution_set_path)
+        properties = get_properties_section(factsheet)
+        properties_table = dash_table.DataTable(
+            id='properties_table-1',
+            columns=[{"name": i, "id": i} for i in properties.columns],
+            data=properties.to_dict('records'),
+            style_table={
+                "width": "100%",
+                'overflowX': 'hidden',
+                'textAlign': 'left'
+            },
+            style_data={
+                'whiteSpace': 'normal',
+                'height': 'auto',
+            },
+            style_header={
+                'backgroundColor': SECONDARY_COLOR,
+            },
+            style_cell={
+                'textAlign': 'left',
+                'backgroundColor': SECONDARY_COLOR,
+            },
+            style_cell_conditional=[
+                {
+                    'if': {'column_id': 'key'},
+                    'fontWeight': 'bold',
+                    'width': '30%'
+                }
+            ],
+            style_as_list_view=True,
+            css=[
+                {
+                    'selector': 'tr:first-child',
+                    'rule': 'display: none',
+                },
+            ],
+        )
+        return html.Div([html.H5("Properties"), properties_table], className="mt-4 mb-4")
+
+@app.callback(Output('properties_section-2', 'children'),
+              Input('solution_set_dropdown-2', 'value'), prevent_initial_call=True)
+def show_properties_2(solution_set_path):
+    if not solution_set_path:
+        return []
+    else:
+        test_data, training_data, model, factsheet = read_solution(solution_set_path)
+        properties = get_properties_section(factsheet)
+        properties_table = dash_table.DataTable(
+            id='properties_table-2',
+            columns=[{"name": i, "id": i} for i in properties.columns],
+            data=properties.to_dict('records'),
+            style_table={
+                "width": "100%",
+                'overflowX': 'hidden',
+                'textAlign': 'left'
+            },
+            style_data={
+                'whiteSpace': 'normal',
+                'height': 'auto',
+            },
+            style_header={
+                'backgroundColor': SECONDARY_COLOR,
+            },
+            style_cell={
+                'textAlign': 'left',
+                'backgroundColor': SECONDARY_COLOR,
+            },
+            style_cell_conditional=[
+                {
+                    'if': {'column_id': 'key'},
+                    'fontWeight': 'bold',
+                    'width': '30%'
+                }
+            ],
+            style_as_list_view=True,
+            css=[
+                {
+                    'selector': 'tr:first-child',
+                    'rule': 'display: none',
+                },
+            ],
+        )
+        return html.Div([html.H5("Properties"), properties_table], className="mt-4 mb-4")
 
 @app.callback(
     [Output('bar-1', 'figure'),
