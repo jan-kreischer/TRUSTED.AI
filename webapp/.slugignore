@@ -1,0 +1,14 @@
+# Heres a comment
+scenarios/*
+!scenarios/it_sec_incident_classification
+!scenarios/it_sec_incident_classification/*
+!scenarios/it_sec_incident_classification/solutions
+!scenarios/it_sec_incident_classification/solutions/melikes_logistic_regression
+
+!scenarios/credit_card_approval
+!scenarios/credit_card_approval/*
+!scenarios/credit_card_approval/solutions
+!scenarios/credit_card_approval/solutions/jans_knn_classifier_01
+.ipynb_checkpoints
+/tools
+tools
