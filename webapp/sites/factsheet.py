@@ -178,7 +178,7 @@ layout = dbc.Container([
             html.Div([
                 html.H2("• Fairness"),
                 html.Div([
-                    create_info_modal("question_fairness", "Question Fairness", "Please enter the name of the target column within your dataset.", ""),
+                    create_info_modal("question_fairness", "Question Fairness", "A model is always used in order to acomplish a certain task or make certain predictions. Please score in regard to the scenario, how fair you think this task is. The rating is done on a scale from 1 (very unfair) to 5 (very fair).", "E.g racial profiling would be considered to be very unfair (1) while the detection of cyberattacks would probably be considered very fair (5)"),
                     html.H3("Question Fairness"),
                     dcc.Dropdown(
                         id='question_fairness',

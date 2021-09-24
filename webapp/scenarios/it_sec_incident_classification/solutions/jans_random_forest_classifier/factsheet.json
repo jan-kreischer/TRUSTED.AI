@@ -21,7 +21,7 @@
         "fairness": {
             "question_fairness": 5,
             "class_balance": 5,
-            "statistical_parity_difference": NaN,
+            "statistical_parity_difference": 3,
             "equal_opportunity_difference": NaN,
             "average_odds_difference": NaN,
             "disparate_impact": NaN,
@@ -55,9 +55,17 @@
     },
     "properties": {
         "fairness": {
-            "question_fairness": {},
-            "class_balance": {},
-            "statistical_parity_difference": {},
+            "question_fairness": {
+                "Question Fairness": "5"
+            },
+            "class_balance": {
+                "class balance score": 5
+            },
+            "statistical_parity_difference": {
+                "Favored Majority Ratio": 0.079126488939308,
+                "Favored Minority Ratio": 0.041666666666666664,
+                "Statistical Parity Difference": -0.03745982227264134
+            },
             "equal_opportunity_difference": {},
             "average_odds_difference": {},
             "disparate_impact": {},
