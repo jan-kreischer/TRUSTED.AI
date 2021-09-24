@@ -728,7 +728,7 @@ def pillar_section(pillar, metrics):
                     backdrop=True
                     )                   
 
-                ], id="{}_section".format(pillar), style={"display": "None"})
+                ], id="{}_section".format(pillar), style={"display": "None"}, hidden = True)
     
 def mapping_panel(pillar):
     

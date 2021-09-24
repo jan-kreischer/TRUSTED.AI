@@ -224,6 +224,20 @@ for s in SECTIONS[1:]:
             return (not is_open, {'display': 'None'})
         else:
             return (not is_open, {'display': 'Block'})
+        
+    @app.callback(
+        Output("{}_section".format(s), "hidden"),
+        Input("{}_s".format(s), "n_clicks"),
+        State("{}_section".format(s), "hidden"),
+        prevent_initial_call=True
+    )
+    def toggle_detail_section(n, is_open):
+        #app.logger.info("toggle {0} detail section".format(s))
+       # list(map(lambda x: Output("{}_section".format(x), "hidden"), [n for n in SECTIONS[1:] if n != "fairness"])),
+        if is_open:
+            return (not is_open)
+        else:
+            return (not is_open)
 
 @app.callback(
     Output(component_id="bar", component_property='style'),
@@ -1317,6 +1331,15 @@ layout = html.Div([
                 html.Div([
                     general_section(),
                     trust_section(),
+                    html.Div([
+                    dbc.Row(
+                    [
+                    dbc.Col(dbc.Button("FAIRNESS", id='fairness_s',className="mt-3", color="primary", style={"background-color": FAIRNESS_COLOR})),
+                    dbc.Col(dbc.Button("EXPLAINABILITY", id='explainability_s',className="mt-3", color="primary", style={"background-color": EXPLAINABILITY_COLOR})),
+                    dbc.Col(dbc.Button("ROBUSTNESS", id='robustness_s',className="mt-3", color="primary" , style={"background-color": ROBUSTNESS_COLOR})),
+                    dbc.Col(dbc.Button("METHODOLOGY", id='methodology_s',className="mt-3", color="primary" , style={"background-color": METHODOLOGY_COLOR})),
+                    ]
+                    ), html.Br()],className="text-center", style={"margin-left":"10%","margin-right":"10%"}),
                     pillar_section("fairness", fairness_metrics),
                     pillar_section("explainability", explainability_metrics),
                     pillar_section("robustness", robustness_metrics),
