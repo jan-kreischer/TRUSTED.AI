@@ -1,14 +1,9 @@
-# Heres a comment
-scenarios/*
-!scenarios/it_sec_incident_classification
-!scenarios/it_sec_incident_classification/*
-!scenarios/it_sec_incident_classification/solutions
-!scenarios/it_sec_incident_classification/solutions/melikes_logistic_regression
+# Excluded Scenarios
+scenarios/compas_recidivism
+scenarios/german_credit_scoring
+scenarios/it_sec_anomaly_detection
+scenarios/medical_expenditure_panel_survey
 
-!scenarios/credit_card_approval
-!scenarios/credit_card_approval/*
-!scenarios/credit_card_approval/solutions
-!scenarios/credit_card_approval/solutions/jans_knn_classifier_01
 .ipynb_checkpoints
 /tools
 tools

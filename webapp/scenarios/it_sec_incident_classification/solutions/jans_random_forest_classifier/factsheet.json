@@ -8,13 +8,18 @@
         "target_column": "label",
         "authors": "Jan"
     },
-    "fairness": {},
+    "fairness": {
+        "question_fairness": 5,
+        "protected_feature": "connectivity",
+        "protected_group": "lambda x: x[protected_feature] == 0",
+        "favorable_outcome": "lambda x: x[target_column] == 14"
+    },
     "methodology": {
         "regularization": "none"
     },
     "scores": {
         "fairness": {
-            "question_fairness": NaN,
+            "question_fairness": 5,
             "class_balance": 5,
             "statistical_parity_difference": NaN,
             "equal_opportunity_difference": NaN,

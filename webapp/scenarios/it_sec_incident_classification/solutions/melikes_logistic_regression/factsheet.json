@@ -5,10 +5,15 @@
         "domain_description": "IT Security",
         "training_data_description": "Alberto's original Raspery Pie data",
         "model_information": "Sklearn Logistic Regression Classifier for IoT Security Incident Classification scenario",
-        "target_column": 73,
+        "target_column": "label",
         "authors": "Melike"
     },
-    "fairness": {},
+    "fairness": {
+        "question_fairness": 5,
+        "protected_feature": "connectivity",
+        "protected_group": "lambda x: x[protected_feature] == 0",
+        "favorable_outcome": "lambda x: x[target_column] == 14"
+    },
     "methodology": {
         "regularization": "none"
     },

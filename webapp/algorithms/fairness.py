@@ -79,6 +79,7 @@ def analyse(model, training_dataset, test_dataset, factsheet, fairness_config):
 def question_fairness_score(factsheet):
     try:
         score = factsheet.get("fairness", {}).get("question_fairness", np.nan)
+        print("Question fairness {}".format(score))
         return result(score=score, properties={}) 
     except Exception as e:
         print(e)

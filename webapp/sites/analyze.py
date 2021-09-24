@@ -214,7 +214,7 @@ for s in SECTIONS[1:]:
     @app.callback(
         [Output("{0}_details".format(s), "is_open"),
         Output("{0}_details".format(s), "style")],
-        [Input("toggle_{0}_details".format(s), "n_clicks")],
+        [Input("toggle_{0}_details".format(s), "on")],
         [State("{0}_details".format(s), "is_open")],
         prevent_initial_call=True
     )
@@ -542,18 +542,18 @@ def metric_detail(data):
               output.append(html.Div(prop))
       return output
      
-'''
-The following function updates
-'''
-@app.callback(
-    [Output("class_balance_details", 'children')],
-    [Input("solution_set_label_select", 'value'), 
-    State('training_data', 'data'),
-    State("solution_set_dropdown", 'value')], prevent_initial_call=True)
-def class_balance(label, jsonified_training_data, solution_set_path):
-    training_data = read_train(solution_set_path)
-    graph = dcc.Graph(figure=px.histogram(training_data, x=label, opacity=1, title="Label vs Label Occurence", color_discrete_sequence=[FAIRNESS_COLOR]))
-    return [graph]
+#'''
+#The following function updates
+#'''
+#@app.callback(
+#    [Output("class_balance_details", 'children')],
+#    [Input("solution_set_label_select", 'value'), 
+#    State('training_data', 'data'),
+#    State("solution_set_dropdown", 'value')], prevent_initial_call=True)
+#def class_balance(label, jsonified_training_data, solution_set_path):
+#    training_data = read_train(solution_set_path)
+#    graph = dcc.Graph(figure=px.histogram(training_data, x=label, opacity=1, title="Label vs Label Occurence", color_discrete_sequence=[FAIRNESS_COLOR]))
+#    return [graph]
        
 '''
 The following function updates
@@ -570,8 +570,44 @@ def statistical_parity_difference(data):
         metric_properties = properties["fairness"]["statistical_parity_difference"]
         metric_scores = result["results"]
         return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["fairness"]["statistical_parity_difference"]))
-    
-    
+
+'''
+The following function updates
+'''
+@app.callback(
+    Output("fairness_details", 'children'),
+    [Input('result', 'data')], prevent_initial_call=True)
+def fairness_metric_test(data):
+    print("Fairness Metric Test CALLED!")
+    if data is None:
+        return []
+    else:
+        print("Inner Fairness Metric Test CALLED!")
+        result = json.loads(data)
+        print(result["results"]["fairness"])
+        properties = result["properties"]
+        #metric_properties = properties["fairness"]["statistical_parity_difference"]
+        #metric_scores = result["results"]
+        FAIRNESS_SECTION_INDEX = 1
+        metric_index = 0
+        fairness_metrics_details = []
+        fairness_metrics_details.append(html.H3("▶ Fairness Metrics"))
+        calculated_metrics = []
+        non_calculated_metrics = [html.H5("Non-Computable Metrics")]
+        
+        print("TYPE: {}".format(type(result["results"]["fairness"])))
+        for metric_id, metric_score in (result["results"]["fairness"]).items():
+            if not math.isnan(metric_score):
+                print(type(metric_score))
+                metric_index +=1
+                calculated_metrics.append(show_metric_details_section(metric_id, metric_score, metric_index, FAIRNESS_SECTION_INDEX))
+            else:
+                non_calculated_metrics.append(show_metric_details_section(metric_id, metric_score))
+        fairness_metrics_details.append(html.Div(calculated_metrics))
+        fairness_metrics_details.append(html.Div(non_calculated_metrics))
+        return html.Div(fairness_metrics_details)
+ 
+
 #@app.callback(
 #    [Output("f1_score_details", 'children'), Output("f1_score_score", 'children')],
 #    [Input('result', 'data')])
@@ -858,7 +894,7 @@ def show_performance_metrics(solution_set_path):
                                   },
                                 ],
         )
-        return html.Div([html.H5("Performance Metrics"), performance_metrics_table], className="mt-4 mb-4")
+        return html.Div([html.H5("Performance Metrics"), performance_metrics_table], className="mt-4 mb-4 p-2", style={"border": "1px solid {}".format(ROBUSTNESS_COLOR)})
 
 
 @app.callback(Output('properties_section', 'children'),

@@ -1,7 +1,6 @@
-webapp/uploaded_files
-.idea
-site/
-.ipynb_checkpoints
+.ide
+.ipynb_checkpointsa
+**/*.ipynb_checkpoints/
 .DS_Store
 
 webapp/scenarios/*

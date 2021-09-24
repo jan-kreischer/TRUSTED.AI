@@ -22,7 +22,7 @@ from config import *
 from app import server
 from app import app
 # import all pages in the app
-from sites import homepage, upload, analyze, compare, existing, factsheet #, visualisation 
+from sites import homepage, upload, analyze, compare, scenarios, factsheet #, visualisation 
 from sites.config_panel import input_ids 
 
 navbar = dbc.Navbar(
@@ -42,7 +42,7 @@ navbar = dbc.Navbar(
             dbc.Collapse(
                 dbc.Nav(
                     [                
-                        dbc.NavItem(dbc.NavLink("Scenarios", href="/existing")),
+                        dbc.NavItem(dbc.NavLink("Scenarios", href="/scenarios")),
                         dbc.NavItem(dbc.NavLink("Factsheet", href="/factsheet")),
                         dbc.NavItem(dbc.NavLink("Upload", href="/upload")),
                         dbc.NavItem(dbc.NavLink("Analyze", href="/analyze")),
@@ -87,8 +87,8 @@ def display_page(pathname):
         return analyze.layout
     elif pathname == '/compare':
         return compare.layout
-    elif pathname == '/existing':
-        return existing.layout
+    elif pathname == '/scenarios':
+        return scenarios.layout
     elif pathname == '/factsheet':
         return factsheet.layout
     # elif pathname == '/visualisation':

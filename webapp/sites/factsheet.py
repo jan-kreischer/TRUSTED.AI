@@ -179,6 +179,7 @@ layout = dbc.Container([
                 html.H2("• Fairness"),
                 html.Div([
                     create_info_modal("question_fairness", "Question Fairness", "Please enter the name of the target column within your dataset.", ""),
+                    html.H3("Question Fairness"),
                     dcc.Dropdown(
                         id='question_fairness',
                         options=[

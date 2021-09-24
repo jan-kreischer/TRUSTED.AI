@@ -638,6 +638,19 @@ def create_metric_details_section(metric_id, i, section_n = 1, is_open=False, sc
         ),
         ], id="{}_section".format(metric_id), className="mb-5 mt-5")
 
+def show_metric_details_section(metric_id, metric_score=None, metric_index = 1, section_index = 1):
+    metric_name = metric_id.replace("_", " ")
+    sections = []
+    if not math.isnan(metric_score):
+        sections.append(html.I(className="fas fa-chevron-down ml-4", id="toggle_{}_details".format(metric_id), style={"float": "right"}))
+        sections.append(html.H4("({}/5)".format(metric_score),id="{}_score".format(metric_id), style={"float": "right"})),
+        sections.append(html.H4("{0}.{1} {2}".format(section_index, metric_index, metric_name)))
+    else: 
+        sections.append(html.H4("- {}".format(metric_name)))
+    sections.append(dbc.Collapse(["Test content"], id="{}_details".format(metric_id)))
+    
+    return html.Div(sections, id="{}_section".format(metric_id), className="mb-5 mt-5")
+
 def pillar_section(pillar, metrics):
         #configuration_section = []
         #configuration_section.append(html.H3("▶ {} Configuration".format(pillar)))
@@ -649,21 +662,19 @@ def pillar_section(pillar, metrics):
 
         return html.Div([
                 html.Div([
-                    html.Div([html.Label("show Details"),
-                    dbc.Button(
-                        html.I(className="fas fa-chevron-down"),
-                        id="toggle_{}_details".format(pillar),
-                        className="mb-3",
-                        n_clicks=0,
-                        style={"backgroundColor": SECONDARY_COLOR}
-                    )
-                    ],style={"float": "right"}),
+                    daq.BooleanSwitch(id='toggle_{}_details'.format(pillar),
+                      on=False,
+                      label='Show Details',
+                      labelPosition="right",
+                      color = TRUST_COLOR,
+                      style={"float": "right","margin-right":"3%"}
+                    ),
                     daq.BooleanSwitch(id='toggle_{}_mapping'.format(pillar),
                       on=False,
                       label='Show Mappings',
-                      labelPosition="top",
+                      labelPosition="right",
                       color = TRUST_COLOR,
-                      style={"float": "right","margin-right":"31%"}
+                      style={"float": "right","margin-right":"3%"}
                     ),
                     html.H2("• {}".format(pillar.upper()), className="mb-5"),
                     ], id="{}_section_heading".format(pillar.lower())),

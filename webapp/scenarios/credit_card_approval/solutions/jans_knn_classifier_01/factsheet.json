@@ -42,10 +42,8 @@
         "methodology": {
             "normalization": 1,
             "missing_data": 5,
-            "regularization": 1,
+            "regularization": NaN,
             "train_test_split": 5,
-            "test_accuracy": NaN,
-            "f1_score": NaN,
             "factsheet_completeness": 1
         }
     },
@@ -118,6 +116,10 @@
                 "Test_std": [
                     "Standard deviation of the test data",
                     "4596.55"
+                ],
+                "normalization": [
+                    "Normalization",
+                    "None"
                 ]
             },
             "missing_data": {
@@ -127,29 +129,50 @@
                 ]
             },
             "regularization": {
-                "regularization_technique": "not specified"
-            },
-            "train_test_split": {
-                "training_data_ratio": [
-                    "The ratio of the train data",
-                    "80.00"
-                ],
-                "test_data_ratio": [
-                    "The ratio of the test data",
-                    "20.00"
+                "regularization_technique": [
+                    "Regularization technique",
+                    "not specified"
                 ]
             },
-            "test_accuracy": {},
-            "f1_score": {},
+            "train_test_split": {
+                "train_test_split": [
+                    "Train test split",
+                    "80.00/20.00"
+                ]
+            },
             "factsheet_completeness": {
-                "model_name": "missing",
-                "purpose_description": "missing",
-                "domain_description": "missing",
-                "training_data_description": "missing",
-                "model_information": "missing",
-                "target_column": "present",
-                "authors": "missing",
-                "contact_information": "missing"
+                "model_name": [
+                    "(Factsheet Property) model_name",
+                    "missing"
+                ],
+                "purpose_description": [
+                    "(Factsheet Property) purpose_description",
+                    "missing"
+                ],
+                "domain_description": [
+                    "(Factsheet Property) domain_description",
+                    "missing"
+                ],
+                "training_data_description": [
+                    "(Factsheet Property) training_data_description",
+                    "missing"
+                ],
+                "model_information": [
+                    "(Factsheet Property) model_information",
+                    "missing"
+                ],
+                "target_column": [
+                    "(Factsheet Property) target_column",
+                    "present"
+                ],
+                "authors": [
+                    "(Factsheet Property) authors",
+                    "missing"
+                ],
+                "contact_information": [
+                    "(Factsheet Property) contact_information",
+                    "missing"
+                ]
             }
         }
     }
