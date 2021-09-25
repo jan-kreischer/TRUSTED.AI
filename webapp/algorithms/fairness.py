@@ -60,6 +60,8 @@ def analyse(model, training_dataset, test_dataset, factsheet, fairness_config):
     output = dict(
         question_fairness = question_fairness_score(factsheet),
         class_balance = class_balance_score(training_dataset, target_column),
+        underfitting = underfitting_score(model, training_dataset, test_dataset, factsheet),
+        overfitting = overfitting_score(model, training_dataset, test_dataset, factsheet),
         statistical_parity_difference = statistical_parity_difference_score(model, training_dataset, test_dataset, factsheet),
         equal_opportunity_difference = equal_opportunity_difference_score(),
         average_odds_difference = average_odds_difference_score(),
@@ -115,6 +117,89 @@ def class_balance_score(training_data, target_column):
     except Exception as e:
         print(e)
         return result(score=np.nan, properties={}) 
+
+# --- Over & Underfitting ---
+
+def underfitting_score(model, training_dataset, test_dataset, factsheet):
+    try:
+        properties = {"Conclusion": "Model is underfitting"}
+        score = 0
+        training_accuracy = compute_accuracy(model, training_dataset, factsheet)
+        test_accuracy = compute_accuracy(model, test_dataset, factsheet)
+        if training_accuracy <= test_accuracy:
+            # model could be underfitting.
+            # for underfitting models the spread is negative
+            accuracy_difference = training_accuracy - test_accuracy
+            if abs(accuracy_difference) < 0.01:
+                score = 5
+            elif abs(accuracy_difference) < 0.02:
+                score = 4
+            elif abs(accuracy_difference) < 0.03:
+                score = 3
+            elif abs(accuracy_difference) < 0.04:
+                score = 2
+            else:
+                score = 1
+            properties["Training Accuracy"] = training_accuracy
+            properties["Test Accuracy"] = test_accuracy
+            properties["Train Test Accuracy Difference"] = training_accuracy - test_accuracy
+    
+            return result(score=score, properties=properties)
+        else:
+            return result(score=np.nan, properties={}) 
+    except Exception as e:
+        print(e)
+        return result(score=np.nan, properties={}) 
+
+
+def overfitting_score(model, training_dataset, test_dataset, factsheet):
+    try:
+        properties = {"Conclusion": "Model is overfitting"}
+        score = 0
+        training_accuracy = compute_accuracy(model, training_dataset, factsheet)
+        test_accuracy = compute_accuracy(model, test_dataset, factsheet)
+        if training_accuracy >= test_accuracy:
+            # model could be underfitting.
+            # for underfitting models the spread is negative
+            accuracy_difference = training_accuracy - test_accuracy
+            if abs(accuracy_difference) < 0.01:
+                score = 5
+            elif abs(accuracy_difference) < 0.02:
+                score = 4
+            elif abs(accuracy_difference) < 0.03:
+                score = 3
+            elif abs(accuracy_difference) < 0.04:
+                score = 2
+            else:
+                score = 1
+            properties["Training Accuracy"] = training_accuracy
+            properties["Test Accuracy"] = test_accuracy
+            properties["Train Test Accuracy Difference"] = training_accuracy - test_accuracy
+    
+            return result(score=score, properties=properties)
+        else:
+            return result(score=np.nan, properties={}) 
+    except Exception as e:
+        print(e)
+        return result(score=np.nan, properties={}) 
+
+def compute_accuracy(model, dataset, factsheet):
+    print("COMPUTE ACCURACY")
+    try:
+        target_column = factsheet.get("general", {}).get("target_column", {})
+        X_data = dataset.drop(target_column, axis=1)
+        y_data = dataset[target_column]
+
+        y_true = y_data.values.flatten()
+        if (isinstance(model, tf.keras.Sequential)):
+            y_train_pred_proba = model.predict(X_train)
+            y_pred = np.argmax(y_pred_proba, axis=1)
+        else:
+            y_pred = model.predict(X_data).flatten()
+        return metrics.accuracy_score(y_true, y_pred)
+    except Exception as e:
+        print(e)
+        return -1
 
 # --- Statistical Parity Difference ---
 def statistical_parity_difference_score(model, training_dataset, test_dataset, factsheet):

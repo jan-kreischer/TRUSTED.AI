@@ -5,7 +5,7 @@
         "domain_description": "IT Security",
         "training_data_description": "Alberto's classification data",
         "model_information": "Sklearn SVM Classifier for IT Security Incident Classification scenario",
-        "target_column": "label",
+        "target_column": 73,
         "authors": "Melike"
     },
     "fairness": {

@@ -16,5 +16,298 @@
     },
     "methodology": {
         "regularization": "none"
+    },
+    "scores": {
+        "fairness": {
+            "question_fairness": 5,
+            "class_balance": 5,
+            "underfitting": NaN,
+            "overfitting": 1,
+            "statistical_parity_difference": 1,
+            "equal_opportunity_difference": NaN,
+            "average_odds_difference": NaN,
+            "disparate_impact": NaN,
+            "theil_index": NaN,
+            "euclidean_distance": NaN,
+            "mahalanobis_distance": NaN,
+            "manhattan_distance": NaN
+        },
+        "explainability": {
+            "algorithm_class": 3,
+            "correlated_features": 2,
+            "model_size": 3,
+            "feature_relevance": 2
+        },
+        "robustness": {
+            "confidence_score": 4,
+            "clique_method": 1,
+            "loss_sensitivity": NaN,
+            "clever_score": NaN,
+            "empirical_robustness_fast_gradient_attack": NaN,
+            "empirical_robustness_carlini_wagner_attack": NaN,
+            "empirical_robustness_deepfool_attack": NaN
+        },
+        "methodology": {
+            "normalization": 1,
+            "missing_data": 5,
+            "regularization": 1,
+            "train_test_split": 1,
+            "factsheet_completeness": 4
+        }
+    },
+    "properties": {
+        "fairness": {
+            "question_fairness": {
+                "Question Fairness": "5"
+            },
+            "class_balance": {
+                "class balance score": 5
+            },
+            "underfitting": {},
+            "overfitting": {
+                "Conclusion": "Model is overfitting",
+                "Training Accuracy": 0.6605787476280834,
+                "Test Accuracy": 0.5855855855855856,
+                "Train Test Accuracy Difference": 0.07499316204249784
+            },
+            "statistical_parity_difference": {
+                "Favored Majority Ratio": 0.077069911715581,
+                "Favored Minority Ratio": 0.56,
+                "Statistical Parity Difference": 0.4829300882844191
+            },
+            "equal_opportunity_difference": {},
+            "average_odds_difference": {},
+            "disparate_impact": {},
+            "theil_index": {},
+            "euclidean_distance": {},
+            "mahalanobis_distance": {},
+            "manhattan_distance": {}
+        },
+        "explainability": {
+            "algorithm_class": {
+                "clf_name": [
+                    "model type",
+                    "RandomForestClassifier"
+                ]
+            },
+            "correlated_features": {
+                "pct_drop": [
+                    "Percentage of highly correlated features",
+                    "29.55%"
+                ]
+            },
+            "model_size": {
+                "n_features": [
+                    "number of features",
+                    45
+                ]
+            },
+            "feature_relevance": {
+                "n_outliers": [
+                    "number of outliers in the importance distribution",
+                    3
+                ],
+                "pct_dist": [
+                    "percentage of feature that make up over 60% of all features importance",
+                    "18.18%"
+                ],
+                "importance": [
+                    "feature importance",
+                    {
+                        "value": [
+                            0.12837901953326158,
+                            0.08380079827122745,
+                            0.08023024982401203,
+                            0.0701752458227158,
+                            0.06547343988467427,
+                            0.061904076387717326,
+                            0.05021893042997504,
+                            0.04281759433844336,
+                            0.037136162960892866,
+                            0.033969134147419436,
+                            0.03199404077820343,
+                            0.03180987563771369,
+                            0.02953798365064732,
+                            0.02866231137797419,
+                            0.02731778267564812,
+                            0.026893105507327385,
+                            0.02631343398685448,
+                            0.025907629279973907,
+                            0.021409623225343136,
+                            0.021355674451634648,
+                            0.020268289536121517,
+                            0.014502876541051939,
+                            0.012994792442524484,
+                            0.012523315941203367,
+                            0.008943434666808971,
+                            0.004657154411386545,
+                            0.0004896628732733037,
+                            0.00019740899986417357,
+                            8.321171150689558e-05,
+                            3.3740704599386424e-05,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0,
+                            0.0
+                        ],
+                        "labels": [
+                            "fib:fib_table_lookup",
+                            "skb:consume_skb",
+                            "skb:kfree_skb",
+                            "skb:skb_copy_datagram_iovec",
+                            "sock:inet_sock_set_state",
+                            "writeback:writeback_dirty_inode",
+                            "random:urandom_read",
+                            "block:block_dirty_buffer",
+                            "kmem:kfree",
+                            "tcp:tcp_probe",
+                            "cs",
+                            "kmem:mm_page_free",
+                            "filemap:mm_filemap_add_to_page_cache",
+                            "qdisc:qdisc_dequeue",
+                            "kmem:mm_page_alloc_zone_locked",
+                            "rpm:rpm_resume",
+                            "writeback:writeback_dirty_inode_enqueue",
+                            "random:get_random_bytes",
+                            "irq:softirq_entry",
+                            "kmem:mm_page_alloc",
+                            "timer:timer_start",
+                            "block:block_bio_backmerge",
+                            "cpu-migrations",
+                            "clk:clk_set_rate",
+                            "kmem:kmem_cache_alloc",
+                            "pagemap:mm_lru_insertion",
+                            "workqueue:workqueue_activate_work",
+                            "block:block_unplug",
+                            "block:block_getrq",
+                            "rpm:rpm_suspend",
+                            "connectivity",
+                            "writeback:writeback_written",
+                            "page-faults",
+                            "ipi:ipi_raise",
+                            "jbd2:jbd2_start_commit",
+                            "kmem:mm_page_pcpu_drain",
+                            "mmc:mmc_request_start",
+                            "writeback:writeback_write_inode",
+                            "writeback:global_dirty_state",
+                            "writeback:sb_clear_inode_writeback",
+                            "writeback:wbc_writepage",
+                            "writeback:writeback_pages_written",
+                            "writeback:writeback_single_inode",
+                            "seconds"
+                        ]
+                    }
+                ]
+            }
+        },
+        "robustness": {
+            "confidence_score": {
+                "confidence_score": [
+                    "Average confidence score",
+                    "63.71%"
+                ]
+            },
+            "clique_method": {
+                "error_bound": [
+                    "Average error bound",
+                    "0.00"
+                ],
+                "error": [
+                    "Error",
+                    "1.0"
+                ]
+            },
+            "loss_sensitivity": {},
+            "clever_score": {},
+            "empirical_robustness_fast_gradient_attack": {},
+            "empirical_robustness_carlini_wagner_attack": {},
+            "empirical_robustness_deepfool_attack": {}
+        },
+        "methodology": {
+            "normalization": {
+                "Training_mean": [
+                    "Mean of the training data",
+                    "11085.00"
+                ],
+                "Training_std": [
+                    "Standard deviation of the training data",
+                    "3924.92"
+                ],
+                "Test_mean": [
+                    "Mean of the test data",
+                    "11154.77"
+                ],
+                "Test_std": [
+                    "Standard deviation of the test data",
+                    "3933.36"
+                ],
+                "normalization": [
+                    "Normalization",
+                    "None"
+                ]
+            },
+            "missing_data": {
+                "null_values": [
+                    "Number of the null values",
+                    "0"
+                ]
+            },
+            "regularization": {
+                "regularization_technique": [
+                    "Regularization technique",
+                    "none"
+                ]
+            },
+            "train_test_split": {
+                "train_test_split": [
+                    "Train test split",
+                    "95.00/5.00"
+                ]
+            },
+            "factsheet_completeness": {
+                "model_name": [
+                    "(Factsheet Property) model_name",
+                    "present"
+                ],
+                "purpose_description": [
+                    "(Factsheet Property) purpose_description",
+                    "present"
+                ],
+                "domain_description": [
+                    "(Factsheet Property) domain_description",
+                    "present"
+                ],
+                "training_data_description": [
+                    "(Factsheet Property) training_data_description",
+                    "present"
+                ],
+                "model_information": [
+                    "(Factsheet Property) model_information",
+                    "present"
+                ],
+                "target_column": [
+                    "(Factsheet Property) target_column",
+                    "present"
+                ],
+                "authors": [
+                    "(Factsheet Property) authors",
+                    "present"
+                ],
+                "contact_information": [
+                    "(Factsheet Property) contact_information",
+                    "missing"
+                ]
+            }
+        }
     }
 }

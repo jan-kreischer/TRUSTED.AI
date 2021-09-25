@@ -21,6 +21,8 @@
         "fairness": {
             "question_fairness": 5,
             "class_balance": 5,
+            "underfitting": NaN,
+            "overfitting": 1,
             "statistical_parity_difference": 3,
             "equal_opportunity_difference": NaN,
             "average_odds_difference": NaN,
@@ -60,6 +62,13 @@
             },
             "class_balance": {
                 "class balance score": 5
+            },
+            "underfitting": {},
+            "overfitting": {
+                "Conclusion": "Model is overfitting",
+                "Training Accuracy": 1.0,
+                "Test Accuracy": 0.8806306306306306,
+                "Train Test Accuracy Difference": 0.11936936936936937
             },
             "statistical_parity_difference": {
                 "Favored Majority Ratio": 0.079126488939308,
