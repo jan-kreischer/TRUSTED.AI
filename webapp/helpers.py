@@ -24,8 +24,7 @@ import sklearn.metrics as metrics
 import collections
 import reportlab
 from reportlab.pdfgen import canvas
-from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image
-from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Table
 from reportlab.rl_config import defaultPageSize
 from reportlab.lib.units import inch
 from reportlab.graphics.shapes import *
@@ -33,7 +32,6 @@ from reportlab.lib.colors import *
 from base64 import b64encode
 from textwrap import wrap
 import timeit
-from reportlab.lib.utils import ImageReader
 
 PAGE_HEIGHT=defaultPageSize[1]; PAGE_WIDTH=defaultPageSize[0]
 
@@ -351,7 +349,45 @@ def title_style(canvas, doc):
     canvas.setFont('Times-Roman',9)
     canvas.restoreState()
 
-def create_report_section(Story, title , keys, values):
+
+def report_section(Story, title , keys, values, sizex, sizey):
+    it = iter(zip(keys, values))
+
+    Story.append(Spacer(1, 0.2 * inch))
+
+    p = Paragraph(id_to_name(title))
+
+    Story.append(p)
+    Story.append(Spacer(1, 0.1 * inch))
+    d = Drawing(PAGE_WIDTH, 1)
+    d.add(Line(0, 0, PAGE_WIDTH-130, 0, strokeColor='#000080', strokeWidth=.8))
+    Story.append(d)
+    Story.append(Spacer(1, 0.1 * inch))
+
+    data = []
+
+    for x in it:
+        p1 = Paragraph('{}:'.format(id_to_name(x[0])))
+        p2 = Paragraph('{}'.format(x[1]))
+        item = next(it, None)
+        if item is None:
+            p3 = ''
+            p4 = ''
+        else:
+            l = item[0]
+            v = item[1]
+            p3 = Paragraph('{}:'.format(id_to_name(l)))
+            p4 = Paragraph('{}'.format(v))
+        m = [p1, p2, p3, p4]
+        data.append(m)
+    print(data)
+    t = Table(data,sizex, sizey, style = [('VALIGN',(0,0),(-1,-1),'MIDDLE')])
+    Story.append(t)
+    Story.append(Spacer(1, 0.2 * inch))
+
+    return Story
+
+def report_performance_metrics_section(Story, title , keys, values):
     Story.append(Spacer(1, 0.2 * inch))
     p = Paragraph(id_to_name(title))
     Story.append(p)
@@ -360,48 +396,31 @@ def create_report_section(Story, title , keys, values):
     d.add(Line(0, 0, PAGE_WIDTH-130, 0, strokeColor='#000080', strokeWidth=.8))
     Story.append(d)
     Story.append(Spacer(1, 0.1 * inch))
-    for k, v in zip(keys, values):
-        m = "{}: {}".format(id_to_name(k), v)
-        p = Paragraph(m)
-        Story.append(p)
-        Story.append(Spacer(1, 0.2 * inch))
+
+    it = iter(zip(keys, values))
+    data = []
+    l,v = next(it)
+    m = ['{}:'.format(id_to_name(l)), '{}'.format(v), '', '']
+    data.append(m)
+    for x in it:
+        l, v = next(it)
+        m = ['{}:'.format(id_to_name(x[0])), '{}'.format(x[1]), '{}:'.format(id_to_name(l)), '{}'.format(v)]
+        data.append(m)
+
+    t = Table(data, [2 * inch, 0.7*inch, 2 * inch, 0.7*inch], 4 * [0.3 * inch],
+              style=[('SPAN', (1, 0), (-1, 0))])
+    Story.append(t)
+    Story.append(Spacer(1, 0.2 * inch))
     return Story
 
-def add_charts_to_report(Story, charts):
-    for chart in charts:
-        img_bytes = chart.to_image(format="png")
-        encoding = b64encode(img_bytes).decode()
-        img_b64 = "data:image/png;base64," + encoding
-        im = reportlab.platypus.Image(img_b64)
-        im._restrictSize(4 * inch, 4 * inch)
-        Story.append(im)
-    return Story
 
-def add_matplotlib_to_report(Story, charts):
-   # Story.append(reportlab.platypus.Paragraph("<h1>Charts</h1>"))
-    for i, fig in enumerate(charts):
-        # img_bytes = io.BytesIO()
-        # fig.savefig(img_bytes)
-        # img_bytes.seek(0)   
-        # encoding = b64encode(img_bytes).decode()
-        # img_b64 = "data:image/png;base64," + encoding
-        # im = reportlab.platypus.Image(img_b64)
-        # im._restrictSize(4 * inch, 4 * inch)
-        #fig.set_size_inches(18.5, 10.5)
-        imgdata = io.BytesIO()
-        fig.savefig(imgdata, format='png',dpi=300,bbox_inches='tight')
-        imgdata.seek(0)  # rewind the data
-        im = reportlab.platypus.Image(imgdata)
-        if i ==1:
-            im._restrictSize(7 * inch, 5 * inch)
-            Story.append(im)
-        else:
-            im._restrictSize(6 * inch, 4 * inch)
-            Story.append(reportlab.platypus.Paragraph("<br/><br/>"))
-            Story.append(im)
-       
-       
-       
+def add_matplotlib_to_report(Story, fig, sizex, sizey):
+    imgdata = io.BytesIO()
+    fig.savefig(imgdata, format='png',dpi=300,bbox_inches='tight')
+    imgdata.seek(0)  # rewind the data
+    im = reportlab.platypus.Image(imgdata)
+    im._restrictSize(sizex, sizey)
+    Story.append(im)
     return Story
 
 
@@ -411,16 +430,54 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
     print("creating report")
     weight, map_f, map_e, map_r, map_m = configs
     doc = SimpleDocTemplate("report.pdf")
-    Story = [Spacer(1, 0.2 * inch)]
-    l = ["general"]
+    Story = [Spacer(1, 0.1 * inch)]
 
-    for element in l:
-        if factsheet[element]!= {}:
-            Story = create_report_section(Story, element, factsheet[element].keys(),factsheet[element].values())
+    sizex = [1.3 * inch, 2.1*inch, 1.3 * inch, 2.1*inch]
+    sizey = 4 * [0.4 * inch]
+    Story = report_section(Story, "Model Information", factsheet["general"].keys(),factsheet["general"].values(), sizex, sizey)
     perf = get_performance_metrics(model, test_data, target_column)
-    Story = create_report_section(Story,  "Performance of the Model", perf.columns, perf.values.flatten())
+    keys = []
+    values = []
+    for dic in perf.to_dict('records'):
+        keys.append(dic["key"])
+        values.append(dic["value"])
 
-    
+    Story = report_performance_metrics_section(Story,  "Performance of the Model", keys, values)
+
+
+    #overall score chart
+    final_score = result["final_score"]
+    pillars = list(final_score.keys())
+    values = list(final_score.values())
+    pillar_colors = ['#06d6a0', '#ffd166', '#ef476f', '#118ab2']
+
+    plt.switch_backend('Agg')
+    my_dpi = 96
+    fig = plt.figure(figsize=(600 / my_dpi, 400 / my_dpi), dpi=my_dpi)
+    ax = plt.subplot(111)
+    trust_score = result["trust_score"]
+    draw_bar_plot(pillars, values, ax, color=pillar_colors,
+                  title="Overall Trust Score {}/5 \n(config: {})".format(trust_score, weight.split("/")[-1][:-5]))
+    Story = add_matplotlib_to_report(Story, fig, 7 * inch, 5 * inch)
+
+    results = result["results"]
+
+    plots= []
+    for n, (pillar, sub_scores) in enumerate(results.items()):
+        my_dpi = 96
+        fig = plt.figure(figsize=(600 / my_dpi, 400 / my_dpi), dpi=my_dpi)
+        title = "{} \n(config: {})".format(pillar, configs[n + 1].split("/")[-1][:-5])
+        categories = list(map(lambda x: x.replace("_", ' '), sub_scores.keys()))
+        categories = ['\n'.join(wrap(l, 12, break_long_words=False)) for l in categories]
+        values = list(sub_scores.values())
+        nan_val = np.isnan(values)
+        values = np.array(values)[~nan_val]
+        categories = np.array(categories)[~nan_val]
+        ax = plt.subplot(2, 2, n + 1)
+        draw_bar_plot(categories, values, ax, color=pillar_colors[n], title=id_to_name(title), size=6)
+        plots.append(fig)
+
+    Story = add_matplotlib_to_report(Story, plots[0], 7 * inch, 5 * inch)
     fairness_properties = [p for k, p in result["properties"]["fairness"].items()]
     k = []
     v = []
@@ -433,9 +490,12 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
                 else: 
                     k.append(i)
                     v.append(m)
-                    
-    Story = create_report_section(Story, "Fairness Properties",  k, v)
-    
+
+    sizex = 4* [1.6 * inch]
+    sizey = math.ceil(len(k)/2) * [0.4 * inch]
+    Story = report_section(Story, "Fairness Properties",  k, v, sizex, sizey)
+
+    Story = add_matplotlib_to_report(Story, plots[1], 7 * inch, 5 * inch)
     explainability_properties = [p for k, p in result["properties"]["explainability"].items()] 
     k = []
     v = []
@@ -449,8 +509,12 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
                 else: 
                     k.append(i)
                     v.append(m)
-    Story = create_report_section(Story, "Explainability Properties",  k, v)
-    
+
+    sizex = [2.3 * inch, 1.4 * inch, 2.3 * inch, 0.8 * inch]
+    sizey = math.ceil(len(k)/2) * [0.45 * inch]
+    Story = report_section(Story, "Explainability Properties", k, v, sizex, sizey)
+
+    Story = add_matplotlib_to_report(Story, plots[2], 7 * inch, 5 * inch)
     robustness_properties = [p for k, p in result["properties"]["robustness"].items()]
     k = []
     v = []
@@ -463,9 +527,11 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
                 else: 
                     k.append(i)
                     v.append(m)
-                    
-    Story = create_report_section(Story, "Robustness Properties",  k, v)
-    
+    sizex = [2.4 * inch, 0.8 * inch, 2.4 * inch, 0.8 * inch]
+    sizey = math.ceil(len(k)/2) * [0.4 * inch]
+    Story = report_section(Story, "Robustness Properties", k, v, sizex, sizey)
+
+    Story = add_matplotlib_to_report(Story, plots[3], 7 * inch, 5 * inch)
     methodology_properties = [p for k, p in result["properties"]["methodology"].items()]
     k = []
     v = []
@@ -478,52 +544,12 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
                 else: 
                     k.append(i)
                     v.append(m)
-                    
-    Story = create_report_section(Story, "Methodology Properties",  k, v)
-    
-    #Story = add_charts_to_report(Story, charts)
-    plots = []
-    
-    final_score = result["final_score"]
-    pillars = list(final_score.keys())
-    values = list(final_score.values())
-    pillar_colors = ['#06d6a0','#ffd166','#ef476f','#118ab2']
 
-    plt.switch_backend('Agg')
-    my_dpi=96
-    fig = plt.figure(figsize=(600/my_dpi, 400/my_dpi), dpi=my_dpi)
-    ax = plt.subplot(111)
-    trust_score = result["trust_score"]
-    draw_bar_plot(pillars,values, ax, color= pillar_colors, title="Overall Trust Score {}/5 \n(config: {})".format(trust_score, weight.split("/")[-1][:-5]))
-    plots.append(fig)
+    sizex = [2.2 * inch, 1.2 * inch, 2.4 * inch, 1 * inch]
+    sizey = math.ceil(len(k)/2) * [0.4 * inch]
+    Story = report_section(Story, "Methodology Properties", k, v, sizex, sizey)
 
-    
-    results = result["results"]
-    my_dpi=96
-    fig = plt.figure(figsize=(1200/my_dpi, 800/my_dpi), dpi=my_dpi)
-    my_palette = ['#06d6a0','#ffd166','#ef476f','#118ab2']
-    plt.subplots_adjust(hspace=0.5,wspace=0.2)
-    
-    for n, (pillar , sub_scores) in enumerate(results.items()):
-        title = "{} \n(config: {})".format(pillar,configs[n+1].split("/")[-1][:-5])
-        categories = list(map(lambda x: x.replace("_",' '), sub_scores.keys())) 
-        categories= [ '\n'.join(wrap(l, 12,break_long_words=False)) for l in categories ]
-        values = list(sub_scores.values())
-        nan_val = np.isnan(values)
-        values = np.array(values)[~nan_val]
-        categories = np.array(categories)[~nan_val]
-        ax = plt.subplot(2,2,n+1)
-        draw_bar_plot(categories,values, ax, color=my_palette[n], title=title,size=9)
-    fig.suptitle('Pillar Metrics', fontsize=16)
-    plots.append(fig)
-    Story.append(reportlab.platypus.PageBreak())
-    p = Paragraph("Charts - Trust Scores")
-    Story.append(p)
-    d = Drawing(PAGE_WIDTH, 1)
-    d.add(Line(0, 0, PAGE_WIDTH-130, 0, strokeColor='#000080', strokeWidth=.8))
-    Story.append(d)
-    Story = add_matplotlib_to_report(Story, plots)
-    
+
     doc.build(Story, onFirstPage=title_style)
     end = timeit.timeit()
     print(end - start)  

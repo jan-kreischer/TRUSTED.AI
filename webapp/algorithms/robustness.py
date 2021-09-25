@@ -142,9 +142,9 @@ def fast_gradient_attack_score(model, train_data, test_data, thresholds):
         print("Accuracy on after_attack: {}%".format(after_attack * 100))
 
         score = np.digitize((before_attack - after_attack)/before_attack*100, thresholds) + 1
-        return result(score=int(score), properties={"before_attack": info("Before attack accuracy", "{:.2f}%".format(100 * before_attack)),
-                                  "after_attack": info("After attack accuracy", "{:.2f}%".format(100 * after_attack)),
-                                  "difference": info("Proportional difference (After attack accuracy - Before attack accuracy)/Before attack accuracy", "{:.2f}%".format(100 * (before_attack - after_attack) / before_attack))})
+        return result(score=int(score), properties={"before_attack": info("FGM Before attack accuracy", "{:.2f}%".format(100 * before_attack)),
+                                  "after_attack": info("FGM After attack accuracy", "{:.2f}%".format(100 * after_attack)),
+                                  "difference": info("FGM Proportional difference (After-Att Acc - Before-Att Acc)/Before-Att Acc", "{:.2f}%".format(100 * (before_attack - after_attack) / before_attack))})
     except:
         return result(score=np.nan, properties={})
 
@@ -173,10 +173,10 @@ def carlini_wagner_attack_score(model, train_data, test_data, thresholds):
         score = np.digitize((before_attack - after_attack)/before_attack*100, thresholds) + 1
         return result(score=int(score),
                       properties={
-                          "before_attack": info("Before attack accuracy", "{:.2f}%".format(100 * before_attack)),
-                          "after_attack": info("After attack accuracy", "{:.2f}%".format(100 * after_attack)),
+                          "before_attack": info("CW Before attack accuracy", "{:.2f}%".format(100 * before_attack)),
+                          "after_attack": info("CW After attack accuracy", "{:.2f}%".format(100 * after_attack)),
                           "difference": info(
-                              "Proportional difference (After attack accuracy - Before attack accuracy)/Before attack accuracy",
+                              "CW Proportional difference (After-Att Acc - Before-Att Acc)/Before-Att Acc",
                               "{:.2f}%".format(100 * (before_attack - after_attack) / before_attack))})
     except:
         return result(score=np.nan, properties={})
@@ -206,8 +206,8 @@ def deepfool_attack_score(model, train_data, test_data, thresholds):
 
         score = np.digitize((before_attack - after_attack)/before_attack*100, thresholds) + 1
         return result(score=int(score),
-                      properties={"before_attack": info("Before attack accuracy", "{:.2f}%".format(100 * before_attack)),
-                                  "after_attack": info("After attack accuracy", "{:.2f}%".format(100 * after_attack)),
-                                  "difference": info("Proportional difference (After attack accuracy - Before attack accuracy)/Before attack accuracy", "{:.2f}%".format(100 * (before_attack - after_attack) / before_attack))})
+                      properties={"before_attack": info("DF Before attack accuracy", "{:.2f}%".format(100 * before_attack)),
+                                  "after_attack": info("DF After attack accuracy", "{:.2f}%".format(100 * after_attack)),
+                                  "difference": info("DF Proportional difference (After-Att Acc - Before-Att Acc)/Before-Att Acc", "{:.2f}%".format(100 * (before_attack - after_attack) / before_attack))})
     except:
         return result(score=np.nan, properties={})
