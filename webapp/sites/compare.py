@@ -624,7 +624,7 @@ def show_performance_metrics_1(solution_set_path):
                                   },
                                 ],
         )
-        return html.Div([html.H5("Performance Metrics"), performance_metrics_table], className="mt-4 mb-4")
+        return html.Div([html.H5("Performance Metrics"), performance_metrics_table], className="mt-4 mb-4", style={"border": "4px solid {}".format(TRUST_COLOR)})
 
 @app.callback(Output('performance_metrics_section-2', 'children'),
           Input('solution_set_dropdown-2', 'value'), prevent_initial_call=True)
@@ -671,7 +671,7 @@ def show_performance_metrics_2(solution_set_path):
                                   },
                                 ],
         )
-        return html.Div([html.H5("Performance Metrics"), performance_metrics_table], className="mt-4 mb-4")
+        return html.Div([html.H5("Performance Metrics"), performance_metrics_table], className="mt-4 mb-4", style={"border": "4px solid {}".format(TRUST_COLOR)})
 
 @app.callback(Output('properties_section-1', 'children'),
               Input('solution_set_dropdown-1', 'value'), prevent_initial_call=True)
@@ -680,7 +680,7 @@ def show_properties_1(solution_set_path):
         return []
     else:
         test_data, training_data, model, factsheet = read_solution(solution_set_path)
-        properties = get_properties_section(factsheet)
+        properties = get_properties_section(training_data, test_data, factsheet)
         properties_table = dash_table.DataTable(
             id='properties_table-1',
             columns=[{"name": i, "id": i} for i in properties.columns],
@@ -725,7 +725,7 @@ def show_properties_2(solution_set_path):
         return []
     else:
         test_data, training_data, model, factsheet = read_solution(solution_set_path)
-        properties = get_properties_section(factsheet)
+        properties = get_properties_section(training_data, test_data, factsheet)
         properties_table = dash_table.DataTable(
             id='properties_table-2',
             columns=[{"name": i, "id": i} for i in properties.columns],

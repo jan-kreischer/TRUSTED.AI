@@ -210,6 +210,10 @@ for s in SECTIONS:
         else:
             return (not is_open,  {"background-color": "rgba(255,228,181,0.5)",'padding-bottom': 20, 'display': 'Block'})
 
+
+#list(out)
+     
+
 for s in SECTIONS[1:]:
     @app.callback(
         [Output("{0}_details".format(s), "is_open"),
@@ -219,20 +223,6 @@ for s in SECTIONS[1:]:
     def toggle_detail_section(is_open):
         return is_open, is_open
 
-        
-    @app.callback(
-        Output("{}_section".format(s), "hidden"),
-        Input("{}_s".format(s), "n_clicks"),
-        State("{}_section".format(s), "hidden"),
-        prevent_initial_call=True
-    )
-    def toggle_detail_second_section(n, is_open):
-        #app.logger.info("toggle {0} detail section".format(s))
-       # list(map(lambda x: Output("{}_section".format(x), "hidden"), [n for n in SECTIONS[1:] if n != "fairness"])),
-        if is_open:
-            return (not is_open)
-        else:
-            return (not is_open)
         
 @app.callback(
     Output(component_id="bar", component_property='style'),
@@ -258,6 +248,28 @@ def toggle_charts(visibility_state):
 #def update_solution_set_dropdown(n_clicks):
 #    return get_solution_sets()
 
+@app.callback(
+    list(map(lambda x: Output("{}_section".format(x), "hidden"),  SECTIONS[1:])),
+    list(map(lambda x: Input("{}_s".format(x), "n_clicks"),  SECTIONS[1:])),
+    list(map(lambda x: State("{}_section".format(x), "hidden"),  SECTIONS[1:])),
+    prevent_initial_call=False
+)
+def toggle_hide_pillar_section(fn,en,rn,mn, fis_open, eis_open, ris_open, mis_open):
+    if fn or en or rn or mn:
+        #app.logger.info("toggle {0} detail section".format(s))
+        # list(map(lambda x: Output("{}_section".format(x), "hidden"), [n for n in SECTIONS[1:] if n != "fairness"])),
+        pillars = np.array(['fairness', 'explainability', 'robustness', 'methodology'])
+        out= np.array( [True,True,True,True])
+        ctx = dash.callback_context
+        pillar = ctx.triggered[0]['prop_id'][:-11]
+        #fairness_s.n_clicks
+        print("#"*15 + pillar)
+        is_open = eval(pillar[0]+"is_open")
+        out[pillars==pillar]= not is_open 
+        print(out)
+        return list(out)
+    else:
+        return [True,True,True,True]
 
 @app.callback(Output('input-mappings', 'data'), 
         list(map(lambda i: Input('apply-mapping-{}'.format(i), "n_clicks"),SECTIONS[1:])),
@@ -876,7 +888,6 @@ def show_performance_metrics(solution_set_path):
                                 columns=[{"name": i, "id": i} for i in performance_metrics.columns],
                                 data=performance_metrics.to_dict('records'),
                                 style_table={
-                                    #"table-layout": "fixed",
                                     "width": "100%",
                                     'overflowX': 'hidden',
                                     'textAlign': 'left'
@@ -884,12 +895,9 @@ def show_performance_metrics(solution_set_path):
                                 style_data={
                                     'whiteSpace': 'normal',
                                     'height': 'auto',
-                                    #'lineHeight': '15px'
                                 },
                                 style_header={
                                     'backgroundColor': SECONDARY_COLOR,
-                                    #"display": "none",
-                                    #"visibility": "hidden"
                                 },
                                 style_cell={
                                     'textAlign': 'left',
@@ -910,7 +918,7 @@ def show_performance_metrics(solution_set_path):
                                   },
                                 ],
         )
-        return html.Div([html.H5("Performance Metrics"), performance_metrics_table], className="mt-4 mb-4 p-2", style={"border": "1px solid {}".format(ROBUSTNESS_COLOR)})
+        return html.Div([html.H5("Performance Metrics"), performance_metrics_table], className="mt-4 mb-4 p-2", style={"border": "4px solid {}".format(TRUST_COLOR)})
 
 
 @app.callback(Output('properties_section', 'children'),
@@ -920,7 +928,7 @@ def show_properties(solution_set_path):
         return []
     else:
         test_data, training_data, model, factsheet = read_solution(solution_set_path)
-        properties = get_properties_section(factsheet)
+        properties = get_properties_section(training_data, test_data, factsheet)
         if properties is None:
             return []
         properties_table = dash_table.DataTable(
@@ -1049,7 +1057,9 @@ def update_figure(data, trig):
       result = json.loads(data)
       final_score, results, properties = result["final_score"] , result["results"], result["properties"]
       trust_score = result["trust_score"]
-      pillars = list(final_score.keys())
+      pillars = list(map(lambda x: x.upper(),list(final_score.keys())))
+      print(pillars)
+      print(list(final_score.keys()))
       values = list(final_score.values()) 
         
       colors = [FAIRNESS_COLOR, EXPLAINABILITY_COLOR, ROBUSTNESS_COLOR, METHODOLOGY_COLOR]
@@ -1328,6 +1338,7 @@ layout = html.Div([
                     general_section(),
                     trust_section(),
                     html.Div([
+                    # html.H2("Pillar Sections", className="text-center"),
                     dbc.Row(
                     [
                     dbc.Col(dbc.Button("FAIRNESS", id='fairness_s',className="mt-3", color="primary", style={"background-color": FAIRNESS_COLOR})),

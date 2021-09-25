@@ -6,6 +6,7 @@
         "training_data_description": "Alberto's classification data",
         "model_information": "Keras Neural Network Classifier for IT Security Incident Classification scenario",
         "target_column": 73,
+
         "authors": "Melike Demirci",
         "contact_information": "melike.demirci@uzh.ch"
     },
@@ -122,7 +123,7 @@
             "clever_score": {
                 "clever_score": [
                     "CLEVER Score",
-                    "0.14"
+                    "0.40"
                 ]
             },
             "empirical_robustness_fast_gradient_attack": {},
