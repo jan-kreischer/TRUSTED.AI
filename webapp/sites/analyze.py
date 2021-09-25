@@ -888,7 +888,6 @@ def show_performance_metrics(solution_set_path):
                                 columns=[{"name": i, "id": i} for i in performance_metrics.columns],
                                 data=performance_metrics.to_dict('records'),
                                 style_table={
-                                    #"table-layout": "fixed",
                                     "width": "100%",
                                     'overflowX': 'hidden',
                                     'textAlign': 'left'
@@ -896,12 +895,9 @@ def show_performance_metrics(solution_set_path):
                                 style_data={
                                     'whiteSpace': 'normal',
                                     'height': 'auto',
-                                    #'lineHeight': '15px'
                                 },
                                 style_header={
                                     'backgroundColor': SECONDARY_COLOR,
-                                    #"display": "none",
-                                    #"visibility": "hidden"
                                 },
                                 style_cell={
                                     'textAlign': 'left',
@@ -932,7 +928,7 @@ def show_properties(solution_set_path):
         return []
     else:
         test_data, training_data, model, factsheet = read_solution(solution_set_path)
-        properties = get_properties_section(factsheet)
+        properties = get_properties_section(training_data, test_data, factsheet)
         if properties is None:
             return []
         properties_table = dash_table.DataTable(

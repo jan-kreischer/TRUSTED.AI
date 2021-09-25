@@ -128,13 +128,14 @@ def get_scenario_description(scenario_id):
     scenario_description['key'] = scenario_description['key'].str.capitalize()
     return scenario_description
 
-def get_properties_section(factsheet):
+def get_properties_section(train_data, test_data, factsheet):
     if "properties" in factsheet:
         factsheet = factsheet["properties"]
 
         properties = pd.DataFrame({
             "Model Type": [factsheet["explainability"]["algorithm_class"]["clf_name"][1]],
-            "Train test split": [factsheet["methodology"]["train_test_split"]["train_test_split"][1]],
+            "Train Test Split": [factsheet["methodology"]["train_test_split"]["train_test_split"][1]],
+            "Train / Test Data Size": str(train_data.shape[0])+ " samples / "+ str(test_data.shape[0])+ " samples",
             "Regularization Technique": [factsheet["methodology"]["regularization"]["regularization_technique"][1]],
             "Normalization Technique": [factsheet["methodology"]["normalization"]["normalization"][1]],
             "Number of Features": [factsheet["explainability"]["model_size"]["n_features"][1]],

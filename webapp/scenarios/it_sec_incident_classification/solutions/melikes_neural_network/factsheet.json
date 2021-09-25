@@ -5,7 +5,7 @@
         "domain_description": "IT Security",
         "training_data_description": "Alberto's classification data",
         "model_information": "Keras Neural Network Classifier for IT Security Incident Classification scenario",
-        "target_column": "label",
+        "target_column": 73,
         "authors": "Melike"
     },
     "fairness": {
@@ -19,9 +19,11 @@
     },
     "scores": {
         "fairness": {
-            "question_fairness": NaN,
+            "question_fairness": 5,
             "class_balance": 5,
-            "statistical_parity_difference": NaN,
+            "underfitting": 5,
+            "overfitting": 5,
+            "statistical_parity_difference": 5,
             "equal_opportunity_difference": NaN,
             "average_odds_difference": NaN,
             "disparate_impact": NaN,
@@ -55,9 +57,29 @@
     },
     "properties": {
         "fairness": {
-            "question_fairness": {},
-            "class_balance": {},
-            "statistical_parity_difference": {},
+            "question_fairness": {
+                "Question Fairness": "5"
+            },
+            "class_balance": {
+                "class balance score": 5
+            },
+            "underfitting": {
+                "Conclusion": "Model is underfitting",
+                "Training Accuracy": -1,
+                "Test Accuracy": -1,
+                "Train Test Accuracy Difference": 0
+            },
+            "overfitting": {
+                "Conclusion": "Model is overfitting",
+                "Training Accuracy": -1,
+                "Test Accuracy": -1,
+                "Train Test Accuracy Difference": 0
+            },
+            "statistical_parity_difference": {
+                "Favored Majority Ratio": 0,
+                "Favored Minority Ratio": 0,
+                "Statistical Parity Difference": 0
+            },
             "equal_opportunity_difference": {},
             "average_odds_difference": {},
             "disparate_impact": {},
@@ -99,7 +121,7 @@
             "clever_score": {
                 "clever_score": [
                     "CLEVER Score",
-                    "0.44"
+                    "0.40"
                 ]
             },
             "empirical_robustness_fast_gradient_attack": {},
