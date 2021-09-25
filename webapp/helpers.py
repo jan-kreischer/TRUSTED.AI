@@ -661,23 +661,39 @@ def pillar_section(pillar, metrics):
             metric_detail_sections.append(create_metric_details_section(metric_id, i))
 
         return html.Div([
-                html.Div([
-                    daq.BooleanSwitch(id='toggle_{}_details'.format(pillar),
+                # html.H2("{}".format(pillar.upper()), className="text-center"),
+                dbc.Row(
+                    [
+                    dbc.Col(html.Div([daq.BooleanSwitch(id='toggle_{}_details'.format(pillar),
                       on=False,
                       label='Show Details',
-                      labelPosition="right",
+                      labelPosition="top",
                       color = TRUST_COLOR,
-                      style={"float": "right","margin-right":"3%"}
-                    ),
-                    daq.BooleanSwitch(id='toggle_{}_mapping'.format(pillar),
+                    )], className="text-center")),
+                    dbc.Col(html.Div([daq.BooleanSwitch(id='toggle_{}_mapping'.format(pillar),
                       on=False,
                       label='Show Mappings',
-                      labelPosition="right",
+                      labelPosition="top",
                       color = TRUST_COLOR,
-                      style={"float": "right","margin-right":"3%"}
-                    ),
-                    html.H2("• {}".format(pillar.upper()), className="mb-5"),
-                    ], id="{}_section_heading".format(pillar.lower())),
+                    )], className="text-center"))
+                    ]),
+                # html.Div([
+                #     daq.BooleanSwitch(id='toggle_{}_details'.format(pillar),
+                #       on=False,
+                #       label='Show Details',
+                #       labelPosition="right",
+                #       color = TRUST_COLOR,
+                #       style={"float": "right","margin-right":"3%"}
+                #     ),
+                #     daq.BooleanSwitch(id='toggle_{}_mapping'.format(pillar),
+                #       on=False,
+                #       label='Show Mappings',
+                #       labelPosition="right",
+                #       color = TRUST_COLOR,
+                #       style={"float": "right","margin-right":"3%"}
+                #     ),
+                #     html.H2("{}".format(pillar.upper()), className="mb-5"),
+                #     ], id="{}_section_heading".format(pillar.lower())),
                     dbc.Collapse(html.Div(mapping_panel(pillar)[0]),
                         id="{}_mapping".format(pillar),
                         is_open=False,
