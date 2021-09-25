@@ -1,5 +1,0 @@
-{
-  "factsheet_ID" : 4,
-  "name": "Case 4",
-  "description": "Logistic Regression- Classification"
-}

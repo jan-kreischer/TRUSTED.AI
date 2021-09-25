@@ -5,7 +5,7 @@
     "fairness": {
         "question_fairness": 3,
         "protected_feature": "Group",
-        "protected_group": "lambda x: x[protected_feature] == 1",
+        "protected_group": "lambda x: x[protected_feature] == 0",
         "favorable_outcome": "lambda x: x[target_column] == 1"
     },
     "explainability": {},
@@ -15,6 +15,8 @@
         "fairness": {
             "question_fairness": 3,
             "class_balance": 1,
+            "underfitting": NaN,
+            "overfitting": 5,
             "statistical_parity_difference": 1,
             "equal_opportunity_difference": NaN,
             "average_odds_difference": NaN,
@@ -49,12 +51,23 @@
     },
     "properties": {
         "fairness": {
-            "question_fairness": {},
-            "class_balance": {},
+            "question_fairness": {
+                "Question Fairness": "3"
+            },
+            "class_balance": {
+                "class balance score": 1
+            },
+            "underfitting": {},
+            "overfitting": {
+                "Conclusion": "Model is not overfitting",
+                "Training Accuracy": 0.927935,
+                "Test Accuracy": 0.9192,
+                "Train Test Accuracy Difference": 0.008734999999999937
+            },
             "statistical_parity_difference": {
-                "Favored Majority Ratio": 0.19789638099433796,
-                "Favored Minority Ratio": 0.5743349529835355,
-                "Statistical Parity Difference": 0.3764385719891976
+                "Favored Majority Ratio": 0.5743349529835355,
+                "Favored Minority Ratio": 0.19789638099433796,
+                "Statistical Parity Difference": -0.3764385719891976
             },
             "equal_opportunity_difference": {},
             "average_odds_difference": {},

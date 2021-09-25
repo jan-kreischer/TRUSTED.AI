@@ -1,5 +1,0 @@
-{
-  "factsheet_ID" : 3,
-  "name": "Case 3",
-  "description": "SVC - Classification"
-}

@@ -2,7 +2,7 @@
 # functions for fairness score
 from helpers import *
 from scipy.stats import chisquare
-
+import operator
 
 
 import numpy as np
@@ -63,7 +63,7 @@ def analyse(model, training_dataset, test_dataset, factsheet, fairness_config):
         underfitting = underfitting_score(model, training_dataset, test_dataset, factsheet),
         overfitting = overfitting_score(model, training_dataset, test_dataset, factsheet),
         statistical_parity_difference = statistical_parity_difference_score(model, training_dataset, test_dataset, factsheet),
-        equal_opportunity_difference = equal_opportunity_difference_score(),
+        equal_opportunity_difference = equal_opportunity_difference_score(model, test_dataset, factsheet),
         average_odds_difference = average_odds_difference_score(),
         disparate_impact = disparate_impact_score(),
         theil_index = theil_index_score(),
@@ -122,7 +122,7 @@ def class_balance_score(training_data, target_column):
 
 def underfitting_score(model, training_dataset, test_dataset, factsheet):
     try:
-        properties = {"Conclusion": "Model is underfitting"}
+        properties = {}
         score = 0
         training_accuracy = compute_accuracy(model, training_dataset, factsheet)
         test_accuracy = compute_accuracy(model, test_dataset, factsheet)
@@ -131,14 +131,19 @@ def underfitting_score(model, training_dataset, test_dataset, factsheet):
             # for underfitting models the spread is negative
             accuracy_difference = training_accuracy - test_accuracy
             if abs(accuracy_difference) < 0.01:
+                properties["Conclusion"] = "Model is not underfitting"
                 score = 5
             elif abs(accuracy_difference) < 0.02:
+                properties["Conclusion"] = "Model mildly underfitting"
                 score = 4
             elif abs(accuracy_difference) < 0.03:
+                properties["Conclusion"] = "Model is slighly underfitting"
                 score = 3
             elif abs(accuracy_difference) < 0.04:
+                properties["Conclusion"] = "Model is underfitting"
                 score = 2
             else:
+                properties["Conclusion"] = "Model is strongly underfitting"
                 score = 1
             properties["Training Accuracy"] = training_accuracy
             properties["Test Accuracy"] = test_accuracy
@@ -163,14 +168,19 @@ def overfitting_score(model, training_dataset, test_dataset, factsheet):
             # for underfitting models the spread is negative
             accuracy_difference = training_accuracy - test_accuracy
             if abs(accuracy_difference) < 0.01:
+                properties["Conclusion"] = "Model is not overfitting"
                 score = 5
             elif abs(accuracy_difference) < 0.02:
+                properties["Conclusion"] = "Model mildly overfitting"
                 score = 4
             elif abs(accuracy_difference) < 0.03:
+                properties["Conclusion"] = "Model is slighly overfitting"
                 score = 3
             elif abs(accuracy_difference) < 0.04:
+                properties["Conclusion"] = "Model is overfitting"
                 score = 2
             else:
+                properties["Conclusion"] = "Model is strongly overfitting"
                 score = 1
             properties["Training Accuracy"] = training_accuracy
             properties["Test Accuracy"] = test_accuracy
@@ -263,7 +273,62 @@ def statistical_parity_difference_metric(model, training_dataset, test_dataset, 
 
 
 # --- Equal Opportunity Difference ---
-def equal_opportunity_difference_score():
+def equal_opportunity_difference_score(model, test_dataset, factsheet):
+    try: 
+        properties = {}
+        data = test_dataset.copy(deep=True)
+        äy_true = y_test.values.flatten()
+        if (isinstance(model, tf.keras.Sequential)):
+            y_pred_proba = model.predict(data)
+            y_pred = np.argmax(y_pred_proba, axis=1)
+        else:
+            y_pred = model.predict(data).flatten()
+        
+        data['y_pred'] = y_pred.tolist()
+
+        #data['y_true'] = y_test["Target"].tolist()
+
+        #favorable_outome = lambda x: x[target_column]==1
+        favorable_outcome = factsheet.get("fairness", {}).get("favorable_outcome", None)
+        protected_feature = factsheet.get("fairness", {}).get("protected_feature", None)
+        protected = factsheet.get("fairness", {}).get("protected_group", None)
+        #favorable_prediction = lambda x: x['y_pred']==1
+
+        #protected_feature = "Group"
+        #protected = lambda x: x[protected_feature]==0
+
+        #protected_feature = factsheet.get("fairness", {}).get("protected_feature", None)
+        #protected = factsheet.get("fairness", {}).get("protected_group", None)
+        #target_column = factsheet.get("general", {}).get("target_column", None)
+
+        target_column = factsheet.get("general", {}).get("target_column", "")
+        favored_indices = data.apply(favorable_outome, axis=1)
+        protected_indices = data.apply(protected, axis=1)
+
+        favored_samples = data[favored_indices]
+        protected_favored_samples = favored_samples[protected_indices]
+        unprotected_favored_samples = favored_samples[~protected_indices]
+
+        num_unprotected_favored_true = len(unprotected_favored_samples)
+        target_column = 'y_pred'
+        num_unprotected_favored_pred = len(unprotected_favored_samples[unprotected_favored_samples.apply(favorable_prediction, axis=1)])
+        unprotected_favored_ratio = num_unprotected_favored_pred/num_unprotected_favored_true
+        properties["Unprotected favored ratio = P(y_hat=favorable|y_true=favorable, protected=False)"] = unprotected_favored_ratio
+        #print("unprotected_favored_ratio: {}".format(unprotected_favored_ratio))
+
+        num_protected_favored_true = len(protected_favored_samples)
+        target_column = 'y_pred'
+        num_protected_favored_pred = len(protected_favored_samples[protected_favored_samples.apply(favorable_prediction, axis=1)])
+        protected_favored_ratio = num_protected_favored_pred / num_protected_favored_true 
+        properties["Protected favored ratio = P(y_hat=favorable|y_true=favorable, protected=True)"] = protected_favored_ratio
+        #print("protected_favored_ratio: {}".format(protected_favored_ratio))
+
+        equal_opportunity_difference = protected_favored_ratio - unprotected_favored_ratio
+        print("equal_opportunity_difference: {}".format(equal_opportunity_difference))
+        properties["equal_opportunity_difference"] = equal_opportunity_difference
+        return result(score=3, properties=properties) 
+    except Exception as e:
+        print(e)
     return result(score=np.nan, properties={}) 
 
 def equal_opportunity_difference_metric():
