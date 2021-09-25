@@ -12,6 +12,18 @@
                 "description": "The description of the paramter and its impact"
             }
         },
+        "score_underfitting": {
+            "parameter_XY": {
+                "value": "The value of the parameter_XY",
+                "description": "The description of the paramter and its impact"
+            }
+        },
+        "score_overfitting": {
+            "parameter_XY": {
+                "value": "The value of the parameter_XY",
+                "description": "The description of the paramter and its impact"
+            }
+        },
         "score_statistical_parity_difference": {
             "parameter_XY": {
                 "value": "The value of the parameter_XY",

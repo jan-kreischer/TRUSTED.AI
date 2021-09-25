@@ -638,7 +638,7 @@ def create_metric_details_section(metric_id, i, section_n = 1, is_open=False, sc
         ),
         ], id="{}_section".format(metric_id), className="mb-5 mt-5")
 
-def show_metric_details_section(metric_id, metric_score=None, metric_index = 1, section_index = 1):
+def show_metric_details_section(metric_id, metric_score=None, metric_properties = None, metric_index = 1, section_index = 1):
     metric_name = metric_id.replace("_", " ")
     sections = []
     if not math.isnan(metric_score):
@@ -647,15 +647,30 @@ def show_metric_details_section(metric_id, metric_score=None, metric_index = 1, 
         sections.append(html.H4("{0}.{1} {2}".format(section_index, metric_index, metric_name)))
     else: 
         sections.append(html.H4("- {}".format(metric_name)))
-    sections.append(dbc.Collapse(["Test content"], id="{}_details".format(metric_id)))
     
+    if metric_properties:
+        sections.append(dbc.Collapse(show_metric_properties(metric_properties), id="{}_details".format(metric_id)))
+        
     return html.Div(sections, id="{}_section".format(metric_id), className="mb-5 mt-5")
+
+def metric_detail_div(properties):
+    prop = []
+    for k, v in properties.items():
+        prop.append(html.Div("{}: {}".format(v[0], v[1])))
+    return html.Div(prop)
+
+def show_metric_properties(metric_properties):
+    sections = []
+    for k, v in metric_properties.items():
+        sections.append(html.Div("{}: {}".format(k, v)))
+    return html.Div(sections)
 
 def pillar_section(pillar, metrics):
         #configuration_section = []
         #configuration_section.append(html.H3("▶ {} Configuration".format(pillar)))
         #configuration_section.append()
-        metric_detail_sections = [html.Div([], id="{}_configuration".format(pillar))]
+        #metric_detail_sections = [html.Div([], id="{}_configuration".format(pillar))]
+        metric_detail_sections = []
         for i in range(len(metrics)):
             metric_id = metrics[i].lower()
             metric_detail_sections.append(create_metric_details_section(metric_id, i))
@@ -707,9 +722,13 @@ def pillar_section(pillar, metrics):
                     dcc.Graph(id='{}_spider'.format(pillar), style={'display': 'none'}),
                     dcc.Graph(id='{}_bar'.format(pillar), style={'display': 'block'}),    
                     html.Div([], id="{}_available_metrics".format(pillar),className = pillar),
+                    dbc.Collapse(["{}_configuration".format(pillar)],
+                        id="{}_configuration".format(pillar),
+                        is_open=False,
+                    ),
                     dbc.Collapse(metric_detail_sections,
                         id="{}_details".format(pillar),
-                        is_open= False,
+                        is_open=False,
                     ),
                     html.Hr(style={"size": "10"}),
                     dbc.Modal(

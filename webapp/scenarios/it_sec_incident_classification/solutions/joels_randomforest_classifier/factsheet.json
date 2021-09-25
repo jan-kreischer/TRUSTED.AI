@@ -12,16 +12,69 @@
         "question_fairness": 5,
         "protected_feature": "connectivity",
         "protected_group": "lambda x: x[protected_feature] == 0",
-        "favorable_outcome": "lambda x: x[target_column] == 14"
+        "favorable_outcome": "lambda x: x[target_column] == 13"
     },
     "methodology": {
         "regularization": "none"
     },
+    "scores": {
+        "fairness": {
+            "question_fairness": 5,
+            "class_balance": 5,
+            "underfitting": NaN,
+            "overfitting": 1,
+            "statistical_parity_difference": 1,
+            "equal_opportunity_difference": NaN,
+            "average_odds_difference": NaN,
+            "disparate_impact": NaN,
+            "theil_index": NaN,
+            "euclidean_distance": NaN,
+            "mahalanobis_distance": NaN,
+            "manhattan_distance": NaN
+        },
+        "explainability": {
+            "algorithm_class": 3,
+            "correlated_features": 2,
+            "model_size": 3,
+            "feature_relevance": 2
+        },
+        "robustness": {
+            "confidence_score": 4,
+            "clique_method": 1,
+            "loss_sensitivity": NaN,
+            "clever_score": NaN,
+            "empirical_robustness_fast_gradient_attack": NaN,
+            "empirical_robustness_carlini_wagner_attack": NaN,
+            "empirical_robustness_deepfool_attack": NaN
+        },
+        "methodology": {
+            "normalization": 1,
+            "missing_data": 5,
+            "regularization": 1,
+            "train_test_split": 1,
+            "factsheet_completeness": 4
+        }
+    },
     "properties": {
         "fairness": {
-            "question_fairness": {},
-            "class_balance": {},
-            "statistical_parity_difference": {},
+            "question_fairness": {
+                "Question Fairness": "5"
+            },
+            "class_balance": {
+                "class balance score": 5
+            },
+            "underfitting": {},
+            "overfitting": {
+                "Conclusion": "Model is overfitting",
+                "Training Accuracy": 0.6605787476280834,
+                "Test Accuracy": 0.5855855855855856,
+                "Train Test Accuracy Difference": 0.07499316204249784
+            },
+            "statistical_parity_difference": {
+                "Favored Majority Ratio": 0.077069911715581,
+                "Favored Minority Ratio": 0.56,
+                "Statistical Parity Difference": 0.4829300882844191
+            },
             "equal_opportunity_difference": {},
             "average_odds_difference": {},
             "disparate_impact": {},
@@ -255,42 +308,6 @@
                     "missing"
                 ]
             }
-        }
-    },
-    "scores": {
-        "fairness": {
-            "question_fairness": 5,
-            "class_balance": 5,
-            "statistical_parity_difference": NaN,
-            "equal_opportunity_difference": NaN,
-            "average_odds_difference": NaN,
-            "disparate_impact": NaN,
-            "theil_index": NaN,
-            "euclidean_distance": NaN,
-            "mahalanobis_distance": NaN,
-            "manhattan_distance": NaN
-        },
-        "explainability": {
-            "algorithm_class": 3,
-            "correlated_features": 2,
-            "model_size": 3,
-            "feature_relevance": 2
-        },
-        "robustness": {
-            "confidence_score": 4,
-            "clique_method": 1,
-            "loss_sensitivity": NaN,
-            "clever_score": NaN,
-            "empirical_robustness_fast_gradient_attack": NaN,
-            "empirical_robustness_carlini_wagner_attack": NaN,
-            "empirical_robustness_deepfool_attack": NaN
-        },
-        "methodology": {
-            "normalization": 1,
-            "missing_data": 5,
-            "regularization": 1,
-            "train_test_split": 1,
-            "factsheet_completeness": 4
         }
     }
 }

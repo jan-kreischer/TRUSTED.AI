@@ -5,23 +5,25 @@
         "domain_description": "IT Security",
         "training_data_description": "Alberto's original Raspery Pie data",
         "model_information": "Sklearn Logistic Regression Classifier for IoT Security Incident Classification scenario",
-        "target_column": "label",
+        "target_column": 73,
         "authors": "Melike"
     },
     "fairness": {
         "question_fairness": 5,
         "protected_feature": "connectivity",
         "protected_group": "lambda x: x[protected_feature] == 0",
-        "favorable_outcome": "lambda x: x[target_column] == 14"
+        "favorable_outcome": "lambda x: x[target_column] == 13"
     },
     "methodology": {
         "regularization": "none"
     },
     "scores": {
         "fairness": {
-            "question_fairness": NaN,
+            "question_fairness": 5,
             "class_balance": 5,
-            "statistical_parity_difference": NaN,
+            "underfitting": NaN,
+            "overfitting": 3,
+            "statistical_parity_difference": 5,
             "equal_opportunity_difference": NaN,
             "average_odds_difference": NaN,
             "disparate_impact": NaN,
@@ -43,7 +45,7 @@
             "clever_score": NaN,
             "empirical_robustness_fast_gradient_attack": 2,
             "empirical_robustness_carlini_wagner_attack": 1,
-            "empirical_robustness_deepfool_attack": 3
+            "empirical_robustness_deepfool_attack": 2
         },
         "methodology": {
             "normalization": 4,
@@ -55,9 +57,24 @@
     },
     "properties": {
         "fairness": {
-            "question_fairness": {},
-            "class_balance": {},
-            "statistical_parity_difference": {},
+            "question_fairness": {
+                "Question Fairness": "5"
+            },
+            "class_balance": {
+                "class balance score": 5
+            },
+            "underfitting": {},
+            "overfitting": {
+                "Training Accuracy": "training accuracy",
+                "Test Accuracy": "test accuracy",
+                "Fitting Difference": "fitting difference",
+                "Conclusion": "Model is overfitting"
+            },
+            "statistical_parity_difference": {
+                "Favored Majority Ratio": 0,
+                "Favored Minority Ratio": 0,
+                "Statistical Parity Difference": 0
+            },
             "equal_opportunity_difference": {},
             "average_odds_difference": {},
             "disparate_impact": {},
@@ -98,79 +115,79 @@
                     "feature importance",
                     {
                         "value": [
-                            1.8529267781913703,
-                            1.652457512663054,
-                            1.6191607936541006,
-                            1.3623305005360553,
-                            1.265147812863464,
-                            1.2556368694224727,
-                            1.155087680721816,
-                            1.0467156336101762,
-                            1.0240061381333265,
-                            0.9615320252311726,
-                            0.9080332831598187,
-                            0.8913931676905227,
-                            0.8761423652689772,
-                            0.8449135545479248,
-                            0.8426475977500766,
-                            0.8283089882460344,
-                            0.7939130851655302,
-                            0.7067921019928888,
-                            0.7058547767842498,
-                            0.6684129169663625,
-                            0.643474828352887,
-                            0.6234216134760528,
-                            0.5042577464849959,
-                            0.5035756109644137,
-                            0.5027019420767954,
-                            0.4943285408733252,
-                            0.4919638027458728,
-                            0.4883567466408682,
-                            0.4879165605501629,
-                            0.4733168359522423,
-                            0.43856462654558415,
-                            0.43719317833073473,
-                            0.43224558133664814,
-                            0.4285305456403429,
-                            0.42566062650669667,
-                            0.4227538896405718,
-                            0.38754836909619944,
-                            0.37624018763153666,
-                            0.37234412921421123,
-                            0.3715043542677438,
-                            0.32724817499562814,
-                            0.31916250761103365,
-                            0.3095260898529155,
-                            0.30737186809599026,
-                            0.30552525471936187,
-                            0.2688819191197843,
-                            0.24284494285004488,
-                            0.23713127929103517,
-                            0.2341005372571463,
-                            0.23178438600543164,
-                            0.22119651566372744,
-                            0.2187174697415666,
-                            0.21794263079535794,
-                            0.20982778026495452,
-                            0.20593198082546307,
-                            0.19686280138285978,
-                            0.19550002539638858,
-                            0.18701262552717138,
-                            0.17619078903144977,
-                            0.13790016289047777,
-                            0.12560786112944344,
-                            0.10992214222849568,
-                            0.10414746355327192,
-                            0.09387168093203013,
-                            0.07837184885631159,
-                            0.0732114799236477,
-                            0.06971992083088349,
-                            0.061482639461442785,
-                            0.058129864619694833,
-                            0.05386482787704846,
-                            0.03618354815903689,
-                            0.030261903145506537,
-                            0.0069743827361544546
+                            1.852776540382293,
+                            1.6519083807236423,
+                            1.6192334149367908,
+                            1.3621248726906128,
+                            1.2649140509199182,
+                            1.2556987043294334,
+                            1.15498033553867,
+                            1.0467620829071227,
+                            1.0238191006087796,
+                            0.9609401971232868,
+                            0.9077131193067949,
+                            0.8908573889729865,
+                            0.8763671732276824,
+                            0.8443950207704707,
+                            0.8422611757887805,
+                            0.8277786157116949,
+                            0.7937074085346637,
+                            0.7069832694820098,
+                            0.7057693104269707,
+                            0.6681929811814264,
+                            0.6432303614787129,
+                            0.6231260179204952,
+                            0.5043768412261427,
+                            0.5030179890796942,
+                            0.5025297740302215,
+                            0.49414491053191534,
+                            0.4924094563724412,
+                            0.4885341775334922,
+                            0.48759908158425225,
+                            0.4731893562206103,
+                            0.4389479693212909,
+                            0.4373487365572575,
+                            0.43250179533576444,
+                            0.4291453774286183,
+                            0.42537425621027397,
+                            0.42275755735110543,
+                            0.38765537434505154,
+                            0.3765851235835153,
+                            0.3722681128893659,
+                            0.3712235914755538,
+                            0.3275358552571993,
+                            0.31875533632221115,
+                            0.309295775991443,
+                            0.30709140585336775,
+                            0.3054361551310348,
+                            0.268454404014057,
+                            0.24317479445984233,
+                            0.23705467672072963,
+                            0.23382169203113007,
+                            0.23183010648086919,
+                            0.2211181913367685,
+                            0.21826694104914293,
+                            0.21793297003923162,
+                            0.20978278925965144,
+                            0.20652141574916155,
+                            0.1970029341433686,
+                            0.19558356074637584,
+                            0.18720255222652366,
+                            0.17572338679869096,
+                            0.13752001517426868,
+                            0.12545813489723492,
+                            0.10957249689478192,
+                            0.10408715505426469,
+                            0.09401982435526841,
+                            0.0782246689715415,
+                            0.07329832786578329,
+                            0.0697563494297971,
+                            0.06174435760330706,
+                            0.057586168022249196,
+                            0.05402383214072905,
+                            0.036307552745956255,
+                            0.030442822266000726,
+                            0.007381178698661134
                         ],
                         "labels": [
                             59,
@@ -264,15 +281,15 @@
             "empirical_robustness_fast_gradient_attack": {
                 "before_attack": [
                     "Before attack accuracy",
-                    "86.00%"
+                    "82.00%"
                 ],
                 "after_attack": [
                     "After attack accuracy",
-                    "18.00%"
+                    "22.00%"
                 ],
                 "difference": [
                     "Proportional difference (After attack accuracy - Before attack accuracy)/Before attack accuracy",
-                    "79.07%"
+                    "73.17%"
                 ]
             },
             "empirical_robustness_carlini_wagner_attack": {
@@ -292,7 +309,7 @@
             "empirical_robustness_deepfool_attack": {
                 "before_attack": [
                     "Before attack accuracy",
-                    "50.00%"
+                    "75.00%"
                 ],
                 "after_attack": [
                     "After attack accuracy",
@@ -300,7 +317,7 @@
                 ],
                 "difference": [
                     "Proportional difference (After attack accuracy - Before attack accuracy)/Before attack accuracy",
-                    "50.00%"
+                    "66.67%"
                 ]
             }
         },

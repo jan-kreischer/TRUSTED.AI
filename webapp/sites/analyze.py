@@ -217,36 +217,13 @@ for s in SECTIONS:
 for s in SECTIONS[1:]:
     @app.callback(
         [Output("{0}_details".format(s), "is_open"),
-        Output("{0}_details".format(s), "style")],
+         Output("{0}_configuration".format(s), "is_open")],
         [Input("toggle_{0}_details".format(s), "on")],
-        [State("{0}_details".format(s), "is_open")],
-        prevent_initial_call=True
-    )
-    def toggle_detail_section(n, is_open):
-        #app.logger.info("toggle {0} detail section".format(s))
-        if is_open:
-            return (not is_open, {'display': 'None'})
-        else:
-            return (not is_open, {'display': 'Block'})
-        
-    # @app.callback(
-    #     Output("{}_section".format(s), "hidden"),
-    #     Input("{}_s".format(s), "n_clicks"),
-    #     State("{}_section".format(s), "hidden"),
-    #     prevent_initial_call=True
-    # )
-    # def toggle_detail_section(n, is_open):
-    #     #app.logger.info("toggle {0} detail section".format(s))
-    #     # list(map(lambda x: Output("{}_section".format(x), "hidden"), [n for n in SECTIONS[1:] if n != "fairness"])),
-    #     #['fairness', 'explainability', 'robustness', 'methodology']
-    #     ctx = dash.callback_context
-    #     print(ctx.triggered[0]['prop_id'])
-    #     #fairness_s.n_clicks
-    #     if is_open:
-    #         return (not is_open)
-    #     else:
-    #         return (not is_open)
+        prevent_initial_call=True)
+    def toggle_detail_section(is_open):
+        return is_open, is_open
 
+        
 @app.callback(
     Output(component_id="bar", component_property='style'),
     Output(component_id="fairness_bar", component_property='style'),
@@ -468,35 +445,16 @@ def fairness_configuration(solution_set_path):
             f = open(factsheet_path,)
             factsheet = json.load(f)
                    
-            target_column = ""
-            if "general" in factsheet and "target_column" in factsheet["general"]:
-                target_column = factsheet["general"]["target_column"]
-            
-            protected_feature = ""
-            if "fairness" in factsheet and "protected_feature" in factsheet["fairness"]:
-                protected_feature = factsheet["fairness"]["protected_feature"]
-            print("protected_feature: {}".format(protected_feature))
-            
-            protected_group = ""
-            if "fairness" in factsheet and "protected_group" in factsheet["fairness"]:
-                protected_group = factsheet["fairness"]["protected_group"]
+            protected_feature = factsheet.get("fairness", {}).get("protected_feature", None)
+            protected_group = factsheet.get("fairness", {}).get("protected_group", None)
+            target_column = factsheet.get("general", {}).get("target_column", None)
+            favorable_outcome = factsheet.get("fairness", {}).get("favorable_outcome", None)
             
             f.close()
         # Create a factsheet
         else:
             print("No factsheet exists yet")
 
-
-        solution_set_label_select_options = list(map(lambda x: {"label": x, "value": x}, features))
-        solution_set_label_select = html.Div([
-            "Select Target Column", 
-            dcc.Dropdown(
-                id="solution_set_label_select",
-                options=solution_set_label_select_options,
-                value=target_column
-            ),
-        ])
-        
         protected_feature_select_options = list(map(lambda x: {"label": x, "value": x}, features))
         protected_feature_select = html.Div([
             "Select Protected Feature", 
@@ -518,9 +476,31 @@ def fairness_configuration(solution_set_path):
                 style={'width': '100%'}
             ),
         ])
+        
+        solution_set_label_select_options = list(map(lambda x: {"label": x, "value": x}, features))
+        solution_set_label_select = html.Div([
+            "Select Target Column", 
+            dcc.Dropdown(
+                id="solution_set_label_select",
+                options=solution_set_label_select_options,
+                value=target_column
+            ),
+        ])
+        
+        favorable_outcome_definition = html.Div([
+            "Define Favorable Outcome",
+            html.Br(),
+            dcc.Input(
+                id="favorable_outcome_definition",
+                type="text",
+                placeholder="e.g lambda x: x[target_column] < 25",
+                value=favorable_outcome,
+                style={'width': '100%'}
+            ),
+        ])
 
 
-        sections = [html.Hr(), html.H3("▶ Fairness Configuration"), solution_set_label_select, protected_feature_select, protected_group_definition, html.Hr()]
+        sections = [html.Hr(), html.H3("▶ Fairness Configuration"), protected_feature_select, protected_group_definition, solution_set_label_select, favorable_outcome_definition, html.Hr()]
         
         #for i in range(len(fairness_metrics)):
         #    metric_id = fairness_metrics[i]
@@ -599,21 +579,21 @@ def metric_detail(data):
 #    graph = dcc.Graph(figure=px.histogram(training_data, x=label, opacity=1, title="Label vs Label Occurence", color_discrete_sequence=[FAIRNESS_COLOR]))
 #    return [graph]
        
-'''
-The following function updates
-'''
-@app.callback(
-    [Output("statistical_parity_difference_details", 'children'), Output("statistical_parity_difference_score", 'children')],
-    [Input('result', 'data')], prevent_initial_call=True)
-def statistical_parity_difference(data):
-    if data is None:
-        return [NO_DETAILS], [NO_SCORE_FULL]
-    else:
-        result = json.loads(data)
-        properties = result["properties"]
-        metric_properties = properties["fairness"]["statistical_parity_difference"]
-        metric_scores = result["results"]
-        return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["fairness"]["statistical_parity_difference"]))
+#'''
+#The following function updates
+#'''
+#@app.callback(
+#    [Output("statistical_parity_difference_details", 'children'), Output("statistical_parity_difference_score", 'children')],
+#    [Input('result', 'data')], prevent_initial_call=True)
+#def statistical_parity_difference(data):
+#    if data is None:
+#        return [NO_DETAILS], [NO_SCORE_FULL]
+#    else:
+#        result = json.loads(data)
+#        properties = result["properties"]
+#        metric_properties = properties["fairness"]["statistical_parity_difference"]
+#        metric_scores = result["results"]
+#        return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["fairness"]["statistical_parity_difference"]))
 
 '''
 The following function updates
@@ -621,7 +601,7 @@ The following function updates
 @app.callback(
     Output("fairness_details", 'children'),
     [Input('result', 'data')], prevent_initial_call=True)
-def fairness_metric_test(data):
+def fairness_metric_details(data):
     print("Fairness Metric Test CALLED!")
     if data is None:
         return []
@@ -639,12 +619,16 @@ def fairness_metric_test(data):
         calculated_metrics = []
         non_calculated_metrics = [html.H5("Non-Computable Metrics")]
         
+        print("FAIRNESS PROPERTIES {}".format(properties.get("fairness", {})))
+        print("EXPLAINABILITY PROPERTIES {}".format(properties.get("explainability", {})))
         print("TYPE: {}".format(type(result["results"]["fairness"])))
         for metric_id, metric_score in (result["results"]["fairness"]).items():
             if not math.isnan(metric_score):
                 print(type(metric_score))
                 metric_index +=1
-                calculated_metrics.append(show_metric_details_section(metric_id, metric_score, metric_index, FAIRNESS_SECTION_INDEX))
+                metric_properties = properties.get("fairness", {}).get(metric_id, {})
+                print("METRIC PROPERTIES {}".format(metric_properties))
+                calculated_metrics.append(show_metric_details_section(metric_id, metric_score, metric_properties, metric_index, FAIRNESS_SECTION_INDEX))
             else:
                 non_calculated_metrics.append(show_metric_details_section(metric_id, metric_score))
         fairness_metrics_details.append(html.Div(calculated_metrics))
@@ -1168,12 +1152,6 @@ def robustness_details(data):
         if properties["robustness"][metric_id] != {}:
             sections.append(create_metric_details_section(metric_id, i, 3))
     return sections
-
-def metric_detail_div(properties):
-    prop = []
-    for k, v in properties.items():
-        prop.append(html.Div("{}: {}".format(v[0], v[1])))
-    return html.Div(prop)
 
 @app.callback(
 [Output("empirical_robustness_deepfool_attack_details", 'children'), Output("empirical_robustness_deepfool_attack_score", 'children')],

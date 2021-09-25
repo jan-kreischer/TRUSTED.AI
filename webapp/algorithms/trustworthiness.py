@@ -49,16 +49,16 @@ def get_final_score(model, train_data, test_data, config_weights, mappings_confi
           default_map = json.loads(f.read())
     print(default_map == mappings_config)
     if default_map == mappings_config:
-        if "scores" in factsheet.keys() and "properties" in factsheet.keys():
-             scores = factsheet["scores"]
-             properties = factsheet["properties"]
-        else:
-            result = trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness, config_explainability, config_robustness, config_methodology, solution_set_path)
-            scores = result.score
-            factsheet["scores"] = scores
-            properties = result.properties
-            factsheet["properties"] = properties
-            write_into_factsheet(factsheet, solution_set_path)
+        #if "scores" in factsheet.keys() and "properties" in factsheet.keys():
+        #     scores = factsheet["scores"]
+        #     properties = factsheet["properties"]
+        #else:
+        result = trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness, config_explainability, config_robustness, config_methodology, solution_set_path)
+        scores = result.score
+        factsheet["scores"] = scores
+        properties = result.properties
+        factsheet["properties"] = properties
+        write_into_factsheet(factsheet, solution_set_path)
     else:
         result = trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness, config_explainability, config_robustness, config_methodology, solution_set_path)
         scores = result.score
