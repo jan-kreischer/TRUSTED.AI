@@ -24,19 +24,19 @@ def trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness,
     #     scores = factsheet["scores"]
     #     properties = factsheet["properties"]
     # else:
-    output = dict(
-        fairness       = analyse_fairness(model, train_data, test_data, factsheet, config_fairness),
-        explainability = analyse_explainability(model, train_data, test_data, config_explainability, factsheet),
-        robustness     = analyse_robustness(model, train_data, test_data, config_robustness, factsheet),
-        methodology    = analyse_methodology(model, train_data, test_data, factsheet, methodology_config)
-    )
-    scores = dict((k, v.score) for k, v in output.items())
-    properties = dict((k, v.properties) for k, v in output.items())
-    # factsheet["scores"] = scores
-    # factsheet["properties"] = properties
-    write_into_factsheet(factsheet, solution_set_path)
+        output = dict(
+            fairness       = analyse_fairness(model, train_data, test_data, factsheet, config_fairness),
+            explainability = analyse_explainability(model, train_data, test_data, config_explainability, factsheet),
+            robustness     = analyse_robustness(model, train_data, test_data, config_robustness, factsheet),
+            methodology    = analyse_methodology(model, train_data, test_data, factsheet, methodology_config)
+        )
+        scores = dict((k, v.score) for k, v in output.items())
+        properties = dict((k, v.properties) for k, v in output.items())
+        # factsheet["scores"] = scores
+        # factsheet["properties"] = properties
+        # write_into_factsheet(factsheet, solution_set_path)
     
-    return  result(score=scores, properties=properties)
+        return  result(score=scores, properties=properties)
 
 # calculate final score with weigths
 def get_final_score(model, train_data, test_data, config_weights, mappings_config, factsheet, solution_set_path):
@@ -47,18 +47,19 @@ def get_final_score(model, train_data, test_data, config_weights, mappings_confi
     
     with open('configs/mappings/default.json', 'r') as f:
           default_map = json.loads(f.read())
+    print("mapping is default:")
     print(default_map == mappings_config)
     if default_map == mappings_config:
-        #if "scores" in factsheet.keys() and "properties" in factsheet.keys():
-        #     scores = factsheet["scores"]
-        #     properties = factsheet["properties"]
-        #else:
-        result = trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness, config_explainability, config_robustness, config_methodology, solution_set_path)
-        scores = result.score
-        factsheet["scores"] = scores
-        properties = result.properties
-        factsheet["properties"] = properties
-        write_into_factsheet(factsheet, solution_set_path)
+        if "scores" in factsheet.keys() and "properties" in factsheet.keys():
+            scores = factsheet["scores"]
+            properties = factsheet["properties"]
+        else:
+            result = trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness, config_explainability, config_robustness, config_methodology, solution_set_path)
+            scores = result.score
+            factsheet["scores"] = scores
+            properties = result.properties
+            factsheet["properties"] = properties
+            write_into_factsheet(factsheet, solution_set_path)
     else:
         result = trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness, config_explainability, config_robustness, config_methodology, solution_set_path)
         scores = result.score
