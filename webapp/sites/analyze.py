@@ -442,7 +442,7 @@ def fairness_configuration(solution_set_path):
         # Create a factsheet
         else:
             print("No factsheet exists yet")
-
+        
         protected_feature_select_options = list(map(lambda x: {"label": x, "value": x}, features))
         protected_feature_select = html.Div([
             "Select Protected Feature", 

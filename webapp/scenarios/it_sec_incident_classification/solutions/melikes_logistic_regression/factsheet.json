@@ -6,7 +6,8 @@
         "training_data_description": "Alberto's original Raspery Pie data",
         "model_information": "Sklearn Logistic Regression Classifier for IoT Security Incident Classification scenario",
         "target_column": 73,
-        "authors": "Melike"
+        "authors": "Melike Demirci",
+        "contact_information": "melike.demirci@uzh.ch"
     },
     "fairness": {
         "question_fairness": 5,
@@ -52,7 +53,7 @@
             "missing_data": 5,
             "regularization": 1,
             "train_test_split": 5,
-            "factsheet_completeness": 4
+            "factsheet_completeness": 5
         }
     },
     "properties": {
@@ -65,10 +66,10 @@
             },
             "underfitting": {},
             "overfitting": {
-                "Training Accuracy": "training accuracy",
-                "Test Accuracy": "test accuracy",
-                "Fitting Difference": "fitting difference",
-                "Conclusion": "Model is overfitting"
+                "Conclusion": "Model is overfitting",
+                "Training Accuracy": 0.8769014084507042,
+                "Test Accuracy": 0.8547297297297297,
+                "Train Test Accuracy Difference": 0.022171678720974475
             },
             "statistical_parity_difference": {
                 "Favored Majority Ratio": 0,
@@ -281,15 +282,15 @@
             "empirical_robustness_fast_gradient_attack": {
                 "before_attack": [
                     "Before attack accuracy",
-                    "82.00%"
+                    "78.00%"
                 ],
                 "after_attack": [
                     "After attack accuracy",
-                    "22.00%"
+                    "20.00%"
                 ],
                 "difference": [
                     "Proportional difference (After attack accuracy - Before attack accuracy)/Before attack accuracy",
-                    "73.17%"
+                    "74.36%"
                 ]
             },
             "empirical_robustness_carlini_wagner_attack": {
@@ -299,17 +300,17 @@
                 ],
                 "after_attack": [
                     "After attack accuracy",
-                    "0.00%"
+                    "20.00%"
                 ],
                 "difference": [
                     "Proportional difference (After attack accuracy - Before attack accuracy)/Before attack accuracy",
-                    "100.00%"
+                    "80.00%"
                 ]
             },
             "empirical_robustness_deepfool_attack": {
                 "before_attack": [
                     "Before attack accuracy",
-                    "75.00%"
+                    "100.00%"
                 ],
                 "after_attack": [
                     "After attack accuracy",
@@ -317,7 +318,7 @@
                 ],
                 "difference": [
                     "Proportional difference (After attack accuracy - Before attack accuracy)/Before attack accuracy",
-                    "66.67%"
+                    "75.00%"
                 ]
             }
         },
@@ -393,7 +394,7 @@
                 ],
                 "contact_information": [
                     "(Factsheet Property) contact_information",
-                    "missing"
+                    "present"
                 ]
             }
         }

@@ -1,17 +1,5 @@
 {
   "parameters": {
-    "score_question_fairness": {
-        "parameter_XY": {
-            "value": "The value of the parameter_XY",
-            "description": "The description of the paramter and its impact"
-        }
-    },
-    "score_class_balance": {
-      "parameter_XY": {
-        "value": "The value of the parameter_XY",
-        "description": "The description of the paramter and its impact"
-      }
-    },
     "score_underfitting": {
       "parameter_XY": {
         "value": "The value of the parameter_XY",
@@ -88,11 +76,11 @@
     "manhattan_distance": 0.2
   },
     "metrics": {
-    "question_fairness": "Is the prediction to be done by the model fair in how it is formulated or not?",
-    "class_balance": "How well is the training data balanced or not?",
-    "underfitting": "Is the model underfitting?",
-    "overfitting": "Is the model overfitting?",
-    "statistical_parity_difference": "How many percent more from the majority class receive a favorable outcome compared to the protected group",
+    "question_fairness": "Is the prediction to be done by the model fair in how it is formulated or not? <br> The higher this value the fairer we consider the question being asked.",
+    "class_balance": "How well is the training data balanced or not? <br> The higher this value the more balanced the training data is.",
+    "underfitting": "Is the model underfitting? <br> The higher this value the less underfitting was detected.",
+    "overfitting": "Is the model overfitting? <br> The higher this value the less overfitting was detected.",
+    "statistical_parity_difference": "How many percent more from the majority class receive a favorable outcome compared to the protected group.",
     "equal_opportunity_difference": "Description of the metric",
     "average_odds_difference": "Description of the metric",
     "disparate_impact": "Description of the metric",

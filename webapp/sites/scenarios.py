@@ -78,7 +78,18 @@ def display_scenario(scenario_id, scenario_name, scenario_link, scenario_descrip
         returns true if the dialog was previously closed.
 
     """
-    sections = [html.H3("▶ {}".format(scenario_name), style={"text-transform": "none"}),
+    sections = [
+                dcc.ConfirmDialog(
+                    id='delete_{}_confirm'.format(scenario_id),
+                    message='Are you sure that you want to delete the "{}" scenario?'.format(scenario_name),
+                ),
+                dbc.Button(
+                    html.I(className="fas fa-backspace"),
+                    id="delete_{}_button".format(scenario_id), 
+                    n_clicks=0,
+                    style={"float": "right", "backgroundColor": SECONDARY_COLOR}
+                ),
+        html.H3("▶ {}".format(scenario_name), style={"text-transform": "none"}),
                html.Div(scenario_description, className="mt-4 mb-1", style={"font-style": "italic"}),
                html.A("Link To Dataset", href=scenario_link, className="mt-1 mb-4", style={"display": "block", "font-style": "italic", "color": PRIMARY_COLOR}),
                html.H4("• Solutions", style={"text-transform": "none"})]
@@ -135,30 +146,42 @@ def toggle_create_scenario_modal(n1, n2, is_open):
         return not is_open
     return is_open
 
-
-@app.callback(
-    Output("delete_scenario_dialog", "is_open"),
-    [Input("open_delete_scenario_dialog", "n_clicks"), Input("submit_delete_scenario_dialog", "n_clicks")],
-    [State("delete_scenario_dialog", "is_open")],
-)
-def toggle_delete_scenario_modal(n1, n2, is_open):
-    """This function open and closes the dialog window
-        where the user can delete existing scenarios
-
-    Args:
-        n1: number of clicks on the open button.
-        n2: number of clicks on the delete button.
-        is_open: current state of the modal.
-
-    Returns:
-        Returns false if the dialog was previously open and
-        returns true if the dialog was previously closed.
-
-    """
-    if n1 or n2:
-        return not is_open
-    return is_open
-
+for scenario_id in get_scenario_ids():
+    #@app.callback(
+    #    Output("{}_scenario".format(scenario_id), "style"),
+    #    Input("delete_{}_button".format(scenario_id), "n_clicks"),
+    #    prevent_initial_call=True
+    #)
+    #def toggle_detail_section(n_clicks):
+    #    print("DELETE {} SCENARIO".format(scenario_id))
+    #    if n_clicks:
+    #        return {'display': 'None'}
+        
+    @app.callback(Output('delete_{}_confirm'.format(scenario_id), 'displayed'),
+              Input('delete_{}_button'.format(scenario_id), 'n_clicks'), prevent_initial_call=True)
+    def display_delete_scenario_confirm(n_clicks):
+        if n_clicks:
+            return True
+        else:
+            return False
+        
+    @app.callback(
+        Output("{}_scenario".format(scenario_id), "style"),
+        Input("delete_{}_button".format(scenario_id), "n_clicks"),
+        prevent_initial_call=True
+    )
+    def delete_scenario(submit_n_clicks):
+        if submit_n_clicks:
+            print("Trying to delete the {} scenario".format(scenario_id))
+            scenario_path = get_scenario_path(scenario_id)
+            try:
+                shutil.rmtree(scenario_path, ignore_errors=False)
+                return {"display": "none"}
+            except Exception as e:
+                print(e)
+                raise
+        else:
+            return {"display": "block"}
 
 @app.callback(
     [Output("scenario_display", "children"),
@@ -184,32 +207,6 @@ def create_scenario(n_clicks, scenario_display, scenario_name, scenario_link, sc
         scenario_display = scenario_display + [display_scenario(scenario_id, scenario_name, scenario_link, scenario_description, [])]
         
     return scenario_display, "", "", ""
-
-
-@app.callback(
-    Output("scenario_to_delete", "value"),
-    [Input("submit_delete_scenario_dialog", "n_clicks")],
-    [State("scenario_to_delete", 'value')], prevent_initial_call=True)
-def delete_scenario(n_clicks, path):
-    try:
-        shutil.rmtree(path, ignore_errors=False)
-    except Exception as e:
-        print(e)
-        raise
-    return ""
-    
-    
-#@app.callback(
-#    Output("modal", "is_open"),
-#    [Input("open", "n_clicks"), Input("submit", "n_clicks")],
-#    [State("modal", "is_open")],
-#)
-#def toggle_modal(n1, n2, is_open):
-#    if n1 or n2:
-#        return not is_open
-#    return is_open
-
-
 
 # === LAYOUT ===
 create_scenario_dialog = html.Div(
@@ -252,44 +249,10 @@ create_scenario_dialog = html.Div(
     ]
 )
 
-
-delete_scenario_dialog = html.Div(
-    [
-        dbc.Button(
-            html.I(className="fas fa-minus-circle"),
-            id="open_delete_scenario_dialog", 
-            n_clicks=0,
-            style={"float": "right"}
-        ),
-        dbc.Modal(
-            [
-                dbc.ModalHeader("Delete a scenario"),
-                dbc.ModalBody(dbc.Form([
-    dbc.FormGroup([
-        dcc.Dropdown(
-                    id='scenario_to_delete',
-                    options=scenario_dropdown_options(),
-                    placeholder='Select Scenario'
-        ),
-        dbc.Button(
-            "Delete", id="submit_delete_scenario_dialog", className="ml-auto", n_clicks=0, style={"float": "right"}
-        )
-    ])
-])),
-                
-            ],
-            id="delete_scenario_dialog",
-            is_open=False,
-        ),
-    ]
-)
-
-
 layout = html.Div([
     dbc.Container([
         dbc.Row([
             dbc.Col([
-                delete_scenario_dialog,
                 create_scenario_dialog,
                 html.H1("Scenarios", className="text-center", style={"text-transform": "uppercase"}),
             ], width=12),

@@ -6,7 +6,8 @@
         "training_data_description": "Raspery pie system information",
         "model_information": "Sklearn Random Forest Classifier for IT Security Incident Classification scenario",
         "target_column": "label",
-        "authors": "Joel"
+        "authors": "Joel Leupp",
+        "contact_information": "joel.leupp@uzh.ch"
     },
     "fairness": {
         "question_fairness": 5,
@@ -52,7 +53,7 @@
             "missing_data": 5,
             "regularization": 1,
             "train_test_split": 1,
-            "factsheet_completeness": 4
+            "factsheet_completeness": 5
         }
     },
     "properties": {
@@ -305,7 +306,7 @@
                 ],
                 "contact_information": [
                     "(Factsheet Property) contact_information",
-                    "missing"
+                    "present"
                 ]
             }
         }

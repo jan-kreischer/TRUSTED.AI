@@ -6,7 +6,8 @@
         "training_data_description": "Alberto's classification data",
         "model_information": "Sklearn SVM Classifier for IT Security Incident Classification scenario",
         "target_column": 73,
-        "authors": "Melike"
+        "authors": "Melike Demirci",
+        "contact_information": "melike.demirci@uzh.ch"
     },
     "fairness": {
         "question_fairness": 5,
@@ -19,9 +20,11 @@
     },
     "scores": {
         "fairness": {
-            "question_fairness": NaN,
+            "question_fairness": 5,
             "class_balance": 5,
-            "statistical_parity_difference": NaN,
+            "underfitting": NaN,
+            "overfitting": 1,
+            "statistical_parity_difference": 5,
             "equal_opportunity_difference": NaN,
             "average_odds_difference": NaN,
             "disparate_impact": NaN,
@@ -42,22 +45,37 @@
             "loss_sensitivity": NaN,
             "clever_score": NaN,
             "empirical_robustness_fast_gradient_attack": 4,
-            "empirical_robustness_carlini_wagner_attack": 2,
-            "empirical_robustness_deepfool_attack": 5
+            "empirical_robustness_carlini_wagner_attack": 5,
+            "empirical_robustness_deepfool_attack": 3
         },
         "methodology": {
             "normalization": 4,
             "missing_data": 5,
             "regularization": 1,
             "train_test_split": 5,
-            "factsheet_completeness": 4
+            "factsheet_completeness": 5
         }
     },
     "properties": {
         "fairness": {
-            "question_fairness": {},
-            "class_balance": {},
-            "statistical_parity_difference": {},
+            "question_fairness": {
+                "Question Fairness": "5"
+            },
+            "class_balance": {
+                "class balance score": 5
+            },
+            "underfitting": {},
+            "overfitting": {
+                "Conclusion": "Model is overfitting",
+                "Training Accuracy": 0.9419718309859155,
+                "Test Accuracy": 0.8547297297297297,
+                "Train Test Accuracy Difference": 0.08724210125618581
+            },
+            "statistical_parity_difference": {
+                "Favored Majority Ratio": 0,
+                "Favored Minority Ratio": 0,
+                "Statistical Parity Difference": 0
+            },
             "equal_opportunity_difference": {},
             "average_odds_difference": {},
             "disparate_impact": {},
@@ -100,15 +118,15 @@
             "empirical_robustness_fast_gradient_attack": {
                 "before_attack": [
                     "Before attack accuracy",
-                    "88.00%"
+                    "86.00%"
                 ],
                 "after_attack": [
                     "After attack accuracy",
-                    "54.00%"
+                    "66.00%"
                 ],
                 "difference": [
                     "Proportional difference (After attack accuracy - Before attack accuracy)/Before attack accuracy",
-                    "38.64%"
+                    "23.26%"
                 ]
             },
             "empirical_robustness_carlini_wagner_attack": {
@@ -118,25 +136,25 @@
                 ],
                 "after_attack": [
                     "After attack accuracy",
-                    "40.00%"
+                    "80.00%"
                 ],
                 "difference": [
                     "Proportional difference (After attack accuracy - Before attack accuracy)/Before attack accuracy",
-                    "60.00%"
+                    "20.00%"
                 ]
             },
             "empirical_robustness_deepfool_attack": {
                 "before_attack": [
                     "Before attack accuracy",
-                    "75.00%"
+                    "100.00%"
                 ],
                 "after_attack": [
                     "After attack accuracy",
-                    "75.00%"
+                    "50.00%"
                 ],
                 "difference": [
                     "Proportional difference (After attack accuracy - Before attack accuracy)/Before attack accuracy",
-                    "0.00%"
+                    "50.00%"
                 ]
             }
         },
@@ -212,7 +230,7 @@
                 ],
                 "contact_information": [
                     "(Factsheet Property) contact_information",
-                    "missing"
+                    "present"
                 ]
             }
         }

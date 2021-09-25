@@ -6,7 +6,8 @@
         "training_data_description": "Alberto's classification data",
         "model_information": "Sklearn Random Forest Classifier for IT Security Incident Classification scenario",
         "target_column": "label",
-        "authors": "Jan"
+        "authors": "Jan Bauer",
+        "contact_information": "jan.bauer@uzh.ch"
     },
     "fairness": {
         "question_fairness": 5,
@@ -52,7 +53,7 @@
             "missing_data": 5,
             "regularization": 1,
             "train_test_split": 5,
-            "factsheet_completeness": 4
+            "factsheet_completeness": 5
         }
     },
     "properties": {
@@ -363,7 +364,7 @@
                 ],
                 "contact_information": [
                     "(Factsheet Property) contact_information",
-                    "missing"
+                    "present"
                 ]
             }
         }
