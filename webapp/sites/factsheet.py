@@ -206,7 +206,7 @@ layout = dbc.Container([
             ], className="mb-4 mt-4"),
                 
              html.Div([
-                create_info_modal("favorable_outcome", "Favorable Outcome", "Please enter a lambda expression defining values of the target column which are seen as favorable.", ""),
+                create_info_modal("favorable_outcome", "Favorable Outcome", "Please enter a lambda expression defining values of the target column which are seen as favorable.", "It would be considered favorable for example to get the credit card successfully approved in a credit scoring scenario."),
                 html.H3("Favorable Outcome"),
                 dcc.Input(id="favorable_outcome", type="text", placeholder=FAVORABLE_OUTCOME_DEFINITION_EXAMPLE, value="", debounce=True, style={'width': '100%'}),
             ], className="mb-4 mt-4")
