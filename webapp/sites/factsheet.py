@@ -194,7 +194,7 @@ layout = dbc.Container([
                 ]),
 
             html.Div([
-                create_info_modal("protected_feature", "Protected Feature", "Please enter the name of the target column within your dataset.", ""),
+                create_info_modal("protected_feature", "Protected Feature", "A protected feature (like age, race, gender) is not supposed to be used for making predictions.", ""),
                 html.H3("Protected Feature"),
                 dcc.Input(id="protected_feature", type="text", placeholder="", value="", debounce=True, style={'width': '100%'}),
             ], ),
