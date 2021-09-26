@@ -46,3 +46,4 @@ pyod==0.9.2
 #aif360==0.4.0
 adversarial-robustness-toolbox==1.7.1
 reportlab==3.6.1
+funcy==1.16

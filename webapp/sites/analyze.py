@@ -263,10 +263,10 @@ def toggle_hide_pillar_section(fn,en,rn,mn, fis_open, eis_open, ris_open, mis_op
         ctx = dash.callback_context
         pillar = ctx.triggered[0]['prop_id'][:-11]
         #fairness_s.n_clicks
-        print("#"*15 + pillar)
+        #print("#"*15 + pillar)
         is_open = eval(pillar[0]+"is_open")
         out[pillars==pillar]= not is_open 
-        print(out)
+        #print(out)
         return list(out)
     else:
         return [True,True,True,True]
@@ -398,27 +398,6 @@ def show_general_description(scenario_id, solution_set_path):
         return description
     else:
         return ""
-    
-# @app.callback([Output('solution_set_dropdown', 'value'),
-#               Output('delete_solution_alert', 'children')],
-#               [Input('delete_solution_confirm', 'submit_n_clicks'),
-#                Input('uploaded_solution_set_path', 'data')],
-#               State('solution_set_dropdown', 'value'))
-# def update_output(submit_n_clicks, uploaded_solution_set, solution_set_path):
-    
-#     if not solution_set_path:
-#         return "",[]
-#     if submit_n_clicks:
-#         app.logger.info("Deletign {}".format(solution_set_path))
-#         try:
-#             shutil.rmtree(solution_set_path, ignore_errors=False)
-#         except Exception as e:
-#             print(e)
-#             raise
-#         return "", html.H3("Deleted solution", className="text-center", style={"color": "Red"})
-#     else:
-#         if uploaded_solution_set:
-#             return uploaded_solution_set["path"], []
     
 # === FAIRNESS ===
 @app.callback(
@@ -566,35 +545,6 @@ def metric_detail(data):
               output.append(html.Div(prop))
       return output
      
-#'''
-#The following function updates
-#'''
-#@app.callback(
-#    [Output("class_balance_details", 'children')],
-#    [Input("solution_set_label_select", 'value'), 
-#    State('training_data', 'data'),
-#    State("solution_set_dropdown", 'value')], prevent_initial_call=True)
-#def class_balance(label, jsonified_training_data, solution_set_path):
-#    training_data = read_train(solution_set_path)
-#    graph = dcc.Graph(figure=px.histogram(training_data, x=label, opacity=1, title="Label vs Label Occurence", color_discrete_sequence=[FAIRNESS_COLOR]))
-#    return [graph]
-       
-#'''
-#The following function updates
-#'''
-#@app.callback(
-#    [Output("statistical_parity_difference_details", 'children'), Output("statistical_parity_difference_score", 'children')],
-#    [Input('result', 'data')], prevent_initial_call=True)
-#def statistical_parity_difference(data):
-#    if data is None:
-#        return [NO_DETAILS], [NO_SCORE_FULL]
-#    else:
-#        result = json.loads(data)
-#        properties = result["properties"]
-#        metric_properties = properties["fairness"]["statistical_parity_difference"]
-#        metric_scores = result["results"]
-#        return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["fairness"]["statistical_parity_difference"]))
-
 '''
 The following function updates
 '''
@@ -602,13 +552,13 @@ The following function updates
     Output("fairness_details", 'children'),
     [Input('result', 'data')], prevent_initial_call=True)
 def fairness_metric_details(data):
-    print("Fairness Metric Test CALLED!")
+    #print("Fairness Metric Test CALLED!")
     if data is None:
         return []
     else:
-        print("Inner Fairness Metric Test CALLED!")
+        #print("Inner Fairness Metric Test CALLED!")
         result = json.loads(data)
-        print(result["results"]["fairness"])
+        #print(result["results"]["fairness"])
         properties = result["properties"]
         #metric_properties = properties["fairness"]["statistical_parity_difference"]
         #metric_scores = result["results"]
@@ -619,15 +569,15 @@ def fairness_metric_details(data):
         calculated_metrics = []
         non_calculated_metrics = [html.H5("Non-Computable Metrics")]
         
-        print("FAIRNESS PROPERTIES {}".format(properties.get("fairness", {})))
-        print("EXPLAINABILITY PROPERTIES {}".format(properties.get("explainability", {})))
-        print("TYPE: {}".format(type(result["results"]["fairness"])))
+        #print("FAIRNESS PROPERTIES {}".format(properties.get("fairness", {})))
+        #print("EXPLAINABILITY PROPERTIES {}".format(properties.get("explainability", {})))
+        #print("TYPE: {}".format(type(result["results"]["fairness"])))
         for metric_id, metric_score in (result["results"]["fairness"]).items():
             if not math.isnan(metric_score):
-                print(type(metric_score))
+                #print(type(metric_score))
                 metric_index +=1
                 metric_properties = properties.get("fairness", {}).get(metric_id, {})
-                print("METRIC PROPERTIES {}".format(metric_properties))
+                #print("METRIC PROPERTIES {}".format(metric_properties))
                 calculated_metrics.append(show_metric_details_section(metric_id, metric_score, metric_properties, metric_index, FAIRNESS_SECTION_INDEX))
             else:
                 non_calculated_metrics.append(show_metric_details_section(metric_id, metric_score))
@@ -1058,8 +1008,8 @@ def update_figure(data, trig):
       final_score, results, properties = result["final_score"] , result["results"], result["properties"]
       trust_score = result["trust_score"]
       pillars = list(map(lambda x: x.upper(),list(final_score.keys())))
-      print(pillars)
-      print(list(final_score.keys()))
+      #print(pillars)
+      #print(list(final_score.keys()))
       values = list(final_score.values()) 
         
       colors = [FAIRNESS_COLOR, EXPLAINABILITY_COLOR, ROBUSTNESS_COLOR, METHODOLOGY_COLOR]
@@ -1071,8 +1021,9 @@ def update_figure(data, trig):
           y=values,
           marker_color=colors
               )])
+      bar_chart.update_yaxes(range=[0, 5], fixedrange=True)
       #bar_chart.update_xaxes(range=[0, 5])
-      bar_chart.update_layout(title_text='', title_x=0.5,           paper_bgcolor='#FFFFFF', plot_bgcolor=SECONDARY_COLOR)
+      bar_chart.update_layout(title_text='', title_x=0.5, paper_bgcolor='#FFFFFF', plot_bgcolor=SECONDARY_COLOR)
       chart_list.append(bar_chart)
       charts.append(bar_chart)
      

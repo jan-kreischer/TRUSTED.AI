@@ -40,7 +40,7 @@ for key, val in config_fairness["weights"].items():
     input_ids.append(input_id)
     
     comp_weight.append(html.Div([
-        html.Div(html.Label(key.replace("_",' ')), style={'width': '40%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10}),
+        html.Div(html.Label(key.replace("_",' ').title()), style={'width': '40%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10}),
         html.Div(dcc.Input(id="w_"+key,value=val, type='text'), style={'width': '40%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10}),
         ]))
 # parameter panel

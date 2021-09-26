@@ -13,7 +13,7 @@
         "question_fairness": 5,
         "protected_feature": "connectivity",
         "protected_group": "lambda x: x[protected_feature] == 0",
-        "favorable_outcome": "lambda x: x[target_column] == 14"
+        "favorable_outcome": "lambda x: x[target_column] == 13"
     },
     "methodology": {
         "regularization": "none"
@@ -24,14 +24,9 @@
             "class_balance": 5,
             "underfitting": NaN,
             "overfitting": 1,
-            "statistical_parity_difference": 3,
-            "equal_opportunity_difference": NaN,
-            "average_odds_difference": NaN,
-            "disparate_impact": NaN,
-            "theil_index": NaN,
-            "euclidean_distance": NaN,
-            "mahalanobis_distance": NaN,
-            "manhattan_distance": NaN
+            "statistical_parity_difference": 1,
+            "equal_opportunity_difference": 1,
+            "average_odds_difference": 3
         },
         "explainability": {
             "algorithm_class": 3,
@@ -72,17 +67,24 @@
                 "Train Test Accuracy Difference": 0.11936936936936937
             },
             "statistical_parity_difference": {
-                "Favored Majority Ratio": 0.079126488939308,
-                "Favored Minority Ratio": 0.041666666666666664,
-                "Statistical Parity Difference": -0.03745982227264134
+                "Favored Majority Ratio": 0.07969370391378332,
+                "Favored Minority Ratio": 0.5416666666666666,
+                "Statistical Parity Difference": 0.4619729627528833
             },
-            "equal_opportunity_difference": {},
-            "average_odds_difference": {},
-            "disparate_impact": {},
-            "theil_index": {},
-            "euclidean_distance": {},
-            "mahalanobis_distance": {},
-            "manhattan_distance": {}
+            "equal_opportunity_difference": {
+                "Metric Description": "Difference in true positive rates between protected and unprotected group.",
+                "TPR Unprotected Group": "P(y_hat=favorable|y_true=favorable, protected=False) = 0.5454545454545454",
+                "TPR Protected Group": "P(y_hat=favorable|y_true=favorable, protected=True) = 1.0",
+                "Equal Opportunity Difference": "TPR Protected Group - TPR Unprotected Group = 0.4545454545454546"
+            },
+            "average_odds_difference": {
+                "Metric Description": "Is the average of difference in false positive rates and true positive rates between the protected and unprotected group",
+                "FPR Unprotected Group": "P(y_hat=favorable|y_true=unfavorable, protected=False) = 0.007317073170731708",
+                "FPR Protected Group": "P(y_hat=favorable|y_true=unfavorable, protected=True) = 0.0",
+                "TPR Unprotected Group": "P(y_hat=favorable|y_true=favorable, protected=False) = 0.5454545454545454",
+                "TPR Protected Group": "P(y_hat=favorable|y_true=favorable, protected=True) = 1.0",
+                "Average Odds Difference": "0.5*(TPR Protected - TPR Unprotected) + 0.5*(FPR Protected - FPR Unprotected): 0.22361419068736144"
+            }
         },
         "explainability": {
             "algorithm_class": {

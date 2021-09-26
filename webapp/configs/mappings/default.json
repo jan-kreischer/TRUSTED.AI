@@ -1,63 +1,63 @@
 {
     "fairness": {
         "score_underfitting": {
-            "parameter_XY": {
-                "value": "The value of the parameter_XY",
-                "description": "The description of the paramter and its impact"
+            "thresholds": {
+                "value": [
+                    0.01,
+                    0.02,
+                    0.03,
+                    0.04
+                ],
+                "description": "",
+                "label": ""
             }
         },
         "score_overfitting": {
-            "parameter_XY": {
-                "value": "The value of the parameter_XY",
-                "description": "The description of the paramter and its impact"
+            "thresholds": {
+                "value": [
+                    0.01,
+                    0.02,
+                    0.03,
+                    0.04
+                ],
+                "description": "",
+                "label": ""
             }
         },
         "score_statistical_parity_difference": {
-            "parameter_XY": {
-                "value": "The value of the parameter_XY",
-                "description": "The description of the paramter and its impact"
+            "thresholds": {
+                "value": [
+                    0.01,
+                    0.025,
+                    0.05,
+                    0.075
+                ],
+                "description": "",
+                "label": ""
             }
         },
         "score_equal_opportunity_difference": {
-            "parameter_XY": {
-                "value": "The value of the parameter_XY",
-                "description": "The description of the paramter and its impact"
+            "thresholds": {
+                "value": [
+                    0.03,
+                    0.05,
+                    0.1,
+                    0.15
+                ],
+                "description": "",
+                "label": ""
             }
         },
         "score_average_odds_difference": {
-            "parameter_XY": {
-                "value": "The value of the parameter_XY",
-                "description": "The description of the paramter and its impact"
-            }
-        },
-        "score_disparate_impact": {
-            "parameter_XY": {
-                "value": "The value of the parameter_XY",
-                "description": "The description of the paramter and its impact"
-            }
-        },
-        "score_theil_index": {
-            "parameter_XY": {
-                "value": "The value of the parameter_XY",
-                "description": "The description of the paramter and its impact"
-            }
-        },
-        "score_euclidean_distance": {
-            "parameter_XY": {
-                "value": "The value of the parameter_XY",
-                "description": "The description of the paramter and its impact"
-            }
-        },
-        "score_mahalanobis_distance": {
-            "parameter_XY": {
-                "value": "The value of the parameter_XY",
-                "description": "The description of the paramter and its impact"
-            }
-        },
-        "score_manhattan_distance": {
-            "parameter_XY": {
-                "value": "The value of the parameter_XY",
-                "description": "The description of the paramter and its impact"
+            "thresholds": {
+                "value": [
+                    0.03,
+                    0.05,
+                    0.1,
+                    0.15
+                ],
+                "description": "",
+                "label": ""
             }
         }
     },

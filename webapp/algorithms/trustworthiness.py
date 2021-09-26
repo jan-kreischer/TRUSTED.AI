@@ -47,8 +47,8 @@ def get_final_score(model, train_data, test_data, config_weights, mappings_confi
     
     with open('configs/mappings/default.json', 'r') as f:
           default_map = json.loads(f.read())
-    print("mapping is default:")
-    print(default_map == mappings_config)
+    #print("mapping is default:")
+    #print(default_map == mappings_config)
     if default_map == mappings_config:
         if "scores" in factsheet.keys() and "properties" in factsheet.keys():
             scores = factsheet["scores"]

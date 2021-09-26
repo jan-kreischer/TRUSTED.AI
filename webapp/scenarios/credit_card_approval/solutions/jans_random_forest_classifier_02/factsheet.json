@@ -15,14 +15,11 @@
         "fairness": {
             "question_fairness": 3,
             "class_balance": 1,
+            "underfitting": NaN,
+            "overfitting": 5,
             "statistical_parity_difference": 1,
-            "equal_opportunity_difference": NaN,
-            "average_odds_difference": NaN,
-            "disparate_impact": NaN,
-            "theil_index": NaN,
-            "euclidean_distance": NaN,
-            "mahalanobis_distance": NaN,
-            "manhattan_distance": NaN
+            "equal_opportunity_difference": 4,
+            "average_odds_difference": 3
         },
         "explainability": {
             "algorithm_class": 3,
@@ -32,7 +29,7 @@
         },
         "robustness": {
             "confidence_score": 5,
-            "clique_method": 0,
+            "clique_method": 1,
             "loss_sensitivity": NaN,
             "clever_score": NaN,
             "empirical_robustness_fast_gradient_attack": NaN,
@@ -42,29 +39,45 @@
         "methodology": {
             "normalization": 1,
             "missing_data": 5,
-            "regularization": 1,
+            "regularization": NaN,
             "train_test_split": 5,
-            "test_accuracy": NaN,
-            "f1_score": NaN,
             "factsheet_completeness": 1
         }
     },
     "properties": {
         "fairness": {
-            "question_fairness": {},
-            "class_balance": {},
+            "question_fairness": {
+                "Question Fairness": "3"
+            },
+            "class_balance": {
+                "class balance score": 1
+            },
+            "underfitting": {},
+            "overfitting": {
+                "Conclusion": "Model is not overfitting",
+                "Training Accuracy": 0.972625,
+                "Test Accuracy": 0.9700833333333333,
+                "Train Test Accuracy Difference": 0.0025416666666666643
+            },
             "statistical_parity_difference": {
                 "Favored Majority Ratio": 0.19776821164374975,
                 "Favored Minority Ratio": 0.572176297096332,
                 "Statistical Parity Difference": 0.37440808545258225
             },
-            "equal_opportunity_difference": {},
-            "average_odds_difference": {},
-            "disparate_impact": {},
-            "theil_index": {},
-            "euclidean_distance": {},
-            "mahalanobis_distance": {},
-            "manhattan_distance": {}
+            "equal_opportunity_difference": {
+                "Metric Description": "Difference in true positive rates between protected and unprotected group.",
+                "TPR Unprotected Group": "P(y_hat=favorable|y_true=favorable, protected=False) = 0.939873417721519",
+                "TPR Protected Group": "P(y_hat=favorable|y_true=favorable, protected=True) = 0.9720863309352518",
+                "Equal Opportunity Difference": "TPR Protected Group - TPR Unprotected Group = 0.03221291321373276"
+            },
+            "average_odds_difference": {
+                "Metric Description": "Is the average of difference in false positive rates and true positive rates between the protected and unprotected group",
+                "FPR Unprotected Group": "P(y_hat=favorable|y_true=unfavorable, protected=False) = 0.024178154825026513",
+                "FPR Protected Group": "P(y_hat=favorable|y_true=unfavorable, protected=True) = 0.028279654359780047",
+                "TPR Unprotected Group": "P(y_hat=favorable|y_true=favorable, protected=False) = 0.939873417721519",
+                "TPR Protected Group": "P(y_hat=favorable|y_true=favorable, protected=True) = 0.9720863309352518",
+                "Average Odds Difference": "0.5*(TPR Protected - TPR Unprotected) + 0.5*(FPR Protected - FPR Unprotected): 0.01815720637424315"
+            }
         },
         "explainability": {
             "algorithm_class": {
@@ -155,6 +168,10 @@
                 "Test_std": [
                     "Standard deviation of the test data",
                     "4566.49"
+                ],
+                "normalization": [
+                    "Normalization",
+                    "None"
                 ]
             },
             "missing_data": {
@@ -164,29 +181,50 @@
                 ]
             },
             "regularization": {
-                "regularization_technique": "not specified"
-            },
-            "train_test_split": {
-                "training_data_ratio": [
-                    "The ratio of the train data",
-                    "80.00"
-                ],
-                "test_data_ratio": [
-                    "The ratio of the test data",
-                    "20.00"
+                "regularization_technique": [
+                    "Regularization technique",
+                    "not specified"
                 ]
             },
-            "test_accuracy": {},
-            "f1_score": {},
+            "train_test_split": {
+                "train_test_split": [
+                    "Train test split",
+                    "80.00/20.00"
+                ]
+            },
             "factsheet_completeness": {
-                "model_name": "missing",
-                "purpose_description": "missing",
-                "domain_description": "missing",
-                "training_data_description": "missing",
-                "model_information": "missing",
-                "target_column": "present",
-                "authors": "missing",
-                "contact_information": "missing"
+                "model_name": [
+                    "(Factsheet Property) model_name",
+                    "missing"
+                ],
+                "purpose_description": [
+                    "(Factsheet Property) purpose_description",
+                    "missing"
+                ],
+                "domain_description": [
+                    "(Factsheet Property) domain_description",
+                    "missing"
+                ],
+                "training_data_description": [
+                    "(Factsheet Property) training_data_description",
+                    "missing"
+                ],
+                "model_information": [
+                    "(Factsheet Property) model_information",
+                    "missing"
+                ],
+                "target_column": [
+                    "(Factsheet Property) target_column",
+                    "present"
+                ],
+                "authors": [
+                    "(Factsheet Property) authors",
+                    "missing"
+                ],
+                "contact_information": [
+                    "(Factsheet Property) contact_information",
+                    "missing"
+                ]
             }
         }
     }

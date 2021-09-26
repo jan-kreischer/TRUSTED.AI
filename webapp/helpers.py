@@ -182,26 +182,20 @@ def show_star_rating(rating):
 
 def id_to_name(identifier):
     """This function converts scenario and solution ids into the matching names
-
     Args:
         n1: number of clicks on the open button.
-
     Returns:
         Returns false if the dialog was previously open and
         returns true if the dialog was previously closed.
-
     """
     return identifier.replace("_", " ").title()
 
 def name_to_id(name):
     """This function converts scenario and solution names into a valid ids
-
     Args:
         n1: number of clicks on the open button.
-
     Returns:
         Returns false if the dialog was previously open and
-
     """
     return name.replace(" ", "_").lower()
 
@@ -689,7 +683,7 @@ def metric_detail_div(properties):
 def show_metric_properties(metric_properties):
     sections = []
     for k, v in metric_properties.items():
-        sections.append(html.Div("{}: {}".format(k, v)))
+        sections.append(html.Div([html.B("{}: ".format(k), style={"fontWeight": "bold"}), v]))
     return html.Div(sections)
 
 def pillar_section(pillar, metrics):
@@ -839,4 +833,3 @@ def metrics_list(metrics):
         metric_name = id_to_name(metric_id)
         elements.append(html.Li(metric_name, className="text-left"))
     return html.Ul(elements)
-        
