@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-
+# === Explainability ===
 import numpy as np
 import pandas as pd
 import json
@@ -8,7 +7,7 @@ import collections
 result = collections.namedtuple('result', 'score properties')
 info = collections.namedtuple('info', 'description value')
 
-# === EX ===
+
 def analyse(clf, train_data, test_data, config, factsheet):
     
     #function parameters

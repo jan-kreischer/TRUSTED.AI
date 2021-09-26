@@ -25,9 +25,7 @@ import plotly
 from dash_extensions.snippets import send_file
 warnings.filterwarnings('ignore')
 
-# plotly.io.orca.config.executable = r"C:\Users\Besitzer\AppData\Roaming\npm\node_modules\orca"
 # === CONFIG ===
-
 config_fairness, config_explainability, config_robustness, config_methodology, config_pillars = 0, 0, 0 ,0,0
 for config in ["config_pillars","config_fairness", "config_explainability", "config_robustness", "config_methodology"]:
     with open(os.path.join(METRICS_CONFIG_PATH, config + ".json")) as file:
@@ -209,11 +207,7 @@ for s in SECTIONS:
             return (not is_open, {'display': 'None'})
         else:
             return (not is_open,  {"background-color": "rgba(255,228,181,0.5)",'padding-bottom': 20, 'display': 'Block'})
-
-
-#list(out)
-     
-
+        
 for s in SECTIONS[1:]:
     @app.callback(
         [Output("{0}_details".format(s), "is_open"),
@@ -243,11 +237,7 @@ def toggle_charts(visibility_state):
     if visibility_state == False:
         return {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'block'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}, {'display': 'none'}
 
-#@app.callback(Output('solution_set_dropdown', 'options'),
-#              Input('solution_set_dropdown', 'nclicks'))
-#def update_solution_set_dropdown(n_clicks):
-#    return get_solution_sets()
-
+    
 @app.callback(
     list(map(lambda x: Output("{}_section".format(x), "hidden"),  SECTIONS[1:])),
     list(map(lambda x: Input("{}_s".format(x), "n_clicks"),  SECTIONS[1:])),
@@ -256,17 +246,12 @@ def toggle_charts(visibility_state):
 )
 def toggle_hide_pillar_section(fn,en,rn,mn, fis_open, eis_open, ris_open, mis_open):
     if fn or en or rn or mn:
-        #app.logger.info("toggle {0} detail section".format(s))
-        # list(map(lambda x: Output("{}_section".format(x), "hidden"), [n for n in SECTIONS[1:] if n != "fairness"])),
         pillars = np.array(['fairness', 'explainability', 'robustness', 'methodology'])
         out= np.array( [True,True,True,True])
         ctx = dash.callback_context
         pillar = ctx.triggered[0]['prop_id'][:-11]
-        #fairness_s.n_clicks
-        #print("#"*15 + pillar)
         is_open = eval(pillar[0]+"is_open")
         out[pillars==pillar]= not is_open 
-        #print(out)
         return list(out)
     else:
         return [True,True,True,True]
@@ -314,7 +299,6 @@ def show_general_description(scenario_id, solution_set_path):
             columns=[{"name": i, "id": i} for i in scenario_description.columns],
             data=scenario_description.to_dict('records'),
             style_table={
-                #"table-layout": "fixed",
                 "width": "100%",
                 'overflowX': 'hidden',
                 'textAlign': 'left'
@@ -322,12 +306,9 @@ def show_general_description(scenario_id, solution_set_path):
             style_data={
                 'whiteSpace': 'normal',
                 'height': 'auto',
-                #'lineHeight': '15px'
             },
             style_header={
                 'backgroundColor': SECONDARY_COLOR,
-                #"display": "none",
-                #"visibility": "hidden"
             },
             style_cell={
                 'textAlign': 'left',
@@ -360,7 +341,6 @@ def show_general_description(scenario_id, solution_set_path):
             columns=[{"name": i, "id": i} for i in solution_description.columns],
             data=solution_description.to_dict('records'),
             style_table={
-                                    #"table-layout": "fixed",
                                     "width": "100%",
                                     'overflowX': 'hidden',
                                     'textAlign': 'left'
@@ -368,12 +348,9 @@ def show_general_description(scenario_id, solution_set_path):
                                 style_data={
                                     'whiteSpace': 'normal',
                                     'height': 'auto',
-                                    #'lineHeight': '15px'
                                 },
                                 style_header={
                                     'backgroundColor': SECONDARY_COLOR,
-                                    #"display": "none",
-                                    #"visibility": "hidden"
                                 },
                                 style_cell={
                                     'textAlign': 'left',
@@ -416,9 +393,6 @@ def fairness_configuration(solution_set_path):
 
         factsheet_path = os.path.join(solution_set_path, "factsheet.json") 
         # Check if a factsheet.json file already exists in the target directory
-
-
-
         if os.path.isfile(factsheet_path):
 
             f = open(factsheet_path,)
@@ -430,7 +404,6 @@ def fairness_configuration(solution_set_path):
             favorable_outcome = factsheet.get("fairness", {}).get("favorable_outcome", None)
             
             f.close()
-        # Create a factsheet
         else:
             print("No factsheet exists yet")
         
@@ -480,10 +453,6 @@ def fairness_configuration(solution_set_path):
 
 
         sections = [html.Hr(), html.H3("▶ Fairness Configuration"), protected_feature_select, protected_group_definition, solution_set_label_select, favorable_outcome_definition, html.Hr()]
-        
-        #for i in range(len(fairness_metrics)):
-        #    metric_id = fairness_metrics[i]
-        #    sections.append(create_metric_details_section(metric_id, i))
         return sections
     else:
         return []
@@ -552,16 +521,11 @@ The following function updates
     Output("fairness_details", 'children'),
     [Input('result', 'data')], prevent_initial_call=True)
 def fairness_metric_details(data):
-    #print("Fairness Metric Test CALLED!")
     if data is None:
         return []
     else:
-        #print("Inner Fairness Metric Test CALLED!")
         result = json.loads(data)
-        #print(result["results"]["fairness"])
         properties = result["properties"]
-        #metric_properties = properties["fairness"]["statistical_parity_difference"]
-        #metric_scores = result["results"]
         FAIRNESS_SECTION_INDEX = 1
         metric_index = 0
         fairness_metrics_details = []
@@ -569,15 +533,10 @@ def fairness_metric_details(data):
         calculated_metrics = []
         non_calculated_metrics = [html.H5("Non-Computable Metrics")]
         
-        #print("FAIRNESS PROPERTIES {}".format(properties.get("fairness", {})))
-        #print("EXPLAINABILITY PROPERTIES {}".format(properties.get("explainability", {})))
-        #print("TYPE: {}".format(type(result["results"]["fairness"])))
         for metric_id, metric_score in (result["results"]["fairness"]).items():
             if not math.isnan(metric_score):
-                #print(type(metric_score))
                 metric_index +=1
                 metric_properties = properties.get("fairness", {}).get(metric_id, {})
-                #print("METRIC PROPERTIES {}".format(metric_properties))
                 calculated_metrics.append(show_metric_details_section(metric_id, metric_score, metric_properties, metric_index, FAIRNESS_SECTION_INDEX))
             else:
                 non_calculated_metrics.append(show_metric_details_section(metric_id, metric_score))
@@ -585,20 +544,6 @@ def fairness_metric_details(data):
         fairness_metrics_details.append(html.Div(non_calculated_metrics))
         return html.Div(fairness_metrics_details)
  
-
-#@app.callback(
-#    [Output("f1_score_details", 'children'), Output("f1_score_score", 'children')],
-#    [Input('result', 'data')])
-#def f1_score(data):
-#    if data is None:
-#        return [], []
-#    else:
-#        result = json.loads(data)
-#        properties = result["properties"]
-#        metric_properties = properties["methodology"]["f1_score"]
-#        metric_scores = result["results"]
-#        return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["methodology"]["f1_score"]))
-    
 @app.callback(
     [Output('training_data', 'data'),
      Output('test_data', 'data')],
@@ -607,7 +552,6 @@ def load_data(solution_set_path):
     if solution_set_path:
         training_data = read_train(solution_set_path)
         test_data = read_test(solution_set_path)
-        #compute_train_test_split(solution_set_path)
         return training_data.to_json(date_format='iso', orient='split'), test_data.to_json(date_format='iso', orient='split'), 
     else:
         return None, None
@@ -922,10 +866,7 @@ def show_properties(solution_set_path):
 @app.callback(Output('result', 'data'), 
           [Input('solution_set_dropdown', 'value'),
           Input("input-config","data"),Input('input-mappings', 'data')])
-def store_trust_analysis(solution_set_dropdown, config_weights, config_mappings):
-        # print("this button was clicked:")
-        # print(dash.callback_context.triggered[0]['prop_id'])
-        
+def store_trust_analysis(solution_set_dropdown, config_weights, config_mappings): 
         if not solution_set_dropdown:
             return None
         
@@ -948,8 +889,6 @@ def store_trust_analysis(solution_set_dropdown, config_weights, config_mappings)
         else:
             mappings_config = json.loads(config_mappings)
     
-        # print("similar mapping:"+ str(default_map == mappings_config))
-        # print("similar weight:"+ str(default_weight == weight_config))
         test, train, model, factsheet = read_solution(solution_set_dropdown)
     
         final_score, results, properties = get_final_score(model, train, test, weight_config, mappings_config, factsheet, solution_set_dropdown)
@@ -1008,8 +947,6 @@ def update_figure(data, trig):
       final_score, results, properties = result["final_score"] , result["results"], result["properties"]
       trust_score = result["trust_score"]
       pillars = list(map(lambda x: x.upper(),list(final_score.keys())))
-      #print(pillars)
-      #print(list(final_score.keys()))
       values = list(final_score.values()) 
         
       colors = [FAIRNESS_COLOR, EXPLAINABILITY_COLOR, ROBUSTNESS_COLOR, METHODOLOGY_COLOR]
@@ -1022,7 +959,6 @@ def update_figure(data, trig):
           marker_color=colors
               )])
       bar_chart.update_yaxes(range=[0, 5], fixedrange=True)
-      #bar_chart.update_xaxes(range=[0, 5])
       bar_chart.update_layout(title_text='', title_x=0.5, paper_bgcolor='#FFFFFF', plot_bgcolor=SECONDARY_COLOR)
       chart_list.append(bar_chart)
       charts.append(bar_chart)
@@ -1236,14 +1172,7 @@ def set_uploaded_model(solution_set_path):
         return scenario, solution
     else:
         return None, None
-    
-# @app.callback(Output("download-report", "data"), [Input("download_report_button", "n_clicks")])
-# def func2(n_clicks):
-#     if n_clicks:
-#         data = send_file("report.pdf")
-#         del data["mime_type"]
-#         return data
-    
+      
 config_panel.get_callbacks(app)
     
 # === LAYOUT ===

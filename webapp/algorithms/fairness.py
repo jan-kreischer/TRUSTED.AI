@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-# functions for fairness score
+# === FAIRNESS ===
 import numpy as np
 np.random.seed(0)
 from helpers import *
@@ -39,7 +38,7 @@ def question_fairness_score(factsheet):
         properties = {"Question Fairness": "{}".format(score)}
         return result(score=score, properties=properties) 
     except Exception as e:
-        print(e)
+        print("ERROR in question_fairness_score(): {}".format(e))
         return result(score=np.nan, properties={}) 
     
 # --- Class Balance ---
@@ -67,9 +66,10 @@ def class_balance_score(training_data, target_column):
         properties["class balance score"] = score
         return result(score=score, properties=properties)     
     except Exception as e:
-        print(e)
+        print("ERROR in class_balance_score(): {}".format(e))
         return result(score=np.nan, properties={}) 
 
+    
 # --- Underfitting ---
 def underfitting_score(model, training_dataset, test_dataset, factsheet):
     try:
@@ -102,9 +102,10 @@ def underfitting_score(model, training_dataset, test_dataset, factsheet):
         else:
             return result(score=np.nan, properties={}) 
     except Exception as e:
-        print(e)
+        print("ERROR in underfitting_score(): {}".format(e))
         return result(score=np.nan, properties={}) 
 
+    
 # --- Overfitting ---
 def overfitting_score(model, training_dataset, test_dataset, factsheet, thresholds):
     try:
@@ -137,9 +138,10 @@ def overfitting_score(model, training_dataset, test_dataset, factsheet, threshol
         else:
             return result(score=np.nan, properties={}) 
     except Exception as e:
-        print(e)
+        print("ERROR in overfitting_score(): {}".format(e))
         return result(score=np.nan, properties={}) 
 
+    
 def compute_accuracy(model, dataset, factsheet):
     try:
         target_column = factsheet.get("general", {}).get("target_column", {})
@@ -154,21 +156,20 @@ def compute_accuracy(model, dataset, factsheet):
             y_pred = model.predict(X_data).flatten()
         return metrics.accuracy_score(y_true, y_pred)
     except Exception as e:
-        print(e)
+        print("ERROR in compute_accuracy(): {}".format(e))
         raise
 
+        
 # --- Statistical Parity Difference ---
 def statistical_parity_difference_score(model, training_dataset, test_dataset, factsheet, thresholds):
-    #print("STATISTICAL PARITY TEST")
     try: 
-        #print("Training data columns {}".format(training_dataset))
         score = 1
         favored_majority_ratio, favored_minority_ratio, statistical_parity_difference = statistical_parity_difference_metric(model, training_dataset, test_dataset, factsheet)
         properties = {"Favored Majority Ratio": favored_majority_ratio, "Favored Minority Ratio": favored_minority_ratio, "Statistical Parity Difference": statistical_parity_difference}
         score = np.digitize(statistical_parity_difference, thresholds, right=False) + 1 
         return result(score=score, properties=properties)
     except Exception as e:
-        print(e)
+        print("ERROR in statistical_parity_difference_score(): {}".format(e))
         return result(score=np.nan, properties={})
 
 def statistical_parity_difference_metric(model, training_dataset, test_dataset, factsheet):
@@ -179,14 +180,7 @@ def statistical_parity_difference_metric(model, training_dataset, test_dataset, 
         favorable_outcome = factsheet.get("fairness", {}).get("favorable_outcome", None)
 
         protected = eval(protected, {"protected_feature": protected_feature}, {"protected_feature": protected_feature})
-        #print("BEFORE FAVORABLE_OUTCOME {}".format(favorable_outcome))
         favorable_outcome = eval(favorable_outcome, {"target_column": target_column}, {"target_column": target_column})
-        #print("AFTER FAVORABLE_OUTCOME {}".format(favorable_outcome))
-        #target_column = "Target"
-        #favorable_outome = lambda x: x[target_column]==1
-
-        #protected_feature = "Group"
-        #protected = lambda x: x[protected_feature]==0
         protected_indices = training_dataset.apply(protected, axis=1)
 
         minority = training_dataset[protected_indices]
@@ -194,17 +188,15 @@ def statistical_parity_difference_metric(model, training_dataset, test_dataset, 
         favored_minority = minority[minority.apply(favorable_outcome, axis=1)]
         favored_minority_size = len(favored_minority)
         favored_minority_ratio = favored_minority_size/minority_size
-        #print("{0}/{1} = {2}".format(favored_minority_size, minority_size, favored_minority_ratio))
 
         majority = training_dataset[~protected_indices]
         majority_size = len(majority)
         favored_majority = majority[majority.apply(favorable_outcome, axis=1)]
         favored_majority_size = len(favored_majority)
         favored_majority_ratio = favored_majority_size/majority_size
-        #print("{0}/{1} = {2}".format(favored_majority_size, majority_size, favored_majority_ratio))
         return favored_majority_ratio, favored_minority_ratio, favored_minority_ratio - favored_majority_ratio
     except Exception as e:
-        print(e)
+        print("ERROR in statistical_parity_difference_metric: {}".format(e))
         raise
 
 
@@ -250,7 +242,8 @@ def average_odds_difference_score(model, test_dataset, factsheet, thresholds):
     except Exception as e:
         print("ERROR in average_odds_difference_score(): {}".format(e))
         raise
-        
+   
+
 def false_positive_rates(model, test_dataset, factsheet):
     try: 
         target_column = factsheet.get("general", {}).get("target_column", "")
@@ -302,7 +295,8 @@ def false_positive_rates(model, test_dataset, factsheet):
     except Exception as e:
         print("ERROR in false_positive_rates(): {}".format(e))
         raise
-        
+   
+
 def true_positive_rates(model, test_dataset, factsheet):
     try: 
         target_column = factsheet.get("general", {}).get("target_column", "")

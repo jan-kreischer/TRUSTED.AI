@@ -18,11 +18,10 @@ import plotly.graph_objects as go
 
 from config import *
 
-# must add this line in order for the app to be deployed successfully on Heroku
+
 from app import server
 from app import app
-# import all pages in the app
-from sites import homepage, upload, analyze, compare, scenarios, factsheet #, visualisation 
+from sites import homepage, upload, analyze, compare, scenarios, factsheet #Importing sub-pages
 from sites.config_panel import input_ids 
 
 navbar = dbc.Navbar(
@@ -91,12 +90,7 @@ def display_page(pathname):
         return scenarios.layout
     elif pathname == '/factsheet':
         return factsheet.layout
-    # elif pathname == '/visualisation':
-    #     return visualisation.layout
     else:
         return homepage.layout
-    
-#visualisation.get_callbacks(app)
-
 if __name__ == '__main__':
     app.run_server(debug=True)

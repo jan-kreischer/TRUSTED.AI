@@ -18,7 +18,6 @@ def analyse(model, training_dataset, test_dataset, factsheet, methodology_config
 
     metrics = list_of_metrics("methodology")
     output = dict(
-    #for metric in metrics:
         #output[metric] = exec("%s_score(model, training_dataset, test_dataset, factsheet, methodology_config)" % metric)
         normalization  = normalization_score(model, training_dataset, test_dataset, factsheet, normalization_mapping),
         missing_data = missing_data_score(model, training_dataset, test_dataset, factsheet, missing_data_mapping),
@@ -28,15 +27,7 @@ def analyse(model, training_dataset, test_dataset, factsheet, methodology_config
         #f1_score = f1_score(model, training_dataset, test_dataset, factsheet, f1_score_thresholds),
         factsheet_completeness= factsheet_completeness_score(model, training_dataset, test_dataset, factsheet, methodology_config)
     )
-    
-    #for metric in metrics:
-    #    exec("{0} = {0}_score(model, training_dataset, test_dataset, factsheet, methodology_config)".format(metric))
-    #    print("METRIC {}".format(metric))
-    #    exec("print({0})".format(metric))
 
-        #treatment_of_corrupt_values     = f1_score(model, training_dataset, test_dataset, factsheet, methodology_config),
-        #feature_filtering    = test_accuracy_score(model, training_dataset, test_dataset, factsheet, methodology_config),
-        #treatment_of_categorical_features  = test_accuracy_score(model, training_dataset, test_dataset, factsheet, methodology_config)
     scores = dict((k, v.score) for k, v in output.items())
     properties = dict((k, v.properties) for k, v in output.items())
     
@@ -75,7 +66,6 @@ def normalization_score(model, train_data, test_data, factsheet, mappings):
     return result(score=score, properties=properties)
 
 # --- Missing Data ---
-
 def missing_data_score(model, training_dataset, test_dataset, factsheet, mappings):
     try:
         missing_values = training_dataset.isna().sum().sum() + test_dataset.isna().sum().sum()
@@ -87,6 +77,7 @@ def missing_data_score(model, training_dataset, test_dataset, factsheet, mapping
     except:
         return result(score=np.nan, properties={})
 
+    
 # --- Train-Test-Split ---
 def train_test_split_score(model, training_dataset, test_dataset, factsheet, mappings):
     try:
@@ -137,7 +128,7 @@ def regularization_metric(factsheet):
         return NOT_SPECIFIED
     
 
-    # --- Test Accuracy ---
+# --- Test Accuracy ---
 def test_accuracy_score(model, training_dataset, test_dataset, factsheet, thresholds):
     try:
         test_accuracy = test_accuracy_metric(model, test_dataset, factsheet)
@@ -169,7 +160,7 @@ def test_accuracy_metric(model, test_dataset, factsheet):
     accuracy = metrics.accuracy_score(y_true, y_pred).round(2)
     return accuracy
 
-    # --- F1 Score ---
+# --- F1 Score ---
 def f1_score(model, training_dataset, test_dataset, factsheet, thresholds):
     try:
         f1_score = f1_metric(model, test_dataset, factsheet)
@@ -213,8 +204,3 @@ def factsheet_completeness_score(model, training_dataset, test_dataset, factshee
             properties[e] = info("(Factsheet Property) {}".format(e), "missing")
     score = round(ctr/n*5)
     return result(score=score, properties=properties)
-            
-    return result(score=np.random.randint(1,6), properties={}) 
-
-def factsheet_completeness_metric(factsheet):
-    print("hi")

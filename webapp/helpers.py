@@ -42,7 +42,6 @@ def draw_bar_plot(categories, values, ax, color='lightblue', title='Trusting AI 
     # drop top and right spine
     ax.spines['right'].set_visible(False)
     ax.spines['top'].set_visible(False)
-    #plt.grid(True,axis='y',zorder=0)
     
     # create barplot
     x_pos = np.arange(len(categories))
@@ -63,8 +62,6 @@ def draw_bar_plot(categories, values, ax, color='lightblue', title='Trusting AI 
     if isinstance(color, list):
         plt.title(title, size=11, y=1.1)
     else:
-        # plt.title(title, size=11, y=1.1,
-        #      bbox=dict(facecolor=color, edgecolor=color, pad=2.0))
         plt.title(title, size=11, y=1.1)
     return plt
    
@@ -84,10 +81,6 @@ def get_performance_metrics(model, test_data, target_column):
         y_pred = np.argmax(y_pred_proba, axis=1)
     else:
         y_pred = model.predict(X_test).flatten()
-    #y_pred_proba = model.predict_proba(X_test)
-    print("y_true.shape: {}".format(y_true.shape))
-    print("y_pred.shape: {}".format(y_pred.shape))
-    #print("y_pred_proba.shape: {}".format(y_pred_proba.shape))
     labels = np.unique(np.array([y_pred,y_true]).flatten())
 
     performance_metrics = pd.DataFrame({
@@ -98,12 +91,8 @@ def get_performance_metrics(model, test_data, target_column):
         "class weighted precision" : [metrics.precision_score(y_true, y_pred,average="weighted")],
         "global f1 score" :  [metrics.f1_score(y_true, y_pred,average="micro")],
         "class weighted f1 score" :  [metrics.f1_score(y_true, y_pred,average="weighted")],
-        #"cross-entropy loss" : [metrics.log_loss(y_true, y_pred_proba)],
-        #"ROC AUC" : [metrics.roc_auc_score(y_true, y_pred_proba,average="weighted", multi_class='ovr')]
     }).round(decimals=2)
     
-    #performance_metrics = pd.Data
-    #print("------------------ {}".format(performance_metrics.transpose().columns))
     performance_metrics = performance_metrics.transpose()
     performance_metrics = performance_metrics.reset_index()
     performance_metrics['index'] = performance_metrics['index'].str.title()
@@ -116,11 +105,7 @@ def get_scenario_description(scenario_id):
     data = []
     data.insert(0, {'key': 'name', 'value': id_to_name(scenario_id)})
     scenario_description = pd.DataFrame.from_dict(scenario_factsheet, orient="index", columns=["value"])
-    #scenario_description.index.set_names(['Scenario'])
     scenario_description = scenario_description.reset_index()
-    print(scenario_description.columns)
-    #scenario_description.index.rename('Scenario', inplace=True)
-    print(scenario_description.columns)
     scenario_description.rename(columns={'index': 'key'}, inplace=True)
     scenario_description = pd.concat([pd.DataFrame(data), scenario_description], ignore_index=True)
     scenario_description['key'] = scenario_description['key'].str.capitalize()
@@ -151,17 +136,7 @@ def get_solution_description(factsheet):
     for e in GENERAL_INPUTS:
         if e == "target_column":
             continue
-        
         description[id_to_name(e)] = factsheet.get("general", {}).get(e, " ")
-    #if "general" in factsheet:
-        #if "model_name" in factsheet["general"]:
-           
-            #description["Model Name"]= factsheet["general"]["model_name"]
-           
-        #if "purpose_description" in factsheet["general"]:
-        #    description["Purpose of the Model"] = factsheet["general"]["purpose_description"]
-        #if "training_data_description" in factsheet["general"]:
-        #    description["Training Data Description"] = factsheet["general"]["training_data_description"]
     description = pd.DataFrame(description, index=[0])
     description = description.transpose()
     description = description.reset_index()
@@ -259,7 +234,6 @@ def read_train(solution_set_path):
     if solution_set_path is None:
         return
     train_file = glob.glob(os.path.join(solution_set_path, TRAINING_DATA_FILE_NAME_REGEX))[0]
-    print("--- {}".format(glob.glob(os.path.join(solution_set_path,"train.*"))[0]))
     ext = os.path.splitext(train_file)[1]
     if ext == ".pkl":
         with open(train_file,'rb') as file:
@@ -274,9 +248,7 @@ def read_train(solution_set_path):
 # Load .joblib or .pickle model
 def read_model(solution_set_path):
     model_file = glob.glob(os.path.join(solution_set_path, MODEL_REGEX))[0]
-    print("model_file: {}".format(model_file))
     file_extension = os.path.splitext(model_file)[1]
-    print("file extension of model to load {0}".format(file_extension))
     pickle_file_extensions = [".sav", ".pkl", ".pickle"]
     if file_extension in pickle_file_extensions:
         with open(model_file,'rb') as file:
@@ -286,8 +258,7 @@ def read_model(solution_set_path):
         tf.compat.v1.disable_eager_execution()
         model = load_model(model_file)
         return model
-    if file_extension == ".joblib":
-        print("loading joblib model")
+    if file_extension == ".joblib": #Check if a .joblib file needs to be loaded
         return joblib.load(model_file)
 
 # === FACTSHEET ===
@@ -374,7 +345,6 @@ def report_section(Story, title , keys, values, sizex, sizey):
             p4 = Paragraph('{}'.format(v))
         m = [p1, p2, p3, p4]
         data.append(m)
-    print(data)
     t = Table(data,sizex, sizey, style = [('VALIGN',(0,0),(-1,-1),'MIDDLE')])
     Story.append(t)
     Story.append(Spacer(1, 0.2 * inch))
@@ -421,7 +391,6 @@ def add_matplotlib_to_report(Story, fig, sizex, sizey):
 def save_report_as_pdf(result, model, test_data, target_column, factsheet, charts, configs):
       
     start = timeit.timeit()
-    print("creating report")
     weight, map_f, map_e, map_r, map_m = configs
     doc = SimpleDocTemplate("report.pdf")
     Story = [Spacer(1, 0.1 * inch)]
@@ -583,24 +552,7 @@ def create_info_modal(module_id, name, content, example):
 )
     return modal
 
-#def load_scenario_description(scenario_path):
-#    scenario_description = ""
-#    path = os.path.join(scenario_path, SCENARIO_DESCRIPTION_FILE)
-#    if os.path.exists(path):
-#        file = open(path, mode='r')
-#        scenario_description = file.read()
-#        file.close()
-#    return scenario_description
- 
-#def load_scenario_link(scenario_path):
-#    scenario_link = ""
-#    path = os.path.join(scenario_path, SCENARIO_LINK_FILE)
-#    if os.path.exists(path):
-#        file = open(path, mode='r')
-#        scenario_link = file.read()
-#        file.close()
-#    return scenario_link
-    
+
 def parse_contents(contents, filename):
     content_type, content_string = contents.split(',')
 
@@ -635,6 +587,7 @@ def parse_contents(contents, filename):
     columns = df.columns.values
     return table, columns
 
+
 def list_of_metrics(pillar):
     metrics = []
     with open(os.path.join(METRICS_CONFIG_PATH, "config_{}.json".format(pillar))) as file:
@@ -642,6 +595,7 @@ def list_of_metrics(pillar):
         for metric_name in config_file["weights"]:
             metrics.append(metric_name.lower())
     return metrics
+
 
 def create_metric_details_section(metric_id, i, section_n = 1, is_open=False, score="X"):
     metric_name = metric_id.replace("_", " ")
@@ -659,6 +613,7 @@ def create_metric_details_section(metric_id, i, section_n = 1, is_open=False, sc
         ),
         ], id="{}_section".format(metric_id), className="mb-5 mt-5")
 
+
 def show_metric_details_section(metric_id, metric_score=None, metric_properties = None, metric_index = 1, section_index = 1):
     metric_name = metric_id.replace("_", " ")
     sections = []
@@ -674,11 +629,13 @@ def show_metric_details_section(metric_id, metric_score=None, metric_properties 
         
     return html.Div(sections, id="{}_section".format(metric_id), className="mb-5 mt-5")
 
+
 def metric_detail_div(properties):
     prop = []
     for k, v in properties.items():
         prop.append(html.Div("{}: {}".format(v[0], v[1])))
     return html.Div(prop)
+
 
 def show_metric_properties(metric_properties):
     sections = []
@@ -687,17 +644,12 @@ def show_metric_properties(metric_properties):
     return html.Div(sections)
 
 def pillar_section(pillar, metrics):
-        #configuration_section = []
-        #configuration_section.append(html.H3("▶ {} Configuration".format(pillar)))
-        #configuration_section.append()
-        #metric_detail_sections = [html.Div([], id="{}_configuration".format(pillar))]
         metric_detail_sections = []
         for i in range(len(metrics)):
             metric_id = metrics[i].lower()
             metric_detail_sections.append(create_metric_details_section(metric_id, i))
 
         return html.Div([
-                # html.H2("{}".format(pillar.upper()), className="text-center"),
                 dbc.Row(
                     [
                     dbc.Col(html.Div([daq.BooleanSwitch(id='toggle_{}_details'.format(pillar),
@@ -713,23 +665,6 @@ def pillar_section(pillar, metrics):
                       color = TRUST_COLOR,
                     )], className="text-center"))
                     ]),
-                # html.Div([
-                #     daq.BooleanSwitch(id='toggle_{}_details'.format(pillar),
-                #       on=False,
-                #       label='Show Details',
-                #       labelPosition="right",
-                #       color = TRUST_COLOR,
-                #       style={"float": "right","margin-right":"3%"}
-                #     ),
-                #     daq.BooleanSwitch(id='toggle_{}_mapping'.format(pillar),
-                #       on=False,
-                #       label='Show Mappings',
-                #       labelPosition="right",
-                #       color = TRUST_COLOR,
-                #       style={"float": "right","margin-right":"3%"}
-                #     ),
-                #     html.H2("{}".format(pillar.upper()), className="mb-5"),
-                #     ], id="{}_section_heading".format(pillar.lower())),
                     dbc.Collapse(html.Div(mapping_panel(pillar)[0]),
                         id="{}_mapping".format(pillar),
                         is_open=False,
@@ -796,7 +731,6 @@ def mapping_panel(pillar):
     
     #weight panel
     map_panel.append(html.H4("Mappings",style={'text-align':'center'}))
-    # map_panel.append(dcc.Store(id='{}-mapping'.format(pillar)))
     for metric, param in mapping.items():
         map_panel.append(html.H5(metric.replace("_",' '),style={'text-align':'center'}))
         for p, v in param.items():
