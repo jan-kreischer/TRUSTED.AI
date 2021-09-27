@@ -7,12 +7,5 @@
         "protected_feature": "Group",
         "protected_group": "lambda x: x[protected_feature] == 1",
         "favorable_outcome": "lambda x: x[target_column]==1"
-    },
-    "target_column": "Target",
-    "scores": {
-        "fairness": {
-            "question_fairness": 3,
-            "class_balance": 1,
-            "underfitting": NaN,
-            "overfitting": 5,
-            "statistical_parity_difference": 
+    }
+}

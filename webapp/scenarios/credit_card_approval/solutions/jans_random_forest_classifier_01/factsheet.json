@@ -19,7 +19,8 @@
             "overfitting": 5,
             "statistical_parity_difference": 1,
             "equal_opportunity_difference": 2,
-            "average_odds_difference": 3
+            "average_odds_difference": 3,
+            "disparate_impact": 1
         },
         "explainability": {
             "algorithm_class": 3,
@@ -77,6 +78,12 @@
                 "TPR Unprotected Group": "P(y_hat=favorable|y_true=favorable, protected=False) = 0.861294964028777",
                 "TPR Protected Group": "P(y_hat=favorable|y_true=favorable, protected=True) = 0.9707278481012658",
                 "Average Odds Difference": "0.5*(TPR Protected - TPR Unprotected) + 0.5*(FPR Protected - FPR Unprotected): 0.07377692740867896"
+            },
+            "disparate_impact": {
+                "Metric Description": "Is quotient of the ratio of samples from the protected group receiving a favorable prediction divided by the ratio of samples from the unprotected group receiving a favorable prediction",
+                "Protected Favored Ratio": "P(y_hat=favorable|protected=True) = 0.23682890115403912",
+                "Unprotected Favored Ratio": "P(y_hat=favorable|protected=False) = 0.4979239329015114",
+                "Disparate Impact": "Protected Favored Ratio / Unprotected Favored Ratio 0.47563269307820866"
             }
         },
         "explainability": {

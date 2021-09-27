@@ -59,7 +59,10 @@ def get_final_score(model, train_data, test_data, config_weights, mappings_confi
             factsheet["scores"] = scores
             properties = result.properties
             factsheet["properties"] = properties
-            write_into_factsheet(factsheet, solution_set_path)
+            try:
+                write_into_factsheet(factsheet, solution_set_path)
+            except Exception as e:
+                print("ERROR in write_into_factsheet: {}".format(e))
     else:
         result = trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness, config_explainability, config_robustness, config_methodology, solution_set_path)
         scores = result.score

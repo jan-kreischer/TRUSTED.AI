@@ -3,10 +3,11 @@
     "score_underfitting": {
         "thresholds": {
             "value": [
-                0.01,
-                0.02,
+                0.04,
                 0.03,
-                0.04
+                0.02,
+                0.01,
+                0
             ],
             "description": "",
             "label": ""
@@ -15,10 +16,11 @@
     "score_overfitting": {
         "thresholds": {
             "value": [
-                0.01,
-                0.02,
+                0.04,
                 0.03,
-                0.04
+                0.02,
+                0.01,
+                0
             ],
             "description": "",
             "label": ""
@@ -27,10 +29,11 @@
     "score_statistical_parity_difference": {
         "thresholds": {
             "value": [
-                0.01,
-                0.025,
+                0.075,
                 0.050,
-                0.075
+                0.025,
+                0.01,
+                0
             ],
             "description": "",
             "label": ""
@@ -39,10 +42,11 @@
     "score_equal_opportunity_difference": {
         "thresholds": {
             "value": [
-                0.03,
-                0.05,
+                0.15,
                 0.10,
-                0.15
+                0.05,
+                0.03,
+                0
             ],
             "description": "",
             "label": ""
@@ -50,11 +54,25 @@
     },
     "score_average_odds_difference": {
         "thresholds": {
-            "value": [
-                0.03,
-                0.05,
+            "value": [   
+                0.15,
                 0.10,
-                0.15
+                0.05,
+                0.03,
+                0
+            ],
+            "description": "",
+            "label": ""
+        }
+    },
+    "score_disparate_impact": {
+        "thresholds": {
+            "value": [
+                0.80,
+                0.85,
+                0.90,
+                0.95,
+                1
             ],
             "description": "",
             "label": ""
@@ -68,7 +86,8 @@
     "overfitting": 0.15,
     "statistical_parity_difference": 0.15,
     "equal_opportunity_difference": 0.2,
-    "average_odds_difference": 0.2
+    "average_odds_difference": 0.1,
+    "disparate_impact": 0.1
   },
     "metrics": {
     "question_fairness": "Is the prediction to be done by the model fair in how it is formulated or not? <br> The higher this value the fairer we consider the question being asked.",
@@ -77,6 +96,7 @@
     "overfitting": "Is the model overfitting? <br> The higher this value the less overfitting was detected.",
     "statistical_parity_difference": "How many percent more from the majority class receive a favorable outcome compared to the protected group.",
     "equal_opportunity_difference": "Difference in true positive rates between protected and unprotected group.",
-    "average_odds_difference": "Is the average of difference in false positive rates and true positive rates between the protected and unprotected group"
+    "average_odds_difference": "Is the average of difference in false positive rates and true positive rates between the protected and unprotected group",
+    "disparate_impact": "Is quotient of the ratio of samples from the protected group receiving a favorable prediction divided by the ratio of samples from the unprotected group receiving a favorable prediction"
   }
 }
