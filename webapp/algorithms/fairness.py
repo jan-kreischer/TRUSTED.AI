@@ -33,8 +33,20 @@ def analyse(model, training_dataset, test_dataset, factsheet, fairness_config):
 
     return  result(score=scores, properties=properties)
 
+
 # --- Question Fairness ---
 def question_fairness_score(factsheet):
+    """Reads and the question fairness score from the factsheet.
+    If this fails np.nan is returned.
+
+    Args:
+        factsheet: json document containing all information about a particular solution.
+
+    Returns:
+        On success, the function returns the question fairness score together with optional properties.
+        On failure, a score of np.nan together with an empty properties dictionary is returned.
+
+    """
     try:
         score = factsheet.get("fairness", {}).get("question_fairness", np.nan)
         properties = {"Question Fairness": "{}".format(score)}
@@ -42,22 +54,22 @@ def question_fairness_score(factsheet):
     except Exception as e:
         print("ERROR in question_fairness_score(): {}".format(e))
         return result(score=np.nan, properties={}) 
-    
+   
+
 # --- Class Balance ---
-def class_balance_metric(training_data, target_column):
-    absolute_class_occurences = training_data[target_column].value_counts().sort_index().to_numpy()
-    significance_level = 0.05
-    p_value = chisquare(absolute_class_occurences, ddof=0, axis=0).pvalue
-
-    if p_value < significance_level:
-        #The data does not follow a unit distribution
-        return 0
-    else:
-        #We can not reject the null hypothesis assuming that the data follows a unit distribution"
-        return 1
-
-
 def class_balance_score(training_data, target_column):
+    """Compute the class balance for the target_column
+    If this fails np.nan is returned.
+
+    Args:
+        training_data: pd.DataFrame containing the used training data.
+        target_column: name of the label column in the provided training data frame.
+
+    Returns:
+        On success, returns a score from 1 - 5 for the class balance.
+        On failure, a score of np.nan together with an empty properties dictionary is returned.
+
+    """
     try:
         class_balance = class_balance_metric(training_data, target_column)
         properties = {}
@@ -70,10 +82,54 @@ def class_balance_score(training_data, target_column):
     except Exception as e:
         print("ERROR in class_balance_score(): {}".format(e))
         return result(score=np.nan, properties={}) 
+    
+    
+def class_balance_metric(training_data, target_column):
+    """This function runs a statistical test (chisquare) in order to
+    check if the targe class labels are equally distributed or not
 
+    Args:
+        training_data: pd.DataFrame containing the used training data.
+        target_column: name of the label column in the provided training data frame.
+
+    Returns:
+        If the label frequency follows a unit distribution a 1 is returned, 0 otherwise.
+
+    """
+    try:
+        absolute_class_occurences = training_data[target_column].value_counts().sort_index().to_numpy()
+        significance_level = 0.05
+        p_value = chisquare(absolute_class_occurences, ddof=0, axis=0).pvalue
+
+        if p_value < significance_level:
+            #The data does not follow a unit distribution
+            return 0
+        else:
+            #We can not reject the null hypothesis assuming that the data follows a unit distribution"
+            return 1
+    except Exception as e:
+        print("ERROR in class_balance_metric(): {}".format(e))
+        raise
+    
     
 # --- Underfitting ---
 def underfitting_score(model, training_dataset, test_dataset, factsheet, thresholds):
+    """This function computes the training and test accuracy for the given model and then
+    compares how much lower the training accuracy is than the test accuracy.
+    If this is the case then we consider our model to be underfitting.
+
+    Args:
+        model: ML-model.
+        training_dataset: pd.DataFrame containing the used training data.
+        test_dataset: pd.DataFrame containing the used test data.
+        factsheet: json document containing all information about the particular solution.
+
+    Returns:
+        A score from one to five representing the level of underfitting.
+        5 means the model is not underfitting
+        1 means the model is strongly underfitting
+
+    """
     try:
         properties = {}
         score = 0
@@ -244,7 +300,7 @@ def average_odds_difference_score(model, test_dataset, factsheet, thresholds):
         return result(score=int(score), properties=properties) 
     except Exception as e:
         print("ERROR in average_odds_difference_score(): {}".format(e))
-        raise
+        return result(score=np.nan, properties={})
    
 
 def false_positive_rates(model, test_dataset, factsheet):
