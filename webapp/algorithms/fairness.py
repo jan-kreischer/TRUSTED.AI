@@ -7,15 +7,31 @@ import operator
 import funcy
 
 # === Fairness Metrics ===
-def analyse(model, training_dataset, test_dataset, factsheet, fairness_config):   
+def analyse(model, training_dataset, test_dataset, factsheet, config): 
+    """Triggers the fairness analysis and in a first step all fairness metrics get computed.
+    In a second step, the scores for the fairness metrics are then created from
+    mapping every metric value to a respective score.
+
+    Args:
+        model: ML-model.
+        training_dataset: pd.DataFrame containing the used training data.
+        test_dataset: pd.DataFrame containing the used test data.
+        factsheet: json document containing all information about the particular solution.
+        config: Config file containing the threshold values for the metrics.
+
+    Returns:
+        Returns a result object containing all metric scores
+        and matching properties for every metric
+
+    """
     target_column = factsheet.get("general", {}).get("target_column", "")
     
-    statistical_parity_difference_thresholds = fairness_config["score_statistical_parity_difference"]["thresholds"]["value"]
-    overfitting_thresholds = fairness_config["score_overfitting"]["thresholds"]["value"]
-    underfitting_thresholds = fairness_config["score_underfitting"]["thresholds"]["value"]
-    equal_opportunity_difference_thresholds = fairness_config["score_equal_opportunity_difference"]["thresholds"]["value"]
-    average_odds_difference_thresholds = fairness_config["score_average_odds_difference"]["thresholds"]["value"]
-    disparate_impact_thresholds = fairness_config["score_disparate_impact"]["thresholds"]["value"]
+    statistical_parity_difference_thresholds = config["score_statistical_parity_difference"]["thresholds"]["value"]
+    overfitting_thresholds = config["score_overfitting"]["thresholds"]["value"]
+    underfitting_thresholds = config["score_underfitting"]["thresholds"]["value"]
+    equal_opportunity_difference_thresholds = config["score_equal_opportunity_difference"]["thresholds"]["value"]
+    average_odds_difference_thresholds = config["score_average_odds_difference"]["thresholds"]["value"]
+    disparate_impact_thresholds = config["score_disparate_impact"]["thresholds"]["value"]
     
     output = dict(
         question_fairness = question_fairness_score(factsheet),
@@ -123,6 +139,7 @@ def underfitting_score(model, training_dataset, test_dataset, factsheet, thresho
         training_dataset: pd.DataFrame containing the used training data.
         test_dataset: pd.DataFrame containing the used test data.
         factsheet: json document containing all information about the particular solution.
+        thresholds: Threshold values used to determine the final score
 
     Returns:
         A score from one to five representing the level of underfitting.
@@ -166,6 +183,23 @@ def underfitting_score(model, training_dataset, test_dataset, factsheet, thresho
     
 # --- Overfitting ---
 def overfitting_score(model, training_dataset, test_dataset, factsheet, thresholds):
+    """This function computes the training and test accuracy for the given model and then
+    compares how much higher the training accuracy is compared to the test accuracy.
+    If this is the case then we consider our model to be overfitting.
+
+    Args:
+        model: ML-model.
+        training_dataset: pd.DataFrame containing the used training data.
+        test_dataset: pd.DataFrame containing the used test data.
+        factsheet: json document containing all information about the particular solution.
+        thresholds: Threshold values used to determine the final score
+
+    Returns:
+        A score from one to five representing the level of overfitting.
+        5 means the model is not overfitting
+        1 means the model is strongly overfitting
+
+    """
     try:
         properties = {}
         score = np.nan
@@ -199,28 +233,27 @@ def overfitting_score(model, training_dataset, test_dataset, factsheet, threshol
     except Exception as e:
         print("ERROR in overfitting_score(): {}".format(e))
         return result(score=np.nan, properties={}) 
-
-    
-def compute_accuracy(model, dataset, factsheet):
-    try:
-        target_column = factsheet.get("general", {}).get("target_column", {})
-        X_data = dataset.drop(target_column, axis=1)
-        y_data = dataset[target_column]
-
-        y_true = y_data.values.flatten()
-        if (isinstance(model, tf.keras.Sequential)):
-            y_train_pred_proba = model.predict(X_train)
-            y_pred = np.argmax(y_pred_proba, axis=1)
-        else:
-            y_pred = model.predict(X_data).flatten()
-        return metrics.accuracy_score(y_true, y_pred)
-    except Exception as e:
-        print("ERROR in compute_accuracy(): {}".format(e))
-        raise
-
+       
         
 # --- Statistical Parity Difference ---
 def statistical_parity_difference_score(model, training_dataset, test_dataset, factsheet, thresholds):
+    """This function scores the computed statistical parity difference
+    on a scale from 1 (very bad) to 5 (very good)
+
+    Args:
+        model: ML-model.
+        training_dataset: pd.DataFrame containing the used training data.
+        test_dataset: pd.DataFrame containing the used test data.
+        factsheet: json document containing all information about the particular solution.
+        thresholds: Threshold values used to determine the final score
+
+    Returns:
+        A score from one to five representing how fair the calculated
+        statistical parity differnce is.
+        5 means that the statistical parity difference is very fair/ low.
+        1 means that the statistical parity difference is very unfair/ high.
+
+    """
     try: 
         score = 1
         favored_majority_ratio, favored_minority_ratio, statistical_parity_difference = statistical_parity_difference_metric(model, training_dataset, test_dataset, factsheet)
@@ -231,7 +264,27 @@ def statistical_parity_difference_score(model, training_dataset, test_dataset, f
         print("ERROR in statistical_parity_difference_score(): {}".format(e))
         return result(score=np.nan, properties={})
 
+    
 def statistical_parity_difference_metric(model, training_dataset, test_dataset, factsheet):
+    """This function computes the statistical parity metric.
+    It separates the data into a protected and an unprotected group 
+    based on the given definition for protected groups.
+    Then it computes the ratio of individuals receiving a favorable outcome
+    divided by the total number of observations in the group.
+    This is done both for the protected and unprotected group.
+
+    Args:
+        model: ML-model.
+        training_dataset: pd.DataFrame containing the used training data.
+        test_dataset: pd.DataFrame containing the used test data.
+        factsheet: json document containing all information about the particular solution.
+
+    Returns:
+        1. The ratio of people from the unprotected group receiving a favorable outcome.
+        2. The ratio of people from the protected group receiving a favorable outcome.
+        3. The statistical parity differenc as the difference of the previous two values.
+
+    """
     try: 
         protected_feature = factsheet.get("fairness", {}).get("protected_feature", None)
         protected = factsheet.get("fairness", {}).get("protected_group", None)
@@ -255,12 +308,30 @@ def statistical_parity_difference_metric(model, training_dataset, test_dataset, 
         favored_majority_ratio = favored_majority_size/majority_size
         return favored_majority_ratio, favored_minority_ratio, favored_minority_ratio - favored_majority_ratio
     except Exception as e:
-        print("ERROR in statistical_parity_difference_metric: {}".format(e))
+        print("ERROR in statistical_parity_difference_metric(): {}".format(e))
         raise
 
 
 # --- Equal Opportunity Difference ---
 def equal_opportunity_difference_score(model, test_dataset, factsheet, thresholds):
+    """This function computes the equal opportunity difference score.
+    It subtracts the true positive rate of the unprotected group from
+    the true positive rate of the protected group.
+    This is then mapped to a score from one to five using the given thresholds.
+
+    Args:
+        model: ML-model.
+        training_dataset: pd.DataFrame containing the used training data.
+        test_dataset: pd.DataFrame containing the used test data.
+        factsheet: json document containing all information about the particular solution.
+
+    Returns:
+        A score from one to five representing how fair the calculated
+        equal opportunity metric is.
+        5 means that the metric is very fair/ low.
+        1 means that the metric is very unfair/ high.
+
+    """
     try:
         properties = {}
         score=np.nan
@@ -275,11 +346,32 @@ def equal_opportunity_difference_score(model, test_dataset, factsheet, threshold
         
         return result(score=int(score), properties=properties) 
     except Exception as e:
-        print("ERROR in equal_opportunity_difference_score: {}".format(e))
+        print("ERROR in equal_opportunity_difference_score(): {}".format(e))
         return result(score=np.nan, properties={})
-        
+ 
+
 # --- Average Odds Difference ---
 def average_odds_difference_score(model, test_dataset, factsheet, thresholds):
+    """This function computes the average odds difference score.
+    It subtracts the true positive rate of the unprotected group from
+    the true positive rate of the protected group. 
+    The same is done for the false positive rates.
+    An equally weighted average is formed out of these two differences.
+    This is then mapped to a score from one to five using the given thresholds.
+
+    Args:
+        model: ML-model.
+        training_dataset: pd.DataFrame containing the used training data.
+        test_dataset: pd.DataFrame containing the used test data.
+        factsheet: json document containing all information about the particular solution.
+
+    Returns:
+        A score from one to five representing how fair the calculated
+        average odds metric is.
+        5 means that the metric is very fair/ low.
+        1 means that the metric is very unfair/ high.
+
+    """
     try:
         score = np.nan
         properties = {}
@@ -302,8 +394,167 @@ def average_odds_difference_score(model, test_dataset, factsheet, thresholds):
         print("ERROR in average_odds_difference_score(): {}".format(e))
         return result(score=np.nan, properties={})
    
+  
+# --- Disparate Impact ---
+def disparate_impact_score(model, test_dataset, factsheet, thresholds):
+    """This function computes the disparate impact score.
+    It divides the ratio of favored people within the protected group by
+    the ratio of favored people within the unprotected group in order
+    to receive the disparate impact ratio.
+    This is then mapped to a score from one to five using the given thresholds.
 
+    Args:
+        model: ML-model.
+        training_dataset: pd.DataFrame containing the used training data.
+        test_dataset: pd.DataFrame containing the used test data.
+        factsheet: json document containing all information about the particular solution.
+
+    Returns:
+        A score from one to five representing how fair the calculated
+        disparate impact metric is.
+        5 means that the disparate impact metric is very fair/ low.
+        1 means that the disparate impact metric is very unfair/ high.
+
+    """
+    try:
+        score = np.nan
+        properties = {}
+        properties["Metric Description"] = "Is quotient of the ratio of samples from the protected group receiving a favorable prediction divided by the ratio of samples from the unprotected group receiving a favorable prediction"
+        protected_favored_ratio, unprotected_favored_ratio = disparate_impact_metric(model, test_dataset, factsheet)
+        properties["Protected Favored Ratio"] = "P(y_hat=favorable|protected=True) = {}".format(protected_favored_ratio)
+        properties["Unprotected Favored Ratio"] = "P(y_hat=favorable|protected=False) = {}".format(unprotected_favored_ratio) 
+        
+        disparate_impact = protected_favored_ratio / unprotected_favored_ratio
+        properties["Disparate Impact"] = "Protected Favored Ratio / Unprotected Favored Ratio {}".format(disparate_impact)
+    
+        score = np.digitize(disparate_impact, thresholds, right=False)+1
+        print("DISPARATE IMPACT THRESHOLDS {}".format(thresholds))
+            
+        return result(score=int(score), properties=properties) 
+    except Exception as e:
+        print("ERROR in disparate_impact_score(): {}".format(e))
+        return result(score=np.nan, properties={})
+
+
+def disparate_impact_metric(model, test_dataset, factsheet):
+    """This function computes the disparate impact metric.
+    It separates the data into a protected and an unprotected group 
+    based on the given definition for protected groups.
+    Then it computes the ratio of individuals receiving a favorable outcome
+    divided by the total number of observations in the group.
+    This is done both for the protected and unprotected group.
+
+    Args:
+        model: ML-model.
+        training_dataset: pd.DataFrame containing the used training data.
+        test_dataset: pd.DataFrame containing the used test data.
+        factsheet: json document containing all information about the particular solution.
+
+    Returns:
+        1. The ratio of people from the protected group receiving a favorable outcome.
+        2. The ratio of people from the unprotected group receiving a favorable outcome.
+
+    """
+    try: 
+        target_column = factsheet.get("general", {}).get("target_column", "")
+        data = test_dataset.copy(deep=True)
+        
+        X_data = data.drop(target_column, axis=1)
+        if (isinstance(model, tf.keras.Sequential)):
+            y_pred_proba = model.predict(X_data)
+            y_pred = np.argmax(y_pred_proba, axis=1)
+        else:
+            y_pred = model.predict(X_data).flatten()
+        data['y_pred'] = y_pred.tolist()
+
+        favorable_outcome_definition = factsheet.get("fairness", {}).get("favorable_outcome", None)
+        favorable_prediction = eval(favorable_outcome_definition, {"target_column": 'y_pred'}, {"target_column": 'y_pred'})
+        #favorable_outcome = eval(favorable_outcome_definition, {"target_column": target_column}, {"target_column": target_column})
+        
+        protected_feature = factsheet.get("fairness", {}).get("protected_feature", None)
+        protected_group_definition = factsheet.get("fairness", {}).get("protected_group", None)
+        protected = eval(protected_group_definition, {"protected_feature": protected_feature}, {"protected_feature": protected_feature})
+        
+        #favored_indices = data.apply(favorable_outcome, axis=1)
+        #1. Divide into protected and unprotected group
+        protected_indices = data.apply(protected, axis=1)
+        protected_group = data[protected_indices]
+        unprotected_group = data[~protected_indices]
+
+        protected_group_size = len(protected_group)
+        print("protected_group_size: {}".format(protected_group_size))
+        unprotected_group_size = len(unprotected_group)
+        print("unprotected_group_size: {}".format(unprotected_group_size))
+
+        protected_favored_group = protected_group[protected_group.apply(favorable_prediction, axis=1)]
+        unprotected_favored_group = unprotected_group[unprotected_group.apply(favorable_prediction, axis=1)]
+
+        protected_favored_group_size = len(protected_favored_group)
+        print("protected_group_size: {}".format(protected_favored_group_size))
+        unprotected_favored_group_size = len(unprotected_favored_group)
+        print("unprotected_group_size: {}".format(unprotected_favored_group_size))
+
+        protected_favored_ratio = protected_favored_group_size / protected_group_size
+        print("protected_favored_ratio: {}".format(protected_favored_ratio))
+        unprotected_favored_ratio = unprotected_favored_group_size / unprotected_group_size
+        print("unprotected_favored_ratio: {}".format(unprotected_favored_ratio))
+
+        disparate_impact = protected_favored_ratio / unprotected_favored_ratio
+        print("disparate_impact: {}".format(disparate_impact))
+        return protected_favored_ratio, unprotected_favored_ratio
+
+    except Exception as e:
+        print("ERROR in disparate_impact_metric(): {}".format(e))
+        raise
+
+        
+# --- Helper Functions ---
+def compute_accuracy(model, dataset, factsheet):
+    """This function computes and returns 
+    the accuracy a model achieves on a given dataset
+
+    Args:
+        model: ML-model.
+        dataset: pd.DataFrame containing the data.
+        factsheet: json document containing all information about the particular solution.
+
+    Returns:
+        The prediction accuracy that the model achieved on the given data.
+
+    """
+    try:
+        target_column = factsheet.get("general", {}).get("target_column", {})
+        X_data = dataset.drop(target_column, axis=1)
+        y_data = dataset[target_column]
+
+        y_true = y_data.values.flatten()
+        if (isinstance(model, tf.keras.Sequential)):
+            y_train_pred_proba = model.predict(X_train)
+            y_pred = np.argmax(y_pred_proba, axis=1)
+        else:
+            y_pred = model.predict(X_data).flatten()
+        return metrics.accuracy_score(y_true, y_pred)
+    except Exception as e:
+        print("ERROR in compute_accuracy(): {}".format(e))
+        raise
+        
+        
 def false_positive_rates(model, test_dataset, factsheet):
+    """For a given model this function calculates the
+    false positive rates for a protected and unprotected group
+    based on the given true labels (y_true) and the model predicted
+    labels (y_pred)
+
+    Args:
+        model: ML-model.
+        test_dataset: pd.DataFrame containing the data.
+        factsheet: json document containing all information about the particular solution.
+
+    Returns:
+        1. false positive prediction rate for observations from the protected group
+        2. false positive prediction rate for observations from the unprotected group
+
+    """
     try: 
         target_column = factsheet.get("general", {}).get("target_column", "")
         data = test_dataset.copy(deep=True)
@@ -357,6 +608,21 @@ def false_positive_rates(model, test_dataset, factsheet):
    
 
 def true_positive_rates(model, test_dataset, factsheet):
+    """For a given model this function calculates the
+    true positive rates for a protected and unprotected group
+    based on the given true labels (y_true) and the model predicted
+    labels (y_pred)
+
+    Args:
+        model: ML-model.
+        test_dataset: pd.DataFrame containing the data.
+        factsheet: json document containing all information about the particular solution.
+
+    Returns:
+        1. true positive prediction rate for observations from the protected group
+        2. true positive prediction rate for observations from the unprotected group
+
+    """
     try: 
         target_column = factsheet.get("general", {}).get("target_column", "")
         data = test_dataset.copy(deep=True)
@@ -394,83 +660,7 @@ def true_positive_rates(model, test_dataset, factsheet):
         return tpr_protected, tpr_unprotected
 
     except Exception as e:
-        print("ERROR in equal_opportunity_difference_metric: {}".format(e))
-        raise
-        
-   
-# --- Disparate Impact ---
-def disparate_impact_score(model, test_dataset, factsheet, thresholds):
-    try:
-        score = np.nan
-        properties = {}
-        properties["Metric Description"] = "Is quotient of the ratio of samples from the protected group receiving a favorable prediction divided by the ratio of samples from the unprotected group receiving a favorable prediction"
-        protected_favored_ratio, unprotected_favored_ratio = disparate_impact_metric(model, test_dataset, factsheet)
-        properties["Protected Favored Ratio"] = "P(y_hat=favorable|protected=True) = {}".format(protected_favored_ratio)
-        properties["Unprotected Favored Ratio"] = "P(y_hat=favorable|protected=False) = {}".format(unprotected_favored_ratio) 
-        
-        disparate_impact = protected_favored_ratio / unprotected_favored_ratio
-        properties["Disparate Impact"] = "Protected Favored Ratio / Unprotected Favored Ratio {}".format(disparate_impact)
-    
-        score = np.digitize(disparate_impact, thresholds, right=False)+1
-        print("DISPARATE IMPACT THRESHOLDS {}".format(thresholds))
-            
-        return result(score=int(score), properties=properties) 
-    except Exception as e:
-        print("ERROR in disparate_impact_score(): {}".format(e))
-        raise
-
-
-def disparate_impact_metric(model, test_dataset, factsheet):
-    try: 
-        target_column = factsheet.get("general", {}).get("target_column", "")
-        data = test_dataset.copy(deep=True)
-        
-        X_data = data.drop(target_column, axis=1)
-        if (isinstance(model, tf.keras.Sequential)):
-            y_pred_proba = model.predict(X_data)
-            y_pred = np.argmax(y_pred_proba, axis=1)
-        else:
-            y_pred = model.predict(X_data).flatten()
-        data['y_pred'] = y_pred.tolist()
-
-        favorable_outcome_definition = factsheet.get("fairness", {}).get("favorable_outcome", None)
-        favorable_prediction = eval(favorable_outcome_definition, {"target_column": 'y_pred'}, {"target_column": 'y_pred'})
-        #favorable_outcome = eval(favorable_outcome_definition, {"target_column": target_column}, {"target_column": target_column})
-        
-        protected_feature = factsheet.get("fairness", {}).get("protected_feature", None)
-        protected_group_definition = factsheet.get("fairness", {}).get("protected_group", None)
-        protected = eval(protected_group_definition, {"protected_feature": protected_feature}, {"protected_feature": protected_feature})
-        
-        #favored_indices = data.apply(favorable_outcome, axis=1)
-        #1. Divide into protected and unprotected group
-        protected_indices = data.apply(protected, axis=1)
-        protected_group = data[protected_indices]
-        unprotected_group = data[~protected_indices]
-
-        protected_group_size = len(protected_group)
-        print("protected_group_size: {}".format(protected_group_size))
-        unprotected_group_size = len(unprotected_group)
-        print("unprotected_group_size: {}".format(unprotected_group_size))
-
-        protected_favored_group = protected_group[protected_group.apply(favorable_prediction, axis=1)]
-        unprotected_favored_group = unprotected_group[unprotected_group.apply(favorable_prediction, axis=1)]
-
-        protected_favored_group_size = len(protected_favored_group)
-        print("protected_group_size: {}".format(protected_favored_group_size))
-        unprotected_favored_group_size = len(unprotected_favored_group)
-        print("unprotected_group_size: {}".format(unprotected_favored_group_size))
-
-        protected_favored_ratio = protected_favored_group_size / protected_group_size
-        print("protected_favored_ratio: {}".format(protected_favored_ratio))
-        unprotected_favored_ratio = unprotected_favored_group_size / unprotected_group_size
-        print("unprotected_favored_ratio: {}".format(unprotected_favored_ratio))
-
-        disparate_impact = protected_favored_ratio / unprotected_favored_ratio
-        print("disparate_impact: {}".format(disparate_impact))
-        return protected_favored_ratio, unprotected_favored_ratio
-
-    except Exception as e:
-        print("ERROR in disparate_impact_metric(): {}".format(e))
+        print("ERROR in true_positive_rates(): {}".format(e))
         raise
 
 
