@@ -816,9 +816,10 @@ def show_performance_metrics(solution_set_path):
 
 
 @app.callback(Output('properties_section', 'children'),
-              Input('solution_set_dropdown', 'value'), prevent_initial_call=True)
-def show_properties(solution_set_path):
-    if not solution_set_path:
+              [Input('result', 'data'),
+              State('solution_set_dropdown', 'value')], prevent_initial_call=True)
+def show_properties(data, solution_set_path):
+    if data is None:
         return []
     else:
         test_data, training_data, model, factsheet = read_solution(solution_set_path)
