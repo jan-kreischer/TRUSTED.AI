@@ -61,10 +61,6 @@ layout = dbc.Container([
                 "background-color": TRUST_COLOR,
                 "height":  "300px",
                 "opacity": "0.75",
-                "position": "fixed",
-                "bottom": "0px",
-                "left": "0px",
-                "right": "0px",
                 "margin-bottom": "0px"
         },   
         justify="center",

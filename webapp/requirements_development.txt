@@ -1,4 +1,3 @@
-#Requirements for the production environment
 tensorflow-cpu==2.6.0
 #Using tensorflow-cpu because of its reduced size
 #in order not to exceed the Heroku size limit
