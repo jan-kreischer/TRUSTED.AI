@@ -94,8 +94,8 @@ def feature_relevance_score(clf, train_data, target_column=None, threshold_outli
     distri_threshold = 0.6
     if (type(clf).__name__ == 'LogisticRegression') or (type(clf).__name__ == 'LinearRegression'): 
         #normalize 
-        for feature in X_train.columns:
-            X_train.loc[feature] = X_train[feature] / X_train[feature].std()   
+        #for feature in X_train.columns:
+        #    X_train.loc[feature] = X_train[feature] / X_train[feature].std()
         clf.max_iter =1000
         clf.fit(X_train, y_train.values.ravel())
         importance = clf.coef_[0]
