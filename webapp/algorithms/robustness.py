@@ -18,6 +18,20 @@ result = collections.namedtuple('result', 'score properties')
 
 # === ROBUSTNESS ===
 def analyse(model, train_data, test_data, config, factsheet):
+    """Reads the thresholds from the config file.
+    Calls all robustness metric functions with correct arguments.
+    Organizes all robustness metrics in a dict. Then returns the scores and the properties.
+        Args:
+            model: ML-model.
+            training_dataset: pd.DataFrame containing the used training data.
+            test_dataset: pd.DataFrame containing the used test data.
+            config: Config file containing the threshold values for the metrics.
+            factsheet: json document containing all information about the particular solution.
+
+        Returns:
+            Returns a result object containing all metric scores
+            and matching properties for every metric
+    """
 
     clique_method_thresholds = config["score_clique_method"]["thresholds"]["value"]
     clever_score_thresholds = config["score_clever_score"]["thresholds"]["value"]
@@ -43,6 +57,18 @@ def analyse(model, train_data, test_data, config, factsheet):
 
 
 def clever_score(model, train_data, test_data, thresholds):
+    """For a given Keras-NN model this function calculates the Untargeted-Clever score.
+    It uses clever_u function from IBM art library.
+    Returns a score according to the thresholds.
+        Args:
+            model: ML-model (Keras).
+            train_data: pd.DataFrame containing the data.
+            test_data: pd.DataFrame containing the data.
+            threshold: list of threshold values
+
+        Returns:
+            Clever score
+    """
     try:
         X_test = test_data.iloc[:,:-1]
         X_train = train_data.iloc[:, :-1]
@@ -64,6 +90,18 @@ def clever_score(model, train_data, test_data, thresholds):
         return result(score=np.nan, properties={})
 
 def loss_sensitivity_score(model, train_data, test_data, thresholds):
+    """For a given Keras-NN model this function calculates the Loss Sensitivity score.
+    It uses loss_sensitivity function from IBM art library.
+    Returns a score according to the thresholds.
+        Args:
+            model: ML-model (Keras).
+            train_data: pd.DataFrame containing the data.
+            test_data: pd.DataFrame containing the data.
+            threshold: list of threshold values
+
+        Returns:
+            Loss Sensitivity score
+    """
     try:
         X_test = test_data.iloc[:,:-1]
         X_test = np.array(X_test)
@@ -78,6 +116,17 @@ def loss_sensitivity_score(model, train_data, test_data, thresholds):
         return result(score=np.nan, properties={})
 
 def confidence_score(model, train_data, test_data, thresholds):
+    """For a given model this function calculates the Confidence score.
+    It takes the average over confusion_matrix. Then returns a score according to the thresholds.
+        Args:
+            model: ML-model.
+            train_data: pd.DataFrame containing the data.
+            test_data: pd.DataFrame containing the data.
+            threshold: list of threshold values
+
+        Returns:
+            Confidence score
+        """
     try:
         X_test = test_data.iloc[:,:-1]
         y_test = test_data.iloc[:,-1: ]
@@ -91,7 +140,23 @@ def confidence_score(model, train_data, test_data, thresholds):
         return result(score=np.nan, properties={})
 
 def clique_method(model, train_data, test_data, thresholds, factsheet):
+    """For a given tree-based model this function calculates the Clique score.
+    First checks the factsheet to see if the score is already calculated.
+    If not it uses RobustnessVerificationTreeModelsCliqueMethod function from
+    IBM art library to calculate the score. Returns a score according to the thresholds.
 
+    Args:
+        model: ML-model (Tree-based).
+        train_data: pd.DataFrame containing the data.
+        test_data: pd.DataFrame containing the data.
+        threshold: list of threshold values
+        factsheet: factsheet dict
+
+    Returns:
+        Clique score
+        Error bound
+        Error
+    """
     with open('configs/mappings/robustness/default.json', 'r') as f:
           default_map = json.loads(f.read())
     
@@ -115,9 +180,26 @@ def clique_method(model, train_data, test_data, thresholds, factsheet):
             "error": info("Error", "{:.1f}".format(error))})
     except:
         return result(score=np.nan, properties={})
-    #return result(score=np.nan, properties={})
 
 def fast_gradient_attack_score(model, train_data, test_data, thresholds):
+    """For a given model this function calculates the fast gradient attack score.
+    First from the test data selects a random small test subset.
+    Then measures the accuracy of the model on this subset.
+    Next creates FSG attacks on this test set and measures the model's
+    accuracy on the attacks. Compares the before attack and after attack accuracies.
+    Returns a score according to the thresholds.
+
+    Args:
+        model: ML-model (Logistic Regression, SVM).
+        train_data: pd.DataFrame containing the data.
+        test_data: pd.DataFrame containing the data.
+        threshold: list of threshold values
+
+    Returns:
+        FSG attack score
+        FSG Before attack accuracy
+        FSG After attack accuracy
+    """
     try:
         randomData = test_data.sample(50)
         randomX = randomData.iloc[:,:-1]
@@ -149,6 +231,24 @@ def fast_gradient_attack_score(model, train_data, test_data, thresholds):
         return result(score=np.nan, properties={})
 
 def carlini_wagner_attack_score(model, train_data, test_data, thresholds):
+    """For a given model this function calculates the CW attack score.
+    First from the test data selects a random small test subset.
+    Then measures the accuracy of the model on this subset.
+    Next creates CW attacks on this test set and measures the model's
+    accuracy on the attacks. Compares the before attack and after attack accuracies.
+    Returns a score according to the thresholds.
+
+    Args:
+        model: ML-model (Logistic Regression, SVM).
+        train_data: pd.DataFrame containing the data.
+        test_data: pd.DataFrame containing the data.
+        threshold: list of threshold values
+
+    Returns:
+        CW attack score
+        CW Before attack accuracy
+        CW After attack accuracy
+    """
     try:
         randomData = test_data.sample(5)
         randomX = randomData.iloc[:,:-1]
@@ -182,6 +282,24 @@ def carlini_wagner_attack_score(model, train_data, test_data, thresholds):
         return result(score=np.nan, properties={})
 
 def deepfool_attack_score(model, train_data, test_data, thresholds):
+    """For a given model this function calculates the deepfool attack score.
+    First from the test data selects a random small test subset.
+    Then measures the accuracy of the model on this subset.
+    Next creates deepfool attacks on this test set and measures the model's
+    accuracy on the attacks. Compares the before attack and after attack accuracies.
+    Returns a score according to the thresholds.
+
+    Args:
+        model: ML-model (Logistic Regression, SVM).
+        train_data: pd.DataFrame containing the data.
+        test_data: pd.DataFrame containing the data.
+        threshold: list of threshold values
+
+    Returns:
+        Deepfool attack score
+        DF Before attack accuracy
+        DF After attack accuracy
+    """
     try:
         randomData = test_data.sample(4)
         randomX = randomData.iloc[:,:-1]
