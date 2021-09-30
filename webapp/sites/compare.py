@@ -798,6 +798,7 @@ def update_figure_1(data):
         marker_color=colors
     )])
     bar_chart.update_layout(title_text='<b style="font-size: 48px;">{}/5</b>'.format(trust_score), title_x=0.5)
+    bar_chart.update_yaxes(range=[0, 5], fixedrange=True)
     chart_list.append(bar_chart)
 
     # spider
@@ -824,6 +825,7 @@ def update_figure_1(data):
             values = nonNanValues
         bar_chart_pillar = go.Figure(data=[go.Bar(x=categories, y=values, marker_color=colors[n])])
         bar_chart_pillar.update_layout(title_text=title, title_x=0.5)
+        bar_chart_pillar.update_yaxes(range=[0, 5], fixedrange=True)
         chart_list.append(bar_chart_pillar)
 
     # spider charts
@@ -890,6 +892,7 @@ def update_figure_2(data):
         marker_color=colors
     )])
     bar_chart.update_layout(title_text='<b style="font-size: 48px;">{}/5</b>'.format(trust_score), title_x=0.5)
+    bar_chart.update_yaxes(range=[0, 5], fixedrange=True)
     chart_list.append(bar_chart)
 
     # spider
@@ -916,6 +919,7 @@ def update_figure_2(data):
             values = nonNanValues
         bar_chart_pillar = go.Figure(data=[go.Bar(x=categories, y=values, marker_color=colors[n])])
         bar_chart_pillar.update_layout(title_text=title, title_x=0.5)
+        bar_chart_pillar.update_yaxes(range=[0, 5], fixedrange=True)
         chart_list.append(bar_chart_pillar)
 
     # spider charts

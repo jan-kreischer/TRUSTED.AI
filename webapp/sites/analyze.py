@@ -20,7 +20,7 @@ from sites import config_panel
 import plotly.express as px
 import plotly.graph_objects as go
 import dash
-import warnings
+import warnings 
 import plotly
 from dash_extensions.snippets import send_file
 warnings.filterwarnings('ignore')
