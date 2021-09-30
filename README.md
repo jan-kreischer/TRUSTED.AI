@@ -1,26 +1,20 @@
 
 # TRUSTED.AI
 
-## Project Documentation 
 
-The whole documentation of the project can be found on our [GitHub page](https://joelleupp.github.io/Trusted-AI/)
 
 ## Time Schedule
 
-- [ ] State of the art of pillars and metrics (12-Mar)
-  - [x] Fairness
-  - [ ] Explainability
-  - [ ] Robustness
-  - [ ] Transparency
-- [ ] Identify missing aspects relevant for calculating AI trust score (26-Mar)
-- [ ] Create taxonomy (2-Apr)
-- [ ] Select an application scenario (9-Apr)
-- [ ] Design a trusted AI algorithm (7-Mai)
-- [ ] Implementation (18-Jun)
-- [ ] Evaluation and Discussion (9-Jul)
+- [x] Analyze the current state of the art regarding thrustworithniess. (12-Mar)
+- [x] Identify missing aspects relevant for automatically calculating a model's trust score (26-Mar)
+- [x] Create a taxonomy containing relevant pillars and metrics (2-Apr)
+- [x] Select an application scenario (9-Apr)
+- [x] Design a trusted AI algorithm (7-Mai)
+- [x] Implementation (18-Jun)
+- [x] Evaluation and Discussion (9-Jul)
 - [ ] Documentation and Process (30-Jul)
 
-### webapp
+## Webapp
 In order to setup and run the webapplication you need to execute the following steps.
 At first open the console and navigate to the webapp directory.
 Then install the necessary dependencies form the requirements.txt file.
@@ -32,9 +26,9 @@ pip install -r requirements.txt
 python index.py
 ```
 
+## Documentation 
 
-### mkdocs
-
+The whole documentation of the project can be found on our [GitHub page](https://joelleupp.github.io/Trusted-AI/)
 The documentation is created with mkdocs, which uses simple markdown file and a .yml config file to build and deploy the documentation to GitHub.
 
 The relevant files to create the documentation are in the [mkdocs folder](https://github.com/JoelLeupp/Trusted-AI/tree/main/mkdocs)
