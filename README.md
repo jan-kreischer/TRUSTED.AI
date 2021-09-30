@@ -20,6 +20,18 @@ The whole documentation of the project can be found on our [GitHub page](https:/
 - [ ] Evaluation and Discussion (9-Jul)
 - [ ] Documentation and Process (30-Jul)
 
+### webapp
+In order to setup and run the webapplication you need to execute the following steps.
+At first open the console and navigate to the webapp directory.
+Then install the necessary dependencies form the requirements.txt file.
+Start the application.
+
+```
+cd webapp
+pip install -r requirements.txt
+python index.py
+```
+
 
 ### mkdocs
 
