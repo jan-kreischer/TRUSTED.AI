@@ -37,6 +37,10 @@ PAGE_HEIGHT=defaultPageSize[1]; PAGE_WIDTH=defaultPageSize[0]
 
 result = collections.namedtuple('result', 'score properties')
 
+def get_url_path(endpoint):
+    print(endpoint)
+    return "{0}/{1}".format(BASE_PATH, endpoint)
+
 def draw_bar_plot(categories, values, ax, color='lightblue', title='Trusting AI Final Score',size=12):
     
     # drop top and right spine

@@ -5,8 +5,8 @@ on how to use Docker for our TrustedAI project.
 1. Go to the /webapp folder of our project
 
 2. Run docker build command in order to build the Docker Image from a Dockerfile
-- docker build -f <path-to-dockerfile> -t <hub-user>/<repo-name>
-- docker build -f ./Dockerfile -t trustedai/webapp:v1 
+- docker build -f <path-to-dockerfile> -t <hub-user>/<repo-name> .
+- docker build -f ./Dockerfile -t trustedai/webapp:v1 .
 -f ... specify path to Dockerfile
 -t ... add a tag to the image
 
@@ -26,7 +26,12 @@ and check if everything is working correctly
 - docker push <hub-user>/<repo-name>:<tag>
 - docker push trustedai/webapp:v1
 
+    
+7. Run Docker compose
+docker compose -f docker-compose.yml up
 
+docker network create -d bridge proxynet
+    
 # === DOCKER COMMANDS ===
 
 

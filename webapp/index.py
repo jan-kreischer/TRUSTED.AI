@@ -15,6 +15,7 @@ import json
 import pickle
 import plotly.express as px
 import plotly.graph_objects as go
+from helpers import *
 
 from config import *
 
@@ -35,17 +36,17 @@ navbar = dbc.Navbar(
                     align="center",
                     no_gutters=True,
                 ),
-                href="/",
+                href=get_url_path(''),
             ),
             dbc.NavbarToggler(id="navbar-toggler"),
             dbc.Collapse(
                 dbc.Nav(
                     [                
-                        dbc.NavItem(dbc.NavLink("Scenarios", href="/scenarios")),
-                        dbc.NavItem(dbc.NavLink("Factsheet", href="/factsheet")),
-                        dbc.NavItem(dbc.NavLink("Upload", href="/upload")),
-                        dbc.NavItem(dbc.NavLink("Analyze", href="/analyze")),
-                        dbc.NavItem(dbc.NavLink("Compare", href="/compare"))
+                        dbc.NavItem(dbc.NavLink("Scenarios", href=get_url_path('scenarios'))),
+                        dbc.NavItem(dbc.NavLink("Factsheet", href=get_url_path('factsheet'))),
+                        dbc.NavItem(dbc.NavLink("Upload", href=get_url_path('upload'))),
+                        dbc.NavItem(dbc.NavLink("Analyze", href=get_url_path('analyze'))),
+                        dbc.NavItem(dbc.NavLink("Compare", href=get_url_path('compare')))
                     ], className="ml-auto", navbar=True
                 ),
                 id="navbar-collapse",
@@ -78,19 +79,19 @@ app.layout = html.Div([
     
 @app.callback(Output('page_content', 'children'), [Input('url', 'pathname')])
 def display_page(pathname):
-    if pathname == '/':
+    if pathname == get_url_path(''):
         return homepage.layout
-    if pathname == '/upload':
+    if pathname == get_url_path('upload'):
         return upload.layout
-    if pathname == '/analyze':
+    if pathname == get_url_path('analyze'):
         return analyze.layout
-    elif pathname == '/compare':
+    if pathname == get_url_path('compare'):
         return compare.layout
-    elif pathname == '/scenarios':
+    if pathname == get_url_path('scenarios'):
         return scenarios.layout
-    elif pathname == '/factsheet':
+    elif pathname == get_url_path('factsheet'):
         return factsheet.layout
     else:
-        return homepage.layout
+        return dcc.Location(pathname=get_url_path(''), id="someid_doesnt_matter")
 if __name__ == '__main__':
     app.run_server(host=HOST, debug=True, port=PORT)

@@ -1,9 +1,17 @@
+import sys
+
 DEBUG = True # Turns on debugging features in Flask
 BCRYPT_LOG_ROUNDS = 12 # Configuration for the Flask-Bcrypt extension
 MAIL_FROM_EMAIL = "robert@example.com" # For use in application emails
 
 PORT = 8080
 HOST= '0.0.0.0'
+
+if len(sys.argv) > 1:
+    BASE_PATH = '/trusted-ai'
+else:
+    BASE_PATH = ''
+print("BASE_PATH: {}".format(BASE_PATH))
 
 SCENARIOS_FOLDER_PATH = "scenarios"
 SOLUTIONS_FOLDER = "solutions"

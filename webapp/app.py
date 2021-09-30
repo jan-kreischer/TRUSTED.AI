@@ -1,5 +1,6 @@
 import dash
 import dash_bootstrap_components as dbc
+from config import BASE_PATH
 
 FONT_AWESOME = "https://use.fontawesome.com/releases/v5.7.2/css/all.css"
 external_stylesheets = [
@@ -13,7 +14,7 @@ external_stylesheets = [
     FONT_AWESOME
 ]
 
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
+app = dash.Dash(__name__, external_stylesheets=external_stylesheets, requests_pathname_prefix="{}/".format(BASE_PATH))
 app.title = "TRUSTED.AI" #Adding html title
 
 server = app.server
