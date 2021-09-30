@@ -990,6 +990,8 @@ def update_figure(data, trig):
           #bar_chart_pillar.update_yaxes(fixedrange=True)
           #bar_chart_pillar.update_yaxes(range=[0, 8])
           bar_chart_pillar.update_layout(title_text='', title_x=0.5, xaxis_tickangle=XAXIS_TICKANGLE, paper_bgcolor='#FFFFFF', plot_bgcolor=SECONDARY_COLOR)
+            
+            
             #fig.update_layout(barmode='group', xaxis_tickangle=-45)
           chart_list.append(bar_chart_pillar)
           charts.append(bar_chart_pillar)

@@ -11,8 +11,7 @@ import json
 import glob
 import shutil
 from helpers import *
-from config import SCENARIOS_FOLDER_PATH, FAIRNESS_COLOR, EXPLAINABILITY_COLOR, ROBUSTNESS_COLOR, METHODOLOGY_COLOR, \
-    TRUST_COLOR
+from config import *
 from algorithms.trustworthiness import trusting_AI_scores, get_trust_score, get_final_score
 import dash_table
 import numpy as np
@@ -824,7 +823,8 @@ def update_figure_1(data):
             categories = nonNanCategories
             values = nonNanValues
         bar_chart_pillar = go.Figure(data=[go.Bar(x=categories, y=values, marker_color=colors[n])])
-        bar_chart_pillar.update_layout(title_text=title, title_x=0.5)
+        bar_chart_pillar.update_layout(title_text=title, title_x=0.5, xaxis_tickangle=XAXIS_TICKANGLE)
+        #bar_chart_pillar.update_layout(title_text='', title_x=0.5, xaxis_tickangle=XAXIS_TICKANGLE, paper_bgcolor='#FFFFFF', plot_bgcolor=SECONDARY_COLOR)
         bar_chart_pillar.update_yaxes(range=[0, 5], fixedrange=True)
         chart_list.append(bar_chart_pillar)
 
@@ -918,7 +918,7 @@ def update_figure_2(data):
             categories = nonNanCategories
             values = nonNanValues
         bar_chart_pillar = go.Figure(data=[go.Bar(x=categories, y=values, marker_color=colors[n])])
-        bar_chart_pillar.update_layout(title_text=title, title_x=0.5)
+        bar_chart_pillar.update_layout(title_text=title, title_x=0.5, xaxis_tickangle=XAXIS_TICKANGLE)
         bar_chart_pillar.update_yaxes(range=[0, 5], fixedrange=True)
         chart_list.append(bar_chart_pillar)
 
