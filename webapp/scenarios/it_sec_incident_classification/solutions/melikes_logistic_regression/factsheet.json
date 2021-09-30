@@ -5,7 +5,7 @@
         "domain_description": "IT Security",
         "training_data_description": "Alberto's original Raspery Pie data",
         "model_information": "Sklearn Logistic Regression Classifier for IoT Security Incident Classification scenario",
-        "target_column": 73,
+        "target_column": "label",
         "authors": "Melike Demirci",
         "contact_information": "melike.demirci@uzh.ch"
     },
@@ -17,5 +17,374 @@
     },
     "methodology": {
         "regularization": "none"
+    },
+    "scores": {
+        "fairness": {
+            "question_fairness": 5,
+            "class_balance": 5,
+            "underfitting": NaN,
+            "overfitting": 3,
+            "statistical_parity_difference": NaN,
+            "equal_opportunity_difference": NaN,
+            "average_odds_difference": NaN,
+            "disparate_impact": NaN
+        },
+        "explainability": {
+            "algorithm_class": 3,
+            "correlated_features": 1,
+            "model_size": 3,
+            "feature_relevance": 1
+        },
+        "robustness": {
+            "confidence_score": 5,
+            "clique_method": NaN,
+            "loss_sensitivity": NaN,
+            "clever_score": NaN,
+            "empirical_robustness_fast_gradient_attack": 2,
+            "empirical_robustness_carlini_wagner_attack": 1,
+            "empirical_robustness_deepfool_attack": 1
+        },
+        "methodology": {
+            "normalization": 4,
+            "missing_data": 5,
+            "regularization": 1,
+            "train_test_split": 5,
+            "factsheet_completeness": 5
+        }
+    },
+    "properties": {
+        "fairness": {
+            "question_fairness": {
+                "Question Fairness": "5"
+            },
+            "class_balance": {
+                "class balance score": 5
+            },
+            "underfitting": {},
+            "overfitting": {
+                "Conclusion": "Model is slighly overfitting",
+                "Training Accuracy": 0.8769014084507042,
+                "Test Accuracy": 0.8547297297297297,
+                "Train Test Accuracy Difference": 0.022171678720974475
+            },
+            "statistical_parity_difference": {},
+            "equal_opportunity_difference": {},
+            "average_odds_difference": {},
+            "disparate_impact": {}
+        },
+        "explainability": {
+            "algorithm_class": {
+                "clf_name": [
+                    "model type",
+                    "LogisticRegression"
+                ]
+            },
+            "correlated_features": {
+                "pct_drop": [
+                    "Percentage of highly correlated features",
+                    "58.90%"
+                ]
+            },
+            "model_size": {
+                "n_features": [
+                    "number of features",
+                    74
+                ]
+            },
+            "feature_relevance": {
+                "n_outliers": [
+                    "number of outliers in the importance distribution",
+                    5
+                ],
+                "pct_dist": [
+                    "percentage of feature that make up over 60% of all features importance",
+                    "0.00%"
+                ],
+                "importance": [
+                    "feature importance",
+                    {
+                        "value": [
+                            2.6197836385569215,
+                            1.956401080406617,
+                            1.7825485105866197,
+                            1.427109597632527,
+                            1.290442215807906,
+                            1.269982190737973,
+                            1.1311510303698507,
+                            1.0506210354336187,
+                            1.0503761971733112,
+                            1.029803116063796,
+                            0.8609431513557205,
+                            0.8166649769991171,
+                            0.8089438967154752,
+                            0.7714489533704848,
+                            0.6714817332396239,
+                            0.6564706289383203,
+                            0.6408028773618776,
+                            0.636466547009416,
+                            0.6188754037781995,
+                            0.6168159260105524,
+                            0.5763905539187734,
+                            0.5576997524464217,
+                            0.541993871109897,
+                            0.5360165084359325,
+                            0.532004169849531,
+                            0.522061868303113,
+                            0.5207032903444915,
+                            0.41987825993720773,
+                            0.40097313968229104,
+                            0.39339962754426,
+                            0.38358906434014695,
+                            0.3552465128474958,
+                            0.34567805329742607,
+                            0.30922439182057176,
+                            0.3078099218555553,
+                            0.29620696904305277,
+                            0.2937935120222635,
+                            0.27755536132180153,
+                            0.2666963242157085,
+                            0.25791130296492254,
+                            0.25702627731174427,
+                            0.2511000756688533,
+                            0.2510303998656048,
+                            0.24661212416968978,
+                            0.23455037385289726,
+                            0.23442622927416856,
+                            0.22961010003040108,
+                            0.22605464135043535,
+                            0.22504839507403238,
+                            0.2225012453335093,
+                            0.21375482934106,
+                            0.19848065391901004,
+                            0.18126735459077675,
+                            0.1794336709403921,
+                            0.17274970229225237,
+                            0.15670905852977754,
+                            0.15468595625794718,
+                            0.15432443546518512,
+                            0.13584613118055083,
+                            0.10209784602545621,
+                            0.09510076676619164,
+                            0.0950034401954924,
+                            0.08079091055654204,
+                            0.07790709322073641,
+                            0.07552971972094831,
+                            0.06244256894823244,
+                            0.054796543419652434,
+                            0.04839105546351062,
+                            0.035213707518944606,
+                            0.008634382312999353,
+                            0.008498449802269185,
+                            0.007725730304515189,
+                            0.0025168799264045395
+                        ],
+                        "labels": [
+                            "timer:hrtimer_start",
+                            "tcp:tcp_probe",
+                            "writeback:global_dirty_state",
+                            "kmem:kfree",
+                            "writeback:writeback_write_inode",
+                            "random:mix_pool_bytes_nolock",
+                            "sock:inet_sock_set_state",
+                            "kmem:kmalloc",
+                            "irq:softirq_entry",
+                            "random:urandom_read",
+                            "kmem:kmem_cache_alloc",
+                            "block:block_unplug",
+                            "kmem:kmem_cache_free",
+                            "sched:sched_process_wait",
+                            "block:block_dirty_buffer",
+                            "block:block_touch_buffer",
+                            "qdisc:qdisc_dequeue",
+                            "qdisc:qdisc_dequeue.1",
+                            "jbd2:jbd2_handle_start",
+                            "irq:irq_handler_entry",
+                            "jbd2:jbd2_start_commit",
+                            "writeback:writeback_written",
+                            "net:netif_rx",
+                            "timer:timer_start",
+                            "workqueue:workqueue_activate_work",
+                            "sched:sched_process_exec",
+                            "writeback:writeback_single_inode",
+                            "cpu-migrations",
+                            "signal:signal_deliver",
+                            "task:task_newtask",
+                            "writeback:writeback_dirty_inode",
+                            "block:block_bio_backmerge",
+                            "random:get_random_bytes",
+                            "sched:sched_wakeup",
+                            "page-faults",
+                            "writeback:wbc_writepage",
+                            "rpm:rpm_resume",
+                            "block:block_getrq",
+                            "ipi:ipi_raise",
+                            "raw_syscalls:sys_enter",
+                            "raw_syscalls:sys_exit",
+                            "gpio:gpio_value",
+                            "writeback:writeback_dirty_inode_enqueue",
+                            "connectivity",
+                            "writeback:sb_clear_inode_writeback",
+                            "kmem:mm_page_alloc",
+                            "writeback:writeback_mark_inode_dirty",
+                            "net:net_dev_xmit",
+                            "skb:consume_skb.1",
+                            "skb:consume_skb",
+                            "preemptirq:irq_enable",
+                            "net:net_dev_queue",
+                            "pagemap:mm_lru_insertion",
+                            "skb:kfree_skb.1",
+                            "kmem:mm_page_free",
+                            "skb:kfree_skb",
+                            "sched:sched_process_free",
+                            "fib:fib_table_lookup",
+                            "block:block_bio_remap",
+                            "signal:signal_generate",
+                            "seconds",
+                            "kmem:mm_page_alloc_zone_locked",
+                            "sched:sched_switch",
+                            "mmc:mmc_request_start",
+                            "cs",
+                            "skb:skb_copy_datagram_iovec",
+                            "rpm:rpm_suspend",
+                            "clk:clk_set_rate",
+                            "tcp:tcp_destroy_sock",
+                            "writeback:writeback_pages_written",
+                            "kmem:mm_page_pcpu_drain",
+                            "writeback:writeback_dirty_page",
+                            "filemap:mm_filemap_add_to_page_cache"
+                        ]
+                    }
+                ]
+            }
+        },
+        "robustness": {
+            "confidence_score": {
+                "confidence_score": [
+                    "Average confidence score",
+                    "86.33%"
+                ]
+            },
+            "clique_method": {},
+            "loss_sensitivity": {},
+            "clever_score": {},
+            "empirical_robustness_fast_gradient_attack": {
+                "before_attack": [
+                    "FGM Before attack accuracy",
+                    "86.00%"
+                ],
+                "after_attack": [
+                    "FGM After attack accuracy",
+                    "18.00%"
+                ],
+                "difference": [
+                    "FGM Proportional difference (After-Att Acc - Before-Att Acc)/Before-Att Acc",
+                    "79.07%"
+                ]
+            },
+            "empirical_robustness_carlini_wagner_attack": {
+                "before_attack": [
+                    "CW Before attack accuracy",
+                    "100.00%"
+                ],
+                "after_attack": [
+                    "CW After attack accuracy",
+                    "0.00%"
+                ],
+                "difference": [
+                    "CW Proportional difference (After-Att Acc - Before-Att Acc)/Before-Att Acc",
+                    "100.00%"
+                ]
+            },
+            "empirical_robustness_deepfool_attack": {
+                "before_attack": [
+                    "DF Before attack accuracy",
+                    "50.00%"
+                ],
+                "after_attack": [
+                    "DF After attack accuracy",
+                    "0.00%"
+                ],
+                "difference": [
+                    "DF Proportional difference (After-Att Acc - Before-Att Acc)/Before-Att Acc",
+                    "100.00%"
+                ]
+            }
+        },
+        "methodology": {
+            "normalization": {
+                "Training_mean": [
+                    "Mean of the training data",
+                    "-0.00"
+                ],
+                "Training_std": [
+                    "Standard deviation of the training data",
+                    "1.00"
+                ],
+                "Test_mean": [
+                    "Mean of the test data",
+                    "-0.03"
+                ],
+                "Test_std": [
+                    "Standard deviation of the test data",
+                    "0.88"
+                ],
+                "normalization": [
+                    "Normalization",
+                    "Training data are standardized"
+                ]
+            },
+            "missing_data": {
+                "null_values": [
+                    "Number of the null values",
+                    "0"
+                ]
+            },
+            "regularization": {
+                "regularization_technique": [
+                    "Regularization technique",
+                    "none"
+                ]
+            },
+            "train_test_split": {
+                "train_test_split": [
+                    "Train test split",
+                    "80.00/20.00"
+                ]
+            },
+            "factsheet_completeness": {
+                "model_name": [
+                    "(Factsheet Property) model_name",
+                    "present"
+                ],
+                "purpose_description": [
+                    "(Factsheet Property) purpose_description",
+                    "present"
+                ],
+                "domain_description": [
+                    "(Factsheet Property) domain_description",
+                    "present"
+                ],
+                "training_data_description": [
+                    "(Factsheet Property) training_data_description",
+                    "present"
+                ],
+                "model_information": [
+                    "(Factsheet Property) model_information",
+                    "present"
+                ],
+                "target_column": [
+                    "(Factsheet Property) target_column",
+                    "present"
+                ],
+                "authors": [
+                    "(Factsheet Property) authors",
+                    "present"
+                ],
+                "contact_information": [
+                    "(Factsheet Property) contact_information",
+                    "present"
+                ]
+            }
+        }
     }
 }
