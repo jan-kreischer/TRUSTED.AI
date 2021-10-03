@@ -407,6 +407,7 @@ def fairness_configuration(solution_set_path):
         else:
             print("No factsheet exists yet")
         
+        fairness_configuration_alert = html.Div([], id="fairness_configuration_alert")
         protected_feature_select_options = list(map(lambda x: {"label": x, "value": x}, features))
         protected_feature_select = html.Div([
             "Select Protected Feature", 
@@ -457,6 +458,40 @@ def fairness_configuration(solution_set_path):
     else:
         return []
 
+#    '''
+#The following function updates
+#'''
+#@app.callback(
+#    Output("fairness_configuration_alert", 'children'),
+#    [Input('protected_feature_select'),
+#     Input('protected_group_definition'),
+#     Input('solution_set_label_select'),
+#     Input('favorable_outcome_definition')
+#    ], prevent_initial_call=True)
+#def update_fairness_configuration(protected_feature, protected_group_definition, target_column, favorable_outcome_definition):
+#    if data is None:
+#        return []
+#    else:
+#        result = json.loads(data)
+#        properties = result["properties"]
+#        FAIRNESS_SECTION_INDEX = 1
+#        metric_index = 0
+#        fairness_metrics_details = []
+#        fairness_metrics_details.append(html.H3("▶ Fairness Metrics"))
+#        calculated_metrics = []
+#        non_calculated_metrics = [html.H5("Non-Computable Metrics")]
+#        
+#        for metric_id, metric_score in (result["results"]["fairness"]).items():
+#            if not math.isnan(metric_score):
+#                metric_index +=1
+#                metric_properties = properties.get("fairness", {}).get(metric_id, {})
+#                calculated_metrics.append(show_metric_details_section(metric_id, metric_score, metric_properties, metric_index, #FAIRNESS_SECTION_INDEX))
+#            else:
+#                non_calculated_metrics.append(show_metric_details_section(metric_id, metric_score))
+#        fairness_metrics_details.append(html.Div(calculated_metrics))
+#        fairness_metrics_details.append(html.Div(non_calculated_metrics))
+#        return html.Div(fairness_metrics_details)
+    
 # === EXPLAINABILITY ===
 @app.callback(
     Output("explainability_details", 'children'),

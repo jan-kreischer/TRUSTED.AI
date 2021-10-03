@@ -9,8 +9,11 @@ HOST= '0.0.0.0'
 
 if len(sys.argv) > 1:
     BASE_PATH = '/trusted-ai'
+    DEBUG = False
 else:
     BASE_PATH = ''
+    DEBUG = True
+print("DEBUG: {}".format(DEBUG))
 print("BASE_PATH: {}".format(BASE_PATH))
 
 SCENARIOS_FOLDER_PATH = "scenarios"

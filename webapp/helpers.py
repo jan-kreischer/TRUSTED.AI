@@ -278,6 +278,18 @@ def read_factsheet(solution_set_path):
     else:
         return {}
     
+def save_factsheet(path, name, content, target_column_name, description):
+    file_name, file_extension = os.path.splitext(name)
+    content_type, content_string = content.split(',')
+    factsheet = json.loads(base64.b64decode(content_string).decode())
+    if target_column_name:
+        factsheet['general']['target_column'] = target_column_name
+    if description:
+        factsheet['general']['description'] = description
+        
+    with open(os.path.join(path, name), "w",  encoding="utf8") as file:
+        json.dump(factsheet, file, indent=4)
+    
 '''
     This function reads the factsheet into a dictionary
 '''

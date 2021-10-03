@@ -94,4 +94,4 @@ def display_page(pathname):
     else:
         return dcc.Location(pathname=get_url_path(''), id="someid_doesnt_matter")
 if __name__ == '__main__':
-    app.run_server(host=HOST, debug=True, port=PORT)
+    app.run_server(host=HOST, debug=DEBUG, port=PORT)

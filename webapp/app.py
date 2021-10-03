@@ -15,6 +15,11 @@ external_stylesheets = [
 ]
 
 app = dash.Dash(__name__, external_stylesheets=external_stylesheets, requests_pathname_prefix="{}/".format(BASE_PATH))
+try:
+    app._favicon = app.get_asset_url('favicon.ico')
+except Exception as e:
+    print("Error: {}".format(e))
+    
 app.title = "TRUSTED.AI" #Adding html title
 
 server = app.server
