@@ -17,6 +17,6 @@ COPY . .
 RUN pip install -r requirements.txt
 
 # command to run on container start
-CMD [ "python", "./index.py" ]
+CMD [ "python", "./index.py", "1"]
 
 EXPOSE 8080

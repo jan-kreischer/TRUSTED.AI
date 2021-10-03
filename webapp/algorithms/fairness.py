@@ -130,7 +130,6 @@ def class_balance_metric(training_data, target_column):
     
 # --- Underfitting ---
 def underfitting_score(model, training_dataset, test_dataset, factsheet, thresholds):
-    print("Computing underfitting")
     """This function computes the training and test accuracy for the given model and then
     compares how much lower the training accuracy is than the test accuracy.
     If this is the case then we consider our model to be underfitting.
@@ -170,7 +169,7 @@ def underfitting_score(model, training_dataset, test_dataset, factsheet, thresho
         properties["Test Accuracy"] = test_accuracy
         properties["Train Test Accuracy Difference"] = training_accuracy - test_accuracy
 
-        return result(score=score, properties=properties)
+        return result(score=int(score), properties=properties)
     
     except Exception as e:
         print("ERROR in underfitting_score(): {}".format(e))
@@ -222,7 +221,6 @@ def overfitting_score(model, training_dataset, test_dataset, factsheet, threshol
             properties["Test Accuracy"] = test_accuracy
             properties["Train Test Accuracy Difference"] = training_accuracy - test_accuracy
     
-            print("TYPE OF SCORE: {}".format(type(score)))
             return result(int(score), properties=properties)
         else:
             return result(score=np.nan, properties={}) 
@@ -424,7 +422,6 @@ def disparate_impact_score(model, test_dataset, factsheet, thresholds):
         properties["Disparate Impact"] = "Protected Favored Ratio / Unprotected Favored Ratio {}".format(disparate_impact)
     
         score = np.digitize(disparate_impact, thresholds, right=False)+1
-        print("DISPARATE IMPACT THRESHOLDS {}".format(thresholds))
             
         return result(score=int(score), properties=properties) 
     except Exception as e:

@@ -220,6 +220,9 @@ def get_scenario_solutions_options(scenario_id):
 def get_solution_path(scenario_id, solution_id):
     return os.path.join(SCENARIOS_FOLDER_PATH, scenario_id, SOLUTIONS_FOLDER, solution_id)
 
+def get_factsheet_path(scenario_id, solution_id):
+    return os.path.join(get_solution_path(scenario_id, solution_id), FACTSHEET_NAME)
+
 def read_test(solution_set_path):
     #test data
     test_file = glob.glob(os.path.join(solution_set_path, TEST_DATA_FILE_NAME_REGEX))[0]
@@ -289,6 +292,21 @@ def save_factsheet(path, name, content, target_column_name, description):
         
     with open(os.path.join(path, name), "w",  encoding="utf8") as file:
         json.dump(factsheet, file, indent=4)
+
+def update_factsheet(factsheet_path, new_factsheet):
+    try:
+        factsheet = {}
+        if os.path.isfile(factsheet_path):
+            with open(factsheet_path,'rb') as f:
+                factsheet = json.loads(f.read())
+
+        for section in FACTSHEET_SECTIONS:
+            factsheet[section] = factsheet.get(section, {}) | new_factsheet.get(section, {})
+
+        with open(factsheet_path, "w",  encoding="utf8") as f:
+            json.dump(factsheet, f, indent=4)
+    except Exception as e:
+        print("Error in update_factsheet(): {}".format(e))
     
 '''
     This function reads the factsheet into a dictionary

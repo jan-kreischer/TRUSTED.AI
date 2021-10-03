@@ -453,44 +453,39 @@ def fairness_configuration(solution_set_path):
         ])
 
 
-        sections = [html.Hr(), html.H3("▶ Fairness Configuration"), protected_feature_select, protected_group_definition, solution_set_label_select, favorable_outcome_definition, html.Hr()]
+        sections = [html.Hr(), html.H3("▶ Fairness Configuration"), fairness_configuration_alert, protected_feature_select, protected_group_definition, solution_set_label_select, favorable_outcome_definition, html.Hr()]
         return sections
     else:
         return []
 
-#    '''
-#The following function updates
-#'''
-#@app.callback(
-#    Output("fairness_configuration_alert", 'children'),
-#    [Input('protected_feature_select'),
-#     Input('protected_group_definition'),
-#     Input('solution_set_label_select'),
-#     Input('favorable_outcome_definition')
-#    ], prevent_initial_call=True)
-#def update_fairness_configuration(protected_feature, protected_group_definition, target_column, favorable_outcome_definition):
-#    if data is None:
-#        return []
-#    else:
-#        result = json.loads(data)
-#        properties = result["properties"]
-#        FAIRNESS_SECTION_INDEX = 1
-#        metric_index = 0
-#        fairness_metrics_details = []
-#        fairness_metrics_details.append(html.H3("▶ Fairness Metrics"))
-#        calculated_metrics = []
-#        non_calculated_metrics = [html.H5("Non-Computable Metrics")]
-#        
-#        for metric_id, metric_score in (result["results"]["fairness"]).items():
-#            if not math.isnan(metric_score):
-#                metric_index +=1
-#                metric_properties = properties.get("fairness", {}).get(metric_id, {})
-#                calculated_metrics.append(show_metric_details_section(metric_id, metric_score, metric_properties, metric_index, #FAIRNESS_SECTION_INDEX))
-#            else:
-#                non_calculated_metrics.append(show_metric_details_section(metric_id, metric_score))
-#        fairness_metrics_details.append(html.Div(calculated_metrics))
-#        fairness_metrics_details.append(html.Div(non_calculated_metrics))
-#        return html.Div(fairness_metrics_details)
+    '''
+The following function updates
+'''
+@app.callback(
+    Output("fairness_configuration_alert", 'children'),
+    [Input('protected_feature_select', 'value'),
+     Input('protected_group_definition', 'value'),
+     Input('solution_set_label_select', 'value'),
+     Input('favorable_outcome_definition', 'value'),
+     State('scenario_dropdown', 'value'),
+     State('solution_set_dropdown', 'value')
+    ], prevent_initial_call=True)
+def update_fairness_configuration(protected_feature, protected_group_definition, target_column, favorable_outcome_definition, scenario_id, solution_id):
+    print("UPDATE FAIRNESS CONFIGURATION")
+    if scenario_id and solution_id:
+        print("writing new values into factsheet")
+        new_factsheet = {"general": {}, "fairness": {}}
+        new_factsheet["general"]["target_column"] = target_column
+        new_factsheet["fairness"]["protected_feature"] = protected_feature
+        new_factsheet["fairness"]["protected_group"] = protected_group_definition
+        new_factsheet["fairness"]["favorable_outcome"] = favorable_outcome_definition
+        
+        print("SOlution id: {}".format(solution_id))
+        factsheet_path = os.path.join(solution_id, FACTSHEET_NAME)
+        
+        print("Factsheet Path: {}".format(factsheet_path))
+        update_factsheet(factsheet_path, new_factsheet)
+    return html.Div("Updated factsheet")
     
 # === EXPLAINABILITY ===
 @app.callback(

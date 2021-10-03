@@ -213,6 +213,7 @@ def upload_data(
                 # Saving Test Data
                 save_test_data(solution_path, test_data_filename, test_data)
                 
+                fact
                 # Saving Factsheet
                 save_factsheet(solution_path, FACTSHEET_NAME, factsheet, target_column_name, general_description)
   
