@@ -3,11 +3,10 @@
     "score_underfitting": {
         "thresholds": {
             "value": [
-                0.04,
-                0.03,
-                0.02,
-                0.01,
-                0
+                0.80,
+                0.85,
+                0.90,
+                0.95
             ],
             "description": "",
             "label": ""

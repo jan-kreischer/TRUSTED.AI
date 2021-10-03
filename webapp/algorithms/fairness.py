@@ -130,6 +130,7 @@ def class_balance_metric(training_data, target_column):
     
 # --- Underfitting ---
 def underfitting_score(model, training_dataset, test_dataset, factsheet, thresholds):
+    print("Computing underfitting")
     """This function computes the training and test accuracy for the given model and then
     compares how much lower the training accuracy is than the test accuracy.
     If this is the case then we consider our model to be underfitting.
@@ -152,30 +153,25 @@ def underfitting_score(model, training_dataset, test_dataset, factsheet, thresho
         score = 0
         training_accuracy = compute_accuracy(model, training_dataset, factsheet)
         test_accuracy = compute_accuracy(model, test_dataset, factsheet)
-        if training_accuracy <= test_accuracy:
-            # model could be underfitting.
-            # for underfitting models the spread is negative
-            accuracy_difference = training_accuracy - test_accuracy
-            score = np.digitize(abs(accuracy_difference), thresholds, right=False) + 1 
-                
-            if score == 5:
-                properties["Conclusion"] = "Model is not underfitting"
-            elif score == 4:
-                properties["Conclusion"] = "Model mildly underfitting"
-            elif score == 3:
-                properties["Conclusion"] = "Model is slighly underfitting"
-            elif score == 2:
-                properties["Conclusion"] = "Model is underfitting"
-            else:
-                properties["Conclusion"] = "Model is strongly underfitting"
- 
-            properties["Training Accuracy"] = training_accuracy
-            properties["Test Accuracy"] = test_accuracy
-            properties["Train Test Accuracy Difference"] = training_accuracy - test_accuracy
-    
-            return result(score=score, properties=properties)
+        score = np.digitize(abs(test_accuracy), thresholds, right=False) + 1 
+
+        if score == 5:
+            properties["Conclusion"] = "Model is not underfitting"
+        elif score == 4:
+            properties["Conclusion"] = "Model mildly underfitting"
+        elif score == 3:
+            properties["Conclusion"] = "Model is slighly underfitting"
+        elif score == 2:
+            properties["Conclusion"] = "Model is underfitting"
         else:
-            return result(score=np.nan, properties={}) 
+            properties["Conclusion"] = "Model is strongly underfitting"
+
+        properties["Training Accuracy"] = training_accuracy
+        properties["Test Accuracy"] = test_accuracy
+        properties["Train Test Accuracy Difference"] = training_accuracy - test_accuracy
+
+        return result(score=score, properties=properties)
+    
     except Exception as e:
         print("ERROR in underfitting_score(): {}".format(e))
         return result(score=np.nan, properties={}) 
