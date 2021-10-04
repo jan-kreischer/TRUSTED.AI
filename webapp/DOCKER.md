@@ -34,4 +34,6 @@ docker network create -d bridge proxynet
     
 # === DOCKER COMMANDS ===
 
+# Open shell session for container
+docker exec -it <container name> /bin/bash
 
