@@ -109,6 +109,12 @@ def trust_section():
 def alert_section(name):
     return html.Div([], id="{}_alert_section".format(name), className="text-center", style={"color":"Red"})
 
+def listdir_nohidden(path):
+    for f in os.listdir(path):
+        if not f.startswith('.'):
+            yield f
+
+
 for pillar in SECTIONS[1:]:
     @app.callback(
         Output("modal-{}-mapping".format(pillar), "is_open"),
@@ -142,7 +148,7 @@ for pillar in SECTIONS[1:]:
             Input("modal-saved-{}".format(pillar), "is_open"),
             State("mapping-dropdown-{}".format(pillar), "className"))
     def update_options(n, pillar):
-        options = list(map(lambda name:{'label': name[:-5], 'value': "configs/mappings/{}/{}".format(pillar,name)} ,os.listdir("configs/mappings/{}".format(pillar))))
+        options = list(map(lambda name:{'label': name[:-5], 'value': "configs/mappings/{}/{}".format(pillar,name)} ,listdir_nohidden("configs/mappings/{}".format(pillar))))
         return options
     
     @app.callback(
@@ -1037,16 +1043,10 @@ def update_figure(data, trig):
           title = "<b style='font-size:32px;''>{}/5</b>".format(final_score[pillar])
           categories = list(map(lambda x: x.replace("_",' '), sub_scores.keys()))
           val = list(map(float, sub_scores.values()))
-          if np.isnan(values).any():
-              nonNanCategories = list()
-              nonNanValues = list()
-              for c, v in zip(categories, values):
-                  if not np.isnan(v):
-                      nonNanCategories.append(c)
-                      nonNanValues.append(v)
-              categories = nonNanCategories
-              val = nonNanValues
-          radar_chart_pillar = px.line_polar(r=val, theta=categories, line_close=True, title='')
+          exc = np.isnan(val)
+          r = np.array(val)[~exc]
+          theta=np.array(categories)[~exc]
+          radar_chart_pillar = px.line_polar(r=r, theta=theta, line_close=True, title='')
           radar_chart_pillar.update_traces(fill='toself', fillcolor=colors[n], marker_color=colors[n],marker_line_width=1.5, opacity=0.6)
           radar_chart_pillar.update_layout(title_x=0.5)
           chart_list.append(radar_chart_pillar)
