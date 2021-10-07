@@ -240,19 +240,25 @@ def toggle_charts(visibility_state):
     
 @app.callback(
     list(map(lambda x: Output("{}_section".format(x), "hidden"),  SECTIONS[1:])),
-    list(map(lambda x: Input("{}_s".format(x), "n_clicks"),  SECTIONS[1:])),
+    list(map(lambda x: Input("{}_s".format(x), "n_clicks"),  SECTIONS[1:])) + [Input("all_s", "n_clicks")],
     list(map(lambda x: State("{}_section".format(x), "hidden"),  SECTIONS[1:])),
     prevent_initial_call=False
 )
-def toggle_hide_pillar_section(fn,en,rn,mn, fis_open, eis_open, ris_open, mis_open):
-    if fn or en or rn or mn:
+def toggle_hide_pillar_section(fn,en,rn,mn,alln, fis_open, eis_open, ris_open, mis_open):
+    if fn or en or rn or mn or alln:
         pillars = np.array(['fairness', 'explainability', 'robustness', 'methodology'])
         out= np.array( [True,True,True,True])
         ctx = dash.callback_context
         pillar = ctx.triggered[0]['prop_id'][:-11]
-        is_open = eval(pillar[0]+"is_open")
-        out[pillars==pillar]= not is_open 
-        return list(out)
+        if pillar=="all":
+            if fis_open or eis_open or ris_open or mis_open:
+                return [False,False,False,False]
+            else:
+                return [True,True,True,True]
+        else:
+            is_open = eval(pillar[0]+"is_open")
+            out[pillars==pillar]= not is_open 
+            return list(out)
     else:
         return [True,True,True,True]
 
@@ -1248,6 +1254,9 @@ layout = html.Div([
                 html.Div([], id="analyze_alert_section"),
 
                 html.Div([
+                    html.Div([dbc.Button("Download Report", id='download_report_button', color="primary", className="mt-3", style={"width": "30%"}),
+                              dcc.Download(id="download-report", type="application/pdf")],
+                         className="text-center"),html.Br(),
                     general_section(),
                     trust_section(),
                     html.Div([
@@ -1260,15 +1269,18 @@ layout = html.Div([
                     dbc.Col(dbc.Button("METHODOLOGY", id='methodology_s',className="mt-3", color="primary" , style={"background-color": METHODOLOGY_COLOR})),
                     ]
                     ), html.Br()],className="text-center", style={"margin-left":"10%","margin-right":"10%"}),
+                    html.Div([
+                        dbc.Col(dbc.Button("Show ALL", id='all_s',className="mt-3", color="primary" , style={"background-color": TRUST_COLOR, "border-radius":"80%"}))
+                        ],className="text-center"),
                     pillar_section("fairness", fairness_metrics),
                     pillar_section("explainability", explainability_metrics),
                     pillar_section("robustness", robustness_metrics),
                     pillar_section("methodology", methodology_metrics),
                     dcc.Store(id='training_data'),
                     dcc.Store(id='test_data'),
-                    html.Div([dbc.Button("Download Report", id='download_report_button', color="primary", className="mt-3"),
-                              dcc.Download(id="download-report", type="application/pdf")],
-                         className="text-center"),
+                    # html.Div([dbc.Button("Download Report", id='download_report_button', color="primary", className="mt-3"),
+                    #           dcc.Download(id="download-report", type="application/pdf")],
+                    #      className="text-center"),
                 ], id="analysis_section")
             ],
                 width=12, 
