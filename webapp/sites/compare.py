@@ -784,7 +784,7 @@ def update_figure_1(data):
     result = json.loads(data)
     final_score, results = result["final_score"], result["results"]
     trust_score = result["trust_score"]
-    pillars = list(final_score.keys())
+    pillars = list(map(lambda x: x.upper(),list(final_score.keys())))
     values = list(final_score.values())
 
     colors = [FAIRNESS_COLOR, EXPLAINABILITY_COLOR, ROBUSTNESS_COLOR, METHODOLOGY_COLOR]
@@ -811,7 +811,7 @@ def update_figure_1(data):
     # barcharts
     for n, (pillar, sub_scores) in enumerate(results.items()):
         title = "<b style='font-size:32px;''>{}/5</b>".format(final_score[pillar])
-        categories = list(map(lambda x: x.replace("_", ' '), sub_scores.keys()))
+        categories = list(map(lambda x: x.replace("_", ' ').title(), sub_scores.keys()))
         values = list(map(float, sub_scores.values()))
         if np.isnan(values).any():
             nonNanCategories = list()
@@ -831,7 +831,7 @@ def update_figure_1(data):
     # spider charts
     for n, (pillar, sub_scores) in enumerate(results.items()):
         title = "<b style='font-size:32px;''>{}/5</b>".format(final_score[pillar])
-        categories = list(map(lambda x: x.replace("_", ' '), sub_scores.keys()))
+        categories = list(map(lambda x: x.replace("_", ' ').title(), sub_scores.keys()))
         val = list(map(float, sub_scores.values()))
         if np.isnan(values).any():
             nonNanCategories = list()
@@ -879,7 +879,7 @@ def update_figure_2(data):
     result = json.loads(data)
     final_score, results = result["final_score"], result["results"]
     trust_score = result["trust_score"]
-    pillars = list(final_score.keys())
+    pillars = list(map(lambda x: x.upper(),list(final_score.keys())))
     values = list(final_score.values())
 
     colors = [FAIRNESS_COLOR, EXPLAINABILITY_COLOR, ROBUSTNESS_COLOR, METHODOLOGY_COLOR]
@@ -906,7 +906,7 @@ def update_figure_2(data):
     # barcharts
     for n, (pillar, sub_scores) in enumerate(results.items()):
         title = "<b style='font-size:32px;''>{}/5</b>".format(final_score[pillar])
-        categories = list(map(lambda x: x.replace("_", ' '), sub_scores.keys()))
+        categories = list(map(lambda x: x.replace("_", ' ').title(), sub_scores.keys()))
         values = list(map(float, sub_scores.values()))
         if np.isnan(values).any():
             nonNanCategories = list()
@@ -925,7 +925,7 @@ def update_figure_2(data):
     # spider charts
     for n, (pillar, sub_scores) in enumerate(results.items()):
         title = "<b style='font-size:32px;''>{}/5</b>".format(final_score[pillar])
-        categories = list(map(lambda x: x.replace("_", ' '), sub_scores.keys()))
+        categories = list(map(lambda x: x.replace("_", ' ').title(), sub_scores.keys()))
         val = list(map(float, sub_scores.values()))
         if np.isnan(values).any():
             nonNanCategories = list()

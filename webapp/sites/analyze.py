@@ -1054,7 +1054,7 @@ def update_figure(data, trig):
       #spider charts
       for n, (pillar , sub_scores) in enumerate(results.items()):
           title = "<b style='font-size:32px;''>{}/5</b>".format(final_score[pillar])
-          categories = list(map(lambda x: x.replace("_",' '), sub_scores.keys()))
+          categories = list(map(lambda x: x.replace("_",' ').title(), sub_scores.keys()))
           val = list(map(float, sub_scores.values()))
           exc = np.isnan(val)
           r = np.array(val)[~exc]
