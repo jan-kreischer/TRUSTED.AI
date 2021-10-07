@@ -148,20 +148,10 @@ def validate_model(n_clicks, model):
             return html.H6("No model uploaded", style={"color":"Red"})
         else:
             return None
-        
-@app.callback(Output('uploaded_solution_set_path', 'data'),
-    [Input('upload_button', 'n_clicks'),
-    State('upload_scenario_id', 'value'),
-    State('solution_name', 'value')], prevent_initial_call=True)
-def save_new_solution_name(n_clicks, scenario_id, solution_name):
-    if n_clicks is not None:
-        if scenario_id and solution_name:
-            print("Uploaded solution set path {}".format(os.path.join(scenario_id, solution_name)))
-            return os.path.join(scenario_id, solution_name)
-    else:
-        return None
 
-@app.callback(Output('upload_alert', 'children'),
+@app.callback([Output('upload_alert', 'children'),
+              Output('uploaded_scenario_id', 'data'),
+              Output('uploaded_solution_id', 'data')],
               [
                Input('upload_button', 'n_clicks'),
                State('upload_scenario_id', 'value'),
@@ -192,10 +182,10 @@ def upload_data(
     model,
     model_filename):
     if n_clicks is None:
-        return ""
+        return "", "", ""
     else:
         if None in (scenario_id, solution_name, training_data, test_data, model):   
-            return html.H5("Please provide all necessary data", style={"color":"Red"},  className="text-center")
+            return html.H5("Please provide all necessary data", style={"color":"Red"},  className="text-center"), '', ''
         else:
             # Create directory within the problem set to contain the data
             solution_id = name_to_id(solution_name)
@@ -203,8 +193,6 @@ def upload_data(
             # Check if directory does not exists yet
             if not os.path.isdir(solution_path):
                 os.mkdir(solution_path)
-                print("The new directory is created!")
-                #return html.H4("Successfully created new directory.", style={"color":"Green"},  className="text-center")
                 
                 # Upload all the data to the new directory.
                 # Saving Training Data
@@ -213,7 +201,6 @@ def upload_data(
                 # Saving Test Data
                 save_test_data(solution_path, test_data_filename, test_data)
                 
-                fact
                 # Saving Factsheet
                 save_factsheet(solution_path, FACTSHEET_NAME, factsheet, target_column_name, general_description)
   
@@ -221,10 +208,9 @@ def upload_data(
                 save_model(solution_path, model_filename, model)
 
             else: 
-                return html.H4("Directory already exists", style={"color":"Red"}, className="text-center")
+                return html.H4("Directory already exists", style={"color":"Red"}, className="text-center"), '', ''
                       
-            return dcc.Location(pathname="/analyze", id="someid_doesnt_matter")
-            return html.H5("Upload Successful", className="text-center")
+            return dcc.Location(pathname="/analyze", id="someid_doesnt_matter"), scenario_id, solution_id
 
 modals = ["upload_scenario_id", "solution_name", "general_description", "training_data", "test_data", "target_column_name" ,"factsheet", "model"]
 for m in modals:

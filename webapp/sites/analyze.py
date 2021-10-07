@@ -387,6 +387,19 @@ def show_general_description(scenario_id, solution_set_path):
         return description
     else:
         return ""
+ 
+#@app.callback(
+#    [Output("scenario_dropdown", 'value'),
+#    Output("solution_set_dropdown", 'value')],
+#    [Input('url', 'scenario_id'),
+#    Input('url', 'solution_id')])
+#def display_scenario_solution(scenario_id, solution_id):
+#    if scenario_id and solution_id:
+#        print("Scenario_id {}".format(scenario_id))
+#        print("Solution_id {}".format(solution_id))
+#        return scenario_id, solution_id
+#    else:
+#        return '', ''
     
 # === FAIRNESS ===
 @app.callback(
@@ -1176,7 +1189,8 @@ def clever_score(data):
     Input('scenario_dropdown', 'value'), prevent_initial_call=False)
 def show_scenario_solution_options(scenario_id):
     if scenario_id:
-        return get_scenario_solutions_options(scenario_id)
+        solutions = get_scenario_solutions_options(scenario_id)
+        return solutions
     else:
         return []
 
@@ -1201,14 +1215,14 @@ def download_report(n_clicks, solution_set_path, is_open, data, weight, map_f, m
     else:
         return is_open, data
     
-@app.callback([Output("scenario_dropdown", 'value'), Output("solution_set_dropdown", 'value')],
-    Input('uploaded_solution_set_path', 'data'))
-def set_uploaded_model(solution_set_path):
-    
-    if solution_set_path:
-        scenario, solution = solution_set_path.split(os.sep)
-        solution = os.path.join("scenarios", scenario, "solutions", solution)
-        return scenario, solution
+@app.callback([Output("scenario_dropdown", 'value'), 
+               Output("solution_set_dropdown", 'value')],
+    [Input('uploaded_scenario_id', 'data'),
+    Input('uploaded_solution_id', 'data')])
+def set_uploaded_model(scenario_id, solution_id):
+    if scenario_id and solution_id :
+        solution_path = get_solution_path(scenario_id, solution_id)
+        return scenario_id, solution_path
     else:
         return None, None
       

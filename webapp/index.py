@@ -74,7 +74,8 @@ app.layout = html.Div([
     dcc.Location(id='url', refresh=False),
     navbar,
     html.Div(id='page_content'),
-    dcc.Store(id='uploaded_solution_set_path', storage_type='session')
+    dcc.Store(id='uploaded_scenario_id', storage_type='session'),
+    dcc.Store(id='uploaded_solution_id', storage_type='session')
 ])
     
 @app.callback(Output('page_content', 'children'), [Input('url', 'pathname')])
