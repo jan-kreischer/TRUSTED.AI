@@ -18,19 +18,59 @@ import dash_table
 from dash.dependencies import Input, Output, State
 import dash_bootstrap_components as dbc
 from algorithms.trustworthiness import trusting_AI_scores, get_trust_score
-from sites.explainability_panel import explainability_panel, exp_input_ids
-from sites.fairness_panel import fairness_panel ,fair_input_ids
-from sites.robustness_panel import robustness_panel, rob_input_ids
-from sites.methodology_panel import methodology_panel, meth_input_ids
 import dash_daq as daq
 from config import *
+from config import METRICS_CONFIG_PATH
 
 children=[]
 
-config_fairness, config_explainability, config_robustness, config_methodology = 0, 0, 0 ,0
-for config in ["config_fairness", "config_explainability", "config_robustness", "config_methodology"]:
+config_pillars, config_fairness, config_explainability, config_robustness, config_methodology = 0, 0, 0 ,0, 0
+for config in ["config_pillars", "config_fairness", "config_explainability", "config_robustness", "config_methodology"]:
     with open(os.path.join(METRICS_CONFIG_PATH, config + ".json")) as file:
             exec("%s = json.load(file)" % config)
+
+def listdir_nohidden(path):
+    for f in os.listdir(path):
+        if not f.startswith('.'):
+            yield f
+
+#exp_input_ids + fair_input_ids + rob_input_ids + meth_input_ids PILLARS
+def get_weight_panel(config_w, pillar):
+    
+    # create panel
+    fairness_panel = [html.H4("Weights"),html.Br(),html.H4("Parameters")]
+    
+    exp_panel_comp = []
+    w_pil ="w_"+pillar+"_pillar"
+    input_ids = [w_pil]
+    
+    comp_weight = []
+    comp_weight.append(html.H5("Pillar Weight",style={'text-align':'center'}))
+    
+    comp_weight.append(html.Div(dcc.Input(id=w_pil,value=config_pillars[pillar], type='text'), 
+                                style=dict(display='flex', justifyContent='center')))
+    comp_weight.append(html.Br())
+    
+    
+    comp_weight.append(html.H5("Metrics Weights",style={'text-align':'center'}))
+    for key, val in config_w["weights"].items():
+        input_id = "w_"+key
+        input_ids.append(input_id)
+        
+        comp_weight.append(html.Div([
+            html.Div(html.Label(key.replace("_",' ').title()), style={'width': '40%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10}),
+            html.Div(dcc.Input(id="w_"+key,value=val, type='text'), style={'width': '40%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10}),
+            ]))
+    # parameter panel
+    exp_panel_comp.append(html.Div(comp_weight))
+    
+    
+    return exp_panel_comp, input_ids
+
+explainability_panel, exp_input_ids = get_weight_panel(config_explainability,"explainability")
+fairness_panel ,fair_input_ids = get_weight_panel(config_fairness,"fairness")
+robustness_panel, rob_input_ids = get_weight_panel(config_robustness,"robustness")
+methodology_panel, meth_input_ids = get_weight_panel(config_methodology,"methodology")
 
 #panels
 fair_panel_comp = [html.H3("Fairness", style={'text-align':'center'})] + fairness_panel
