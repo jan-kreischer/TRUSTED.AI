@@ -497,7 +497,7 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
     k = []
     v = []
     for l in explainability_properties:
-        if l!= {}:
+        if l!= {} and l != None:
             for i,m in l.items():
              if i !="importance":
                 if type(m) == list:
