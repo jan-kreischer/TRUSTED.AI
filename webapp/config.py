@@ -85,5 +85,5 @@ def list_of_metrics(pillar):
 
 FAIRNESS_METRICS = list_of_metrics("fairness")
 EXPLAINABILITY_METRICS = list_of_metrics("explainability")
-ROBUSTNESS_METRICS = ["clever_score", "loss_sensitivity", "confidence_score", "empirical_robustness_fast_gradient_attack", "empirical_robustness_deepfool_attack", "empirical_robustness_carlini_wagner_attack"]
+ROBUSTNESS_METRICS = list_of_metrics("robustness")
 METHODOLOGY_METRICS = list_of_metrics("methodology")

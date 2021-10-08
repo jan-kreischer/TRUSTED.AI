@@ -1096,14 +1096,30 @@ def robustness_details(data):
     metrics = list(properties["robustness"].keys())
 
     sections = [html.H3("▶ Robustness Metrics")]
+    non_calculated_metrics = []
+    count = 1
     for i in range(len(metrics)):
         metric_id = metrics[i]
         if properties["robustness"][metric_id] != {}:
-            sections.append(create_metric_details_section(metric_id, i, 3))
+            sections.append(create_metric_details_section(metric_id, count, 3))
+            count = count + 1
+        else:
+            if metric_id == "loss_sensitivity" or metric_id == "clever_score":
+                non_calculated_metrics.append(show_metric_details_section(metric_id, np.nan, reason_not_calculated="Can only be calculated on Keras models."))
+            elif metric_id == "er_fast_gradient_attack" or metric_id == "er_carlini_wagner_attack" or metric_id == "er_deepfool_attack":
+                non_calculated_metrics.append(show_metric_details_section(metric_id, np.nan, reason_not_calculated="Can be calculated on either SVC or Logistic Regression models."))
+            elif metric_id == "confidence_score":
+                non_calculated_metrics.append(show_metric_details_section(metric_id, np.nan, reason_not_calculated="Can only be calculated on models which provide prediction probabilities."))
+            elif metric_id == "clique_method":
+                non_calculated_metrics.append(show_metric_details_section(metric_id, np.nan, reason_not_calculated="Can only be calculated on Tree-Based models."))
+
+
+    sections.append(html.H5("Non-Computable Metrics") if not [] == non_calculated_metrics else [])
+    sections.append(html.Div(non_calculated_metrics))
     return sections
 
 @app.callback(
-[Output("empirical_robustness_deepfool_attack_details", 'children'), Output("empirical_robustness_deepfool_attack_score", 'children')],
+[Output("er_deepfool_attack_details", 'children'), Output("er_deepfool_attack_score", 'children')],
 Input('result', 'data'), prevent_initial_call=False)
 def Deepfool_Attack_metric_detail(data):
   if data is None:
@@ -1111,12 +1127,12 @@ def Deepfool_Attack_metric_detail(data):
   else:
       result = json.loads(data)
       properties = result["properties"]
-      metric_properties = properties["robustness"]["empirical_robustness_deepfool_attack"]
+      metric_properties = properties["robustness"]["er_deepfool_attack"]
       metric_scores = result["results"]
-      return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["empirical_robustness_deepfool_attack"]))
+      return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["er_deepfool_attack"]))
 
 @app.callback(
-[Output("empirical_robustness_carlini_wagner_attack_details", 'children'), Output("empirical_robustness_carlini_wagner_attack_score", 'children')],
+[Output("er_carlini_wagner_attack_details", 'children'), Output("er_carlini_wagner_attack_score", 'children')],
 Input('result', 'data'), prevent_initial_call=False)
 def carlini_wagner_attack_analysis(data):
   if data is None:
@@ -1124,12 +1140,12 @@ def carlini_wagner_attack_analysis(data):
   else:
       result = json.loads(data)
       properties = result["properties"]
-      metric_properties = properties["robustness"]["empirical_robustness_carlini_wagner_attack"]
+      metric_properties = properties["robustness"]["er_carlini_wagner_attack"]
       metric_scores = result["results"]
-      return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["empirical_robustness_carlini_wagner_attack"]))
+      return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["er_carlini_wagner_attack"]))
 
 @app.callback(
-[Output("empirical_robustness_fast_gradient_attack_details", 'children'), Output("empirical_robustness_fast_gradient_attack_score", 'children')],
+[Output("er_fast_gradient_attack_details", 'children'), Output("er_fast_gradient_attack_score", 'children')],
 Input('result', 'data'), prevent_initial_call=False)
 def fast_gradient_attack_analysis(data):
   if data is None:
@@ -1137,9 +1153,9 @@ def fast_gradient_attack_analysis(data):
   else:
       result = json.loads(data)
       properties = result["properties"]
-      metric_properties = properties["robustness"]["empirical_robustness_fast_gradient_attack"]
+      metric_properties = properties["robustness"]["er_fast_gradient_attack"]
       metric_scores = result["results"]
-      return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["empirical_robustness_fast_gradient_attack"]))
+      return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["er_fast_gradient_attack"]))
 
 @app.callback(
 [Output("clique_method_details", 'children'), Output("clique_method_score", 'children')],
