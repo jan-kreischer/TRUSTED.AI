@@ -1,9 +1,0 @@
-# Excluded Scenarios
-scenarios/compas_recidivism
-scenarios/german_credit_scoring
-scenarios/it_sec_anomaly_detection
-scenarios/medical_expenditure_panel_survey
-
-.ipynb_checkpoints
-/tools
-tools
