@@ -1,13 +1,12 @@
 {
     "fairness": {
-        "question_fairness": 0.2,
-        "class_balance": 0.1,
-        "underfitting": 0.15,
+        "underfitting": 0.35,
         "overfitting": 0.15,
         "statistical_parity_difference": 0.15,
         "equal_opportunity_difference": 0.2,
         "average_odds_difference": 0.1,
-        "disparate_impact": 0.1
+        "disparate_impact": 0.1,
+        "class_balance": 0.1
     },
     "explainability": {
         "algorithm_class": 0.55,

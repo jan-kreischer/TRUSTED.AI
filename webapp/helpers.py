@@ -687,7 +687,7 @@ def pillar_section(pillar, metrics):
                 dbc.Row(
                     [
                     dbc.Col(html.Div([daq.BooleanSwitch(id='toggle_{}_details'.format(pillar),
-                      on=False,
+                      on=True,
                       label='Show Details',
                       labelPosition="top",
                       color = TRUST_COLOR,

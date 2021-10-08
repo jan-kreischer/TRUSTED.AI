@@ -34,43 +34,19 @@ def analyse(model, training_dataset, test_dataset, factsheet, config):
     disparate_impact_thresholds = config["score_disparate_impact"]["thresholds"]["value"]
     
     output = dict(
-        question_fairness = question_fairness_score(factsheet),
-        class_balance = class_balance_score(training_dataset, target_column),
         underfitting = underfitting_score(model, training_dataset, test_dataset, factsheet, underfitting_thresholds),
         overfitting = overfitting_score(model, training_dataset, test_dataset, factsheet, overfitting_thresholds),
         statistical_parity_difference = statistical_parity_difference_score(model, training_dataset, test_dataset, factsheet, statistical_parity_difference_thresholds),
         equal_opportunity_difference = equal_opportunity_difference_score(model, test_dataset, factsheet, equal_opportunity_difference_thresholds),
         average_odds_difference = average_odds_difference_score(model, test_dataset, factsheet, average_odds_difference_thresholds),
-        disparate_impact = disparate_impact_score(model, test_dataset, factsheet, disparate_impact_thresholds)
+        disparate_impact = disparate_impact_score(model, test_dataset, factsheet, disparate_impact_thresholds),
+        class_balance = class_balance_score(training_dataset, target_column)
     )
     
     scores = dict((k, v.score) for k, v in output.items())
     properties = dict((k, v.properties) for k, v in output.items())
 
     return  result(score=scores, properties=properties)
-
-
-# --- Question Fairness ---
-def question_fairness_score(factsheet):
-    """Reads and the question fairness score from the factsheet.
-    If this fails np.nan is returned.
-
-    Args:
-        factsheet: json document containing all information about a particular solution.
-
-    Returns:
-        On success, the function returns the question fairness score together with optional properties.
-        On failure, a score of np.nan together with an empty properties dictionary is returned.
-
-    """
-    try:
-        score = factsheet.get("fairness", {}).get("question_fairness", np.nan)
-        properties = {"Question Fairness": "{}".format(score)}
-        return result(score=score, properties=properties) 
-    except Exception as e:
-        print("ERROR in question_fairness_score(): {}".format(e))
-        return result(score=np.nan, properties={}) 
-   
 
 # --- Class Balance ---
 def class_balance_score(training_data, target_column):
@@ -419,7 +395,8 @@ def disparate_impact_score(model, test_dataset, factsheet, thresholds):
         properties["Unprotected Favored Ratio"] = "P(y_hat=favorable|protected=False) = {}".format(unprotected_favored_ratio) 
         
         disparate_impact = protected_favored_ratio / unprotected_favored_ratio
-        properties["Disparate Impact"] = "Protected Favored Ratio / Unprotected Favored Ratio {}".format(disparate_impact)
+        properties["Formula"] = "Disparate Impact = Protected Favored Ratio / Unprotected Favored Ratio"
+        properties["Disparate Impact"] = "{:.2f}".format(disparate_impact*100)
     
         score = np.digitize(disparate_impact, thresholds, right=False)+1
             

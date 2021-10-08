@@ -1,6 +1,5 @@
 {
     "fairness": {
-        "question_fairness": 0.2,
         "class_balance": 0.1,
         "underfitting": 0.15,
         "overfitting": 0.15,
