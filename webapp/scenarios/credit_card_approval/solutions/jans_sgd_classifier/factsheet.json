@@ -47,45 +47,56 @@
     "properties": {
         "fairness": {
             "underfitting": {
-                "Conclusion": "Model is not underfitting",
-                "Training Accuracy": 0.9721041666666667,
-                "Test Accuracy": 0.9719166666666667,
-                "Train Test Accuracy Difference": 0.0001875000000000071
+                "Metric Description": "Compares the models achieved test accuracy against a baseline.",
+                "Depends on": "Model, Test Data",
+                "Test Accuracy": "97.19%",
+                "Conclusion": "Model is not underfitting"
             },
             "overfitting": {
-                "Conclusion": "Model is not overfitting",
-                "Training Accuracy": 0.9721041666666667,
-                "Test Accuracy": 0.9719166666666667,
-                "Train Test Accuracy Difference": 0.0001875000000000071
+                "Metric Description": "Overfitting is present if the training accuracy is significantly higher than the test accuracy",
+                "Depends on": "Model, Training Data, Test Data",
+                "Training Accuracy": "97.21%",
+                "Test Accuracy": "97.19%",
+                "Train Test Accuracy Difference": "0.02%",
+                "Conclusion": "Model is not overfitting"
             },
             "statistical_parity_difference": {
-                "Favored Majority Ratio": 0.19776821164374975,
-                "Favored Minority Ratio": 0.572176297096332,
-                "Statistical Parity Difference": 0.37440808545258225
+                "Metric Description": "The spread between the percentage of observations from the majority group receiving a favorable outcome compared to the protected group. The closes this spread is to zero the better.",
+                "Depends on": "Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)",
+                "Favored Majority Ratio": "P(y_true=favorable|protected=False) = 19.78%",
+                "Favored Minority Ratio": "P(y_true=favorable|protected=True) = 57.22%",
+                "Formula": "Favored Minority Ratio - Favored Minority Ratio",
+                "Statistical Parity Difference": "37.44%"
             },
             "equal_opportunity_difference": {
                 "Metric Description": "Difference in true positive rates between protected and unprotected group.",
-                "TPR Unprotected Group": "P(y_hat=favorable|y_true=favorable, protected=False) = 0.9295886075949367",
-                "TPR Protected Group": "P(y_hat=favorable|y_true=favorable, protected=True) = 0.978705035971223",
-                "Equal Opportunity Difference": "TPR Protected Group - TPR Unprotected Group = 0.04911642837628638"
+                "Depends on": "Model, Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)",
+                "TPR Unprotected Group": "P(y_hat=favorable|y_true=favorable, protected=False) = 92.96%",
+                "TPR Protected Group": "P(y_hat=favorable|y_true=favorable, protected=True) = 97.87%",
+                "Formula": "Equal Opportunity Difference = TPR Protected Group - TPR Unprotected Group",
+                "Equal Opportunity Difference": "4.91%"
             },
             "average_odds_difference": {
                 "Metric Description": "Is the average of difference in false positive rates and true positive rates between the protected and unprotected group",
-                "FPR Unprotected Group": "P(y_hat=favorable|y_true=unfavorable, protected=False) = 0.0176033934252386",
-                "FPR Protected Group": "P(y_hat=favorable|y_true=unfavorable, protected=True) = 0.03574234092694423",
-                "TPR Unprotected Group": "P(y_hat=favorable|y_true=favorable, protected=False) = 0.9295886075949367",
-                "TPR Protected Group": "P(y_hat=favorable|y_true=favorable, protected=True) = 0.978705035971223",
-                "Average Odds Difference": "0.5*(TPR Protected - TPR Unprotected) + 0.5*(FPR Protected - FPR Unprotected): 0.033627687938996"
+                "Depends on": "Model, Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)",
+                "FPR Unprotected Group": "P(y_hat=favorable|y_true=unfavorable, protected=False) = 1.76%",
+                "FPR Protected Group": "P(y_hat=favorable|y_true=unfavorable, protected=True) = 3.57%",
+                "TPR Unprotected Group": "P(y_hat=favorable|y_true=favorable, protected=False) = 92.96%",
+                "TPR Protected Group": "P(y_hat=favorable|y_true=favorable, protected=True) = 97.87%",
+                "Formula": "0.5*(TPR Protected - TPR Unprotected) + 0.5*(FPR Protected - FPR Unprotected)",
+                "Average Odds Difference": "3.36%"
             },
             "disparate_impact": {
                 "Metric Description": "Is quotient of the ratio of samples from the protected group receiving a favorable prediction divided by the ratio of samples from the unprotected group receiving a favorable prediction",
-                "Protected Favored Ratio": "P(y_hat=favorable|protected=True) = 0.5799701046337817",
-                "Unprotected Favored Ratio": "P(y_hat=favorable|protected=False) = 0.21040307743769862",
+                "Depends on": "Model, Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)",
+                "Protected Favored Ratio": "P(y_hat=favorable|protected=True) = 58.00%",
+                "Unprotected Favored Ratio": "P(y_hat=favorable|protected=False) = 21.04%",
                 "Formula": "Disparate Impact = Protected Favored Ratio / Unprotected Favored Ratio",
-                "Disparate Impact": "275.65"
+                "Disparate Impact": "2.76"
             },
             "class_balance": {
-                "class balance score": 1
+                "Metric Description": "Measures how well the training data is balanced or unbalanced",
+                "Depends on": "Training Data"
             }
         },
         "explainability": {

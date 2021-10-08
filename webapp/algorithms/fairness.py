@@ -65,11 +65,12 @@ def class_balance_score(training_data, target_column):
     try:
         class_balance = class_balance_metric(training_data, target_column)
         properties = {}
+        properties['Metric Description'] = "Measures how well the training data is balanced or unbalanced"
+        properties['Depends on'] = 'Training Data'
         if(class_balance == 1):
             score = 5
         else:
             score = 1
-        properties["class balance score"] = score
         return result(score=score, properties=properties)     
     except Exception as e:
         print("ERROR in class_balance_score(): {}".format(e))
@@ -125,10 +126,14 @@ def underfitting_score(model, training_dataset, test_dataset, factsheet, thresho
     """
     try:
         properties = {}
+        properties['Metric Description'] = "Compares the models achieved test accuracy against a baseline."
+        properties['Depends on'] = 'Model, Test Data'
         score = 0
         training_accuracy = compute_accuracy(model, training_dataset, factsheet)
         test_accuracy = compute_accuracy(model, test_dataset, factsheet)
         score = np.digitize(abs(test_accuracy), thresholds, right=False) + 1 
+
+        properties["Test Accuracy"] = "{:.2f}%".format(test_accuracy*100)
 
         if score == 5:
             properties["Conclusion"] = "Model is not underfitting"
@@ -140,10 +145,6 @@ def underfitting_score(model, training_dataset, test_dataset, factsheet, thresho
             properties["Conclusion"] = "Model is underfitting"
         else:
             properties["Conclusion"] = "Model is strongly underfitting"
-
-        properties["Training Accuracy"] = training_accuracy
-        properties["Test Accuracy"] = test_accuracy
-        properties["Train Test Accuracy Difference"] = training_accuracy - test_accuracy
 
         return result(score=int(score), properties=properties)
     
@@ -173,33 +174,32 @@ def overfitting_score(model, training_dataset, test_dataset, factsheet, threshol
     """
     try:
         properties = {}
+        properties['Metric Description'] = "Overfitting is present if the training accuracy is significantly higher than the test accuracy"
+        properties['Depends on'] = 'Model, Training Data, Test Data'
         score = np.nan
         training_accuracy = compute_accuracy(model, training_dataset, factsheet)
         test_accuracy = compute_accuracy(model, test_dataset, factsheet)
-        if training_accuracy >= test_accuracy:
-            # model could be underfitting.
-            # for underfitting models the spread is negative
-            accuracy_difference = training_accuracy - test_accuracy
-            score = np.digitize(abs(accuracy_difference), thresholds, right=False) + 1 
-            
-            if score == 5:
-                properties["Conclusion"] = "Model is not overfitting"
-            elif score == 4:
-                properties["Conclusion"] = "Model mildly overfitting"
-            elif score == 3:
-                properties["Conclusion"] = "Model is slighly overfitting"
-            elif score == 2:
-                properties["Conclusion"] = "Model is overfitting"
-            else:
-                properties["Conclusion"] = "Model is strongly overfitting"
-                                
-            properties["Training Accuracy"] =training_accuracy 
-            properties["Test Accuracy"] = test_accuracy
-            properties["Train Test Accuracy Difference"] = training_accuracy - test_accuracy
-    
-            return result(int(score), properties=properties)
+        # model could be underfitting.
+        # for underfitting models the spread is negative
+        accuracy_difference = training_accuracy - test_accuracy
+        score = np.digitize(abs(accuracy_difference), thresholds, right=False) + 1 
+
+        properties["Training Accuracy"] = "{:.2f}%".format(training_accuracy*100)
+        properties["Test Accuracy"] = "{:.2f}%".format(test_accuracy*100)
+        properties["Train Test Accuracy Difference"] = "{:.2f}%".format((training_accuracy - test_accuracy)*100)
+        
+        if score == 5:
+            properties["Conclusion"] = "Model is not overfitting"
+        elif score == 4:
+            properties["Conclusion"] = "Model mildly overfitting"
+        elif score == 3:
+            properties["Conclusion"] = "Model is slighly overfitting"
+        elif score == 2:
+            properties["Conclusion"] = "Model is overfitting"
         else:
-            return result(score=np.nan, properties={}) 
+            properties["Conclusion"] = "Model is strongly overfitting"
+
+        return result(int(score), properties=properties)
     except Exception as e:
         print("ERROR in overfitting_score(): {}".format(e))
         return result(score=np.nan, properties={}) 
@@ -225,9 +225,16 @@ def statistical_parity_difference_score(model, training_dataset, test_dataset, f
 
     """
     try: 
-        score = 1
+        
+        score = np.nan
+        properties = {}
+        properties["Metric Description"] = "The spread between the percentage of observations from the majority group receiving a favorable outcome compared to the protected group. The closes this spread is to zero the better."
+        properties["Depends on"] = "Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)"
         favored_majority_ratio, favored_minority_ratio, statistical_parity_difference = statistical_parity_difference_metric(model, training_dataset, test_dataset, factsheet)
-        properties = {"Favored Majority Ratio": favored_majority_ratio, "Favored Minority Ratio": favored_minority_ratio, "Statistical Parity Difference": statistical_parity_difference}
+        properties["Favored Majority Ratio"] =  "P(y_true=favorable|protected=False) = {:.2f}%".format(favored_majority_ratio*100)
+        properties["Favored Minority Ratio"] =  "P(y_true=favorable|protected=True) = {:.2f}%".format(favored_minority_ratio*100)
+        properties["Formula"] =  "Favored Minority Ratio - Favored Minority Ratio"
+        properties["Statistical Parity Difference"] = "{:.2f}%".format(statistical_parity_difference*100)
         score = np.digitize(statistical_parity_difference, thresholds, right=False) + 1 
         return result(score=int(score), properties=properties)
     except Exception as e:
@@ -306,11 +313,13 @@ def equal_opportunity_difference_score(model, test_dataset, factsheet, threshold
         properties = {}
         score=np.nan
         properties["Metric Description"] = "Difference in true positive rates between protected and unprotected group."
+        properties["Depends on"] = "Model, Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)"
         tpr_protected, tpr_unprotected = true_positive_rates(model, test_dataset, factsheet)
-        properties["TPR Unprotected Group"] = "P(y_hat=favorable|y_true=favorable, protected=False) = {}".format(tpr_unprotected)
-        properties["TPR Protected Group"] = "P(y_hat=favorable|y_true=favorable, protected=True) = {}".format(tpr_protected)  
+        properties["TPR Unprotected Group"] = "P(y_hat=favorable|y_true=favorable, protected=False) = {:.2f}%".format(tpr_unprotected*100)
+        properties["TPR Protected Group"] = "P(y_hat=favorable|y_true=favorable, protected=True) = {:.2f}%".format(tpr_protected*100)  
         equal_opportunity_difference = tpr_protected - tpr_unprotected
-        properties["Equal Opportunity Difference"] = "TPR Protected Group - TPR Unprotected Group = {}".format(equal_opportunity_difference)
+        properties["Formula"] = "Equal Opportunity Difference = TPR Protected Group - TPR Unprotected Group"
+        properties["Equal Opportunity Difference"] = "{:.2f}%".format(equal_opportunity_difference*100)
         
         score = np.digitize(abs(equal_opportunity_difference), thresholds, right=False) + 1 
         
@@ -346,16 +355,18 @@ def average_odds_difference_score(model, test_dataset, factsheet, thresholds):
         score = np.nan
         properties = {}
         properties["Metric Description"] = "Is the average of difference in false positive rates and true positive rates between the protected and unprotected group"
+        properties["Depends on"] = "Model, Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)"
         fpr_protected, fpr_unprotected = false_positive_rates(model, test_dataset, factsheet)
-        properties["FPR Unprotected Group"] = "P(y_hat=favorable|y_true=unfavorable, protected=False) = {}".format(fpr_unprotected)
-        properties["FPR Protected Group"] = "P(y_hat=favorable|y_true=unfavorable, protected=True) = {}".format(fpr_protected) 
+        properties["FPR Unprotected Group"] = "P(y_hat=favorable|y_true=unfavorable, protected=False) = {:.2f}%".format(fpr_unprotected*100)
+        properties["FPR Protected Group"] = "P(y_hat=favorable|y_true=unfavorable, protected=True) = {:.2f}%".format(fpr_protected*100) 
         
         tpr_protected, tpr_unprotected = true_positive_rates(model, test_dataset, factsheet)
-        properties["TPR Unprotected Group"] = "P(y_hat=favorable|y_true=favorable, protected=False) = {}".format(tpr_unprotected)
-        properties["TPR Protected Group"] = "P(y_hat=favorable|y_true=favorable, protected=True) = {}".format(tpr_protected) 
+        properties["TPR Unprotected Group"] = "P(y_hat=favorable|y_true=favorable, protected=False) = {:.2f}%".format(tpr_unprotected*100)
+        properties["TPR Protected Group"] = "P(y_hat=favorable|y_true=favorable, protected=True) = {:.2f}%".format(tpr_protected*100) 
         
         average_odds_difference = ((tpr_protected - tpr_unprotected) + (fpr_protected - fpr_unprotected))/2
-        properties["Average Odds Difference"] = "0.5*(TPR Protected - TPR Unprotected) + 0.5*(FPR Protected - FPR Unprotected): {}".format(average_odds_difference)
+        properties["Formula"] = "0.5*(TPR Protected - TPR Unprotected) + 0.5*(FPR Protected - FPR Unprotected)"
+        properties["Average Odds Difference"] = "{:.2f}%".format(average_odds_difference*100)
     
         score = np.digitize(abs(average_odds_difference), thresholds, right=False) + 1 
             
@@ -390,13 +401,14 @@ def disparate_impact_score(model, test_dataset, factsheet, thresholds):
         score = np.nan
         properties = {}
         properties["Metric Description"] = "Is quotient of the ratio of samples from the protected group receiving a favorable prediction divided by the ratio of samples from the unprotected group receiving a favorable prediction"
+        properties["Depends on"] = "Model, Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)"
         protected_favored_ratio, unprotected_favored_ratio = disparate_impact_metric(model, test_dataset, factsheet)
-        properties["Protected Favored Ratio"] = "P(y_hat=favorable|protected=True) = {}".format(protected_favored_ratio)
-        properties["Unprotected Favored Ratio"] = "P(y_hat=favorable|protected=False) = {}".format(unprotected_favored_ratio) 
+        properties["Protected Favored Ratio"] = "P(y_hat=favorable|protected=True) = {:.2f}%".format(protected_favored_ratio*100)
+        properties["Unprotected Favored Ratio"] = "P(y_hat=favorable|protected=False) = {:.2f}%".format(unprotected_favored_ratio*100) 
         
         disparate_impact = protected_favored_ratio / unprotected_favored_ratio
         properties["Formula"] = "Disparate Impact = Protected Favored Ratio / Unprotected Favored Ratio"
-        properties["Disparate Impact"] = "{:.2f}".format(disparate_impact*100)
+        properties["Disparate Impact"] = "{:.2f}".format(disparate_impact)
     
         score = np.digitize(disparate_impact, thresholds, right=False)+1
             
