@@ -712,7 +712,7 @@ def pillar_section(pillar, metrics):
                     dcc.Graph(id='{}_spider'.format(pillar), style={'display': 'none'}),
                     dcc.Graph(id='{}_bar'.format(pillar), style={'display': 'block'}),    
                     html.Div([], id="{}_available_metrics".format(pillar),className = pillar),
-                    dbc.Collapse(["{}_configuration".format(pillar)],
+                    dbc.Collapse([],
                         id="{}_configuration".format(pillar),
                         is_open=False,
                     ),

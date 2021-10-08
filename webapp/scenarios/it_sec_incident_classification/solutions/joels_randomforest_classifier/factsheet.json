@@ -20,14 +20,13 @@
     },
     "scores": {
         "fairness": {
-            "question_fairness": 5,
-            "class_balance": 5,
-            "underfitting": NaN,
+            "underfitting": 1,
             "overfitting": 1,
             "statistical_parity_difference": 1,
             "equal_opportunity_difference": NaN,
             "average_odds_difference": NaN,
-            "disparate_impact": 1
+            "disparate_impact": 1,
+            "class_balance": 5
         },
         "explainability": {
             "algorithm_class": 3,
@@ -54,13 +53,12 @@
     },
     "properties": {
         "fairness": {
-            "question_fairness": {
-                "Question Fairness": "5"
+            "underfitting": {
+                "Conclusion": "Model is strongly underfitting",
+                "Training Accuracy": 0.6605787476280834,
+                "Test Accuracy": 0.5855855855855856,
+                "Train Test Accuracy Difference": 0.07499316204249784
             },
-            "class_balance": {
-                "class balance score": 5
-            },
-            "underfitting": {},
             "overfitting": {
                 "Conclusion": "Model is strongly overfitting",
                 "Training Accuracy": 0.6605787476280834,
@@ -78,7 +76,11 @@
                 "Metric Description": "Is quotient of the ratio of samples from the protected group receiving a favorable prediction divided by the ratio of samples from the unprotected group receiving a favorable prediction",
                 "Protected Favored Ratio": "P(y_hat=favorable|protected=True) = 0.0",
                 "Unprotected Favored Ratio": "P(y_hat=favorable|protected=False) = 0.09954751131221719",
-                "Disparate Impact": "Protected Favored Ratio / Unprotected Favored Ratio 0.0"
+                "Formula": "Disparate Impact = Protected Favored Ratio / Unprotected Favored Ratio",
+                "Disparate Impact": "0.00"
+            },
+            "class_balance": {
+                "class balance score": 5
             }
         },
         "explainability": {

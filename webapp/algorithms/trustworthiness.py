@@ -39,7 +39,7 @@ def trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness,
         return  result(score=scores, properties=properties)
 
 # calculate final score with weigths
-def get_final_score(model, train_data, test_data, config_weights, mappings_config, factsheet, solution_set_path):
+def get_final_score(model, train_data, test_data, config_weights, mappings_config, factsheet, solution_set_path, recalc=False):
     config_fairness = mappings_config["fairness"]
     config_explainability = mappings_config["explainability"]
     config_robustness = mappings_config["robustness"]
@@ -50,7 +50,7 @@ def get_final_score(model, train_data, test_data, config_weights, mappings_confi
     #print("mapping is default:")
     #print(default_map == mappings_config)
     if default_map == mappings_config:
-        if "scores" in factsheet.keys() and "properties" in factsheet.keys():
+        if "scores" in factsheet.keys() and "properties" in factsheet.keys() and not recalc:
             scores = factsheet["scores"]
             properties = factsheet["properties"]
         else:
