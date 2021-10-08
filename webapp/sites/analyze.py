@@ -523,10 +523,21 @@ def explainability_details(data):
     metrics = list(properties["explainability"].keys())
     
     sections = [html.H3("▶ Explainability Metrics")]
+    comp_list = []
+    non_comp_list = []
     for i in range(len(metrics)):
             metric_id = metrics[i]
             score = result["results"]["explainability"][metric_id]
-            sections.append(create_metric_details_section(metric_id, i, 2, True,score))
+            if np.isnan(score):
+                metric_name = metric_id.replace("_", " ")
+                non_comp_list.append(html.H4("{2}.{0} {1}".format(i+1, metric_name, 2)))
+            else:
+                comp_list.append(create_metric_details_section(metric_id, i, 2, True,score))
+            
+    sections.append(html.Div([
+        html.Div(comp_list),
+        html.H5("Non-Computable Metrics"),
+        html.Div(non_comp_list)]))
     return sections
 
 @app.callback(
@@ -920,8 +931,9 @@ def show_properties(data, solution_set_path):
 
 @app.callback(Output('result', 'data'), 
           [Input('solution_set_dropdown', 'value'),
-          Input("input-config","data"),Input('input-mappings', 'data')])
-def store_trust_analysis(solution_set_dropdown, config_weights, config_mappings): 
+          Input("input-config","data"),Input('input-mappings', 'data')],
+          State("recalc","on"))
+def store_trust_analysis(solution_set_dropdown, config_weights, config_mappings,recalc): 
         if not solution_set_dropdown:
             return None
         
@@ -946,7 +958,7 @@ def store_trust_analysis(solution_set_dropdown, config_weights, config_mappings)
     
         test, train, model, factsheet = read_solution(solution_set_dropdown)
     
-        final_score, results, properties = get_final_score(model, train, test, weight_config, mappings_config, factsheet, solution_set_dropdown)
+        final_score, results, properties = get_final_score(model, train, test, weight_config, mappings_config, factsheet, solution_set_dropdown, recalc)
         
         trust_score = get_trust_score(final_score, weight_config["pillars"])
         
@@ -1235,6 +1247,13 @@ layout = html.Div([
             dcc.Store(id='result'),
             
             dbc.Col([html.H1("Analyze", className="text-center")], width=12, className="mb-2 mt-1"),
+            html.Div([daq.BooleanSwitch(id='recalc',
+                      on=False,
+                      label='allways recalculate',
+                      labelPosition="top",
+                      color = "green"
+                    
+                    )],className="text-center",style= {'display': 'inline-block'} if DEBUG else {"display": "None"}),
              dbc.Col([html.H5("Scenario"),
                  dcc.Dropdown(
                     id='scenario_dropdown',
