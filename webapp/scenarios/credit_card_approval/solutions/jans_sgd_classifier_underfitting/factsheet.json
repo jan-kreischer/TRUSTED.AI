@@ -4,23 +4,22 @@
     },
     "fairness": {
         "question_fairness": 3,
-        "protected_feature": "Group",
-        "protected_group": "lambda x: x[protected_feature] == 1",
-        "favorable_outcome": "lambda x: x[target_column] == 1"
+        "protected_feature": "Income",
+        "protected_group": "lambda x: x['Income'] == 1",
+        "favorable_outcome": "lambda x: x['Target'] == 1"
     },
     "explainability": {},
     "robustness": {},
     "methodology": {},
     "scores": {
         "fairness": {
-            "question_fairness": 3,
-            "class_balance": 1,
             "underfitting": 1,
             "overfitting": NaN,
             "statistical_parity_difference": 1,
             "equal_opportunity_difference": 5,
             "average_odds_difference": 5,
-            "disparate_impact": 5
+            "disparate_impact": 5,
+            "class_balance": 1
         },
         "explainability": {
             "algorithm_class": NaN,
@@ -47,12 +46,6 @@
     },
     "properties": {
         "fairness": {
-            "question_fairness": {
-                "Question Fairness": "3"
-            },
-            "class_balance": {
-                "class balance score": 1
-            },
             "underfitting": {
                 "Conclusion": "Model is strongly underfitting",
                 "Training Accuracy": 0.38554166666666667,
@@ -84,6 +77,9 @@
                 "Protected Favored Ratio": "P(y_hat=favorable|protected=True) = 1.0",
                 "Unprotected Favored Ratio": "P(y_hat=favorable|protected=False) = 1.0",
                 "Disparate Impact": "Protected Favored Ratio / Unprotected Favored Ratio 1.0"
+            },
+            "class_balance": {
+                "class balance score": 1
             }
         },
         "explainability": {

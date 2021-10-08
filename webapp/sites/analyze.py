@@ -218,8 +218,7 @@ for s in SECTIONS[1:]:
     @app.callback(
         [Output("{0}_details".format(s), "is_open"),
          Output("{0}_configuration".format(s), "is_open")],
-        [Input("toggle_{0}_details".format(s), "on")],
-        prevent_initial_call=True)
+        [Input("toggle_{0}_details".format(s), "on")])
     def toggle_detail_section(is_open):
         return is_open, is_open
 
