@@ -421,6 +421,47 @@ def add_matplotlib_to_report(Story, fig, sizex, sizey):
     Story.append(im)
     return Story
 
+def fairness_properties_for_report(fairness_properties):
+    k = []
+    v = []
+    if "overfitting" in fairness_properties:
+        k.append("Training Accuracy")
+        v.append(fairness_properties["overfitting"]["Training Accuracy"])
+    if "underfitting" in fairness_properties:
+        k.append("Test Accuracy")
+        v.append(fairness_properties["underfitting"]["Test Accuracy"])
+        k.append("Underfitting Conclusion")
+        v.append(fairness_properties["underfitting"]["Conclusion"])
+    if "overfitting" in fairness_properties:
+        k.append("Overfitting Conclusion")
+        v.append(fairness_properties["overfitting"]["Conclusion"])
+
+    if "statistical_parity_difference" in fairness_properties:
+        k.append("Statistical Parity Difference Formula")
+        v.append(fairness_properties["statistical_parity_difference"]["Formula"])
+        k.append("Statistical Parity Difference")
+        v.append(fairness_properties["statistical_parity_difference"]["Statistical Parity Difference"])
+
+    if "equal_opportunity_difference" in fairness_properties:
+        k.append("Equal Opportunity Difference Formula")
+        v.append(fairness_properties["equal_opportunity_difference"]["Formula"])
+        k.append("Equal Opportunity Difference")
+        v.append(fairness_properties["equal_opportunity_difference"]["Equal Opportunity Difference"])
+
+    if "average_odds_difference" in fairness_properties:
+        k.append("Average Odds Difference Formula")
+        v.append(fairness_properties["average_odds_difference"]["Formula"])
+        k.append("Average Odds Difference")
+        v.append(fairness_properties["average_odds_difference"]["Average Odds Difference"])
+
+    if "disparate_impact" in fairness_properties:
+        k.append("Disparate Impact Formula")
+        v.append(fairness_properties["disparate_impact"]["Formula"])
+        k.append("Disparate Impact")
+        v.append(fairness_properties["disparate_impact"]["Disparate Impact"])
+
+    return k, v
+
 
 def save_report_as_pdf(result, model, test_data, target_column, factsheet, charts, configs):
       
@@ -462,7 +503,7 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
     plots= []
     for n, (pillar, sub_scores) in enumerate(results.items()):
         my_dpi = 96
-        fig = plt.figure(figsize=(600 / my_dpi, 400 / my_dpi), dpi=my_dpi)
+        fig = plt.figure(figsize=(800 / my_dpi, 400 / my_dpi), dpi=my_dpi)
         title = "{} \n(config: {})".format(pillar, configs[n + 1].split("/")[-1][:-5])
         categories = list(map(lambda x: x.replace("_", ' '), sub_scores.keys()))
         categories = ['\n'.join(wrap(l, 12, break_long_words=False)) for l in categories]
@@ -471,25 +512,18 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
         values = np.array(values)[~nan_val]
         categories = np.array(categories)[~nan_val]
         ax = plt.subplot(2, 2, n + 1)
-        draw_bar_plot(categories, values, ax, color=pillar_colors[n], title=id_to_name(title), size=6)
+        if pillar == "fairness":
+            draw_bar_plot(categories, values, ax, color=pillar_colors[n], title=id_to_name(title), size=4.5)
+        else:
+            draw_bar_plot(categories, values, ax, color=pillar_colors[n], title=id_to_name(title), size=6)
         plots.append(fig)
 
     Story = add_matplotlib_to_report(Story, plots[0], 7 * inch, 5 * inch)
-    fairness_properties = [p for k, p in result["properties"]["fairness"].items()]
-    k = []
-    v = []
-    for l in fairness_properties:
-        if l!= {}:
-            for i,m in l.items():
-                if type(m) == list:
-                    k.append(m[0])
-                    v.append(m[1])
-                else: 
-                    k.append(i)
-                    v.append(m)
+    fairness_properties = result["properties"]["fairness"]
+    k, v = fairness_properties_for_report(fairness_properties)
 
-    sizex = 4* [1.6 * inch]
-    sizey = math.ceil(len(k)/2) * [0.4 * inch]
+    sizex = [1.8 * inch, 2.2 * inch, 1.9 * inch, 1.4 * inch]
+    sizey = math.ceil(len(k)/2) * [0.55 * inch]
     Story = report_section(Story, "Fairness Properties",  k, v, sizex, sizey)
 
     Story = add_matplotlib_to_report(Story, plots[1], 7 * inch, 5 * inch)
