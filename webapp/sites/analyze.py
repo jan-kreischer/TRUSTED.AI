@@ -538,7 +538,7 @@ def explainability_details(data):
             
     sections.append(html.Div([
         html.Div(comp_list),
-        html.H5("Non-Computable Metrics"),
+        html.H5("Non-Computable Metrics") if not []==non_comp_list else [],
         html.Div(non_comp_list)]))
     return sections
 
