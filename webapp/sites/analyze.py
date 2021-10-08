@@ -530,7 +530,9 @@ def explainability_details(data):
             score = result["results"]["explainability"][metric_id]
             if np.isnan(score):
                 metric_name = metric_id.replace("_", " ")
-                non_comp_list.append(html.H4("{2}.{0} {1}".format(i+1, metric_name, 2)))
+                non_comp_list.append(create_metric_details_section(metric_id, i, 2, True,score)
+                   # html.H4("{2}.{0} {1}".format(i+1, metric_name, 2))
+                    )
             else:
                 comp_list.append(create_metric_details_section(metric_id, i, 2, True,score))
             
@@ -742,8 +744,8 @@ def regularization(analysis, solution_set_path):
           analysis = json.loads(analysis)
           _, metric_scores, metric_properties = analysis["final_score"] , analysis["results"], analysis["properties"]
           metric_score = metric_scores["methodology"]["regularization"]
-          regularization_technique = metric_properties["methodology"]["regularization"]["regularization_technique"]
-          return html.Div("Regularization Technique: {}".format(regularization_technique)), html.H4("({}/5)".format(metric_score))
+          regularization_technique = metric_properties["methodology"]["regularization"]
+          return metric_detail_div(regularization_technique), html.H4("({}/5)".format(metric_score))
     else:
         return [], []
     
@@ -774,7 +776,8 @@ def factsheet_completeness(analysis, solution_set_path):
           analysis = json.loads(analysis)
           _, metric_scores, metric_properties = analysis["final_score"] , analysis["results"], analysis["properties"]
           metric_score = metric_scores["methodology"]["factsheet_completeness"]
-          return html.Div("Train-Test-Split: {0}/{1}"), html.H4("({}/5)".format(metric_score))
+          metric_properties= metric_properties["methodology"]["factsheet_completeness"]
+          return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_score))
 
 @app.callback(
     Output(component_id="trust_section", component_property='style'),

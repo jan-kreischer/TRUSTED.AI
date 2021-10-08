@@ -54,67 +54,94 @@
     "properties": {
         "fairness": {
             "underfitting": {
-                "Conclusion": "Model is slighly underfitting",
-                "Training Accuracy": 1.0,
-                "Test Accuracy": 0.8806306306306306,
-                "Train Test Accuracy Difference": 0.11936936936936937
+                "Metric Description": "Compares the models achieved test accuracy against a baseline.",
+                "Depends on": "Model, Test Data",
+                "Test Accuracy": "88.06%",
+                "Conclusion": "Model is slighly underfitting"
             },
             "overfitting": {
-                "Conclusion": "Model is strongly overfitting",
-                "Training Accuracy": 1.0,
-                "Test Accuracy": 0.8806306306306306,
-                "Train Test Accuracy Difference": 0.11936936936936937
+                "Metric Description": "Overfitting is present if the training accuracy is significantly higher than the test accuracy",
+                "Depends on": "Model, Training Data, Test Data",
+                "Training Accuracy": "100.00%",
+                "Test Accuracy": "88.06%",
+                "Train Test Accuracy Difference": "11.94%",
+                "Conclusion": "Model is strongly overfitting"
             },
             "statistical_parity_difference": {
-                "Favored Majority Ratio": 0.07969370391378332,
-                "Favored Minority Ratio": 0.5416666666666666,
-                "Statistical Parity Difference": 0.4619729627528833
+                "Metric Description": "The spread between the percentage of observations from the majority group receiving a favorable outcome compared to the protected group. The closes this spread is to zero the better.",
+                "Depends on": "Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)",
+                "Favored Majority Ratio": "P(y_true=favorable|protected=False) = 7.97%",
+                "Favored Minority Ratio": "P(y_true=favorable|protected=True) = 54.17%",
+                "Formula": "Favored Minority Ratio - Favored Minority Ratio",
+                "Statistical Parity Difference": "46.20%"
             },
             "equal_opportunity_difference": {
                 "Metric Description": "Difference in true positive rates between protected and unprotected group.",
-                "TPR Unprotected Group": "P(y_hat=favorable|y_true=favorable, protected=False) = 0.5454545454545454",
-                "TPR Protected Group": "P(y_hat=favorable|y_true=favorable, protected=True) = 1.0",
-                "Equal Opportunity Difference": "TPR Protected Group - TPR Unprotected Group = 0.4545454545454546"
+                "Depends on": "Model, Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)",
+                "TPR Unprotected Group": "P(y_hat=favorable|y_true=favorable, protected=False) = 54.55%",
+                "TPR Protected Group": "P(y_hat=favorable|y_true=favorable, protected=True) = 100.00%",
+                "Formula": "Equal Opportunity Difference = TPR Protected Group - TPR Unprotected Group",
+                "Equal Opportunity Difference": "45.45%"
             },
             "average_odds_difference": {
                 "Metric Description": "Is the average of difference in false positive rates and true positive rates between the protected and unprotected group",
-                "FPR Unprotected Group": "P(y_hat=favorable|y_true=unfavorable, protected=False) = 0.007317073170731708",
-                "FPR Protected Group": "P(y_hat=favorable|y_true=unfavorable, protected=True) = 0.0",
-                "TPR Unprotected Group": "P(y_hat=favorable|y_true=favorable, protected=False) = 0.5454545454545454",
-                "TPR Protected Group": "P(y_hat=favorable|y_true=favorable, protected=True) = 1.0",
-                "Average Odds Difference": "0.5*(TPR Protected - TPR Unprotected) + 0.5*(FPR Protected - FPR Unprotected): 0.22361419068736144"
+                "Depends on": "Model, Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)",
+                "FPR Unprotected Group": "P(y_hat=favorable|y_true=unfavorable, protected=False) = 0.73%",
+                "FPR Protected Group": "P(y_hat=favorable|y_true=unfavorable, protected=True) = 0.00%",
+                "TPR Unprotected Group": "P(y_hat=favorable|y_true=favorable, protected=False) = 54.55%",
+                "TPR Protected Group": "P(y_hat=favorable|y_true=favorable, protected=True) = 100.00%",
+                "Formula": "0.5*(TPR Protected - TPR Unprotected) + 0.5*(FPR Protected - FPR Unprotected)",
+                "Average Odds Difference": "22.36%"
             },
             "disparate_impact": {
                 "Metric Description": "Is quotient of the ratio of samples from the protected group receiving a favorable prediction divided by the ratio of samples from the unprotected group receiving a favorable prediction",
-                "Protected Favored Ratio": "P(y_hat=favorable|protected=True) = 0.5",
-                "Unprotected Favored Ratio": "P(y_hat=favorable|protected=False) = 0.04740406320541761",
+                "Depends on": "Model, Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)",
+                "Protected Favored Ratio": "P(y_hat=favorable|protected=True) = 50.00%",
+                "Unprotected Favored Ratio": "P(y_hat=favorable|protected=False) = 4.74%",
                 "Formula": "Disparate Impact = Protected Favored Ratio / Unprotected Favored Ratio",
-                "Disparate Impact": "1054.76"
+                "Disparate Impact": "10.55"
             },
             "class_balance": {
-                "class balance score": 5
+                "Metric Description": "Measures how well the training data is balanced or unbalanced",
+                "Depends on": "Training Data"
             }
         },
         "explainability": {
             "algorithm_class": {
+                "dep": [
+                    "Depends on",
+                    "Model"
+                ],
                 "clf_name": [
                     "model type",
                     "RandomForestClassifier"
                 ]
             },
             "correlated_features": {
+                "dep": [
+                    "Depends on",
+                    "Training Data"
+                ],
                 "pct_drop": [
                     "Percentage of highly correlated features",
                     "58.90%"
                 ]
             },
             "model_size": {
+                "dep": [
+                    "Depends on",
+                    "Training Data"
+                ],
                 "n_features": [
                     "number of features",
                     74
                 ]
             },
             "feature_relevance": {
+                "dep": [
+                    "Depends on",
+                    "Training Data and Model"
+                ],
                 "n_outliers": [
                     "number of outliers in the importance distribution",
                     0
@@ -305,6 +332,10 @@
         },
         "methodology": {
             "normalization": {
+                "dep": [
+                    "Depends on",
+                    "Training and Testing Data"
+                ],
                 "Training_mean": [
                     "Mean of the training data",
                     "58926.01"
@@ -327,54 +358,70 @@
                 ]
             },
             "missing_data": {
+                "dep": [
+                    "Depends on",
+                    "Training Data"
+                ],
                 "null_values": [
                     "Number of the null values",
                     "0"
                 ]
             },
             "regularization": {
+                "dep": [
+                    "Depends on",
+                    "Factsheet"
+                ],
                 "regularization_technique": [
                     "Regularization technique",
                     "none"
                 ]
             },
             "train_test_split": {
+                "dep": [
+                    "Depends on",
+                    "Training and Testing Data"
+                ],
                 "train_test_split": [
                     "Train test split",
                     "80.00/20.00"
                 ]
             },
             "factsheet_completeness": {
+                "dep": [
+                    "Depends on",
+                    "Factsheet"
+                ],
                 "model_name": [
-                    "(Factsheet Property) model_name",
+                    "Factsheet Property model name",
                     "present"
                 ],
                 "purpose_description": [
-                    "(Factsheet Property) purpose_description",
+                    "Factsheet Property purpose description",
                     "present"
                 ],
                 "domain_description": [
-                    "(Factsheet Property) domain_description",
+                    "Factsheet Property domain description",
                     "present"
                 ],
                 "training_data_description": [
-                    "(Factsheet Property) training_data_description",
+                    "Factsheet Property training data description",
                     "present"
                 ],
                 "model_information": [
-                    "(Factsheet Property) model_information",
+                    "Factsheet Property model information",
                     "present"
                 ],
                 "target_column": [
-                    "(Factsheet Property) target_column",
+                    "Factsheet Property target column",
                     "present"
                 ],
                 "authors": [
-                    "(Factsheet Property) authors",
+                    "Factsheet Property authors",
                     "present"
                 ],
                 "contact_information": [
-                    "(Factsheet Property) contact_information",
+                    "Factsheet Property contact information",
                     "present"
                 ]
             }

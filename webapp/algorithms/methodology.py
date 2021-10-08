@@ -43,7 +43,8 @@ def normalization_score(model, train_data, test_data, factsheet, mappings):
     test_mean = np.mean(np.mean(X_test))
     test_std = np.mean(np.std(X_test))
 
-    properties = {"Training_mean": info("Mean of the training data", "{:.2f}".format(train_mean)),
+    properties = {"dep" :info('Depends on','Training and Testing Data'),
+        "Training_mean": info("Mean of the training data", "{:.2f}".format(train_mean)),
                   "Training_std": info("Standard deviation of the training data", "{:.2f}".format(train_std)),
                   "Test_mean": info("Mean of the test data", "{:.2f}".format(test_mean)),
                   "Test_std": info("Standard deviation of the test data", "{:.2f}".format(test_std))
@@ -73,7 +74,8 @@ def missing_data_score(model, training_dataset, test_dataset, factsheet, mapping
             score = mappings["null_values_exist"]
         else:
             score = mappings["no_null_values"]
-        return result(score=score,properties={"null_values": info("Number of the null values", "{}".format(missing_values))})
+        return result(score=score,properties={"dep" :info('Depends on','Training Data'),
+            "null_values": info("Number of the null values", "{}".format(missing_values))})
     except:
         return result(score=np.nan, properties={})
 
@@ -82,7 +84,8 @@ def missing_data_score(model, training_dataset, test_dataset, factsheet, mapping
 def train_test_split_score(model, training_dataset, test_dataset, factsheet, mappings):
     try:
         training_data_ratio, test_data_ratio = train_test_split_metric(training_dataset, test_dataset)
-        properties= {"train_test_split": info("Train test split", "{:.2f}/{:.2f}".format(training_data_ratio, test_data_ratio))}
+        properties= {"dep" :info('Depends on','Training and Testing Data'),
+            "train_test_split": info("Train test split", "{:.2f}/{:.2f}".format(training_data_ratio, test_data_ratio))}
         for k in mappings.keys():
             thresholds = re.findall(r'\d+-\d+', k)
             for boundary in thresholds:
@@ -107,7 +110,8 @@ def is_between(a, x, b):
 def regularization_score(model, training_dataset, test_dataset, factsheet, methodology_config):
     score = 1
     regularization = regularization_metric(factsheet)
-    properties = {"regularization_technique": info("Regularization technique", regularization)}
+    properties = {"dep" :info('Depends on','Factsheet'),
+        "regularization_technique": info("Regularization technique", regularization)}
 
     if regularization == "elasticnet_regression":
         score = 5
@@ -193,14 +197,15 @@ def f1_metric(model, test_dataset, factsheet):
 # --- Factsheet Completeness ---
 def factsheet_completeness_score(model, training_dataset, test_dataset, factsheet, methodology_config):
     score = 0
-    properties= dict()
+    properties= {"dep" :info('Depends on','Factsheet')}
+    
     n = len(GENERAL_INPUTS)
     ctr = 0
     for e in GENERAL_INPUTS:
         if "general" in factsheet and e in factsheet["general"]:
             ctr+=1
-            properties[e] = info("(Factsheet Property) {}".format(e), "present")
+            properties[e] = info("Factsheet Property {}".format(e.replace("_"," ")), "present")
         else:
-            properties[e] = info("(Factsheet Property) {}".format(e), "missing")
+            properties[e] = info("Factsheet Property {}".format(e.replace("_"," ")), "missing")
     score = round(ctr/n*5)
     return result(score=score, properties=properties)
