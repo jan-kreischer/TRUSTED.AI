@@ -1249,11 +1249,11 @@ layout = html.Div([
             dbc.Col([html.H1("Analyze", className="text-center")], width=12, className="mb-2 mt-1"),
             html.Div([daq.BooleanSwitch(id='recalc',
                       on=False,
-                      label='allways recalculate',
+                      label='Recompute',
                       labelPosition="top",
-                      color = "green"
+                      color = "green",
                     
-                    )],className="text-center",style= {'display': 'inline-block'} if DEBUG else {"display": "None"}),
+                    )], style= {'display': 'Block'} if DEBUG else {"display": "None"}),
              dbc.Col([html.H5("Scenario"),
                  dcc.Dropdown(
                     id='scenario_dropdown',
