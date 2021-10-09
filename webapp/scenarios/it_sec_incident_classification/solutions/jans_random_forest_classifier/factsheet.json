@@ -10,10 +10,13 @@
         "contact_information": "jan.bauer@uzh.ch"
     },
     "fairness": {
-        "question_fairness": 5,
         "protected_feature": "connectivity",
-        "protected_group": "lambda x: x[protected_feature] == 0",
-        "favorable_outcome": "lambda x: x[target_column] == 13"
+        "protected_values": [
+            0
+        ],
+        "favorable_outcomes": [
+            13
+        ]
     },
     "methodology": {
         "regularization": "none"
@@ -39,9 +42,9 @@
             "clique_method": 3,
             "loss_sensitivity": NaN,
             "clever_score": NaN,
-            "empirical_robustness_fast_gradient_attack": NaN,
-            "empirical_robustness_carlini_wagner_attack": NaN,
-            "empirical_robustness_deepfool_attack": NaN
+            "er_fast_gradient_attack": NaN,
+            "er_carlini_wagner_attack": NaN,
+            "er_deepfool_attack": NaN
         },
         "methodology": {
             "normalization": 1,
@@ -69,7 +72,7 @@
             },
             "statistical_parity_difference": {
                 "Metric Description": "The spread between the percentage of observations from the majority group receiving a favorable outcome compared to the protected group. The closes this spread is to zero the better.",
-                "Depends on": "Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)",
+                "Depends on": "Training Data, Factsheet (Definition of Protected Group and Favorable Outcome)",
                 "Favored Majority Ratio": "P(y_true=favorable|protected=False) = 7.97%",
                 "Favored Minority Ratio": "P(y_true=favorable|protected=True) = 54.17%",
                 "Formula": "Favored Minority Ratio - Favored Minority Ratio",
@@ -326,9 +329,9 @@
             },
             "loss_sensitivity": {},
             "clever_score": {},
-            "empirical_robustness_fast_gradient_attack": {},
-            "empirical_robustness_carlini_wagner_attack": {},
-            "empirical_robustness_deepfool_attack": {}
+            "er_fast_gradient_attack": {},
+            "er_carlini_wagner_attack": {},
+            "er_deepfool_attack": {}
         },
         "methodology": {
             "normalization": {

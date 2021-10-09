@@ -19,7 +19,8 @@ from helpers import *
 # --- Preview Callbacks --- #
 @app.callback([Output('training_data_upload', 'children'),
                Output('training_data_summary', 'children'), 
-               Output('target_column_dropdown', 'options')],
+               Output('target_column_dropdown', 'options'),
+               Output('protected_feature_dropdown', 'options')],
               [Input('training_data_upload', 'contents'),
               State('training_data_upload', 'filename')], prevent_initial_call=True)
 def training_data_preview(content, name):
@@ -29,11 +30,38 @@ def training_data_preview(content, name):
     options = []
     if content is not None:
         message = html.Div(name)
-        summary, columns = parse_contents(content, name)
+        df, summary, columns = parse_contents(content, name)
+        print(columns)
         for c in columns:
             options.append({"label": str(c), "value": str(c)})
 
-    return [message, summary, options]
+    return [message, summary, options, options]
+
+@app.callback(Output('protected_value_dropdown', 'options'),
+              [Input('protected_feature_dropdown', 'value'),
+               State('training_data_upload', 'contents'),
+              State('training_data_upload', 'filename')], prevent_initial_call=True)
+def protected_group_value_options(protected_feature, training_data_content, training_data_filename):
+    options = []
+    if training_data_content is not None:
+        df, _, _ = parse_contents(training_data_content, training_data_filename)
+        unique_protected_feature_values = np.unique(df[protected_feature])
+        for unique_protected_feature_value in unique_protected_feature_values:
+            options.append({"label": "{0}=={1}".format(protected_feature, str(unique_protected_feature_value)), "value": str(unique_protected_feature_value)})
+    return options
+
+@app.callback(Output('favorable_outcome_dropdown', 'options'),
+              [Input('target_column_dropdown', 'value'),
+               State('training_data_upload', 'contents'),
+              State('training_data_upload', 'filename')], prevent_initial_call=True)
+def favorable_outcome_value_options(column, content, filename):
+    options = []
+    if content is not None:
+        df, _, _ = parse_contents(content, filename)
+        unique_values = np.unique(df[column])
+        for unique_value in unique_values:
+            options.append({"label": "{0}=={1}".format(column, str(unique_value)), "value": str(unique_value)})
+    return options
 
 @app.callback([Output('test_data_upload', 'children'),
                Output('test_data_summary', 'children')],
@@ -44,7 +72,7 @@ def test_data_preview(content, name):
     summary = []
     if content is not None:
         message = html.Div(name)
-        summary, columns = parse_contents(content, name)
+        df, summary, columns = parse_contents(content, name)
     return [message, summary]
 
 @app.callback([Output('factsheet_upload', 'children'),
@@ -161,7 +189,10 @@ def validate_model(n_clicks, model):
                State('training_data_upload', 'filename'),
                State('test_data_upload', 'contents'),
                State('test_data_upload', 'filename'),
+               State('protected_feature_dropdown', 'value'),
+               State('protected_value_dropdown', 'value'),
                State('target_column_dropdown', 'value'),
+               State('favorable_outcome_dropdown', 'value'),
                State('factsheet_upload', 'contents'),
                State('factsheet_upload', 'filename'),
                State('model_upload', 'contents'),
@@ -176,7 +207,10 @@ def upload_data(
     training_data_filename,
     test_data,
     test_data_filename,
-    target_column_name,
+    protected_feature,
+    protected_values,
+    target_column,
+    favorable_outcome,
     factsheet,
     factsheet_filename,
     model,
@@ -201,8 +235,16 @@ def upload_data(
                 # Saving Test Data
                 save_test_data(solution_path, test_data_filename, test_data)
                 
+                new_factsheet = {"general": {}, "fairness": {}}
+                new_factsheet["general"]["target_column"] = target_column
+                new_factsheet["general"]["description"] = general_description
+                
+                new_factsheet["fairness"]["protected_feature"] = protected_feature
+                new_factsheet["fairness"]["protected_values"] = protected_values
+                new_factsheet["fairness"]["favorable_outcomes"] = favorable_outcomes
+                
                 # Saving Factsheet
-                save_factsheet(solution_path, FACTSHEET_NAME, factsheet, target_column_name, general_description)
+                save_factsheet(solution_path, FACTSHEET_NAME, factsheet, new_factsheet)
   
                 # Saving Model
                 save_model(solution_path, model_filename, model)
@@ -358,23 +400,63 @@ layout = dbc.Container([
         ], className="text-center"),
     ],
             className="mb-4"),
+        
+        # --- PROTECTED FEATURE --- #
+        html.Div([
+            create_info_modal("protected_feature", "Protected Feature", "A protected feature (like age, race, gender) is not supposed to be used for making predictions.", ""),
+            html.H3("Protected Feature"),
+            html.H5("Please select the Protected Feature"),
+            dcc.Dropdown(
+                id='protected_feature_dropdown',
+                options=[],
+                placeholder='Select Protected Feature'
+            ),
+        ], className="mb-4 mt-4 text-center"),
+            
+        # --- PROTECTED VALUES --- #
+        html.Div([
+            create_info_modal("protected_group", "Protected Values", "Please select the values of the protected feature which should be considered as belonging to observations from the protected group", ""),
+            html.H3("Protected Values"),
+            html.H5("Please select the Protected Values for the Protected Feature"),
+            dcc.Dropdown(
+                id='protected_value_dropdown',
+                options=[],
+                placeholder='Select Values of the Protected Feature belonging to the Protected Group',
+                multi=True,
+                style={'width': '100%'}
+            ),
+
+        ], className="mb-4 mt-4 text-center"),
     
     # --- TARGET COLUMN --- #
     
-    html.Div([
+
         html.Div([
             create_info_modal("target_column_name", "Target Column", "The target column contains the values that you want to predict with your model.", ""),
             html.Div(id="target_column_alert"),
-            html.H3("6. Target Column"),
-            html.H5("Please select the target column"),
+            html.H3(["6. Target Column", html.Sup("*")]),
+            html.H5("Please select the Target Column"),
                 dcc.Dropdown(
         id='target_column_dropdown',
         options=[],
         placeholder='Select Target Column'
     ),
-        ], className="text-center"),
-    ],
-            className="mb-4"),
+        ], className="mb-4 text-center"),
+
+        
+    # --- FAVORABLE OUTCOME --- #
+    html.Div([
+        create_info_modal("favorable_outcome", "Favorable Outcome", "Please enter a lambda expression defining values of the target column which are seen as favorable.", "It would be considered favorable for example to get the credit card successfully approved in a credit scoring scenario."),
+        html.H3("Favorable Outcomes"),
+        html.H5("Please select the Favorable Outcomes for the Target Column"),
+        dcc.Dropdown(
+            id='favorable_outcome_dropdown',
+            options=[],
+            placeholder='Select Favorable Outcomes',
+            multi=True,
+            style={'width': '100%'}
+        ),
+    ], className="mb-4 mt-4 text-center"),
        
     # --- FACTSHEET --- #
     

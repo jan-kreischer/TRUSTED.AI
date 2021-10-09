@@ -26,7 +26,6 @@ from helpers import create_info_modal
                Output('target_column', 'value'), 
                Output('authors', 'value'), 
                Output('contact_information', 'value'),
-               Output('question_fairness', 'value'),
                Output('protected_feature', 'value'),
                Output('protected_group', 'value'),
                Output('favorable_outcome', 'value')],
@@ -41,7 +40,6 @@ from helpers import create_info_modal
                State('target_column', 'value'), 
                State('authors', 'value'),    
                State('contact_information', 'value'),
-               State('question_fairness', 'value'),
                State('protected_feature', 'value'),
                State('protected_group', 'value'),
                State('favorable_outcome', 'value')
@@ -57,7 +55,6 @@ def create_factsheet(
     target_column,
     authors,
     contact_information,
-    question_fairness,
     protected_feature,
     protected_group,
     favorable_outcome
@@ -174,53 +171,7 @@ layout = dbc.Container([
                 style={'width': '100%', 'height': 150},
             )], className="mb-4"),
             ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px", "backgroundColor": SECONDARY_COLOR}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),
-                
-            html.Div([
-                html.H2("• Fairness"),
-                html.Div([
-                    create_info_modal("question_fairness", "Question Fairness", "A model is always used in order to acomplish a certain task or make certain predictions. Please score in regard to the scenario, how fair you think this task is. The rating is done on a scale from 1 (very unfair) to 5 (very fair).", "E.g racial profiling would be considered to be very unfair (1) while the detection of cyberattacks would probably be considered very fair (5)"),
-                    html.H3("Question Fairness"),
-                    dcc.Dropdown(
-                        id='question_fairness',
-                        options=[
-                            {'label': 'Very fair', 'value': 5},
-                            {'label': 'Fair', 'value': 4},
-                            {'label': 'Neutral', 'value': 3},
-                            {'label': 'Unfair', 'value': 2},
-                            {'label': 'Very unfair', 'value': 1}
-                        ],
-                        value=3
-                    )
-                ]),
-
-            html.Div([
-                create_info_modal("protected_feature", "Protected Feature", "A protected feature (like age, race, gender) is not supposed to be used for making predictions.", ""),
-                html.H3("Protected Feature"),
-                dcc.Input(id="protected_feature", type="text", placeholder="", value="", debounce=True, style={'width': '100%'}),
-            ], ),
-            
-            html.Div([
-                create_info_modal("protected_group", "Protected Group Definition", "Please enter the name of the target column within your dataset.", ""),
-                html.H3("Protected Group Definition"),
-                dcc.Input(id="protected_group", type="text", placeholder=PROTECTED_GROUP_DEFINITION_EXAMPLE, value="", debounce=True, style={'width': '100%'}),
-            ], className="mb-4 mt-4"),
-                
-             html.Div([
-                create_info_modal("favorable_outcome", "Favorable Outcome", "Please enter a lambda expression defining values of the target column which are seen as favorable.", "It would be considered favorable for example to get the credit card successfully approved in a credit scoring scenario."),
-                html.H3("Favorable Outcome"),
-                dcc.Input(id="favorable_outcome", type="text", placeholder=FAVORABLE_OUTCOME_DEFINITION_EXAMPLE, value="", debounce=True, style={'width': '100%'}),
-            ], className="mb-4 mt-4")
-            ], style={"border": "1px solid #d8d8d8", "borderRadius": "6px", "backgroundColor": SECONDARY_COLOR}, className="pt-3 pb-3 pl-3 pr-3 mb-4 mt-4"),
-                        
-            #html.Div([
-            #    html.H2("• Explainability")
-            #], style={"border": "1px solid #d8d8d8", "borderRadius": "6px", "backgroundColor": SECONDARY_COLOR}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),
-            
-            #html.Div([
-            #
-            #    html.H2("• Robustness")
-            #], style={"border": "1px solid #d8d8d8", "borderRadius": "6px", "backgroundColor": SECONDARY_COLOR}, className="pt-3 pb-3 pl-3 pr-3 mb-4"),
-            
+                           
             html.Div([
                 html.H2("• Methodology"),
                 html.Div([

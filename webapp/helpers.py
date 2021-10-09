@@ -272,8 +272,8 @@ def read_model(solution_set_path):
 '''
     This function reads the factsheet into a dictionary
 '''
-def read_factsheet(solution_set_path):
-    factsheet_path = os.path.join(solution_set_path, FACTSHEET_NAME)
+def read_factsheet(solution_path):
+    factsheet_path = os.path.join(solution_path, FACTSHEET_NAME)
     if os.path.isfile(factsheet_path):
         with open(factsheet_path,'rb') as f:
             factsheet = json.loads(f.read())
@@ -281,14 +281,13 @@ def read_factsheet(solution_set_path):
     else:
         return {}
     
-def save_factsheet(path, name, content, target_column_name, description):
+def save_factsheet(path, name, content, new_factsheet):
     file_name, file_extension = os.path.splitext(name)
     content_type, content_string = content.split(',')
     factsheet = json.loads(base64.b64decode(content_string).decode())
-    if target_column_name:
-        factsheet['general']['target_column'] = target_column_name
-    if description:
-        factsheet['general']['description'] = description
+    print("NEW FACTSHEET: {}".format(new_factsheet))
+    for section in FACTSHEET_SECTIONS:
+        factsheet[section] = factsheet.get(section, {}) | new_factsheet.get(section, {})
         
     with open(os.path.join(path, name), "w",  encoding="utf8") as file:
         json.dump(factsheet, file, indent=4)
@@ -653,7 +652,7 @@ def parse_contents(contents, filename):
         html.Hr(),
     ])
     columns = df.columns.values
-    return table, columns
+    return df, table, columns
 
 
 def list_of_metrics(pillar):
@@ -670,7 +669,6 @@ def create_metric_details_section(metric_id, i, section_n = 1, is_open=True, sco
     return html.Div([
 
         html.Div([
-            html.I(className="fas fa-chevron-down ml-4", id="toggle_{}_details".format(metric_id), style={"float": "right"}),
             html.H4("({}/5)".format(score),id="{}_score".format(metric_id), style={"float": "right"}), 
         html.H4("{2}.{0} {1}".format(i+1, metric_name, section_n)),
         ]),
@@ -686,7 +684,6 @@ def show_metric_details_section(metric_id, metric_score=None, metric_properties 
     metric_name = metric_id.replace("_", " ")
     sections = []
     if not math.isnan(metric_score):
-        #sections.append(html.I(className="fas fa-chevron-down ml-4", id="toggle_{}_details".format(metric_id), style={"float": "right"}))
         sections.append(html.H4("({}/5)".format(metric_score),id="{}_score".format(metric_id), style={"float": "right"})),
         sections.append(html.H4("{0}.{1} {2}".format(section_index, metric_index, metric_name)))
     elif reason_not_calculated !="":
@@ -837,3 +834,10 @@ def metrics_list(metrics):
         metric_name = id_to_name(metric_id)
         elements.append(html.Li(metric_name, className="text-left"))
     return html.Ul(elements)
+
+def load_fairness_config(factsheet):
+    protected_feature = factsheet.get("fairness", {}).get("protected_feature", None)
+    protected_values = factsheet.get("fairness", {}).get("protected_values", [])
+    target_column = factsheet.get("general", {}).get("target_column", None)
+    favorable_outcomes = factsheet.get("fairness", {}).get("favorable_outcomes", [])
+    return protected_feature, protected_values, target_column, favorable_outcomes

@@ -36,7 +36,7 @@ def analyse(model, training_dataset, test_dataset, factsheet, config):
     output = dict(
         underfitting = underfitting_score(model, training_dataset, test_dataset, factsheet, underfitting_thresholds),
         overfitting = overfitting_score(model, training_dataset, test_dataset, factsheet, overfitting_thresholds),
-        statistical_parity_difference = statistical_parity_difference_score(model, training_dataset, test_dataset, factsheet, statistical_parity_difference_thresholds),
+        statistical_parity_difference = statistical_parity_difference_score(model, training_dataset, factsheet, statistical_parity_difference_thresholds),
         equal_opportunity_difference = equal_opportunity_difference_score(model, test_dataset, factsheet, equal_opportunity_difference_thresholds),
         average_odds_difference = average_odds_difference_score(model, test_dataset, factsheet, average_odds_difference_thresholds),
         disparate_impact = disparate_impact_score(model, test_dataset, factsheet, disparate_impact_thresholds),
@@ -129,7 +129,6 @@ def underfitting_score(model, training_dataset, test_dataset, factsheet, thresho
         properties['Metric Description'] = "Compares the models achieved test accuracy against a baseline."
         properties['Depends on'] = 'Model, Test Data'
         score = 0
-        training_accuracy = compute_accuracy(model, training_dataset, factsheet)
         test_accuracy = compute_accuracy(model, test_dataset, factsheet)
         score = np.digitize(abs(test_accuracy), thresholds, right=False) + 1 
 
@@ -206,14 +205,13 @@ def overfitting_score(model, training_dataset, test_dataset, factsheet, threshol
        
         
 # --- Statistical Parity Difference ---
-def statistical_parity_difference_score(model, training_dataset, test_dataset, factsheet, thresholds):
+def statistical_parity_difference_score(model, training_dataset, factsheet, thresholds):
     """This function scores the computed statistical parity difference
     on a scale from 1 (very bad) to 5 (very good)
 
     Args:
         model: ML-model.
         training_dataset: pd.DataFrame containing the used training data.
-        test_dataset: pd.DataFrame containing the used test data.
         factsheet: json document containing all information about the particular solution.
         thresholds: Threshold values used to determine the final score
 
@@ -229,8 +227,9 @@ def statistical_parity_difference_score(model, training_dataset, test_dataset, f
         score = np.nan
         properties = {}
         properties["Metric Description"] = "The spread between the percentage of observations from the majority group receiving a favorable outcome compared to the protected group. The closes this spread is to zero the better."
-        properties["Depends on"] = "Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)"
-        favored_majority_ratio, favored_minority_ratio, statistical_parity_difference = statistical_parity_difference_metric(model, training_dataset, test_dataset, factsheet)
+        properties["Depends on"] = "Training Data, Factsheet (Definition of Protected Group and Favorable Outcome)"
+        favored_majority_ratio, favored_minority_ratio = statistical_parity_difference_metric(model, training_dataset, factsheet)
+        statistical_parity_difference = favored_minority_ratio - favored_majority_ratio
         properties["Favored Majority Ratio"] =  "P(y_true=favorable|protected=False) = {:.2f}%".format(favored_majority_ratio*100)
         properties["Favored Minority Ratio"] =  "P(y_true=favorable|protected=True) = {:.2f}%".format(favored_minority_ratio*100)
         properties["Formula"] =  "Favored Minority Ratio - Favored Minority Ratio"
@@ -242,7 +241,7 @@ def statistical_parity_difference_score(model, training_dataset, test_dataset, f
         return result(score=np.nan, properties={})
 
     
-def statistical_parity_difference_metric(model, training_dataset, test_dataset, factsheet):
+def statistical_parity_difference_metric(model, training_dataset, factsheet):
     """This function computes the statistical parity metric.
     It separates the data into a protected and an unprotected group 
     based on the given definition for protected groups.
@@ -253,7 +252,6 @@ def statistical_parity_difference_metric(model, training_dataset, test_dataset, 
     Args:
         model: ML-model.
         training_dataset: pd.DataFrame containing the used training data.
-        test_dataset: pd.DataFrame containing the used test data.
         factsheet: json document containing all information about the particular solution.
 
     Returns:
@@ -263,27 +261,21 @@ def statistical_parity_difference_metric(model, training_dataset, test_dataset, 
 
     """
     try: 
-        protected_feature = factsheet.get("fairness", {}).get("protected_feature", None)
-        protected = factsheet.get("fairness", {}).get("protected_group", None)
-        target_column = factsheet.get("general", {}).get("target_column", None)
-        favorable_outcome = factsheet.get("fairness", {}).get("favorable_outcome", None)
-
-        protected = eval(protected, {"protected_feature": protected_feature}, {"protected_feature": protected_feature})
-        favorable_outcome = eval(favorable_outcome, {"target_column": target_column}, {"target_column": target_column})
-        protected_indices = training_dataset.apply(protected, axis=1)
-
-        minority = training_dataset[protected_indices]
+        protected_feature, protected_values, target_column, favorable_outcomes = load_fairness_config(factsheet)
+        
+        minority = training_dataset[training_dataset[protected_feature].isin(protected_values)]
         minority_size = len(minority)
-        favored_minority = minority[minority.apply(favorable_outcome, axis=1)]
+        majority = training_dataset[~training_dataset[protected_feature].isin(protected_values)]
+        majority_size = len(majority)
+
+        favored_minority = minority[minority[target_column].isin(favorable_outcomes)]
         favored_minority_size = len(favored_minority)
         favored_minority_ratio = favored_minority_size/minority_size
 
-        majority = training_dataset[~protected_indices]
-        majority_size = len(majority)
-        favored_majority = majority[majority.apply(favorable_outcome, axis=1)]
+        favored_majority = majority[majority[target_column].isin(favorable_outcomes)]
         favored_majority_size = len(favored_majority)
         favored_majority_ratio = favored_majority_size/majority_size
-        return favored_majority_ratio, favored_minority_ratio, favored_minority_ratio - favored_majority_ratio
+        return favored_majority_ratio, favored_minority_ratio
     except Exception as e:
         print("ERROR in statistical_parity_difference_metric(): {}".format(e))
         raise
@@ -373,7 +365,7 @@ def average_odds_difference_score(model, test_dataset, factsheet, thresholds):
         return result(score=int(score), properties=properties) 
     except Exception as e:
         print("ERROR in average_odds_difference_score(): {}".format(e))
-        return result(score=np.nan, properties={})
+        return result(score=np.nan, properties={"Non computable": "{}".format(e)})
    
   
 # --- Disparate Impact ---
@@ -438,8 +430,9 @@ def disparate_impact_metric(model, test_dataset, factsheet):
 
     """
     try: 
-        target_column = factsheet.get("general", {}).get("target_column", "")
         data = test_dataset.copy(deep=True)
+        
+        protected_feature, protected_values, target_column, favorable_outcomes = load_fairness_config(factsheet)
         
         X_data = data.drop(target_column, axis=1)
         if (isinstance(model, tf.keras.Sequential)):
@@ -449,37 +442,20 @@ def disparate_impact_metric(model, test_dataset, factsheet):
             y_pred = model.predict(X_data).flatten()
         data['y_pred'] = y_pred.tolist()
 
-        favorable_outcome_definition = factsheet.get("fairness", {}).get("favorable_outcome", None)
-        favorable_prediction = eval(favorable_outcome_definition, {"target_column": 'y_pred'}, {"target_column": 'y_pred'})
-        #favorable_outcome = eval(favorable_outcome_definition, {"target_column": target_column}, {"target_column": target_column})
-        
-        protected_feature = factsheet.get("fairness", {}).get("protected_feature", None)
-        protected_group_definition = factsheet.get("fairness", {}).get("protected_group", None)
-        protected = eval(protected_group_definition, {"protected_feature": protected_feature}, {"protected_feature": protected_feature})
-        
-        #favored_indices = data.apply(favorable_outcome, axis=1)
-        #1. Divide into protected and unprotected group
-        protected_indices = data.apply(protected, axis=1)
-        protected_group = data[protected_indices]
-        unprotected_group = data[~protected_indices]
+        protected_group = data[data[protected_feature].isin(protected_values)]
+        unprotected_group = data[~data[protected_feature].isin(protected_values)]
 
         protected_group_size = len(protected_group)
-        print("protected_group_size: {}".format(protected_group_size))
         unprotected_group_size = len(unprotected_group)
-        print("unprotected_group_size: {}".format(unprotected_group_size))
 
-        protected_favored_group = protected_group[protected_group.apply(favorable_prediction, axis=1)]
-        unprotected_favored_group = unprotected_group[unprotected_group.apply(favorable_prediction, axis=1)]
+        protected_favored_group = protected_group[protected_group['y_pred'].isin(favorable_outcomes)]
+        unprotected_favored_group = unprotected_group[unprotected_group['y_pred'].isin(favorable_outcomes)]
 
         protected_favored_group_size = len(protected_favored_group)
-        print("protected_group_size: {}".format(protected_favored_group_size))
         unprotected_favored_group_size = len(unprotected_favored_group)
-        print("unprotected_group_size: {}".format(unprotected_favored_group_size))
 
         protected_favored_ratio = protected_favored_group_size / protected_group_size
-        print("protected_favored_ratio: {}".format(protected_favored_ratio))
         unprotected_favored_ratio = unprotected_favored_group_size / unprotected_group_size
-        print("unprotected_favored_ratio: {}".format(unprotected_favored_ratio))
 
         disparate_impact = protected_favored_ratio / unprotected_favored_ratio
         print("disparate_impact: {}".format(disparate_impact))
@@ -538,8 +514,9 @@ def false_positive_rates(model, test_dataset, factsheet):
 
     """
     try: 
-        target_column = factsheet.get("general", {}).get("target_column", "")
         data = test_dataset.copy(deep=True)
+        
+        protected_feature, protected_values, target_column, favorable_outcomes = load_fairness_config(factsheet)
         
         X_data = data.drop(target_column, axis=1)
         if (isinstance(model, tf.keras.Sequential)):
@@ -549,31 +526,20 @@ def false_positive_rates(model, test_dataset, factsheet):
             y_pred = model.predict(X_data).flatten()
         data['y_pred'] = y_pred.tolist()
 
-        favorable_outcome_definition = factsheet.get("fairness", {}).get("favorable_outcome", None)
-        favorable_prediction = eval(favorable_outcome_definition, {"target_column": 'y_pred'}, {"target_column": 'y_pred'})
-        favorable_outcome = eval(favorable_outcome_definition, {"target_column": target_column}, {"target_column": target_column})
-        unfavorable_outcome = funcy.compose(operator.not_, favorable_outcome)
-        
-        protected_feature = factsheet.get("fairness", {}).get("protected_feature", None)
-        protected_group_definition = factsheet.get("fairness", {}).get("protected_group", None)
-        protected = eval(protected_group_definition, {"protected_feature": protected_feature}, {"protected_feature": protected_feature})
-        
-        #1. Divide into protected and unprotected group
-        protected_indices = data.apply(protected, axis=1)
-        protected_group = data[protected_indices]
-        unprotected_group = data[~protected_indices]
+        protected_group = data[data[protected_feature].isin(protected_values)]
+        unprotected_group = data[~data[protected_feature].isin(protected_values)]
 
         #2. Compute the number of negative samples y_true=False for the protected and unprotected group.
-        protected_group_true_unfavorable = protected_group[protected_group.apply(unfavorable_outcome, axis=1)]
-        unprotected_group_true_unfavorable = unprotected_group[unprotected_group.apply(unfavorable_outcome, axis=1)]
+        protected_group_true_unfavorable = protected_group[~protected_group[target_column].isin(favorable_outcomes)]
+        unprotected_group_true_unfavorable = unprotected_group[~unprotected_group[target_column].isin(favorable_outcomes)]
         protected_group_n_true_unfavorable = len(protected_group_true_unfavorable)
         unprotected_group_n_true_unfavorable = len(unprotected_group_true_unfavorable)
         print("protected_group_n_true_unfavorable {}".format(protected_group_n_true_unfavorable))
         print("unprotected_group_true_unfavorable {}".format(unprotected_group_true_unfavorable))
 
         #3. Calculate the number of false positives for the protected and unprotected group
-        protected_group_true_unfavorable_pred_favorable = protected_group_true_unfavorable[protected_group_true_unfavorable.apply(favorable_prediction, axis=1)]
-        unprotected_group_true_unfavorable_pred_favorable = unprotected_group_true_unfavorable[unprotected_group_true_unfavorable.apply(favorable_prediction, axis=1)]
+        protected_group_true_unfavorable_pred_favorable = protected_group_true_unfavorable[protected_group_true_unfavorable['y_pred'].isin(favorable_outcomes)]
+        unprotected_group_true_unfavorable_pred_favorable = unprotected_group_true_unfavorable[unprotected_group_true_unfavorable['y_pred'].isin(favorable_outcomes)]
         protected_group_n_true_unfavorable_pred_favorable = len(protected_group_true_unfavorable_pred_favorable)
         unprotected_group_n_true_unfavorable_pred_favorable = len(unprotected_group_true_unfavorable_pred_favorable)
 
@@ -606,8 +572,14 @@ def true_positive_rates(model, test_dataset, factsheet):
 
     """
     try: 
-        target_column = factsheet.get("general", {}).get("target_column", "")
         data = test_dataset.copy(deep=True)
+        
+        protected_feature = factsheet.get("fairness", {}).get("protected_feature", None)
+        protected_values = factsheet.get("fairness", {}).get("protected_values", [])
+        target_column = factsheet.get("general", {}).get("target_column", None)
+        favorable_outcomes = factsheet.get("fairness", {}).get("favorable_outcomes", [])
+        
+
         
         X_data = data.drop(target_column, axis=1)
         if (isinstance(model, tf.keras.Sequential)):
@@ -617,35 +589,33 @@ def true_positive_rates(model, test_dataset, factsheet):
             y_pred = model.predict(X_data).flatten()
         data['y_pred'] = y_pred.tolist()
 
-        favorable_outcome_definition = factsheet.get("fairness", {}).get("favorable_outcome", None)
-        favorable_prediction = eval(favorable_outcome_definition, {"target_column": 'y_pred'}, {"target_column": 'y_pred'})
-        favorable_outcome = eval(favorable_outcome_definition, {"target_column": target_column}, {"target_column": target_column})
+        #favorable_outcome_definition = factsheet.get("fairness", {}).get("favorable_outcome", None)
+        #favorable_prediction = eval(favorable_outcome_definition, {"target_column": 'y_pred'}, {"target_column": 'y_pred'})
+        #favorable_outcome = eval(favorable_outcome_definition, {"target_column": target_column}, {"target_column": target_column})
         
-        protected_feature = factsheet.get("fairness", {}).get("protected_feature", None)
-        protected_group_definition = factsheet.get("fairness", {}).get("protected_group", None)
-        protected = eval(protected_group_definition, {"protected_feature": protected_feature}, {"protected_feature": protected_feature})
+        #protected_feature = factsheet.get("fairness", {}).get("protected_feature", None)
+        #protected_group_definition = factsheet.get("fairness", {}).get("protected_group", None)
+        #protected = eval(protected_group_definition, {"protected_feature": protected_feature}, {"protected_feature": protected_feature})
         
-        favored_indices = data.apply(favorable_outcome, axis=1)
-        protected_indices = data.apply(protected, axis=1)
+        #favored_indices = data.apply(favorable_outcome, axis=1)
+        #protected_indices = data.apply(protected, axis=1)
 
-        favored_samples = data[favored_indices]
-        protected_favored_samples = favored_samples[protected_indices]
-        unprotected_favored_samples = favored_samples[~protected_indices]
+        favored_samples = data[data[target_column].isin(favorable_outcomes)]
+        protected_favored_samples = favored_samples[favored_samples[protected_feature].isin(protected_values)]
+        unprotected_favored_samples = favored_samples[~favored_samples[protected_feature].isin(protected_values)]
 
         num_unprotected_favored_true = len(unprotected_favored_samples)
-        num_unprotected_favored_pred = len(unprotected_favored_samples[unprotected_favored_samples.apply(favorable_prediction, axis=1)])
+        num_unprotected_favored_pred = len(unprotected_favored_samples[unprotected_favored_samples['y_pred'].isin(favorable_outcomes)])
         tpr_unprotected = num_unprotected_favored_pred/num_unprotected_favored_true
 
         num_protected_favored_true = len(protected_favored_samples)
-        num_protected_favored_pred = len(protected_favored_samples[protected_favored_samples.apply(favorable_prediction, axis=1)])
+        num_protected_favored_pred = len(protected_favored_samples[protected_favored_samples['y_pred'].isin(favorable_outcomes)])
         tpr_protected = num_protected_favored_pred / num_protected_favored_true 
         return tpr_protected, tpr_unprotected
 
     except Exception as e:
         print("ERROR in true_positive_rates(): {}".format(e))
         raise
-
-
 
 
 
