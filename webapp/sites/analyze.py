@@ -386,98 +386,77 @@ def show_general_description(scenario_id, solution_set_path):
         return description
     else:
         return ""
- 
-#@app.callback(
-#    [Output("scenario_dropdown", 'value'),
-#    Output("solution_set_dropdown", 'value')],
-#    [Input('url', 'scenario_id'),
-#    Input('url', 'solution_id')])
-#def display_scenario_solution(scenario_id, solution_id):
-#    if scenario_id and solution_id:
-#        print("Scenario_id {}".format(scenario_id))
-#        print("Solution_id {}".format(solution_id))
-#        return scenario_id, solution_id
-#    else:
-#        return '', ''
     
 # === FAIRNESS ===
 @app.callback(
     Output("fairness_configuration", 'children'),
     [Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
-def fairness_configuration(solution_set_path):
-    if solution_set_path == "":
-        return []
-    if solution_set_path is not None:
-        train_data =  read_train(solution_set_path)
-        test_data =  read_test(solution_set_path)
-
+def fairness_configuration(solution_path):
+    if solution_path is not None:
+        train_data =  read_train(solution_path)
         features = list(train_data.columns)
-        target_column=""
-        factsheet = None
-
-        factsheet_path = os.path.join(solution_set_path, "factsheet.json") 
-        # Check if a factsheet.json file already exists in the target directory
-        if os.path.isfile(factsheet_path):
-
-            f = open(factsheet_path,)
-            factsheet = json.load(f)
-                   
-            protected_feature = factsheet.get("fairness", {}).get("protected_feature", None)
-            protected_group = factsheet.get("fairness", {}).get("protected_group", None)
-            target_column = factsheet.get("general", {}).get("target_column", None)
-            favorable_outcome = factsheet.get("fairness", {}).get("favorable_outcome", None)
-            
-            f.close()
-        else:
-            print("No factsheet exists yet")
         
-        fairness_configuration_alert = html.Div([], id="fairness_configuration_alert")
-        protected_feature_select_options = list(map(lambda x: {"label": x, "value": x}, features))
-        protected_feature_select = html.Div([
+        factsheet = read_factsheet(solution_path)
+
+        protected_feature, protected_values, target_column, favorable_outcomes = load_fairness_config(factsheet)
+
+        title_section = html.Div([html.H3("▶ Fairness Configuration")])
+        explanation_section = html.Div([html.Img(src=app.get_asset_url('fairness.png'), height="300px"), html.Div("For computing the fairness metrics, the dataset is divided into a protected and an unprotected group based on the values of the protected feature (e.g Gender). The fairness metrics always compare different values (e.g TPR) across these two groups.")], style={'textAlign': 'center'})
+        alert_section = html.Div([], id="fairness_configuration_alert")
+        
+        protected_feature_dropdown_options = list(map(lambda x: {"label": x, "value": x}, features))
+        protected_feature_dropdown = html.Div([
             "Select Protected Feature", 
             dcc.Dropdown(
-                id="protected_feature_select",
-                options=protected_feature_select_options,
+                id="protected_feature_dropdown",
+                options=protected_feature_dropdown_options,
                 value=protected_feature
             ),
         ])
         
-        protected_group_definition = html.Div([
-            "Define Protected Group",
-            html.Br(),
-            dcc.Input(
-                id="protected_group_definition",
-                type="text",
-                placeholder="e.g lambda x: x[protected_feature] < 25",
-                value=protected_group,
+        protected_value_dropdown = html.Div([
+            "Select Protected Values",
+            dcc.Dropdown(
+                id='protected_value_dropdown',
+                options=[],
+                placeholder='',
+                multi=True,
                 style={'width': '100%'}
-            ),
+            )
         ])
         
-        solution_set_label_select_options = list(map(lambda x: {"label": x, "value": x}, features))
-        solution_set_label_select = html.Div([
+        target_column_dropdown_options = list(map(lambda x: {"label": x, "value": x}, features))
+        target_column_dropdown = html.Div([
             "Select Target Column", 
             dcc.Dropdown(
-                id="solution_set_label_select",
-                options=solution_set_label_select_options,
+                id="target_column_dropdown",
+                options=target_column_dropdown_options,
                 value=target_column
-            ),
+            )
         ])
         
-        favorable_outcome_definition = html.Div([
-            "Define Favorable Outcome",
-            html.Br(),
-            dcc.Input(
-                id="favorable_outcome_definition",
-                type="text",
-                placeholder="e.g lambda x: x[target_column] < 25",
-                value=favorable_outcome,
+        favorable_outcome_dropdown = html.Div([
+            "Select Favorable Outcomes",
+            dcc.Dropdown(
+                id='favorable_outcome_dropdown',
+                options=[],
+                placeholder='',
+                multi=True,
                 style={'width': '100%'}
-            ),
+            )
         ])
-
-        fairness_explanation = html.Div([html.Img(src=app.get_asset_url('fairness.png'), height="300px"), html.Div("For computing the fairness metrics, the dataset is divided into a protected and an unprotected group based on the values of the protected feature (e.g Gender). The fairness metrics always compare different values (e.g TPR) across these two groups.")], style={'textAlign': 'center'})
-        sections = [html.Hr(), html.H3("▶ Fairness Configuration"), fairness_explanation, fairness_configuration_alert, protected_feature_select, protected_group_definition, solution_set_label_select, favorable_outcome_definition, html.Hr()]
+        
+        sections = [
+                    html.Hr(),
+                    title_section,
+                    explanation_section,
+                    alert_section,
+                    protected_feature_dropdown,
+                    protected_value_dropdown,
+                    target_column_dropdown,
+                    favorable_outcome_dropdown,
+                    html.Hr()
+                   ]
         return sections
     else:
         return []
@@ -489,25 +468,21 @@ The following function updates
     Output("fairness_configuration_alert", 'children'),
     [Input('protected_feature_select', 'value'),
      Input('protected_group_definition', 'value'),
-     Input('solution_set_label_select', 'value'),
+     Input('target_column_dropdown', 'value'),
      Input('favorable_outcome_definition', 'value'),
      State('scenario_dropdown', 'value'),
      State('solution_set_dropdown', 'value')
     ], prevent_initial_call=True)
 def update_fairness_configuration(protected_feature, protected_group_definition, target_column, favorable_outcome_definition, scenario_id, solution_id):
-    print("UPDATE FAIRNESS CONFIGURATION")
     if scenario_id and solution_id:
-        print("writing new values into factsheet")
         new_factsheet = {"general": {}, "fairness": {}}
         new_factsheet["general"]["target_column"] = target_column
         new_factsheet["fairness"]["protected_feature"] = protected_feature
         new_factsheet["fairness"]["protected_group"] = protected_group_definition
         new_factsheet["fairness"]["favorable_outcome"] = favorable_outcome_definition
-        
-        print("SOlution id: {}".format(solution_id))
+
         factsheet_path = os.path.join(solution_id, FACTSHEET_NAME)
         
-        print("Factsheet Path: {}".format(factsheet_path))
         update_factsheet(factsheet_path, new_factsheet)
     return html.Div("Updated factsheet")
     
@@ -530,13 +505,15 @@ def explainability_details(data):
             score = result["results"]["explainability"][metric_id]
             if np.isnan(score):
                 metric_name = metric_id.replace("_", " ")
-                non_comp_list.append(html.H4("{2}.{0} {1}".format(i+1, metric_name, 2)))
+                non_comp_list.append(create_metric_details_section(metric_id, i, 2, True,score)
+                   # html.H4("{2}.{0} {1}".format(i+1, metric_name, 2))
+                    )
             else:
                 comp_list.append(create_metric_details_section(metric_id, i, 2, True,score))
             
     sections.append(html.Div([
         html.Div(comp_list),
-        html.H5("Non-Computable Metrics"),
+        html.H5("Non-Computable Metrics") if not []==non_comp_list else [],
         html.Div(non_comp_list)]))
     return sections
 
@@ -742,8 +719,8 @@ def regularization(analysis, solution_set_path):
           analysis = json.loads(analysis)
           _, metric_scores, metric_properties = analysis["final_score"] , analysis["results"], analysis["properties"]
           metric_score = metric_scores["methodology"]["regularization"]
-          regularization_technique = metric_properties["methodology"]["regularization"]["regularization_technique"]
-          return html.Div("Regularization Technique: {}".format(regularization_technique)), html.H4("({}/5)".format(metric_score))
+          regularization_technique = metric_properties["methodology"]["regularization"]
+          return metric_detail_div(regularization_technique), html.H4("({}/5)".format(metric_score))
     else:
         return [], []
     
@@ -774,7 +751,8 @@ def factsheet_completeness(analysis, solution_set_path):
           analysis = json.loads(analysis)
           _, metric_scores, metric_properties = analysis["final_score"] , analysis["results"], analysis["properties"]
           metric_score = metric_scores["methodology"]["factsheet_completeness"]
-          return html.Div("Train-Test-Split: {0}/{1}"), html.H4("({}/5)".format(metric_score))
+          metric_properties= metric_properties["methodology"]["factsheet_completeness"]
+          return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_score))
 
 @app.callback(
     Output(component_id="trust_section", component_property='style'),
@@ -971,21 +949,7 @@ def store_trust_analysis(solution_set_dropdown, config_weights, config_mappings,
                 "trust_score":trust_score,
                 "properties" : properties}
         return json.dumps(data,default=convert)
-
-for m in fairness_metrics + methodology_metrics + explainability_metrics + robustness_metrics:
-    @app.callback(
-        [Output("{0}_details".format(m), "is_open"),
-        Output("{0}_details".format(m), "style")],
-        [Input("toggle_{0}_details".format(m), "n_clicks")],
-        [State("{0}_details".format(m), "is_open")],
-        prevent_initial_call=True
-    )
-    def toggle_detail_section(n, is_open):
-        if is_open:
-            return (not is_open, {'display': 'None'})
-        else:
-            return (not is_open, {'display': 'Block'})
-    
+  
 @app.callback(
       [Output('bar', 'figure'),
        Output('spider', 'figure'),
@@ -1093,14 +1057,30 @@ def robustness_details(data):
     metrics = list(properties["robustness"].keys())
 
     sections = [html.H3("▶ Robustness Metrics")]
+    non_calculated_metrics = []
+    count = 1
     for i in range(len(metrics)):
         metric_id = metrics[i]
         if properties["robustness"][metric_id] != {}:
-            sections.append(create_metric_details_section(metric_id, i, 3, True))
+            sections.append(create_metric_details_section(metric_id, count, 3))
+            count = count + 1
+        else:
+            if metric_id == "loss_sensitivity" or metric_id == "clever_score":
+                non_calculated_metrics.append(show_metric_details_section(metric_id, np.nan, reason_not_calculated="Can only be calculated on Keras models."))
+            elif metric_id == "er_fast_gradient_attack" or metric_id == "er_carlini_wagner_attack" or metric_id == "er_deepfool_attack":
+                non_calculated_metrics.append(show_metric_details_section(metric_id, np.nan, reason_not_calculated="Can be calculated on either SVC or Logistic Regression models."))
+            elif metric_id == "confidence_score":
+                non_calculated_metrics.append(show_metric_details_section(metric_id, np.nan, reason_not_calculated="Can only be calculated on models which provide prediction probabilities."))
+            elif metric_id == "clique_method":
+                non_calculated_metrics.append(show_metric_details_section(metric_id, np.nan, reason_not_calculated="Can only be calculated on Tree-Based models."))
+
+
+    sections.append(html.H5("Non-Computable Metrics") if not [] == non_calculated_metrics else [])
+    sections.append(html.Div(non_calculated_metrics))
     return sections
 
 @app.callback(
-[Output("empirical_robustness_deepfool_attack_details", 'children'), Output("empirical_robustness_deepfool_attack_score", 'children')],
+[Output("er_deepfool_attack_details", 'children'), Output("er_deepfool_attack_score", 'children')],
 Input('result', 'data'), prevent_initial_call=False)
 def Deepfool_Attack_metric_detail(data):
   if data is None:
@@ -1108,12 +1088,12 @@ def Deepfool_Attack_metric_detail(data):
   else:
       result = json.loads(data)
       properties = result["properties"]
-      metric_properties = properties["robustness"]["empirical_robustness_deepfool_attack"]
+      metric_properties = properties["robustness"]["er_deepfool_attack"]
       metric_scores = result["results"]
-      return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["empirical_robustness_deepfool_attack"]))
+      return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["er_deepfool_attack"]))
 
 @app.callback(
-[Output("empirical_robustness_carlini_wagner_attack_details", 'children'), Output("empirical_robustness_carlini_wagner_attack_score", 'children')],
+[Output("er_carlini_wagner_attack_details", 'children'), Output("er_carlini_wagner_attack_score", 'children')],
 Input('result', 'data'), prevent_initial_call=False)
 def carlini_wagner_attack_analysis(data):
   if data is None:
@@ -1121,12 +1101,12 @@ def carlini_wagner_attack_analysis(data):
   else:
       result = json.loads(data)
       properties = result["properties"]
-      metric_properties = properties["robustness"]["empirical_robustness_carlini_wagner_attack"]
+      metric_properties = properties["robustness"]["er_carlini_wagner_attack"]
       metric_scores = result["results"]
-      return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["empirical_robustness_carlini_wagner_attack"]))
+      return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["er_carlini_wagner_attack"]))
 
 @app.callback(
-[Output("empirical_robustness_fast_gradient_attack_details", 'children'), Output("empirical_robustness_fast_gradient_attack_score", 'children')],
+[Output("er_fast_gradient_attack_details", 'children'), Output("er_fast_gradient_attack_score", 'children')],
 Input('result', 'data'), prevent_initial_call=False)
 def fast_gradient_attack_analysis(data):
   if data is None:
@@ -1134,9 +1114,9 @@ def fast_gradient_attack_analysis(data):
   else:
       result = json.loads(data)
       properties = result["properties"]
-      metric_properties = properties["robustness"]["empirical_robustness_fast_gradient_attack"]
+      metric_properties = properties["robustness"]["er_fast_gradient_attack"]
       metric_scores = result["results"]
-      return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["empirical_robustness_fast_gradient_attack"]))
+      return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["er_fast_gradient_attack"]))
 
 @app.callback(
 [Output("clique_method_details", 'children'), Output("clique_method_score", 'children')],

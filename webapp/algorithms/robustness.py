@@ -46,9 +46,9 @@ def analyse(model, train_data, test_data, config, factsheet):
         clique_method      = clique_method(model, train_data, test_data, clique_method_thresholds, factsheet ),
         loss_sensitivity   = loss_sensitivity_score(model, train_data, test_data, loss_sensitivity_thresholds),
         clever_score       = clever_score(model, train_data, test_data, clever_score_thresholds),
-        empirical_robustness_fast_gradient_attack = fast_gradient_attack_score(model, train_data, test_data, fsg_attack_thresholds),
-        empirical_robustness_carlini_wagner_attack = carlini_wagner_attack_score(model, train_data, test_data, cw_attack_thresholds),
-        empirical_robustness_deepfool_attack = deepfool_attack_score(model, train_data, test_data, deepfool_thresholds)
+        er_fast_gradient_attack = fast_gradient_attack_score(model, train_data, test_data, fsg_attack_thresholds),
+        er_carlini_wagner_attack = carlini_wagner_attack_score(model, train_data, test_data, cw_attack_thresholds),
+        er_deepfool_attack = deepfool_attack_score(model, train_data, test_data, deepfool_thresholds)
     )
     scores = dict((k, v.score) for k, v in output.items())
     properties = dict((k, v.properties) for k, v in output.items())

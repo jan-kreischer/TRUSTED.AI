@@ -101,24 +101,41 @@
         },
         "explainability": {
             "algorithm_class": {
+                "dep": [
+                    "Depends on",
+                    "Model"
+                ],
                 "clf_name": [
                     "model type",
                     "Pipeline"
                 ]
             },
             "correlated_features": {
+                "dep": [
+                    "Depends on",
+                    "Training Data"
+                ],
                 "pct_drop": [
                     "Percentage of highly correlated features",
                     "0.00%"
                 ]
             },
             "model_size": {
+                "dep": [
+                    "Depends on",
+                    "Training Data"
+                ],
                 "n_features": [
                     "number of features",
                     6
                 ]
             },
-            "feature_relevance": null
+            "feature_relevance": {
+                "dep": [
+                    "Depends on",
+                    "Training Data and Model"
+                ]
+            }
         },
         "robustness": {
             "confidence_score": {
@@ -136,6 +153,10 @@
         },
         "methodology": {
             "normalization": {
+                "dep": [
+                    "Depends on",
+                    "Training and Testing Data"
+                ],
                 "Training_mean": [
                     "Mean of the training data",
                     "14485.76"
@@ -158,54 +179,70 @@
                 ]
             },
             "missing_data": {
+                "dep": [
+                    "Depends on",
+                    "Training Data"
+                ],
                 "null_values": [
                     "Number of the null values",
                     "0"
                 ]
             },
             "regularization": {
+                "dep": [
+                    "Depends on",
+                    "Factsheet"
+                ],
                 "regularization_technique": [
                     "Regularization technique",
                     "not specified"
                 ]
             },
             "train_test_split": {
+                "dep": [
+                    "Depends on",
+                    "Training and Testing Data"
+                ],
                 "train_test_split": [
                     "Train test split",
                     "80.00/20.00"
                 ]
             },
             "factsheet_completeness": {
+                "dep": [
+                    "Depends on",
+                    "Factsheet"
+                ],
                 "model_name": [
-                    "(Factsheet Property) model_name",
+                    "Factsheet Property model name",
                     "missing"
                 ],
                 "purpose_description": [
-                    "(Factsheet Property) purpose_description",
+                    "Factsheet Property purpose description",
                     "missing"
                 ],
                 "domain_description": [
-                    "(Factsheet Property) domain_description",
+                    "Factsheet Property domain description",
                     "missing"
                 ],
                 "training_data_description": [
-                    "(Factsheet Property) training_data_description",
+                    "Factsheet Property training data description",
                     "missing"
                 ],
                 "model_information": [
-                    "(Factsheet Property) model_information",
+                    "Factsheet Property model information",
                     "missing"
                 ],
                 "target_column": [
-                    "(Factsheet Property) target_column",
+                    "Factsheet Property target column",
                     "present"
                 ],
                 "authors": [
-                    "(Factsheet Property) authors",
+                    "Factsheet Property authors",
                     "missing"
                 ],
                 "contact_information": [
-                    "(Factsheet Property) contact_information",
+                    "Factsheet Property contact information",
                     "missing"
                 ]
             }

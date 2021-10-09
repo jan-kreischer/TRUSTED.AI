@@ -38,7 +38,8 @@ def algorithm_class_score(clf, clf_type_score):
 
     clf_name = type(clf).__name__
     exp_score = clf_type_score.get(clf_name,np.nan)
-    properties= {"clf_name": info("model type",clf_name)}
+    properties= {"dep" :info('Depends on','Model'),
+        "clf_name": info("model type",clf_name)}
     
     return  result(score=exp_score, properties=properties)
 
@@ -68,7 +69,8 @@ def correlated_features_score(train_data, test_data, thresholds=[0.05, 0.16, 0.2
     
     bins = thresholds
     score = 5-np.digitize(pct_drop, bins, right=True) 
-    properties= {"pct_drop" : info("Percentage of highly correlated features", "{:.2f}%".format(100*pct_drop))}
+    properties= {"dep" :info('Depends on','Training Data'),
+        "pct_drop" : info("Percentage of highly correlated features", "{:.2f}%".format(100*pct_drop))}
     
     return  result(score=int(score), properties=properties)
 
@@ -77,7 +79,8 @@ def model_size_score(test_data, thresholds = np.array([10,30,100,500])):
     
     dist_score = 5- np.digitize(test_data.shape[1]-1 , thresholds, right=True) 
          
-    return result(score=int(dist_score), properties={"n_features": info("number of features", test_data.shape[1])})
+    return result(score=int(dist_score), properties={"dep" :info('Depends on','Training Data'),
+        "n_features": info("number of features", test_data.shape[1])})
 
 def feature_relevance_score(clf, train_data, target_column=None, threshold_outlier = 0.03, penalty_outlier = 0.5, thresholds = [0.05, 0.1, 0.2, 0.3]):
     
@@ -105,7 +108,7 @@ def feature_relevance_score(clf, train_data, target_column=None, threshold_outli
          importance=clf.feature_importances_
          
     else:
-        return result(score= np.nan, properties=None) 
+        return result(score= np.nan, properties={"dep" :info('Depends on','Training Data and Model')}) 
    
     # absolut values
     importance = abs(importance)
@@ -132,7 +135,8 @@ def feature_relevance_score(clf, train_data, target_column=None, threshold_outli
         dist_score -= penalty_outlier
     
     score =  max(dist_score,1)
-    properties = {"n_outliers":  info("number of outliers in the importance distribution",int(n_outliers)),
+    properties = {"dep" :info('Depends on','Training Data and Model'),
+        "n_outliers":  info("number of outliers in the importance distribution",int(n_outliers)),
                   "pct_dist":  info("percentage of feature that make up over 60% of all features importance", "{:.2f}%".format(100*pct_dist)),
                   "importance":  info("feature importance", {"value": list(importance), "labels": list(feat_labels)})
                   }
