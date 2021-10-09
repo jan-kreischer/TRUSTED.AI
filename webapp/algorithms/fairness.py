@@ -238,7 +238,7 @@ def statistical_parity_difference_score(model, training_dataset, factsheet, thre
         return result(score=int(score), properties=properties)
     except Exception as e:
         print("ERROR in statistical_parity_difference_score(): {}".format(e))
-        return result(score=np.nan, properties={})
+        return result(score=np.nan, properties={"Non computable because": "One subgroup contained no samples after filtering"})
 
     
 def statistical_parity_difference_metric(model, training_dataset, factsheet):
@@ -318,7 +318,7 @@ def equal_opportunity_difference_score(model, test_dataset, factsheet, threshold
         return result(score=int(score), properties=properties) 
     except Exception as e:
         print("ERROR in equal_opportunity_difference_score(): {}".format(e))
-        return result(score=np.nan, properties={})
+        return result(score=np.nan, properties={"Non computable because": "One subgroup contained no samples after filtering"})
  
 
 # --- Average Odds Difference ---
@@ -365,7 +365,7 @@ def average_odds_difference_score(model, test_dataset, factsheet, thresholds):
         return result(score=int(score), properties=properties) 
     except Exception as e:
         print("ERROR in average_odds_difference_score(): {}".format(e))
-        return result(score=np.nan, properties={"Non computable": "{}".format(e)})
+        return result(score=np.nan, properties={"Non computable because": "One subgroup contained no samples after filtering"})
    
   
 # --- Disparate Impact ---
@@ -407,7 +407,7 @@ def disparate_impact_score(model, test_dataset, factsheet, thresholds):
         return result(score=int(score), properties=properties) 
     except Exception as e:
         print("ERROR in disparate_impact_score(): {}".format(e))
-        return result(score=np.nan, properties={})
+        return result(score=np.nan, properties={"Non computable because": "One subgroup contained no samples after filtering"})
 
 
 def disparate_impact_metric(model, test_dataset, factsheet):

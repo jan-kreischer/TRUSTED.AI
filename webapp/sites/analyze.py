@@ -393,18 +393,22 @@ def show_general_description(scenario_id, solution_set_path):
     [Input('solution_set_dropdown', 'value')], prevent_initial_call=True)
 def fairness_configuration(solution_path):
     if solution_path is not None:
-        train_data =  read_train(solution_path)
-        features = list(train_data.columns)
+        data =  read_train(solution_path)
+        features = list(data.columns)
         
         factsheet = read_factsheet(solution_path)
 
         protected_feature, protected_values, target_column, favorable_outcomes = load_fairness_config(factsheet)
 
+        
         title_section = html.Div([html.H3("▶ Fairness Configuration")])
         explanation_section = html.Div([html.Img(src=app.get_asset_url('fairness.png'), height="300px"), html.Div("For computing the fairness metrics, the dataset is divided into a protected and an unprotected group based on the values of the protected feature (e.g Gender). The fairness metrics always compare different values (e.g TPR) across these two groups.")], style={'textAlign': 'center'})
         alert_section = html.Div([], id="fairness_configuration_alert")
         
-        protected_feature_dropdown_options = list(map(lambda x: {"label": x, "value": x}, features))
+        try:
+            protected_feature_dropdown_options = list(map(lambda x: {"label": x, "value": x}, features))
+        except Exception as e:
+            protected_feature_dropdown_options = []
         protected_feature_dropdown = html.Div([
             "Select Protected Feature", 
             dcc.Dropdown(
@@ -414,18 +418,27 @@ def fairness_configuration(solution_path):
             ),
         ])
         
+        try:
+            protected_value_dropdown_options = list(map(lambda x: {"label": "{0}=={1}".format(protected_feature, x), "value": x}, np.unique(data[protected_feature])))
+        except Exception as e:
+            protected_value_dropdown_options = []
+    
         protected_value_dropdown = html.Div([
             "Select Protected Values",
             dcc.Dropdown(
                 id='protected_value_dropdown',
-                options=[],
-                placeholder='',
+                options=protected_value_dropdown_options,
+                value=protected_values,
                 multi=True,
                 style={'width': '100%'}
             )
         ])
         
-        target_column_dropdown_options = list(map(lambda x: {"label": x, "value": x}, features))
+        try:
+            target_column_dropdown_options = list(map(lambda x: {"label": x, "value": x}, features))
+        except Exception as e:
+            target_column_dropdown_options = []
+            
         target_column_dropdown = html.Div([
             "Select Target Column", 
             dcc.Dropdown(
@@ -435,12 +448,17 @@ def fairness_configuration(solution_path):
             )
         ])
         
+        try:
+            favorable_outcome_dropdown_options = list(map(lambda x: {"label": "{0}=={1}".format(target_column, x), "value": x}, np.unique(data[target_column])))
+        except Exception as e:
+            target_column_dropdown_options = []
+            
         favorable_outcome_dropdown = html.Div([
             "Select Favorable Outcomes",
             dcc.Dropdown(
                 id='favorable_outcome_dropdown',
-                options=[],
-                placeholder='',
+                options=favorable_outcome_dropdown_options,
+                value=favorable_outcomes,
                 multi=True,
                 style={'width': '100%'}
             )
@@ -466,21 +484,23 @@ The following function updates
 '''
 @app.callback(
     Output("fairness_configuration_alert", 'children'),
-    [Input('protected_feature_select', 'value'),
-     Input('protected_group_definition', 'value'),
+    [Input('protected_feature_dropdown', 'value'),
+     Input('protected_value_dropdown', 'value'),
      Input('target_column_dropdown', 'value'),
-     Input('favorable_outcome_definition', 'value'),
+     Input('favorable_outcome_dropdown', 'value'),
      State('scenario_dropdown', 'value'),
      State('solution_set_dropdown', 'value')
     ], prevent_initial_call=True)
-def update_fairness_configuration(protected_feature, protected_group_definition, target_column, favorable_outcome_definition, scenario_id, solution_id):
+def update_fairness_configuration(protected_feature, protected_values, target_column, favorable_outcomes, scenario_id, solution_id):
     if scenario_id and solution_id:
         new_factsheet = {"general": {}, "fairness": {}}
-        new_factsheet["general"]["target_column"] = target_column
         new_factsheet["fairness"]["protected_feature"] = protected_feature
-        new_factsheet["fairness"]["protected_group"] = protected_group_definition
-        new_factsheet["fairness"]["favorable_outcome"] = favorable_outcome_definition
+        new_factsheet["fairness"]["protected_values"] = protected_values
+        new_factsheet["general"]["target_column"] = target_column
+        new_factsheet["fairness"]["favorable_outcomes"] = favorable_outcomes
 
+        print("UPDATE FACTSHEET")
+        print(new_factsheet)
         factsheet_path = os.path.join(solution_id, FACTSHEET_NAME)
         
         update_factsheet(factsheet_path, new_factsheet)
@@ -576,12 +596,12 @@ def fairness_metric_details(data):
         non_calculated_metrics = [html.H5("Non-Computable Metrics")]
         
         for metric_id, metric_score in (result["results"]["fairness"]).items():
+            metric_properties = properties.get("fairness", {}).get(metric_id, {})
             if not math.isnan(metric_score):
                 metric_index +=1
-                metric_properties = properties.get("fairness", {}).get(metric_id, {})
                 calculated_metrics.append(show_metric_details_section(metric_id, metric_score, metric_properties, metric_index, FAIRNESS_SECTION_INDEX))
             else:
-                non_calculated_metrics.append(show_metric_details_section(metric_id, metric_score))
+                non_calculated_metrics.append(show_metric_details_section(metric_id, metric_score, metric_properties))
         fairness_metrics_details.append(html.Div(calculated_metrics))
         fairness_metrics_details.append(html.Div(non_calculated_metrics))
         return html.Div(fairness_metrics_details)

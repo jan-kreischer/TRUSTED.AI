@@ -463,7 +463,6 @@ def fairness_properties_for_report(fairness_properties):
 
 
 def save_report_as_pdf(result, model, test_data, target_column, factsheet, charts, configs):
-      
     start = timeit.timeit()
     weight, map_f, map_e, map_r, map_m = configs
     doc = SimpleDocTemplate("report.pdf")
@@ -692,7 +691,7 @@ def show_metric_details_section(metric_id, metric_score=None, metric_properties 
         sections.append(html.H4("- {}".format(metric_name)))
     
     if metric_properties:
-        sections.append(dbc.Collapse(show_metric_properties(metric_properties), id="{}_details".format(metric_id), is_open=True))
+        sections.append(html.Div([show_metric_properties(metric_properties)], id="{}_details".format(metric_id)))
         
     return html.Div(sections, id="{}_section".format(metric_id), className="mb-5 mt-5")
 
@@ -836,8 +835,8 @@ def metrics_list(metrics):
     return html.Ul(elements)
 
 def load_fairness_config(factsheet):
-    protected_feature = factsheet.get("fairness", {}).get("protected_feature", None)
+    protected_feature = factsheet.get("fairness", {}).get("protected_feature", '')
     protected_values = factsheet.get("fairness", {}).get("protected_values", [])
-    target_column = factsheet.get("general", {}).get("target_column", None)
+    target_column = factsheet.get("general", {}).get("target_column", '')
     favorable_outcomes = factsheet.get("fairness", {}).get("favorable_outcomes", [])
     return protected_feature, protected_values, target_column, favorable_outcomes
