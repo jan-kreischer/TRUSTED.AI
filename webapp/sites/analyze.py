@@ -476,8 +476,8 @@ def fairness_configuration(solution_set_path):
             ),
         ])
 
-
-        sections = [html.Hr(), html.H3("▶ Fairness Configuration"), fairness_configuration_alert, protected_feature_select, protected_group_definition, solution_set_label_select, favorable_outcome_definition, html.Hr()]
+        fairness_explanation = html.Div([html.Img(src=app.get_asset_url('fairness.png'), height="300px"), html.Div("For computing the fairness metrics, the dataset is divided into a protected and an unprotected group based on the values of the protected feature (e.g Gender). The fairness metrics always compare different values (e.g TPR) across these two groups.")], style={'textAlign': 'center'})
+        sections = [html.Hr(), html.H3("▶ Fairness Configuration"), fairness_explanation, fairness_configuration_alert, protected_feature_select, protected_group_definition, solution_set_label_select, favorable_outcome_definition, html.Hr()]
         return sections
     else:
         return []
@@ -1096,7 +1096,7 @@ def robustness_details(data):
     for i in range(len(metrics)):
         metric_id = metrics[i]
         if properties["robustness"][metric_id] != {}:
-            sections.append(create_metric_details_section(metric_id, i, 3))
+            sections.append(create_metric_details_section(metric_id, i, 3, True))
     return sections
 
 @app.callback(

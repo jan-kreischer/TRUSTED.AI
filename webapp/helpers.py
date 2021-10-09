@@ -631,7 +631,7 @@ def list_of_metrics(pillar):
     return metrics
 
 
-def create_metric_details_section(metric_id, i, section_n = 1, is_open=False, score="X"):
+def create_metric_details_section(metric_id, i, section_n = 1, is_open=True, score="X"):
     metric_name = metric_id.replace("_", " ")
     return html.Div([
 
@@ -652,14 +652,14 @@ def show_metric_details_section(metric_id, metric_score=None, metric_properties 
     metric_name = metric_id.replace("_", " ")
     sections = []
     if not math.isnan(metric_score):
-        sections.append(html.I(className="fas fa-chevron-down ml-4", id="toggle_{}_details".format(metric_id), style={"float": "right"}))
+        #sections.append(html.I(className="fas fa-chevron-down ml-4", id="toggle_{}_details".format(metric_id), style={"float": "right"}))
         sections.append(html.H4("({}/5)".format(metric_score),id="{}_score".format(metric_id), style={"float": "right"})),
         sections.append(html.H4("{0}.{1} {2}".format(section_index, metric_index, metric_name)))
     else: 
         sections.append(html.H4("- {}".format(metric_name)))
     
     if metric_properties:
-        sections.append(dbc.Collapse(show_metric_properties(metric_properties), id="{}_details".format(metric_id)))
+        sections.append(dbc.Collapse(show_metric_properties(metric_properties), id="{}_details".format(metric_id), is_open=True))
         
     return html.Div(sections, id="{}_section".format(metric_id), className="mb-5 mt-5")
 

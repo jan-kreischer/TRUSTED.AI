@@ -20,14 +20,13 @@
     },
     "scores": {
         "fairness": {
-            "question_fairness": 5,
-            "class_balance": 5,
             "underfitting": NaN,
             "overfitting": NaN,
             "statistical_parity_difference": NaN,
             "equal_opportunity_difference": NaN,
             "average_odds_difference": NaN,
-            "disparate_impact": NaN
+            "disparate_impact": NaN,
+            "class_balance": 5
         },
         "explainability": {
             "algorithm_class": NaN,
@@ -39,7 +38,7 @@
             "confidence_score": NaN,
             "clique_method": NaN,
             "loss_sensitivity": 2,
-            "clever_score": 2,
+            "clever_score": 3,
             "empirical_robustness_fast_gradient_attack": NaN,
             "empirical_robustness_carlini_wagner_attack": NaN,
             "empirical_robustness_deepfool_attack": NaN
@@ -54,18 +53,16 @@
     },
     "properties": {
         "fairness": {
-            "question_fairness": {
-                "Question Fairness": "5"
-            },
-            "class_balance": {
-                "class balance score": 5
-            },
             "underfitting": {},
             "overfitting": {},
             "statistical_parity_difference": {},
             "equal_opportunity_difference": {},
             "average_odds_difference": {},
-            "disparate_impact": {}
+            "disparate_impact": {},
+            "class_balance": {
+                "Metric Description": "Measures how well the training data is balanced or unbalanced",
+                "Depends on": "Training Data"
+            }
         },
         "explainability": {
             "algorithm_class": {
@@ -100,7 +97,7 @@
             "clever_score": {
                 "clever_score": [
                     "CLEVER Score",
-                    "0.44"
+                    "0.68"
                 ]
             },
             "empirical_robustness_fast_gradient_attack": {},
