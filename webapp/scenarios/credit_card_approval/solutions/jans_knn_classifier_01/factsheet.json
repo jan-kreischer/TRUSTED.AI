@@ -1,11 +1,11 @@
 {
     "general": {
-        "target_column": "Target"
+        "target_column": "Own_Housing"
     },
     "fairness": {
-        "protected_feature": "Group",
+        "protected_feature": "Own_Car",
         "protected_values": [
-            1
+            0
         ],
         "favorable_outcomes": [
             1

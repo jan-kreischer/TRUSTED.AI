@@ -451,7 +451,7 @@ def fairness_configuration(solution_path):
         try:
             favorable_outcome_dropdown_options = list(map(lambda x: {"label": "{0}=={1}".format(target_column, x), "value": x}, np.unique(data[target_column])))
         except Exception as e:
-            target_column_dropdown_options = []
+            favorable_outcome_dropdown_options = []
             
         favorable_outcome_dropdown = html.Div([
             "Select Favorable Outcomes",
@@ -480,6 +480,56 @@ def fairness_configuration(solution_path):
         return []
 
     '''
+The following function updates
+'''
+@app.callback(
+    Output('protected_value_dropdown', 'options'),
+     Output('protected_value_dropdown', 'value'),
+    [Input('protected_feature_dropdown', 'value'),
+     State('solution_set_dropdown', 'value')], prevent_initial_call=True)
+def update_protected_value_dropdown_options(protected_feature, solution_path):
+    if solution_path is not None:
+        data =  read_train(solution_path)
+        
+        try:
+            protected_value_dropdown_options = list(map(lambda x: {"label": "{0}=={1}".format(protected_feature, x), "value": x}, np.unique(data[protected_feature])))
+        except Exception as e:
+            protected_value_dropdown_options = []
+    
+        new_factsheet = {"fairness": {}}
+        new_factsheet["fairness"]["protected_values"] = ""
+        factsheet_path = os.path.join(solution_path, FACTSHEET_NAME)
+        update_factsheet(factsheet_path, new_factsheet)
+        
+        return protected_value_dropdown_options, ''
+ 
+    '''
+The following function updates
+'''
+@app.callback(
+    Output('favorable_outcome_dropdown', 'options'),
+    Output('favorable_outcome_dropdown', 'value'),
+    [Input('target_column_dropdown', 'value'),
+     State('solution_set_dropdown', 'value')], prevent_initial_call=True)
+def update_facorable_outcome_dropdown_options(target_column, solution_path):
+    if solution_path is not None:
+        data =  read_train(solution_path)
+        
+        try:
+            favorable_outcome_dropdown_options = list(map(lambda x: {"label": "{0}=={1}".format(target_column, x), "value": x}, np.unique(data[target_column])))
+            
+        except Exception as e:
+            target_column_dropdown_options = []
+    
+        new_factsheet = {"fairness": {}}
+        new_factsheet["fairness"]["favorable_outcomes"] = ""
+        factsheet_path = os.path.join(solution_path, FACTSHEET_NAME)
+        update_factsheet(factsheet_path, new_factsheet)
+        
+        return favorable_outcome_dropdown_options, ''
+
+
+'''
 The following function updates
 '''
 @app.callback(

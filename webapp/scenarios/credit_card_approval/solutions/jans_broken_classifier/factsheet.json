@@ -1,8 +1,16 @@
 {
     "general": {
-        "target_column": "Target"
+        "target_column": "Group"
     },
-    "fairness": {},
+    "fairness": {
+        "protected_feature": "Num_Children",
+        "protected_values": [
+            1
+        ],
+        "favorable_outcomes": [
+            1
+        ]
+    },
     "explainability": {},
     "robustness": {},
     "methodology": {},

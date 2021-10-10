@@ -37,7 +37,7 @@ def training_data_preview(content, name):
 
     return [message, summary, options, options]
 
-@app.callback(Output('protected_value_dropdown', 'options'),
+@app.callback(Output('protected_value_dropdown_upload', 'options'),
               [Input('protected_feature_dropdown', 'value'),
                State('training_data_upload', 'contents'),
               State('training_data_upload', 'filename')], prevent_initial_call=True)
@@ -50,7 +50,7 @@ def protected_group_value_options(protected_feature, training_data_content, trai
             options.append({"label": "{0}=={1}".format(protected_feature, str(unique_protected_feature_value)), "value": str(unique_protected_feature_value)})
     return options
 
-@app.callback(Output('favorable_outcome_dropdown', 'options'),
+@app.callback(Output('favorable_outcome_dropdown_upload', 'options'),
               [Input('target_column_dropdown', 'value'),
                State('training_data_upload', 'contents'),
               State('training_data_upload', 'filename')], prevent_initial_call=True)
@@ -190,9 +190,9 @@ def validate_model(n_clicks, model):
                State('test_data_upload', 'contents'),
                State('test_data_upload', 'filename'),
                State('protected_feature_dropdown', 'value'),
-               State('protected_value_dropdown', 'value'),
+               State('protected_value_dropdown_upload', 'value'),
                State('target_column_dropdown', 'value'),
-               State('favorable_outcome_dropdown', 'value'),
+               State('favorable_outcome_dropdown_upload', 'value'),
                State('factsheet_upload', 'contents'),
                State('factsheet_upload', 'filename'),
                State('model_upload', 'contents'),
@@ -419,7 +419,7 @@ layout = dbc.Container([
             html.H3("Protected Values"),
             html.H5("Please select the Protected Values for the Protected Feature"),
             dcc.Dropdown(
-                id='protected_value_dropdown',
+                id='protected_value_dropdown_upload',
                 options=[],
                 placeholder='Select Values of the Protected Feature belonging to the Protected Group',
                 multi=True,
@@ -450,7 +450,7 @@ layout = dbc.Container([
         html.H3("Favorable Outcomes"),
         html.H5("Please select the Favorable Outcomes for the Target Column"),
         dcc.Dropdown(
-            id='favorable_outcome_dropdown',
+            id='favorable_outcome_dropdown_upload',
             options=[],
             placeholder='Select Favorable Outcomes',
             multi=True,
