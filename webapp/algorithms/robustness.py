@@ -84,10 +84,12 @@ def clever_score(model, train_data, test_data, thresholds):
             if min_score > temp:
                 min_score = temp
         score = np.digitize(min_score, thresholds) + 1
-        return result(score=int(score), properties={"clever_score": info("CLEVER Score", "{:.2f}".format(min_score))})
+        return result(score=int(score), properties={"clever_score": info("CLEVER Score", "{:.2f}".format(min_score)),
+                                                    "depends_on": info("Depends on", "Model")})
     except Exception as e:
         print(e)
-        return result(score=np.nan, properties={})
+        return result(score=np.nan, properties={"non_computable": info("Non Computable Because",
+                                                                       "Can only be calculated on Keras models.")})
 
 def loss_sensitivity_score(model, train_data, test_data, thresholds):
     """For a given Keras-NN model this function calculates the Loss Sensitivity score.
@@ -110,10 +112,12 @@ def loss_sensitivity_score(model, train_data, test_data, thresholds):
         classifier = KerasClassifier(model=model, use_logits=False)
         l_s = loss_sensitivity(classifier, X_test, y)
         score = np.digitize(l_s, thresholds, right=True) + 1
-        return result(score=int(score), properties={"loss_sensitivity": info("Average gradient value of the loss function", "{:.2f}".format(l_s))})
+        return result(score=int(score), properties={"loss_sensitivity": info("Average gradient value of the loss function", "{:.2f}".format(l_s)),
+                                                    "depends_on": info("Depends on", "Model")})
     except Exception as e:
         print(e)
-        return result(score=np.nan, properties={})
+        return result(score=np.nan, properties={"non_computable": info("Non Computable Because",
+                                                                       "Can only be calculated on Keras models.")})
 
 def confidence_score(model, train_data, test_data, thresholds):
     """For a given model this function calculates the Confidence score.
@@ -135,9 +139,10 @@ def confidence_score(model, train_data, test_data, thresholds):
         confidence = metrics.confusion_matrix(y_test, y_pred)/metrics.confusion_matrix(y_test, y_pred).sum(axis=1) 
         confidence_score = np.average(confidence.diagonal())*100
         score = np.digitize(confidence_score, thresholds, right=True) + 1
-        return result(score=int(score), properties={"confidence_score": info("Average confidence score", "{:.2f}%".format(confidence_score))})
+        return result(score=int(score), properties={"confidence_score": info("Average confidence score", "{:.2f}%".format(confidence_score)),
+                                                    "depends_on": info("Depends on", "Model and Data")})
     except:
-        return result(score=np.nan, properties={})
+        return result(score=np.nan, properties={"non_computable": info("Non Computable Because", "Can only be calculated on models which provide prediction probabilities.")})
 
 def clique_method(model, train_data, test_data, thresholds, factsheet):
     """For a given tree-based model this function calculates the Clique score.
@@ -160,11 +165,11 @@ def clique_method(model, train_data, test_data, thresholds, factsheet):
     with open('configs/mappings/robustness/default.json', 'r') as f:
           default_map = json.loads(f.read())
     
-    if thresholds == default_map["score_clique_method"]["thresholds"]["value"]:
-        if "scores" in factsheet.keys() and "properties" in factsheet.keys():
-            score = factsheet["scores"]["robustness"]["clique_method"]
-            properties = factsheet["properties"]["robustness"]["clique_method"]
-            return result(score=score, properties=properties)
+    #if thresholds == default_map["score_clique_method"]["thresholds"]["value"]:
+        #if "scores" in factsheet.keys() and "properties" in factsheet.keys():
+            #score = factsheet["scores"]["robustness"]["clique_method"]
+            #properties = factsheet["properties"]["robustness"]["clique_method"]
+            #return result(score=score, properties=properties)
     
     try:
         X_test = test_data.iloc[:, :-1]
@@ -177,9 +182,11 @@ def clique_method(model, train_data, test_data, thresholds, factsheet):
         score = np.digitize(bound, thresholds) + 1
         return result(score=int(score), properties={
             "error_bound": info("Average error bound", "{:.2f}".format(bound)),
-            "error": info("Error", "{:.1f}".format(error))})
+            "error": info("Error", "{:.1f}".format(error)),
+            "depends_on": info("Depends on", "Model")
+        })
     except:
-        return result(score=np.nan, properties={})
+        return result(score=np.nan, properties={"non_computable": info("Non Computable Because", "Can only be calculated on Tree-Based models.")})
 
 def fast_gradient_attack_score(model, train_data, test_data, thresholds):
     """For a given model this function calculates the fast gradient attack score.
@@ -226,9 +233,11 @@ def fast_gradient_attack_score(model, train_data, test_data, thresholds):
         score = np.digitize((before_attack - after_attack)/before_attack*100, thresholds) + 1
         return result(score=int(score), properties={"before_attack": info("FGM Before attack accuracy", "{:.2f}%".format(100 * before_attack)),
                                   "after_attack": info("FGM After attack accuracy", "{:.2f}%".format(100 * after_attack)),
-                                  "difference": info("FGM Proportional difference (After-Att Acc - Before-Att Acc)/Before-Att Acc", "{:.2f}%".format(100 * (before_attack - after_attack) / before_attack))})
+                                  "difference": info("FGM Proportional difference (After-Att Acc - Before-Att Acc)/Before-Att Acc", "{:.2f}%".format(100 * (before_attack - after_attack) / before_attack)),
+                                  "depends_on": info("Depends on", "Model and Data")})
     except:
-        return result(score=np.nan, properties={})
+        return result(score=np.nan, properties={"non_computable": info("Non Computable Because",
+                                                                       "Can be calculated on either SVC or Logistic Regression models.")})
 
 def carlini_wagner_attack_score(model, train_data, test_data, thresholds):
     """For a given model this function calculates the CW attack score.
@@ -277,9 +286,11 @@ def carlini_wagner_attack_score(model, train_data, test_data, thresholds):
                           "after_attack": info("CW After attack accuracy", "{:.2f}%".format(100 * after_attack)),
                           "difference": info(
                               "CW Proportional difference (After-Att Acc - Before-Att Acc)/Before-Att Acc",
-                              "{:.2f}%".format(100 * (before_attack - after_attack) / before_attack))})
+                              "{:.2f}%".format(100 * (before_attack - after_attack) / before_attack)),
+                          "depends_on": info("Depends on", "Model and Data")})
     except:
-        return result(score=np.nan, properties={})
+        return result(score=np.nan, properties={"non_computable": info("Non Computable Because",
+                                                                       "Can be calculated on either SVC or Logistic Regression models.")})
 
 def deepfool_attack_score(model, train_data, test_data, thresholds):
     """For a given model this function calculates the deepfool attack score.
@@ -326,6 +337,8 @@ def deepfool_attack_score(model, train_data, test_data, thresholds):
         return result(score=int(score),
                       properties={"before_attack": info("DF Before attack accuracy", "{:.2f}%".format(100 * before_attack)),
                                   "after_attack": info("DF After attack accuracy", "{:.2f}%".format(100 * after_attack)),
-                                  "difference": info("DF Proportional difference (After-Att Acc - Before-Att Acc)/Before-Att Acc", "{:.2f}%".format(100 * (before_attack - after_attack) / before_attack))})
+                                  "difference": info("DF Proportional difference (After-Att Acc - Before-Att Acc)/Before-Att Acc", "{:.2f}%".format(100 * (before_attack - after_attack) / before_attack)),
+                                  "depends_on": info("Depends on", "Model and Data")})
     except:
-        return result(score=np.nan, properties={})
+        return result(score=np.nan, properties={"non_computable": info("Non Computable Because",
+                                                                       "Can be calculated on either SVC or Logistic Regression models.")})

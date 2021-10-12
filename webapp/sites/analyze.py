@@ -549,8 +549,6 @@ def update_fairness_configuration(protected_feature, protected_values, target_co
         new_factsheet["general"]["target_column"] = target_column
         new_factsheet["fairness"]["favorable_outcomes"] = favorable_outcomes
 
-        print("UPDATE FACTSHEET")
-        print(new_factsheet)
         factsheet_path = os.path.join(solution_id, FACTSHEET_NAME)
         
         update_factsheet(factsheet_path, new_factsheet)
@@ -735,6 +733,8 @@ def f1_score(data):
         properties = result["properties"]
         metric_properties = properties["methodology"]["f1_score"]
         metric_scores = result["results"]
+        if math.isnan(metric_scores["methodology"]["f1_score"]):
+            return metric_detail_div(metric_properties), []
         return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["methodology"]["f1_score"]))
 
 
@@ -750,6 +750,8 @@ def normalization(data):
         properties = result["properties"]
         metric_properties = properties["methodology"]["normalization"]
         metric_scores = result["results"]
+        if math.isnan(metric_scores["methodology"]["normalization"]):
+            return metric_detail_div(metric_properties), []
         return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["methodology"]["normalization"]))
 
 @app.callback(
@@ -763,6 +765,8 @@ def test_accuracy(data):
         properties = result["properties"]
         metric_properties = properties["methodology"]["test_accuracy"]
         metric_scores = result["results"]
+        if math.isnan(metric_scores["methodology"]["test_accuracy"]):
+            return metric_detail_div(metric_properties), []
         return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["methodology"]["test_accuracy"]))
 
 @app.callback(
@@ -776,6 +780,8 @@ def missing_data(data):
         properties = result["properties"]
         metric_properties = properties["methodology"]["missing_data"]
         metric_scores = result["results"]
+        if math.isnan(metric_scores["methodology"]["missing_data"]):
+            return metric_detail_div(metric_properties), []
         return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["methodology"]["missing_data"]))
 
 
@@ -790,6 +796,8 @@ def regularization(analysis, solution_set_path):
           _, metric_scores, metric_properties = analysis["final_score"] , analysis["results"], analysis["properties"]
           metric_score = metric_scores["methodology"]["regularization"]
           regularization_technique = metric_properties["methodology"]["regularization"]
+          if math.isnan(metric_score):
+              return metric_detail_div(metric_properties), []
           return metric_detail_div(regularization_technique), html.H4("({}/5)".format(metric_score))
     else:
         return [], []
@@ -806,6 +814,8 @@ def train_test_split(data):
         properties = result["properties"]
         metric_properties = properties["methodology"]["train_test_split"]
         metric_scores = result["results"]
+        if math.isnan(metric_scores["methodology"]["train_test_split"]):
+            return metric_detail_div(metric_properties), []
         return metric_detail_div(metric_properties), html.H4(
             "({}/5)".format(metric_scores["methodology"]["train_test_split"]))
 
@@ -1128,23 +1138,15 @@ def robustness_details(data):
 
     sections = [html.H3("▶ Robustness Metrics")]
     non_calculated_metrics = []
-    count = 1
+    count = 0
     for i in range(len(metrics)):
         metric_id = metrics[i]
-        if properties["robustness"][metric_id] != {}:
-            sections.append(create_metric_details_section(metric_id, count, 3))
+        score = result["results"]["robustness"][metric_id]
+        if not math.isnan(score):
+            sections.append(create_metric_details_section(metric_id, count, 3, True,score ))
             count = count + 1
         else:
-            if metric_id == "loss_sensitivity" or metric_id == "clever_score":
-                non_calculated_metrics.append(show_metric_details_section(metric_id, np.nan, reason_not_calculated="Can only be calculated on Keras models."))
-            elif metric_id == "er_fast_gradient_attack" or metric_id == "er_carlini_wagner_attack" or metric_id == "er_deepfool_attack":
-                non_calculated_metrics.append(show_metric_details_section(metric_id, np.nan, reason_not_calculated="Can be calculated on either SVC or Logistic Regression models."))
-            elif metric_id == "confidence_score":
-                non_calculated_metrics.append(show_metric_details_section(metric_id, np.nan, reason_not_calculated="Can only be calculated on models which provide prediction probabilities."))
-            elif metric_id == "clique_method":
-                non_calculated_metrics.append(show_metric_details_section(metric_id, np.nan, reason_not_calculated="Can only be calculated on Tree-Based models."))
-
-
+            non_calculated_metrics.append(create_metric_details_section(metric_id, count, 3, True,score ))
     sections.append(html.H5("Non-Computable Metrics") if not [] == non_calculated_metrics else [])
     sections.append(html.Div(non_calculated_metrics))
     return sections
@@ -1160,6 +1162,8 @@ def Deepfool_Attack_metric_detail(data):
       properties = result["properties"]
       metric_properties = properties["robustness"]["er_deepfool_attack"]
       metric_scores = result["results"]
+      if math.isnan(metric_scores["robustness"]["er_deepfool_attack"]):
+          return metric_detail_div(metric_properties), []
       return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["er_deepfool_attack"]))
 
 @app.callback(
@@ -1173,6 +1177,8 @@ def carlini_wagner_attack_analysis(data):
       properties = result["properties"]
       metric_properties = properties["robustness"]["er_carlini_wagner_attack"]
       metric_scores = result["results"]
+      if math.isnan(metric_scores["robustness"]["er_carlini_wagner_attack"]):
+          return metric_detail_div(metric_properties), []
       return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["er_carlini_wagner_attack"]))
 
 @app.callback(
@@ -1186,6 +1192,8 @@ def fast_gradient_attack_analysis(data):
       properties = result["properties"]
       metric_properties = properties["robustness"]["er_fast_gradient_attack"]
       metric_scores = result["results"]
+      if math.isnan(metric_scores["robustness"]["er_fast_gradient_attack"]):
+          return metric_detail_div(metric_properties), []
       return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["er_fast_gradient_attack"]))
 
 @app.callback(
@@ -1199,6 +1207,8 @@ def clique_method_analysis(data):
       properties = result["properties"]
       metric_properties = properties["robustness"]["clique_method"]
       metric_scores = result["results"]
+      if math.isnan(metric_scores["robustness"]["clique_method"]):
+          return metric_detail_div(metric_properties), []
       return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["robustness"]["clique_method"]))
 
 
@@ -1213,6 +1223,8 @@ def confidence_analysis(data):
         properties = result["properties"]
         metric_properties = properties["robustness"]["confidence_score"]
         metric_scores = result["results"]
+        if math.isnan(metric_scores["robustness"]["confidence_score"]):
+            return metric_detail_div(metric_properties), []
         return metric_detail_div(metric_properties), html.H4(
             "({}/5)".format(metric_scores["robustness"]["confidence_score"]))
 
@@ -1227,6 +1239,8 @@ def loss_sensitivity_analysis(data):
         properties = result["properties"]
         metric_properties = properties["robustness"]["loss_sensitivity"]
         metric_scores = result["results"]
+        if math.isnan(metric_scores["robustness"]["loss_sensitivity"]):
+            return metric_detail_div(metric_properties), []
         return metric_detail_div(metric_properties), html.H4(
             "({}/5)".format(metric_scores["robustness"]["loss_sensitivity"]))
 
@@ -1242,6 +1256,8 @@ def clever_score(data):
         properties = result["properties"]
         metric_properties = properties["robustness"]["clever_score"]
         metric_scores = result["results"]
+        if math.isnan(metric_scores["robustness"]["clever_score"]):
+            return metric_detail_div(metric_properties), []
         return metric_detail_div(metric_properties), html.H4(
             "({}/5)".format(metric_scores["robustness"]["clever_score"]))
  

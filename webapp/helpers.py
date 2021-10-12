@@ -38,7 +38,6 @@ PAGE_HEIGHT=defaultPageSize[1]; PAGE_WIDTH=defaultPageSize[0]
 result = collections.namedtuple('result', 'score properties')
 
 def get_url_path(endpoint):
-    print(endpoint)
     return "{0}/{1}".format(BASE_PATH, endpoint)
 
 def draw_bar_plot(categories, values, ax, color='lightblue', title='Trusting AI Final Score',size=12):
@@ -423,37 +422,39 @@ def add_matplotlib_to_report(Story, fig, sizex, sizey):
 def fairness_properties_for_report(fairness_properties):
     k = []
     v = []
-    if "overfitting" in fairness_properties:
+    if "overfitting" in fairness_properties and "Training Accuracy" in fairness_properties["overfitting"]:
         k.append("Training Accuracy")
         v.append(fairness_properties["overfitting"]["Training Accuracy"])
     if "underfitting" in fairness_properties:
-        k.append("Test Accuracy")
-        v.append(fairness_properties["underfitting"]["Test Accuracy"])
-        k.append("Underfitting Conclusion")
-        v.append(fairness_properties["underfitting"]["Conclusion"])
-    if "overfitting" in fairness_properties:
+        if "Test Accuracy" in fairness_properties["underfitting"]:
+            k.append("Test Accuracy")
+            v.append(fairness_properties["underfitting"]["Test Accuracy"])
+        if "Underfitting Conclusion" in fairness_properties["underfitting"]:
+            k.append("Underfitting Conclusion")
+            v.append(fairness_properties["underfitting"]["Conclusion"])
+    if "overfitting" in fairness_properties and "Overfitting Conclusion" in fairness_properties["overfitting"]:
         k.append("Overfitting Conclusion")
         v.append(fairness_properties["overfitting"]["Conclusion"])
 
-    if "statistical_parity_difference" in fairness_properties:
+    if "statistical_parity_difference" in fairness_properties and "Formula" in fairness_properties["statistical_parity_difference"]:
         k.append("Statistical Parity Difference Formula")
         v.append(fairness_properties["statistical_parity_difference"]["Formula"])
         k.append("Statistical Parity Difference")
         v.append(fairness_properties["statistical_parity_difference"]["Statistical Parity Difference"])
 
-    if "equal_opportunity_difference" in fairness_properties:
+    if "equal_opportunity_difference" in fairness_properties and "Formula" in fairness_properties["equal_opportunity_difference"]:
         k.append("Equal Opportunity Difference Formula")
         v.append(fairness_properties["equal_opportunity_difference"]["Formula"])
         k.append("Equal Opportunity Difference")
         v.append(fairness_properties["equal_opportunity_difference"]["Equal Opportunity Difference"])
 
-    if "average_odds_difference" in fairness_properties:
+    if "average_odds_difference" in fairness_properties and "Formula" in fairness_properties["average_odds_difference"]:
         k.append("Average Odds Difference Formula")
         v.append(fairness_properties["average_odds_difference"]["Formula"])
         k.append("Average Odds Difference")
         v.append(fairness_properties["average_odds_difference"]["Average Odds Difference"])
 
-    if "disparate_impact" in fairness_properties:
+    if "disparate_impact" in fairness_properties and "Formula" in fairness_properties["disparate_impact"]:
         k.append("Disparate Impact Formula")
         v.append(fairness_properties["disparate_impact"]["Formula"])
         k.append("Disparate Impact")
@@ -531,7 +532,7 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
     for l in explainability_properties:
         if l!= {} and l != None:
             for i,m in l.items():
-             if i !="importance":
+             if i !="importance" and i != "dep":
                 if type(m) == list:
                     k.append(m[0])
                     v.append(m[1])
@@ -550,12 +551,13 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
     for l in robustness_properties:
         if l!= {}:
             for i,m in l.items():
-                if type(m) == list:
-                    k.append(m[0])
-                    v.append(m[1])
-                else: 
-                    k.append(i)
-                    v.append(m)
+                if i != "depends_on" and i!= "non_computable":
+                    if type(m) == list:
+                        k.append(m[0])
+                        v.append(m[1])
+                    else:
+                        k.append(i)
+                        v.append(m)
     sizex = [2.4 * inch, 0.8 * inch, 2.4 * inch, 0.8 * inch]
     sizey = math.ceil(len(k)/2) * [0.4 * inch]
     Story = report_section(Story, "Robustness Properties", k, v, sizex, sizey)
@@ -567,12 +569,13 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
     for l in methodology_properties:
         if l!= {}:
             for i,m in l.items():
-                if type(m) == list:
-                    k.append(m[0])
-                    v.append(m[1])
-                else: 
-                    k.append(i)
-                    v.append(m)
+                if i != "dep":
+                    if type(m) == list:
+                        k.append(m[0])
+                        v.append(m[1])
+                    else:
+                        k.append(i)
+                        v.append(m)
 
     sizex = [2.2 * inch, 1.2 * inch, 2.4 * inch, 1 * inch]
     sizey = math.ceil(len(k)/2) * [0.4 * inch]
@@ -663,9 +666,23 @@ def list_of_metrics(pillar):
     return metrics
 
 
-def create_metric_details_section(metric_id, i, section_n = 1, is_open=True, score="X"):
+def create_metric_details_section(metric_id, i, section_n = 1, is_open=True, score=np.nan):
     metric_name = metric_id.replace("_", " ")
-    return html.Div([
+    if math.isnan(score):
+        return html.Div([
+
+            html.Div([
+                html.H4("", id="{}_score".format(metric_id), style={"float": "right"}),
+                html.H4("- {}".format(metric_name)),
+            ]),
+            dbc.Collapse(
+                html.Div([NO_DETAILS]),
+                id="{}_details".format(metric_id),
+                is_open=is_open,
+            ),
+        ], id="{}_section".format(metric_id), className="mb-5 mt-5")
+    else:
+        return html.Div([
 
         html.Div([
             html.H4("({}/5)".format(score),id="{}_score".format(metric_id), style={"float": "right"}), 
@@ -679,14 +696,12 @@ def create_metric_details_section(metric_id, i, section_n = 1, is_open=True, sco
         ], id="{}_section".format(metric_id), className="mb-5 mt-5")
 
 
-def show_metric_details_section(metric_id, metric_score=None, metric_properties = None, metric_index = 1, section_index = 1, reason_not_calculated = ""):
+def show_metric_details_section(metric_id, metric_score=None, metric_properties = None, metric_index = 1, section_index = 1):
     metric_name = metric_id.replace("_", " ")
     sections = []
     if not math.isnan(metric_score):
         sections.append(html.H4("({}/5)".format(metric_score),id="{}_score".format(metric_id), style={"float": "right"})),
         sections.append(html.H4("{0}.{1} {2}".format(section_index, metric_index, metric_name)))
-    elif reason_not_calculated !="":
-        sections.append(html.H4("- {} ({})".format(metric_name, reason_not_calculated)))
     else:
         sections.append(html.H4("- {}".format(metric_name)))
     
