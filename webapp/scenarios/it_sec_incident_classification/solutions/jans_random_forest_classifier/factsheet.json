@@ -32,10 +32,10 @@
             "class_balance": 5
         },
         "explainability": {
-            "algorithm_class": 3,
-            "correlated_features": 1,
-            "model_size": 3,
-            "feature_relevance": 4
+            "algorithm_class": 4,
+            "correlated_features": 2,
+            "model_size": 2,
+            "feature_relevance": 5
         },
         "robustness": {
             "confidence_score": 5,
@@ -127,7 +127,7 @@
                 ],
                 "pct_drop": [
                     "Percentage of highly correlated features",
-                    "58.90%"
+                    "39.73%"
                 ]
             },
             "model_size": {
@@ -137,7 +137,7 @@
                 ],
                 "n_features": [
                     "number of features",
-                    74
+                    73
                 ]
             },
             "feature_relevance": {

@@ -32,16 +32,16 @@
             "class_balance": 5
         },
         "explainability": {
-            "algorithm_class": NaN,
-            "correlated_features": 1,
-            "model_size": 3,
+            "algorithm_class": 1,
+            "correlated_features": 2,
+            "model_size": 2,
             "feature_relevance": NaN
         },
         "robustness": {
             "confidence_score": NaN,
             "clique_method": NaN,
             "loss_sensitivity": 2,
-            "clever_score": 3,
+            "clever_score": 2,
             "er_fast_gradient_attack": NaN,
             "er_carlini_wagner_attack": NaN,
             "er_deepfool_attack": NaN
@@ -58,12 +58,18 @@
         "fairness": {
             "underfitting": {},
             "overfitting": {},
-            "statistical_parity_difference": {},
-            "equal_opportunity_difference": {},
-            "average_odds_difference": {
-                "Non computable": "division by zero"
+            "statistical_parity_difference": {
+                "Non computable because": "One subgroup contained no samples after filtering"
             },
-            "disparate_impact": {},
+            "equal_opportunity_difference": {
+                "Non computable because": "One subgroup contained no samples after filtering"
+            },
+            "average_odds_difference": {
+                "Non computable because": "One subgroup contained no samples after filtering"
+            },
+            "disparate_impact": {
+                "Non computable because": "One subgroup contained no samples after filtering"
+            },
             "class_balance": {
                 "Metric Description": "Measures how well the training data is balanced or unbalanced",
                 "Depends on": "Training Data"
@@ -87,7 +93,7 @@
                 ],
                 "pct_drop": [
                     "Percentage of highly correlated features",
-                    "58.90%"
+                    "39.73%"
                 ]
             },
             "model_size": {
@@ -97,7 +103,7 @@
                 ],
                 "n_features": [
                     "number of features",
-                    74
+                    73
                 ]
             },
             "feature_relevance": {
@@ -119,7 +125,7 @@
             "clever_score": {
                 "clever_score": [
                     "CLEVER Score",
-                    "0.53"
+                    "0.40"
                 ]
             },
             "er_fast_gradient_attack": {},
