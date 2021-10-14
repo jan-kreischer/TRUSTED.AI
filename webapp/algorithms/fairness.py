@@ -178,31 +178,36 @@ def overfitting_score(model, training_dataset, test_dataset, factsheet, threshol
         properties = {}
         properties['Metric Description'] = "Overfitting is present if the training accuracy is significantly higher than the test accuracy"
         properties['Depends on'] = 'Model, Training Data, Test Data'
-        score = np.nan
+        overfitting_score = np.nan
         training_accuracy = compute_accuracy(model, training_dataset, factsheet)
         test_accuracy = compute_accuracy(model, test_dataset, factsheet)
         # model could be underfitting.
         # for underfitting models the spread is negative
         accuracy_difference = training_accuracy - test_accuracy
-        score = np.digitize(abs(accuracy_difference), thresholds, right=False) + 1 
-
-        properties["Training Accuracy"] = "{:.2f}%".format(training_accuracy*100)
-        properties["Test Accuracy"] = "{:.2f}%".format(test_accuracy*100)
-        properties["Train Test Accuracy Difference"] = "{:.2f}%".format((training_accuracy - test_accuracy)*100)
         
-        if score == 5:
-            properties["Conclusion"] = "Model is not overfitting"
-        elif score == 4:
-            properties["Conclusion"] = "Model mildly overfitting"
-        elif score == 3:
-            properties["Conclusion"] = "Model is slighly overfitting"
-        elif score == 2:
-            properties["Conclusion"] = "Model is overfitting"
-        else:
-            properties["Conclusion"] = "Model is strongly overfitting"
+        underfitting_score = np.digitize(abs(test_accuracy), thresholds, right=False) + 1 
+        
+        if underfitting_score >= 3:
+            overfitting_score = np.digitize(abs(accuracy_difference), thresholds, right=False) + 1 
+            properties["Training Accuracy"] = "{:.2f}%".format(training_accuracy*100)
+            properties["Test Accuracy"] = "{:.2f}%".format(test_accuracy*100)
+            properties["Train Test Accuracy Difference"] = "{:.2f}%".format((training_accuracy - test_accuracy)*100)
+        
+            if overfitting_score == 5:
+                properties["Conclusion"] = "Model is not overfitting"
+            elif overfitting_score == 4:
+                properties["Conclusion"] = "Model mildly overfitting"
+            elif overfitting_score == 3:
+                properties["Conclusion"] = "Model is slighly overfitting"
+            elif overfitting_score == 2:
+                properties["Conclusion"] = "Model is overfitting"
+            else:
+                properties["Conclusion"] = "Model is strongly overfitting"
 
-        properties["Score"] = str(score)
-        return result(int(score), properties=properties)
+            properties["Score"] = str(overfitting_score)
+            return result(int(score), properties=properties)
+        else:
+            return result(overfitting_score, properties={"Non computable because": "The test accuracy is to low and if the model is underfitting to much it can't be overfitting at the same time."})
     except Exception as e:
         print("ERROR in overfitting_score(): {}".format(e))
         return result(score=np.nan, properties={"Non computable because": str(e)}) 
