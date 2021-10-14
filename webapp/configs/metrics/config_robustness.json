@@ -97,10 +97,10 @@
     "metrics": {
     "confidence_score": "This metric computes how confident the model is about its predictions.<br>More confident a model is it is more difficult to fool the model. <br>Hence if the confidence score increases the robustness increases.",
     "clique_method"    : "For tree based models, Clique Method calculates a bound for<br>the minimal adversarial perturbation to fool a model",
-    "loss_sensitivity"  :"Description of the metric", 
-    "clever_score"   : "Description of the metric",
-    "er_fast_gradient_attack": "Description of the metric",
-    "er_carlini_wagner_attack": "Description of the metric",
-    "er_deepfool_attack": "Description of the metric"
+    "loss_sensitivity"  :"This metric estimates the smoothness of the model.<br>If a small input difference creates a huge output change,<br> then the model is not robust.",
+    "clever_score"   : "This metric is designed for measuring neural networks' robustness.<br> It uses Cross Lipschitz constant estimation.",
+    "er_fast_gradient_attack": "This metric empirically tests the robustness of the model.<br>It calculates and applies Fast Gradient Attack to the model and<br>checks whether the model is fooled by it.",
+    "er_carlini_wagner_attack": "This metric empirically tests the robustness of the model.<br>It calculates and applies Carlini Wagner Attack to the model and<br>checks whether the model is fooled by it.",
+    "er_deepfool_attack": "This metric empirically tests the robustness of the model.<br>It calculates and applies Deepfool Attack to the model and<br>checks whether the model is fooled by it."
   }
 }
