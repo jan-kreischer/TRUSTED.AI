@@ -397,8 +397,14 @@ def fairness_configuration(solution_path):
         features = list(data.columns)
         
         factsheet = read_factsheet(solution_path)
-
-        protected_feature, protected_values, target_column, favorable_outcomes = load_fairness_config(factsheet)
+        try:
+            protected_feature, protected_values, target_column, favorable_outcomes = load_fairness_config(factsheet)
+        except Exception as e:
+            protected_feature = ""
+            protected_values = [] 
+            target_column = ""
+            favorable_outcomes = []
+            
 
         
         title_section = html.Div([html.H3("▶ Fairness Configuration")])

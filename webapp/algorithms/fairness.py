@@ -24,7 +24,6 @@ def analyse(model, training_dataset, test_dataset, factsheet, config):
         and matching properties for every metric
 
     """
-    target_column = factsheet.get("general", {}).get("target_column", "")
     
     statistical_parity_difference_thresholds = config["score_statistical_parity_difference"]["thresholds"]["value"]
     overfitting_thresholds = config["score_overfitting"]["thresholds"]["value"]
@@ -40,7 +39,7 @@ def analyse(model, training_dataset, test_dataset, factsheet, config):
         equal_opportunity_difference = equal_opportunity_difference_score(model, test_dataset, factsheet, equal_opportunity_difference_thresholds),
         average_odds_difference = average_odds_difference_score(model, test_dataset, factsheet, average_odds_difference_thresholds),
         disparate_impact = disparate_impact_score(model, test_dataset, factsheet, disparate_impact_thresholds),
-        class_balance = class_balance_score(training_dataset, target_column)
+        class_balance = class_balance_score(training_dataset, factsheet)
     )
     
     scores = dict((k, v.score) for k, v in output.items())
@@ -49,7 +48,7 @@ def analyse(model, training_dataset, test_dataset, factsheet, config):
     return  result(score=scores, properties=properties)
 
 # --- Class Balance ---
-def class_balance_score(training_data, target_column):
+def class_balance_score(training_data, factsheet):
     """Compute the class balance for the target_column
     If this fails np.nan is returned.
 
@@ -63,7 +62,7 @@ def class_balance_score(training_data, target_column):
 
     """
     try:
-        class_balance = class_balance_metric(training_data, target_column)
+        class_balance = class_balance_metric(training_data, factsheet)
         properties = {}
         properties['Metric Description'] = "Measures how well the training data is balanced or unbalanced"
         properties['Depends on'] = 'Training Data'
@@ -71,13 +70,15 @@ def class_balance_score(training_data, target_column):
             score = 5
         else:
             score = 1
+        
+        properties["Score"] = str(score)
         return result(score=score, properties=properties)     
     except Exception as e:
         print("ERROR in class_balance_score(): {}".format(e))
-        return result(score=np.nan, properties={}) 
+        return result(score=np.nan, properties={"Non computable because": str(e)}) 
     
     
-def class_balance_metric(training_data, target_column):
+def class_balance_metric(training_data, factsheet):
     """This function runs a statistical test (chisquare) in order to
     check if the targe class labels are equally distributed or not
 
@@ -90,6 +91,7 @@ def class_balance_metric(training_data, target_column):
 
     """
     try:
+        protected_feature, protected_values, target_column, favorable_outcomes = load_fairness_config(factsheet)
         absolute_class_occurences = training_data[target_column].value_counts().sort_index().to_numpy()
         significance_level = 0.05
         p_value = chisquare(absolute_class_occurences, ddof=0, axis=0).pvalue
@@ -145,11 +147,12 @@ def underfitting_score(model, training_dataset, test_dataset, factsheet, thresho
         else:
             properties["Conclusion"] = "Model is strongly underfitting"
 
+        properties["Score"] = str(score)
         return result(score=int(score), properties=properties)
     
     except Exception as e:
         print("ERROR in underfitting_score(): {}".format(e))
-        return result(score=np.nan, properties={}) 
+        return result(score=np.nan, properties={"Non computable because": str(e)}) 
 
     
 # --- Overfitting ---
@@ -198,10 +201,11 @@ def overfitting_score(model, training_dataset, test_dataset, factsheet, threshol
         else:
             properties["Conclusion"] = "Model is strongly overfitting"
 
+        properties["Score"] = str(score)
         return result(int(score), properties=properties)
     except Exception as e:
         print("ERROR in overfitting_score(): {}".format(e))
-        return result(score=np.nan, properties={}) 
+        return result(score=np.nan, properties={"Non computable because": str(e)}) 
        
         
 # --- Statistical Parity Difference ---
@@ -228,17 +232,21 @@ def statistical_parity_difference_score(model, training_dataset, factsheet, thre
         properties = {}
         properties["Metric Description"] = "The spread between the percentage of observations from the majority group receiving a favorable outcome compared to the protected group. The closes this spread is to zero the better."
         properties["Depends on"] = "Training Data, Factsheet (Definition of Protected Group and Favorable Outcome)"
-        favored_majority_ratio, favored_minority_ratio = statistical_parity_difference_metric(model, training_dataset, factsheet)
-        statistical_parity_difference = favored_minority_ratio - favored_majority_ratio
-        properties["Favored Majority Ratio"] =  "P(y_true=favorable|protected=False) = {:.2f}%".format(favored_majority_ratio*100)
-        properties["Favored Minority Ratio"] =  "P(y_true=favorable|protected=True) = {:.2f}%".format(favored_minority_ratio*100)
-        properties["Formula"] =  "Favored Minority Ratio - Favored Minority Ratio"
+        statistical_parity_difference, spdm_properties = statistical_parity_difference_metric(model, training_dataset, factsheet)
+
+        properties['----------'] = ''
+        properties = properties|spdm_properties
+        properties['-----------'] = ''
+        properties["Formula"] =  "Statistical Parity Difference = |Favored Protected Group Ratio - Favored Unprotected Group Ratio|"
         properties["Statistical Parity Difference"] = "{:.2f}%".format(statistical_parity_difference*100)
-        score = np.digitize(statistical_parity_difference, thresholds, right=False) + 1 
+        
+        score = np.digitize(abs(statistical_parity_difference), thresholds, right=False) + 1 
+        
+        properties["Score"] = str(score)
         return result(score=int(score), properties=properties)
     except Exception as e:
         print("ERROR in statistical_parity_difference_score(): {}".format(e))
-        return result(score=np.nan, properties={"Non computable because": "One subgroup contained no samples after filtering"})
+        return result(score=np.nan, properties={"Non computable because": str(e)})
 
     
 def statistical_parity_difference_metric(model, training_dataset, factsheet):
@@ -261,6 +269,7 @@ def statistical_parity_difference_metric(model, training_dataset, factsheet):
 
     """
     try: 
+        properties = {}
         protected_feature, protected_values, target_column, favorable_outcomes = load_fairness_config(factsheet)
         
         minority = training_dataset[training_dataset[protected_feature].isin(protected_values)]
@@ -270,12 +279,22 @@ def statistical_parity_difference_metric(model, training_dataset, factsheet):
 
         favored_minority = minority[minority[target_column].isin(favorable_outcomes)]
         favored_minority_size = len(favored_minority)
+
         favored_minority_ratio = favored_minority_size/minority_size
 
         favored_majority = majority[majority[target_column].isin(favorable_outcomes)]
         favored_majority_size = len(favored_majority)
         favored_majority_ratio = favored_majority_size/majority_size
-        return favored_majority_ratio, favored_minority_ratio
+        
+        properties["|{x|x is protected, y_true is favorable}|"] = favored_minority_size
+        properties["|{x|x is protected}|"] = minority_size
+        properties["Favored Protected Group Ratio"] =  "P(y_true is favorable|protected=True) = {:.2f}%".format(favored_minority_ratio*100)
+        properties["|{x|x is not protected, y_true is favorable}|"] = favored_majority_size
+        properties["|{x|x is not protected}|"] = majority_size
+        properties["Favored Unprotected Group Ratio"] =  "P(y_true is favorable|protected=False) = {:.2f}%".format(favored_majority_ratio*100)
+        
+        statistical_parity_difference = abs(favored_minority_ratio - favored_majority_ratio)
+        return statistical_parity_difference, properties
     except Exception as e:
         print("ERROR in statistical_parity_difference_metric(): {}".format(e))
         raise
@@ -306,19 +325,23 @@ def equal_opportunity_difference_score(model, test_dataset, factsheet, threshold
         score=np.nan
         properties["Metric Description"] = "Difference in true positive rates between protected and unprotected group."
         properties["Depends on"] = "Model, Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)"
-        tpr_protected, tpr_unprotected = true_positive_rates(model, test_dataset, factsheet)
-        properties["TPR Unprotected Group"] = "P(y_hat=favorable|y_true=favorable, protected=False) = {:.2f}%".format(tpr_unprotected*100)
-        properties["TPR Protected Group"] = "P(y_hat=favorable|y_true=favorable, protected=True) = {:.2f}%".format(tpr_protected*100)  
-        equal_opportunity_difference = tpr_protected - tpr_unprotected
-        properties["Formula"] = "Equal Opportunity Difference = TPR Protected Group - TPR Unprotected Group"
-        properties["Equal Opportunity Difference"] = "{:.2f}%".format(equal_opportunity_difference*100)
+        tpr_protected, tpr_unprotected, tpr_properties = true_positive_rates(model, test_dataset, factsheet)
         
+        properties['----------'] = ''
+        properties = properties|tpr_properties 
+        equal_opportunity_difference = abs(tpr_protected - tpr_unprotected)
+        properties['-----------'] = ''
+        
+        properties["Formula"] = "Equal Opportunity Difference = |TPR Protected Group - TPR Unprotected Group|"
+        properties["Equal Opportunity Difference"] = "{:.2f}%".format(equal_opportunity_difference*100)
+
         score = np.digitize(abs(equal_opportunity_difference), thresholds, right=False) + 1 
         
+        properties["Score"] = str(score)
         return result(score=int(score), properties=properties) 
     except Exception as e:
         print("ERROR in equal_opportunity_difference_score(): {}".format(e))
-        return result(score=np.nan, properties={"Non computable because": "One subgroup contained no samples after filtering"})
+        return result(score=np.nan, properties={"Non computable because": str(e)})
  
 
 # --- Average Odds Difference ---
@@ -348,24 +371,26 @@ def average_odds_difference_score(model, test_dataset, factsheet, thresholds):
         properties = {}
         properties["Metric Description"] = "Is the average of difference in false positive rates and true positive rates between the protected and unprotected group"
         properties["Depends on"] = "Model, Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)"
-        fpr_protected, fpr_unprotected = false_positive_rates(model, test_dataset, factsheet)
-        properties["FPR Unprotected Group"] = "P(y_hat=favorable|y_true=unfavorable, protected=False) = {:.2f}%".format(fpr_unprotected*100)
-        properties["FPR Protected Group"] = "P(y_hat=favorable|y_true=unfavorable, protected=True) = {:.2f}%".format(fpr_protected*100) 
         
-        tpr_protected, tpr_unprotected = true_positive_rates(model, test_dataset, factsheet)
-        properties["TPR Unprotected Group"] = "P(y_hat=favorable|y_true=favorable, protected=False) = {:.2f}%".format(tpr_unprotected*100)
-        properties["TPR Protected Group"] = "P(y_hat=favorable|y_true=favorable, protected=True) = {:.2f}%".format(tpr_protected*100) 
-        
-        average_odds_difference = ((tpr_protected - tpr_unprotected) + (fpr_protected - fpr_unprotected))/2
-        properties["Formula"] = "0.5*(TPR Protected - TPR Unprotected) + 0.5*(FPR Protected - FPR Unprotected)"
-        properties["Average Odds Difference"] = "{:.2f}%".format(average_odds_difference*100)
-    
-        score = np.digitize(abs(average_odds_difference), thresholds, right=False) + 1 
+        fpr_protected, fpr_unprotected, fpr_properties = false_positive_rates(model, test_dataset, factsheet)
+        tpr_protected, tpr_unprotected, tpr_properties = true_positive_rates(model, test_dataset, factsheet)
             
+        properties["----------"] = ''
+        properties = properties|fpr_properties
+        properties = properties|tpr_properties
+        properties['-----------'] = ''
+        
+        average_odds_difference = abs(((tpr_protected - tpr_unprotected) + (fpr_protected - fpr_unprotected))/2)
+        properties["Formula"] = "Average Odds Difference = |0.5*(TPR Protected - TPR Unprotected) + 0.5*(FPR Protected - FPR Unprotected)|"
+        properties["Average Odds Difference"] = "{:.2f}%".format(average_odds_difference*100)
+        
+        score = np.digitize(abs(average_odds_difference), thresholds, right=False) + 1 
+        
+        properties["Score"] = str(score)   
         return result(score=int(score), properties=properties) 
     except Exception as e:
         print("ERROR in average_odds_difference_score(): {}".format(e))
-        return result(score=np.nan, properties={"Non computable because": "One subgroup contained no samples after filtering"})
+        return result(score=np.nan, properties={"Non computable because": str(e)})
    
   
 # --- Disparate Impact ---
@@ -394,20 +419,22 @@ def disparate_impact_score(model, test_dataset, factsheet, thresholds):
         properties = {}
         properties["Metric Description"] = "Is quotient of the ratio of samples from the protected group receiving a favorable prediction divided by the ratio of samples from the unprotected group receiving a favorable prediction"
         properties["Depends on"] = "Model, Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)"
-        protected_favored_ratio, unprotected_favored_ratio = disparate_impact_metric(model, test_dataset, factsheet)
-        properties["Protected Favored Ratio"] = "P(y_hat=favorable|protected=True) = {:.2f}%".format(protected_favored_ratio*100)
-        properties["Unprotected Favored Ratio"] = "P(y_hat=favorable|protected=False) = {:.2f}%".format(unprotected_favored_ratio*100) 
+        disparate_impact, dim_properties = disparate_impact_metric(model, test_dataset, factsheet)
         
-        disparate_impact = protected_favored_ratio / unprotected_favored_ratio
+        properties["----------"] = ''
+        properties = properties|dim_properties
+        properties['-----------'] = ''
+        
         properties["Formula"] = "Disparate Impact = Protected Favored Ratio / Unprotected Favored Ratio"
         properties["Disparate Impact"] = "{:.2f}".format(disparate_impact)
-    
+
         score = np.digitize(disparate_impact, thresholds, right=False)+1
             
+        properties["Score"] = str(score)
         return result(score=int(score), properties=properties) 
     except Exception as e:
         print("ERROR in disparate_impact_score(): {}".format(e))
-        return result(score=np.nan, properties={"Non computable because": "One subgroup contained no samples after filtering"})
+        return result(score=np.nan, properties={"Non computable because": str(e)})
 
 
 def disparate_impact_metric(model, test_dataset, factsheet):
@@ -430,6 +457,7 @@ def disparate_impact_metric(model, test_dataset, factsheet):
 
     """
     try: 
+        properties = {}
         data = test_dataset.copy(deep=True)
         
         protected_feature, protected_values, target_column, favorable_outcomes = load_fairness_config(factsheet)
@@ -444,22 +472,26 @@ def disparate_impact_metric(model, test_dataset, factsheet):
 
         protected_group = data[data[protected_feature].isin(protected_values)]
         unprotected_group = data[~data[protected_feature].isin(protected_values)]
-
         protected_group_size = len(protected_group)
         unprotected_group_size = len(unprotected_group)
 
         protected_favored_group = protected_group[protected_group['y_pred'].isin(favorable_outcomes)]
         unprotected_favored_group = unprotected_group[unprotected_group['y_pred'].isin(favorable_outcomes)]
-
         protected_favored_group_size = len(protected_favored_group)
         unprotected_favored_group_size = len(unprotected_favored_group)
-
+        
         protected_favored_ratio = protected_favored_group_size / protected_group_size
         unprotected_favored_ratio = unprotected_favored_group_size / unprotected_group_size
+        
+        properties["|{x|x is protected, y_pred is favorable}"] = protected_favored_group_size
+        properties["|{x|x is protected}|"] = protected_group_size
+        properties["Protected Favored Ratio"] = "P(y_hat=favorable|protected=True) = {:.2f}%".format(protected_favored_ratio*100)
+        properties["|{x|x is not protected, y_pred is favorable}|"] = unprotected_favored_group_size
+        properties["|{x|x is not protected}|"] = unprotected_group_size
+        properties["Unprotected Favored Ratio"] = "P(y_hat=favorable|protected=False) = {:.2f}%".format(unprotected_favored_ratio*100) 
 
-        disparate_impact = protected_favored_ratio / unprotected_favored_ratio
-        print("disparate_impact: {}".format(disparate_impact))
-        return protected_favored_ratio, unprotected_favored_ratio
+        disparate_impact = abs(protected_favored_ratio / unprotected_favored_ratio)
+        return disparate_impact, properties
 
     except Exception as e:
         print("ERROR in disparate_impact_metric(): {}".format(e))
@@ -481,7 +513,7 @@ def compute_accuracy(model, dataset, factsheet):
 
     """
     try:
-        target_column = factsheet.get("general", {}).get("target_column", {})
+        protected_feature, protected_values, target_column, favorable_outcomes = load_fairness_config(factsheet)
         X_data = dataset.drop(target_column, axis=1)
         y_data = dataset[target_column]
 
@@ -514,6 +546,7 @@ def false_positive_rates(model, test_dataset, factsheet):
 
     """
     try: 
+        properties = {}
         data = test_dataset.copy(deep=True)
         
         protected_feature, protected_values, target_column, favorable_outcomes = load_fairness_config(factsheet)
@@ -534,8 +567,6 @@ def false_positive_rates(model, test_dataset, factsheet):
         unprotected_group_true_unfavorable = unprotected_group[~unprotected_group[target_column].isin(favorable_outcomes)]
         protected_group_n_true_unfavorable = len(protected_group_true_unfavorable)
         unprotected_group_n_true_unfavorable = len(unprotected_group_true_unfavorable)
-        print("protected_group_n_true_unfavorable {}".format(protected_group_n_true_unfavorable))
-        print("unprotected_group_true_unfavorable {}".format(unprotected_group_true_unfavorable))
 
         #3. Calculate the number of false positives for the protected and unprotected group
         protected_group_true_unfavorable_pred_favorable = protected_group_true_unfavorable[protected_group_true_unfavorable['y_pred'].isin(favorable_outcomes)]
@@ -546,9 +577,16 @@ def false_positive_rates(model, test_dataset, factsheet):
         #4. Calculate fpr for both groups.
         fpr_protected = protected_group_n_true_unfavorable_pred_favorable/protected_group_n_true_unfavorable
         fpr_unprotected = unprotected_group_n_true_unfavorable_pred_favorable/unprotected_group_n_true_unfavorable
-        print("protected_fpr: {}".format(fpr_protected))
-        print("unprotected_fpr: {}".format(fpr_unprotected))
-        return fpr_protected, fpr_unprotected
+        
+        #5. Adding properties
+        properties["|{x|x is protected, y_true is unfavorable, y_pred is favorable}|"] = protected_group_n_true_unfavorable_pred_favorable
+        properties["|{x|x is protected, y_true is Unfavorable}|"] = protected_group_n_true_unfavorable
+        properties["FPR Protected Group"] = "P(y_pred is favorable|y_true is unfavorable, protected=True) = {:.2f}%".format(fpr_protected*100) 
+        properties["|{x|x is not protected, y_true is unfavorable, y_pred is favorable}|"] = unprotected_group_n_true_unfavorable_pred_favorable
+        properties["|{x|x is not protected, y_true is unfavorable}|"] = unprotected_group_n_true_unfavorable
+        properties["FPR Unprotected Group"] = "P(y_pred is favorable|y_true is unfavorable, protected=False) = {:.2f}%".format(fpr_unprotected*100)
+            
+        return fpr_protected, fpr_unprotected, properties
 
     except Exception as e:
         print("ERROR in false_positive_rates(): {}".format(e))
@@ -572,14 +610,10 @@ def true_positive_rates(model, test_dataset, factsheet):
 
     """
     try: 
+        properties = {}
         data = test_dataset.copy(deep=True)
         
-        protected_feature = factsheet.get("fairness", {}).get("protected_feature", None)
-        protected_values = factsheet.get("fairness", {}).get("protected_values", [])
-        target_column = factsheet.get("general", {}).get("target_column", None)
-        favorable_outcomes = factsheet.get("fairness", {}).get("favorable_outcomes", [])
-        
-
+        protected_feature, protected_values, target_column, favorable_outcomes = load_fairness_config(factsheet)
         
         X_data = data.drop(target_column, axis=1)
         if (isinstance(model, tf.keras.Sequential)):
@@ -588,17 +622,6 @@ def true_positive_rates(model, test_dataset, factsheet):
         else:
             y_pred = model.predict(X_data).flatten()
         data['y_pred'] = y_pred.tolist()
-
-        #favorable_outcome_definition = factsheet.get("fairness", {}).get("favorable_outcome", None)
-        #favorable_prediction = eval(favorable_outcome_definition, {"target_column": 'y_pred'}, {"target_column": 'y_pred'})
-        #favorable_outcome = eval(favorable_outcome_definition, {"target_column": target_column}, {"target_column": target_column})
-        
-        #protected_feature = factsheet.get("fairness", {}).get("protected_feature", None)
-        #protected_group_definition = factsheet.get("fairness", {}).get("protected_group", None)
-        #protected = eval(protected_group_definition, {"protected_feature": protected_feature}, {"protected_feature": protected_feature})
-        
-        #favored_indices = data.apply(favorable_outcome, axis=1)
-        #protected_indices = data.apply(protected, axis=1)
 
         favored_samples = data[data[target_column].isin(favorable_outcomes)]
         protected_favored_samples = favored_samples[favored_samples[protected_feature].isin(protected_values)]
@@ -611,7 +634,16 @@ def true_positive_rates(model, test_dataset, factsheet):
         num_protected_favored_true = len(protected_favored_samples)
         num_protected_favored_pred = len(protected_favored_samples[protected_favored_samples['y_pred'].isin(favorable_outcomes)])
         tpr_protected = num_protected_favored_pred / num_protected_favored_true 
-        return tpr_protected, tpr_unprotected
+        
+        # Adding properties
+        properties["|{x|x is protected, y_true is favorable, y_pred is favorable}|"] = num_protected_favored_pred
+        properties["|{x|x is protected, y_true is favorable}|"] = num_protected_favored_true
+        properties["TPR Protected Group"] = "P(y_pred is favorable|y_true is favorable, protected=True) = {:.2f}%".format(tpr_protected*100) 
+        properties["|{x|x is not protected, y_true is favorable, y_pred is favorable}|"] = num_unprotected_favored_pred
+        properties["|{x|x is not protected, y_true is favorable}|"] = num_unprotected_favored_true
+        properties["TPR Unprotected Group"] = "P(y_pred is favorable|y_true is favorable, protected=False) = {:.2f}%".format(tpr_unprotected*100)
+        
+        return tpr_protected, tpr_unprotected, properties
 
     except Exception as e:
         print("ERROR in true_positive_rates(): {}".format(e))
