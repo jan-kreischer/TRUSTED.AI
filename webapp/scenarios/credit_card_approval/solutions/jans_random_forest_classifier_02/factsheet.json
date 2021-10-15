@@ -10,7 +10,9 @@
     },
     "explainability": {},
     "robustness": {},
-    "methodology": {},
+    "methodology": {
+        "regularization": "Other"
+    },
     "scores": {
         "fairness": {
             "question_fairness": 3,

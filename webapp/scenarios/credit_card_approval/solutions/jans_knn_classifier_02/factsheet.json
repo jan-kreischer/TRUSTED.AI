@@ -13,7 +13,9 @@
     },
     "explainability": {},
     "robustness": {},
-    "methodology": {},
+    "methodology": {
+        "regularization": "Other"
+    },
     "scores": {
         "fairness": {
             "underfitting": 4,

@@ -210,7 +210,7 @@ def upload_data(
     protected_feature,
     protected_values,
     target_column,
-    favorable_outcome,
+    favorable_outcomes,
     factsheet,
     factsheet_filename,
     model,
@@ -307,7 +307,7 @@ layout = dbc.Container([
             create_info_modal("upload_scenario_id", "Scenario", "All different solutions found should belong to the same scenario", ""),
             html.Div(id="scenario_alert"),
             html.H3(["1. Scenario", html.Sup("*")]),
-            html.H5("Please select the scenario your solution belongs to.")
+            html.H5("Please select the scenario your solution belongs to")
         ], className="text-center"),
         dcc.Dropdown(
             id='upload_scenario_id',
@@ -319,10 +319,10 @@ layout = dbc.Container([
     
     html.Div([
         html.Div([
-            create_info_modal("solution_name", "Solution", "One specifically trained model including its training-, test data and factsheet can be seen as a solution set. Your solution set will be saved under the name you entered here.", ""),
+            create_info_modal("solution_name", "Solution", "One specifically trained model including its training-, test data and factsheet are part of a solution. Your solution set will be saved under the name you entered here.", ""),
             html.Div(id="solution_name_alert"),
             html.H3(["2. Solution", html.Sup("*")]),
-            html.H5("Please enter a name for your solution.")
+            html.H5("Please enter a name for your solution")
         ], 
         className="text-center"
         ),
@@ -334,8 +334,9 @@ layout = dbc.Container([
     
     html.Div([
     html.Div([
-        create_info_modal("general_description", "Description", "Please add a brief description for your solution.", "*e.g Detect multiple objects within an image, with bounding boxes. The model is trained to recognize 80 different classes of objects in the COCO Dataset. The model consists of a deep convolutional net base model for image feature extraction, together with additional convolutional layers specialized for the task of object detection, that was trained on the COCO data set. It is based on SSD MobileNetV1 using the TensorFlow framework.*"),
+        create_info_modal("general_description", "Description", "Please add a brief description for your solution. This description will be displayed to all users.", "*e.g Detect multiple objects within an image, with bounding boxes. The model is trained to recognize 80 different classes of objects in the COCO Dataset. The model consists of a deep convolutional net base model for image feature extraction, together with additional convolutional layers specialized for the task of object detection, that was trained on the COCO data set. It is based on SSD MobileNetV1 using the TensorFlow framework.*"),
         html.H3("3. Description", className="text-center"),
+        html.H5("Please enter a description for your solution", className="text-center"),
         dcc.Textarea(
             id='general_description',
             value='',
@@ -345,7 +346,7 @@ layout = dbc.Container([
     
     html.Div([
         html.Div([
-            create_info_modal("training_data", "Training Data", "Please upload the training data you used to train your model. Csv and pickle (pkl) files are accepted. Please place the label to the last column of the dataframe.", ""),
+            create_info_modal("training_data", "Training Data", "Please upload the training data that was used to train the model. Csv and pickle (pkl) files are accepted.", ""),
             html.Div(id="training_data_alert"),
             html.H3(["4. Training Data", html.Sup("*")]),
             html.H5("Please upload the training data")
@@ -374,7 +375,7 @@ layout = dbc.Container([
     
     html.Div([
         html.Div([
-            create_info_modal("test_data", "Test Data", "Please upload the test data you used to test your model. Csv and pickle (pkl) files are accepted. Please place the label to the last column of the dataframe.", ""),
+            create_info_modal("test_data", "Test Data", "Please upload the test data that was used to evaluate the model. Csv and pickle (pkl) files are accepted.", ""),
             html.Div(id="test_data_alert"),
             html.H3(["5. Test Data", html.Sup("*")]),
             html.H5("Please upload the test data"),
@@ -403,7 +404,7 @@ layout = dbc.Container([
         
         # --- PROTECTED FEATURE --- #
         html.Div([
-            create_info_modal("protected_feature", "Protected Feature", "A protected feature (like age, race, gender) is not supposed to be used for making predictions.", ""),
+            create_info_modal("protected_feature", "Protected Feature", "A protected feature (like age, race, gender) is not supposed to influence he prediction.", ""),
             html.H3("Protected Feature"),
             html.H5("Please select the Protected Feature"),
             dcc.Dropdown(
@@ -446,7 +447,7 @@ layout = dbc.Container([
         
     # --- FAVORABLE OUTCOME --- #
     html.Div([
-        create_info_modal("favorable_outcome", "Favorable Outcome", "Please enter a lambda expression defining values of the target column which are seen as favorable.", "It would be considered favorable for example to get the credit card successfully approved in a credit scoring scenario."),
+        create_info_modal("favorable_outcomes", "Favorable Outcome", "The favorable outcomes are values of the target column that are considered to be positive predictions.", "It would be considered favorable for example to get the credit card successfully approved in a credit scoring scenario."),
         html.H3("Favorable Outcomes"),
         html.H5("Please select the Favorable Outcomes for the Target Column"),
         dcc.Dropdown(
@@ -462,7 +463,7 @@ layout = dbc.Container([
     
     html.Div([
         html.Div([
-            create_info_modal("factsheet", "Factsheet", "The factsheet contains the most important information about the methology used.", ""),
+            create_info_modal("factsheet", "Factsheet", "The factsheet contains the most important information about the model.", ""),
             html.Div(id="factsheet_alert"),
             html.H3(["7. Factsheet", html.Sup("*")]),
             html.H5("Please upload the factsheet")
@@ -494,7 +495,7 @@ layout = dbc.Container([
     html.Div([
         
         html.Div([
-            create_info_modal("model", "Model", "Please upload the model you want to assess.", ""),
+            create_info_modal("model", "Model", "Please upload the model to be analyzed.", ""),
             html.Div(id="model_alert"),
             html.H3(["8. Model", html.Sup("*")]),
             html.H5("Please upload the model")

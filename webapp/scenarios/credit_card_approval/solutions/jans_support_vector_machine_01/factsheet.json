@@ -13,5 +13,7 @@
     },
     "explainability": {},
     "robustness": {},
-    "methodology": {}
+    "methodology": {
+        "regularization": "Other"
+    }
 }
