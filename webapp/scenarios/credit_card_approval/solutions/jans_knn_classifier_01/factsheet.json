@@ -3,9 +3,9 @@
         "target_column": "Own_Housing"
     },
     "fairness": {
-        "protected_feature": "Own_Car",
+        "protected_feature": "Group",
         "protected_values": [
-            0
+            1
         ],
         "favorable_outcomes": [
             1

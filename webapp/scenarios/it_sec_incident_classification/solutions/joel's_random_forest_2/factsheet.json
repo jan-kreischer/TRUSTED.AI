@@ -10,7 +10,15 @@
         "contact_information": "joel@uzh.ch",
         "description": "preprocess data and drop all highly correlated features but still use the original random forest model"
     },
-    "fairness": {},
+    "fairness": {
+        "protected_feature": "connectivity",
+        "protected_values": [
+            0
+        ],
+        "favorable_outcomes": [
+            13
+        ]
+    },
     "methodology": {
         "regularization": "Other"
     },
