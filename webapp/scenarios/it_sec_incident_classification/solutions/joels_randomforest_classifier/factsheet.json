@@ -24,7 +24,7 @@
     "scores": {
         "fairness": {
             "underfitting": 1,
-            "overfitting": 1,
+            "overfitting": NaN,
             "statistical_parity_difference": 1,
             "equal_opportunity_difference": NaN,
             "average_odds_difference": NaN,
@@ -32,10 +32,10 @@
             "class_balance": 5
         },
         "explainability": {
-            "algorithm_class": 3,
-            "correlated_features": 2,
+            "algorithm_class": 4,
+            "correlated_features": 5,
             "model_size": 3,
-            "feature_relevance": 2
+            "feature_relevance": 4
         },
         "robustness": {
             "confidence_score": 4,
@@ -60,39 +60,52 @@
                 "Metric Description": "Compares the models achieved test accuracy against a baseline.",
                 "Depends on": "Model, Test Data",
                 "Test Accuracy": "58.56%",
-                "Conclusion": "Model is strongly underfitting"
+                "Conclusion": "Model is strongly underfitting",
+                "Score": "1"
             },
             "overfitting": {
-                "Metric Description": "Overfitting is present if the training accuracy is significantly higher than the test accuracy",
-                "Depends on": "Model, Training Data, Test Data",
-                "Training Accuracy": "66.06%",
-                "Test Accuracy": "58.56%",
-                "Train Test Accuracy Difference": "7.50%",
-                "Conclusion": "Model is strongly overfitting"
+                "Non computable because": "The test accuracy is to low and if the model is underfitting to much it can't be overfitting at the same time."
             },
             "statistical_parity_difference": {
                 "Metric Description": "The spread between the percentage of observations from the majority group receiving a favorable outcome compared to the protected group. The closes this spread is to zero the better.",
                 "Depends on": "Training Data, Factsheet (Definition of Protected Group and Favorable Outcome)",
-                "Favored Majority Ratio": "P(y_true=favorable|protected=False) = 7.71%",
-                "Favored Minority Ratio": "P(y_true=favorable|protected=True) = 56.00%",
-                "Formula": "Favored Minority Ratio - Favored Minority Ratio",
-                "Statistical Parity Difference": "48.29%"
+                "----------": "",
+                "|{x|x is protected, y_true is favorable}|": 14,
+                "|{x|x is protected}|": 25,
+                "Favored Protected Group Ratio": "P(y_true is favorable|protected=True) = 56.00%",
+                "|{x|x is not protected, y_true is favorable}|": 323,
+                "|{x|x is not protected}|": 4191,
+                "Favored Unprotected Group Ratio": "P(y_true is favorable|protected=False) = 7.71%",
+                "-----------": "",
+                "Formula": "Statistical Parity Difference = |Favored Protected Group Ratio - Favored Unprotected Group Ratio|",
+                "Statistical Parity Difference": "48.29%",
+                "Score": "1"
             },
-            "equal_opportunity_difference": {},
+            "equal_opportunity_difference": {
+                "Non computable because": "division by zero"
+            },
             "average_odds_difference": {
-                "Non computable": "division by zero"
+                "Non computable because": "division by zero"
             },
             "disparate_impact": {
                 "Metric Description": "Is quotient of the ratio of samples from the protected group receiving a favorable prediction divided by the ratio of samples from the unprotected group receiving a favorable prediction",
                 "Depends on": "Model, Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)",
+                "----------": "",
+                "|{x|x is protected, y_pred is favorable}": 0,
+                "|{x|x is protected}|": 1,
                 "Protected Favored Ratio": "P(y_hat=favorable|protected=True) = 0.00%",
+                "|{x|x is not protected, y_pred is favorable}|": 22,
+                "|{x|x is not protected}|": 221,
                 "Unprotected Favored Ratio": "P(y_hat=favorable|protected=False) = 9.95%",
+                "-----------": "",
                 "Formula": "Disparate Impact = Protected Favored Ratio / Unprotected Favored Ratio",
-                "Disparate Impact": "0.00"
+                "Disparate Impact": "0.00",
+                "Score": "1"
             },
             "class_balance": {
                 "Metric Description": "Measures how well the training data is balanced or unbalanced",
-                "Depends on": "Training Data"
+                "Depends on": "Training Data",
+                "Score": "5"
             }
         },
         "explainability": {
@@ -113,7 +126,7 @@
                 ],
                 "pct_drop": [
                     "Percentage of highly correlated features",
-                    "29.55%"
+                    "0.00%"
                 ]
             },
             "model_size": {
@@ -123,7 +136,7 @@
                 ],
                 "n_features": [
                     "number of features",
-                    45
+                    44
                 ]
             },
             "feature_relevance": {
@@ -243,6 +256,10 @@
                 "confidence_score": [
                     "Average confidence score",
                     "63.71%"
+                ],
+                "depends_on": [
+                    "Depends on",
+                    "Model and Data"
                 ]
             },
             "clique_method": {
@@ -253,13 +270,42 @@
                 "error": [
                     "Error",
                     "1.0"
+                ],
+                "depends_on": [
+                    "Depends on",
+                    "Model"
                 ]
             },
-            "loss_sensitivity": {},
-            "clever_score": {},
-            "er_fast_gradient_attack": {},
-            "er_carlini_wagner_attack": {},
-            "er_deepfool_attack": {}
+            "loss_sensitivity": {
+                "non_computable": [
+                    "Non Computable Because",
+                    "Can only be calculated on Keras models."
+                ]
+            },
+            "clever_score": {
+                "non_computable": [
+                    "Non Computable Because",
+                    "Can only be calculated on Keras models."
+                ]
+            },
+            "er_fast_gradient_attack": {
+                "non_computable": [
+                    "Non Computable Because",
+                    "Can be calculated on either SVC or Logistic Regression models."
+                ]
+            },
+            "er_carlini_wagner_attack": {
+                "non_computable": [
+                    "Non Computable Because",
+                    "Can be calculated on either SVC or Logistic Regression models."
+                ]
+            },
+            "er_deepfool_attack": {
+                "non_computable": [
+                    "Non Computable Because",
+                    "Can be calculated on either SVC or Logistic Regression models."
+                ]
+            }
         },
         "methodology": {
             "normalization": {
