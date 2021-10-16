@@ -41,7 +41,7 @@
             "confidence_score": NaN,
             "clique_method": NaN,
             "loss_sensitivity": 2,
-            "clever_score": 2,
+            "clever_score": 4,
             "er_fast_gradient_attack": NaN,
             "er_carlini_wagner_attack": NaN,
             "er_deepfool_attack": NaN
@@ -56,23 +56,28 @@
     },
     "properties": {
         "fairness": {
-            "underfitting": {},
-            "overfitting": {},
+            "underfitting": {
+                "Non computable because": "name 'X_train' is not defined"
+            },
+            "overfitting": {
+                "Non computable because": "name 'X_train' is not defined"
+            },
             "statistical_parity_difference": {
-                "Non computable because": "One subgroup contained no samples after filtering"
+                "Non computable because": "division by zero"
             },
             "equal_opportunity_difference": {
-                "Non computable because": "One subgroup contained no samples after filtering"
+                "Non computable because": "division by zero"
             },
             "average_odds_difference": {
-                "Non computable because": "One subgroup contained no samples after filtering"
+                "Non computable because": "division by zero"
             },
             "disparate_impact": {
-                "Non computable because": "One subgroup contained no samples after filtering"
+                "Non computable because": "division by zero"
             },
             "class_balance": {
                 "Metric Description": "Measures how well the training data is balanced or unbalanced",
-                "Depends on": "Training Data"
+                "Depends on": "Training Data",
+                "Score": "5"
             }
         },
         "explainability": {
@@ -114,23 +119,56 @@
             }
         },
         "robustness": {
-            "confidence_score": {},
-            "clique_method": {},
+            "confidence_score": {
+                "non_computable": [
+                    "Non Computable Because",
+                    "Can only be calculated on models which provide prediction probabilities."
+                ]
+            },
+            "clique_method": {
+                "non_computable": [
+                    "Non Computable Because",
+                    "Can only be calculated on Tree-Based models."
+                ]
+            },
             "loss_sensitivity": {
                 "loss_sensitivity": [
                     "Average gradient value of the loss function",
                     "1.54"
+                ],
+                "depends_on": [
+                    "Depends on",
+                    "Model"
                 ]
             },
             "clever_score": {
                 "clever_score": [
                     "CLEVER Score",
-                    "0.40"
+                    "1.04"
+                ],
+                "depends_on": [
+                    "Depends on",
+                    "Model"
                 ]
             },
-            "er_fast_gradient_attack": {},
-            "er_carlini_wagner_attack": {},
-            "er_deepfool_attack": {}
+            "er_fast_gradient_attack": {
+                "non_computable": [
+                    "Non Computable Because",
+                    "Can be calculated on either SVC or Logistic Regression models."
+                ]
+            },
+            "er_carlini_wagner_attack": {
+                "non_computable": [
+                    "Non Computable Because",
+                    "Can be calculated on either SVC or Logistic Regression models."
+                ]
+            },
+            "er_deepfool_attack": {
+                "non_computable": [
+                    "Non Computable Because",
+                    "Can be calculated on either SVC or Logistic Regression models."
+                ]
+            }
         },
         "methodology": {
             "normalization": {
