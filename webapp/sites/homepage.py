@@ -20,7 +20,7 @@ layout = dbc.Container([
              dbc.Card(
                  children=[html.H3(children='Try the Demo', className="text-center"),
                                        dbc.Button("Demo",
-                                                  href="/upload",
+                                                  href="{}/upload".format(BASE_PATH),
                                                   className="mt-3",
                                                   style={"background-color": TRUST_COLOR, "color": "#FFFFFF", "opacity": "0.8"}
                                            ),

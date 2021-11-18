@@ -30,7 +30,7 @@ SECTIONS = ['trust'] + PILLARS
 # === FACTSHEET ===
 FACTSHEET_SECTIONS = "general", "fairness", "explainability", "robustness", "methodology"
 FACTSHEET_NAME = "factsheet.json"
-GENERAL_INPUTS = ["model_name", "purpose_description", "domain_description", "training_data_description", "model_information", "target_column", "authors", "contact_information"]
+GENERAL_INPUTS = ["model_name", "purpose_description", "domain_description", "training_data_description", "model_information", "authors", "contact_information"]
 FAIRNESS_INPUTS = ["question_fairness", "protected_feature", "protected_group", "favorable_outcome"]
 EXPLAINABILITY_INPUTS = ["protected_feature", "privileged_class_definition"]
 ROBUSTNESS_INPUTS = []

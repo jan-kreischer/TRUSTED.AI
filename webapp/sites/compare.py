@@ -52,7 +52,7 @@ def trust_section_1():
                                     color="green",
                                     style={"float": "right"}
                                     )], className="mt-2"),
-        html.H2("Trustworthiness"),
+        html.H2("Trustworthiness", className="text-center"),
 
         html.Div([], id="trust_overview-1"),
         html.H3("Overall Score", className="text-center"),
@@ -68,10 +68,11 @@ def trust_section_2():
         html.Div(id='boolean-switch-output'),
         html.Div([daq.BooleanSwitch(id='toggle_charts-2',
                                     on=False,
+                                    label='Alternative Style',
                                     color="green",
                                     style={"float": "right"}
                                     )], className="mt-2"),
-        html.H2("Trustworthiness"),
+        html.H2("Trustworthiness", className="text-center"),
 
         html.Div([], id="trust_overview-2"),
         html.H3("Overall Score", className="text-center"),
