@@ -5,14 +5,14 @@
 
 ## Time Schedule
 
-- [x] Analyze the current state of the art regarding thrustworithniess. (12-Mar)
-- [x] Identify missing aspects relevant for automatically calculating a model's trust score (26-Mar)
-- [x] Create a taxonomy containing relevant pillars and metrics (2-Apr)
-- [x] Select an application scenario (9-Apr)
-- [x] Design a trusted AI algorithm (7-Mai)
-- [x] Implementation (18-Jun)
-- [x] Evaluation and Discussion (9-Jul)
-- [ ] Documentation and Process (30-Jul)
+- [x] Analyze the current state of the art regarding thrustworithniess. (Februar - March)
+- [x] Identify missing aspects relevant for automatically calculating a model's trust score (April)
+- [x] Create a taxonomy containing relevant pillars and metrics (May)
+- [x] Select and analyze a suitable application scenario (June)
+- [x] Design a trusted AI algorithm (July)
+- [x] Implementation (August - September)
+- [x] Evaluation and Discussion (October)
+- [x] Documentation and Process (November)
 
 ## Webapp
 
