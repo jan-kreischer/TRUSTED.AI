@@ -3,7 +3,7 @@
 
 
 
-## Time Schedule
+## 1. Time Schedule
 
 - [x] Analyze the current state of the art regarding thrustworithniess. (Februar - March)
 - [x] Identify missing aspects relevant for automatically calculating a model's trust score (April)
@@ -15,8 +15,8 @@
 - [x] Documentation and Process (November)
 
 
-
-## Webapp
+## 2. Deployment
+### 2.1 Local Deployment
 
 The webapp is build using Flask, Dash and is optimized to run on python version 3.9.7.
 In order to setup and run the webapplication you need to execute the following steps.
@@ -30,7 +30,7 @@ pip install -r requirements.txt
 python index.py
 ```
 
-## Docker 
+### 2.2 Containerized Deployment
 on how to use Docker for our TrustedAI project.
 
 1. Go to the /webapp folder of our project
