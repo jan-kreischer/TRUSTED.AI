@@ -1,8 +1,7 @@
 
 # TRUSTED.AI
 
-Artificial intelligence (AI) systems are getting more and more relevance as support to human decision-making processes. While AI holds the promise of delivering valuable insights into many application scenarios, the broad adoption of AI systems will rely on the ability to trust their decisions
-
+Artificial intelligence (AI) systems are getting more and more relevance as support to human decision-making processes. While AI holds the promise of delivering valuable insights into many application scenarios, the broad adoption of AI systems will rely on the ability to trust their decisions. This is a tool written in python which allows developers to automatically compute the thrustworithness level for their machine learning models. We support the most common machine learning libraries like TensorFlow, Sklearn and PyTorch.
 
 ## 1. Time Schedule
 
