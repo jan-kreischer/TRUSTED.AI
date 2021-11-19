@@ -33,43 +33,39 @@ python index.py
 ### 2.2 Containerized Deployment
 For easy deployment, our project can be combined into a Docker container, using the following commands.
 
-
-
 1. Run docker build command in order to build the Docker Image from a Dockerfile
 ```
-
 > docker build -f ./webapp/Dockerfile -t trustedai/webapp:v1 .
-# docker build -f <path-to-dockerfile> -t <hub-user>/<repo-name> .
+# docker build -f <path-to-dockerfile> -t <hub-user>/<repo-name>:<tag> .
 # -f ... specify path to Dockerfile
 # -t ... add a tag to the image
 ```
 
-3. List all locally existing Docker images
-- docker image ls 
-- docker images
+2. Login to Docker Hub
+```
+> docker login --username trustedai
+# docker login --username <hub-user>
+```
 
-4. Run the docker image as a local docker container 
+3. Push the Docker image to Docker Hub
+```
+> docker push trustedai/webapp:v1
+# docker push <hub-user>/<repo-name>:<tag>
+```
+
+4. Pull the Docker image from Docker Hub on the remote server
+```
+> docker pull trustedai/webapp:v1
+# docker pull <hub-user>/<repo-name>:<tag>
+```
+
+5. Run the Docker image as a local Docker container 
 and check if everything is working correctly
-- docker run -p <host-port>:<container-port> trustedai/webapp:v1
-- docker run -p 8080:8080 trustedai/webapp:v1
-   
-5. Login to Dockerhub
-- docker login --username trustedai
-    
-6. Push the finished Docker Images to Dockerhub
-- docker push <hub-user>/<repo-name>:<tag>
-- docker push trustedai/webapp:v1
-
-    
-7. Run Docker compose
-docker compose -f docker-compose.yml up
-
-docker network create -d bridge proxynet
-    
-
-
-
-
+```
+> docker run -p 80:8080 trustedai/webapp:v1
+# docker run -p <host-port>:<container-port> <hub-user>/<repo-name>:<tag>
+```
+      
 ## 3. Documentation 
 
 The whole documentation of the project can be found on our [GitHub page](https://joelleupp.github.io/Trusted-AI/)
