@@ -1,9 +1,7 @@
 #Requirements for the production environment
 tensorflow-cpu==2.6.0
-#Using tensorflow-cpu because of its reduced size
-#in order not to exceed the Heroku size limit
 #tensorflow==2.6.0
-#keras==2.6.0
+keras==2.6.0
 Brotli==1.0.9
 certifi==2021.5.30
 click==8.0.1
