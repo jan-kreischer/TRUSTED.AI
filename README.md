@@ -31,15 +31,18 @@ python index.py
 ```
 
 ### 2.2 Containerized Deployment
-on how to use Docker for our TrustedAI project.
+For easy deployment, our project can be combined into a Docker container, using the following commands.
 
-1. Go to the /webapp folder of our project
 
-2. Run docker build command in order to build the Docker Image from a Dockerfile
-- docker build -f <path-to-dockerfile> -t <hub-user>/<repo-name> .
-- docker build -f ./Dockerfile -t trustedai/webapp:v1 .
--f ... specify path to Dockerfile
--t ... add a tag to the image
+
+1. Run docker build command in order to build the Docker Image from a Dockerfile
+```
+
+> docker build -f ./webapp/Dockerfile -t trustedai/webapp:v1 .
+# docker build -f <path-to-dockerfile> -t <hub-user>/<repo-name> .
+# -f ... specify path to Dockerfile
+# -t ... add a tag to the image
+```
 
 3. List all locally existing Docker images
 - docker image ls 
