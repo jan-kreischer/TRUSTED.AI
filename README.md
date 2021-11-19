@@ -15,6 +15,8 @@
 - [ ] Documentation and Process (30-Jul)
 
 ## Webapp
+
+The webapp is build using Flask, Dash and is optimized to run on python version 3.9.7.
 In order to setup and run the webapplication you need to execute the following steps.
 At first open the console and navigate to the webapp directory.
 Then install the necessary dependencies form the requirements.txt file.
