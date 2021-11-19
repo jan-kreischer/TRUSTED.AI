@@ -1,7 +1,7 @@
 
 # TRUSTED.AI
 
-Artificial intelligence (AI) systems are getting more and more relevance as support to human decision-making processes. While AI holds the promise of delivering valuable insights into many application scenarios, the broad adoption of AI systems will rely on the ability to trust their decisions. This is a tool written in python which allows developers to automatically compute the thrustworithness level for their machine learning models. We support the most common machine learning libraries like TensorFlow, Sklearn and PyTorch.
+Artificial intelligence (AI) systems are getting more and more relevance as support to human decision-making processes. While AI holds the promise of delivering valuable insights into many application scenarios, the broad adoption of AI systems will rely on the ability to trust their decisions. This python application enables developers to automatically compute the thrustworithness level for their machine learning models. We support the most common machine learning libraries like TensorFlow, Sklearn and PyTorch.
 
 ## 1. Time Schedule
 
@@ -63,14 +63,11 @@ docker compose -f docker-compose.yml up
 
 docker network create -d bridge proxynet
     
-# === DOCKER COMMANDS ===
-
-# Open shell session for container
-docker exec -it <container name> /bin/bash
 
 
 
-## Documentation 
+
+## 3. Documentation 
 
 The whole documentation of the project can be found on our [GitHub page](https://joelleupp.github.io/Trusted-AI/)
 The documentation is created with mkdocs, which uses simple markdown file and a .yml config file to build and deploy the documentation to GitHub.
