@@ -1,6 +1,7 @@
 
 # TRUSTED.AI
 
+Artificial intelligence (AI) systems are getting more and more relevance as support to human decision-making processes. While AI holds the promise of delivering valuable insights into many application scenarios, the broad adoption of AI systems will rely on the ability to trust their decisions
 
 
 ## 1. Time Schedule
