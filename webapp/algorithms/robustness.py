@@ -165,11 +165,11 @@ def clique_method(model, train_data, test_data, thresholds, factsheet):
     with open('configs/mappings/robustness/default.json', 'r') as f:
           default_map = json.loads(f.read())
     
-    #if thresholds == default_map["score_clique_method"]["thresholds"]["value"]:
-        #if "scores" in factsheet.keys() and "properties" in factsheet.keys():
-            #score = factsheet["scores"]["robustness"]["clique_method"]
-            #properties = factsheet["properties"]["robustness"]["clique_method"]
-            #return result(score=score, properties=properties)
+    if thresholds == default_map["score_clique_method"]["thresholds"]["value"]:
+        if "scores" in factsheet.keys() and "properties" in factsheet.keys():
+            score = factsheet["scores"]["robustness"]["clique_method"]
+            properties = factsheet["properties"]["robustness"]["clique_method"]
+            return result(score=score, properties=properties)
     
     try:
         X_test = test_data.iloc[:, :-1]
