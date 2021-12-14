@@ -12,7 +12,7 @@ if len(sys.argv) > 1:
     DEBUG = False
 else:
     BASE_PATH = ''
-    DEBUG = True
+    DEBUG = False
 print("DEBUG: {}".format(DEBUG))
 print("BASE_PATH: {}".format(BASE_PATH))
 
