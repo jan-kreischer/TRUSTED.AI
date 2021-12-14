@@ -22,7 +22,7 @@ from config import *
 
 from app import server
 from app import app
-from sites import homepage, upload, analyze, compare, scenarios, factsheet #Importing sub-pages
+from sites import homepage, upload, analyze, compare, scenarios #Importing sub-pages
 from sites.config_panel import input_ids 
 
 navbar = dbc.Navbar(
@@ -43,7 +43,6 @@ navbar = dbc.Navbar(
                 dbc.Nav(
                     [                
                         dbc.NavItem(dbc.NavLink("Scenarios", href=get_url_path('scenarios'))),
-                        dbc.NavItem(dbc.NavLink("Factsheet", href=get_url_path('factsheet'))),
                         dbc.NavItem(dbc.NavLink("Upload", href=get_url_path('upload'))),
                         dbc.NavItem(dbc.NavLink("Analyze", href=get_url_path('analyze'))),
                         dbc.NavItem(dbc.NavLink("Compare", href=get_url_path('compare')))
@@ -90,8 +89,6 @@ def display_page(pathname):
         return compare.layout
     if pathname == get_url_path('scenarios'):
         return scenarios.layout
-    elif pathname == get_url_path('factsheet'):
-        return factsheet.layout
     else:
         return dcc.Location(pathname=get_url_path(''), id="someid_doesnt_matter")
 if __name__ == '__main__':

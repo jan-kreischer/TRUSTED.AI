@@ -282,11 +282,14 @@ def read_factsheet(solution_path):
     
 def save_factsheet(path, name, content, new_factsheet):
     file_name, file_extension = os.path.splitext(name)
-    content_type, content_string = content.split(',')
-    factsheet = json.loads(base64.b64decode(content_string).decode())
-    print("NEW FACTSHEET: {}".format(new_factsheet))
+    if content:
+        content_type, content_string = content.split(',')
+        factsheet = json.loads(base64.b64decode(content_string).decode())
+    else:
+        factsheet= {}
     for section in FACTSHEET_SECTIONS:
-        factsheet[section] = factsheet.get(section, {}) | new_factsheet.get(section, {})
+        factsheet[section] = factsheet.get(section, {}).copy()
+        factsheet[section].update(new_factsheet.get(section, {}))
         
     with open(os.path.join(path, name), "w",  encoding="utf8") as file:
         json.dump(factsheet, file, indent=4)
@@ -470,7 +473,7 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
     Story = [Spacer(1, 0.1 * inch)]
 
     sizex = [1.3 * inch, 2.1*inch, 1.3 * inch, 2.1*inch]
-    sizey = 4 * [0.4 * inch]
+    sizey = math.ceil(len( factsheet["general"].keys()) / 2) * [0.4 * inch]
     Story = report_section(Story, "Model Information", factsheet["general"].keys(),factsheet["general"].values(), sizex, sizey)
     perf = get_performance_metrics(model, test_data, target_column)
     keys = []
@@ -521,8 +524,8 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
     fairness_properties = result["properties"]["fairness"]
     k, v = fairness_properties_for_report(fairness_properties)
 
-    sizex = [1.8 * inch, 2.2 * inch, 1.9 * inch, 1.4 * inch]
-    sizey = math.ceil(len(k)/2) * [0.55 * inch]
+    sizex = [1.8 * inch, 0.9 * inch, 1.9 * inch, 2.6 * inch]
+    sizey = math.ceil(len(k)/2) * [0.6 * inch]
     Story = report_section(Story, "Fairness Properties",  k, v, sizex, sizey)
 
     Story = add_matplotlib_to_report(Story, plots[1], 7 * inch, 5 * inch)

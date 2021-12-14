@@ -12,8 +12,9 @@ import io
 import base64
 from joblib import dump, load
 from app import app
-from config import SCENARIOS_FOLDER_PATH, PICKLE_FILE_EXTENSIONS, JOBLIB_FILE_EXTENSIONS, FACTSHEET_NAME
+from config import SCENARIOS_FOLDER_PATH, PICKLE_FILE_EXTENSIONS, JOBLIB_FILE_EXTENSIONS, FACTSHEET_NAME, BASE_PATH
 from helpers import * 
+from sites import factsheet
 
 # === CALLBACKS ===
 # --- Preview Callbacks --- #
@@ -182,6 +183,7 @@ def validate_model(n_clicks, model):
               Output('uploaded_solution_id', 'data')],
               [
                Input('upload_button', 'n_clicks'),
+               Input('created_factsheet', 'data'),
                State('upload_scenario_id', 'value'),
                State('solution_name', 'value'),
                State('general_description', 'value'),
@@ -196,10 +198,11 @@ def validate_model(n_clicks, model):
                State('factsheet_upload', 'contents'),
                State('factsheet_upload', 'filename'),
                State('model_upload', 'contents'),
-               State('model_upload', 'filename')
+               State('model_upload', 'filename'),
 ], prevent_initial_call=True)             
 def upload_data(
     n_clicks,
+    created_factsheet,
     scenario_id,
     solution_name,
     general_description,
@@ -234,8 +237,15 @@ def upload_data(
                 
                 # Saving Test Data
                 save_test_data(solution_path, test_data_filename, test_data)
-                
-                new_factsheet = {"general": {}, "fairness": {}}
+
+                if created_factsheet:
+                    new_factsheet = created_factsheet
+                else:
+                    new_factsheet = {}
+                if "general" not in new_factsheet:
+                    new_factsheet["general"] = {}
+                if "fairness" not in new_factsheet:
+                    new_factsheet["fairness"] = {}
                 new_factsheet["general"]["target_column"] = target_column
                 new_factsheet["general"]["description"] = general_description
                 
@@ -252,7 +262,7 @@ def upload_data(
             else: 
                 return html.H4("Directory already exists", style={"color":"Red"}, className="text-center"), '', ''
                       
-            return dcc.Location(pathname="/analyze", id="someid_doesnt_matter"), scenario_id, solution_id
+            return dcc.Location(pathname="{}/analyze".format(BASE_PATH), id="someid_doesnt_matter"), scenario_id, solution_id
 
 modals = ["upload_scenario_id", "solution_name", "general_description", "training_data", "test_data", "target_column_name" ,"factsheet", "model"]
 for m in modals:
@@ -294,13 +304,9 @@ def save_model(path, name, content):
 # === SITE ===
 #scenarios = [{'label': f.name, 'value': f.path} for f in os.scandir(SCENARIOS_FOLDER_PATH) if f.is_dir()]
 
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-
-app = dash.Dash(__name__, external_stylesheets=external_stylesheets)
-
+factsheet.get_factsheet_callbacks(app)
 layout = dbc.Container([
     dbc.Col([html.H1("Upload", className="text-center")], width=12, className="mb-2 mt-1"),
-    
     dbc.Col([
     html.Div([
         html.Div([
@@ -466,28 +472,37 @@ layout = dbc.Container([
             create_info_modal("factsheet", "Factsheet", "The factsheet contains the most important information about the model.", ""),
             html.Div(id="factsheet_alert"),
             html.H3(["7. Factsheet", html.Sup("*")]),
-            html.H5("Please upload the factsheet")
+            html.H5("Please upload the factsheet or create a new one using the button below", id="factsheet_info"),
+            dbc.Row(
+                [
+                    dbc.Col(
+                        dcc.Upload(
+                            id='factsheet_upload',
+                            children=html.Div(['Drag and Drop or Select File']),
+                            style={
+                                'width': '100%',
+                                'height': '60px',
+                                'lineHeight': '60px',
+                                'borderWidth': '1px',
+                                'borderStyle': 'dashed',
+                                'borderRadius': '5px',
+                                'textAlign': 'center',
+                                'margin': '10px',
+                                'backgroundColor': '#FFFFFF'
+                            }
+                        )
+                    ),
+                    dbc.Col(
+                        html.Div(dbc.Button("Create Factsheet",  id='create_factsheet', color="primary", className="mt-3 mb-3"))
+                    )
+                ]),
         ], className="text-center"),
+        factsheet.layout,
     ],
             className="mb-4"),
+
     
-    dcc.Upload(
-        id='factsheet_upload',
-        children=html.Div([
-            'Drag and Drop or Select File'
-        ]),
-        style={
-            'width': '100%',
-            'height': '60px',
-            'lineHeight': '60px',
-            'borderWidth': '1px',
-            'borderStyle': 'dashed',
-            'borderRadius': '5px',
-            'textAlign': 'center',
-            'margin': '10px',
-            'backgroundColor': '#FFFFFF'
-        }
-    ),
+
     html.Div(id='factsheet_summary'),
     
     # --- MODEL --- #
