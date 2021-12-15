@@ -1,3 +1,5 @@
+.ipynb_checkpoints
+
 scenarios/*
 !scenarios/credit_card_approval
 !scenarios/it_sec_incident_classification
