@@ -1,4 +1,8 @@
+**/*.ipynb_checkpoints/
 .ipynb_checkpoints
+.ipynb_checkpoints
+*/.ipynb_checkpoints
+.ipynb_checkpoints/
 
 scenarios/*
 !scenarios/credit_card_approval
