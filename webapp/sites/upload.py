@@ -48,7 +48,7 @@ def protected_group_value_options(protected_feature, training_data_content, trai
         df, _, _ = parse_contents(training_data_content, training_data_filename)
         unique_protected_feature_values = np.unique(df[protected_feature])
         for unique_protected_feature_value in unique_protected_feature_values:
-            options.append({"label": "{0}=={1}".format(protected_feature, str(unique_protected_feature_value)), "value": str(unique_protected_feature_value)})
+            options.append({"label": "{0}=={1}".format(protected_feature, str(unique_protected_feature_value)), "value": unique_protected_feature_value})
     return options
 
 @app.callback(Output('favorable_outcome_dropdown_upload', 'options'),
@@ -61,7 +61,7 @@ def favorable_outcome_value_options(column, content, filename):
         df, _, _ = parse_contents(content, filename)
         unique_values = np.unique(df[column])
         for unique_value in unique_values:
-            options.append({"label": "{0}=={1}".format(column, str(unique_value)), "value": str(unique_value)})
+            options.append({"label": "{0}=={1}".format(column, str(unique_value)), "value": unique_value})
     return options
 
 @app.callback([Output('test_data_upload', 'children'),
