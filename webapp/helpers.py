@@ -638,6 +638,7 @@ def parse_contents(contents, filename):
         elif 'pkl' in filename:
                 # Assume that the user uploaded an excel file
                 df = pd.read_pickle(io.BytesIO(decoded))
+        df_full = df.copy()
         df = df[:8]
         
     except Exception as e:
@@ -657,7 +658,7 @@ def parse_contents(contents, filename):
         html.Hr(),
     ])
     columns = df.columns.values
-    return df, table, columns
+    return df_full, table, columns
 
 
 def list_of_metrics(pillar):
