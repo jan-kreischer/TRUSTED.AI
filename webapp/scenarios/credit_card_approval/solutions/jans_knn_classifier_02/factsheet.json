@@ -13,7 +13,7 @@
     },
     "explainability": {},
     "robustness": {},
-    "methodology": {
+    "accountability": {
         "regularization": "Other"
     },
     "scores": {
@@ -41,7 +41,7 @@
             "er_carlini_wagner_attack": NaN,
             "er_deepfool_attack": NaN
         },
-        "methodology": {
+        "accountability": {
             "normalization": 1,
             "missing_data": 5,
             "regularization": NaN,
@@ -156,7 +156,7 @@
             "er_carlini_wagner_attack": {},
             "er_deepfool_attack": {}
         },
-        "methodology": {
+        "accountability": {
             "normalization": {
                 "dep": [
                     "Depends on",

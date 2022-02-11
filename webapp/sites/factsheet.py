@@ -114,7 +114,7 @@ def get_factsheet_callbacks(app):
             return html.H3("Factsheet is created and saved for the analysis", className="text-center", style={"color": "Green"}), dict(content=json.dumps(factsheet, indent=4), filename="factsheet.json"), factsheet, "", "", "", "", "", "", "", ""
         return "", "", "", "", "", "", "", "", "", "", ""
 
-    for m in GENERAL_INPUTS + FAIRNESS_INPUTS + ACCOUNTABILITY_INPUTS_INPUTS:
+    for m in GENERAL_INPUTS + FAIRNESS_INPUTS + ACCOUNTABILITY_INPUTS:
         @app.callback(
             Output("{}_info_modal".format(m), "is_open"),
             [Input("{}_info_button".format(m), "n_clicks"), Input("{}_close".format(m), "n_clicks")],
