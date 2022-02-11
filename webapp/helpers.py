@@ -120,10 +120,10 @@ def get_properties_section(train_data, test_data, factsheet):
 
         properties = pd.DataFrame({
             "Model Type": [factsheet["explainability"]["algorithm_class"]["clf_name"][1]],
-            "Train Test Split": [factsheet["methodology"]["train_test_split"]["train_test_split"][1]],
+            "Train Test Split": [factsheet["accountability"]["train_test_split"]["train_test_split"][1]],
             "Train / Test Data Size": str(train_data.shape[0])+ " samples / "+ str(test_data.shape[0])+ " samples",
-            "Regularization Technique": [factsheet["methodology"]["regularization"]["regularization_technique"][1]],
-            "Normalization Technique": [factsheet["methodology"]["normalization"]["normalization"][1]],
+            "Regularization Technique": [factsheet["accountability"]["regularization"]["regularization_technique"][1]],
+            "Normalization Technique": [factsheet["accountability"]["normalization"]["normalization"][1]],
             "Number of Features": [factsheet["explainability"]["model_size"]["n_features"][1]],
         })
         properties = properties.transpose()
@@ -566,10 +566,10 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
     Story = report_section(Story, "Robustness Properties", k, v, sizex, sizey)
 
     Story = add_matplotlib_to_report(Story, plots[3], 7 * inch, 5 * inch)
-    methodology_properties = [p for k, p in result["properties"]["methodology"].items()]
+    accountability_properties = [p for k, p in result["properties"]["accountability"].items()]
     k = []
     v = []
-    for l in methodology_properties:
+    for l in accountability_properties:
         if l!= {}:
             for i,m in l.items():
                 if i != "dep":
@@ -582,7 +582,7 @@ def save_report_as_pdf(result, model, test_data, target_column, factsheet, chart
 
     sizex = [2.2 * inch, 1.2 * inch, 2.4 * inch, 1 * inch]
     sizey = math.ceil(len(k)/2) * [0.4 * inch]
-    Story = report_section(Story, "Methodology Properties", k, v, sizex, sizey)
+    Story = report_section(Story, "Accountability Properties", k, v, sizex, sizey)
 
 
     doc.build(Story, onFirstPage=title_style)

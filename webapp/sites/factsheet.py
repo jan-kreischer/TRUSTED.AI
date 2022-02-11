@@ -107,16 +107,14 @@ def get_factsheet_callbacks(app):
             #        factsheet["fairness"][e] = eval(e)
             #        factsheet["fairness"] = {}
 
-            factsheet["methodology"] = {}
-            for e in METHODOLOGY_INPUTS:
+            factsheet["accountability"] = {}
+            for e in ACCOUNTABILITY_INPUTS:
                 if eval(e):
-                    factsheet["methodology"][e] = eval(e)
+                    factsheet["accountability"][e] = eval(e)
             return html.H3("Factsheet is created and saved for the analysis", className="text-center", style={"color": "Green"}), dict(content=json.dumps(factsheet, indent=4), filename="factsheet.json"), factsheet, "", "", "", "", "", "", "", ""
         return "", "", "", "", "", "", "", "", "", "", ""
 
-
-    #for m in GENERAL_INPUTS + FAIRNESS_INPUTS + EXPLAINABILITY_INPUTS + ROBUSTNESS_INPUTS + METHODOLOGY_INPUTS:
-    for m in GENERAL_INPUTS + FAIRNESS_INPUTS + METHODOLOGY_INPUTS:
+    for m in GENERAL_INPUTS + FAIRNESS_INPUTS + ACCOUNTABILITY_INPUTS_INPUTS:
         @app.callback(
             Output("{}_info_modal".format(m), "is_open"),
             [Input("{}_info_button".format(m), "n_clicks"), Input("{}_close".format(m), "n_clicks")],

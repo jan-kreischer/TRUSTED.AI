@@ -23,7 +23,7 @@
         "er_carlini_wagner_attack": 0.2,
         "er_deepfool_attack": 0.2
     },
-    "methodology": {
+    "accountability": {
         "normalization": 0.2,
         "missing_data": 0.2,
         "regularization": 0.2,

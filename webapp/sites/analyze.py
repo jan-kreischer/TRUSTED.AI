@@ -26,19 +26,19 @@ from dash_extensions.snippets import send_file
 warnings.filterwarnings('ignore')
 
 # === CONFIG ===
-config_fairness, config_explainability, config_robustness, config_methodology, config_pillars = 0, 0, 0 ,0,0
-for config in ["config_pillars","config_fairness", "config_explainability", "config_robustness", "config_methodology"]:
+config_fairness, config_explainability, config_robustness, config_accountability, config_pillars = 0, 0, 0 ,0,0
+for config in ["config_pillars","config_fairness", "config_explainability", "config_robustness", "config_accountability"]:
     with open(os.path.join(METRICS_CONFIG_PATH, config + ".json")) as file:
             exec("%s = json.load(file)" % config)
 
-pillars = ['fairness', 'explainability', 'robustness', 'methodology']
+pillars = ['fairness', 'explainability', 'robustness', 'accountability']
 weight_config = dict(fairness=config_fairness["weights"], explainability=config_explainability["weights"], 
-                   robustness=config_robustness["weights"], methodology=config_methodology["weights"], pillars=config_pillars)
+                   robustness=config_robustness["weights"], accountability=config_accountability["weights"], pillars=config_pillars)
 
 mappings_config = dict(fairness=config_fairness["parameters"], explainability=config_explainability["parameters"], 
-                   robustness=config_robustness["parameters"], methodology=config_methodology["parameters"])
+                   robustness=config_robustness["parameters"], accountability=config_accountability["parameters"])
 
-metric_description = {**config_fairness["metrics"], **config_explainability["metrics"], **config_robustness["metrics"], **config_methodology["metrics"]}
+metric_description = {**config_fairness["metrics"], **config_explainability["metrics"], **config_robustness["metrics"], **config_accountability["metrics"]}
 
 with open('configs/weights/default.json', 'w') as outfile:
                 json.dump(weight_config, outfile, indent=4)
@@ -55,7 +55,7 @@ charts = []
 fairness_metrics = FAIRNESS_METRICS
 explainability_metrics = EXPLAINABILITY_METRICS
 robustness_metrics = ROBUSTNESS_METRICS
-methodology_metrics = METHODOLOGY_METRICS
+accountability_metrics = ACCOUNTABILITY_METRICS
 
 # === SECTIONS ===
 def general_section():
@@ -228,12 +228,12 @@ for s in SECTIONS[1:]:
     Output(component_id="fairness_bar", component_property='style'),
     Output(component_id="explainability_bar", component_property='style'),
     Output(component_id="robustness_bar", component_property='style'),
-    Output(component_id="methodology_bar", component_property='style'),
+    Output(component_id="accountability_bar", component_property='style'),
     Output(component_id="spider", component_property='style'),
     Output(component_id="fairness_spider", component_property='style'),
     Output(component_id="explainability_spider", component_property='style'),
     Output(component_id="robustness_spider", component_property='style'),
-    Output(component_id="methodology_spider", component_property='style'),
+    Output(component_id="accountability_spider", component_property='style'),
     Input('toggle_charts', 'on')
 )
 def toggle_charts(visibility_state):
@@ -251,7 +251,7 @@ def toggle_charts(visibility_state):
 )
 def toggle_hide_pillar_section(fn,en,rn,mn,alln, fis_open, eis_open, ris_open, mis_open):
     if fn or en or rn or mn or alln:
-        pillars = np.array(['fairness', 'explainability', 'robustness', 'methodology'])
+        pillars = np.array(['fairness', 'explainability', 'robustness', 'accountability'])
         out= np.array( [True,True,True,True])
         ctx = dash.callback_context
         pillar = ctx.triggered[0]['prop_id'][:-11]
@@ -672,7 +672,7 @@ def load_data(solution_set_path):
     else:
         return None, None
 
-# === METHODOLOGY ===
+# === ACCOUNTABILITY ===
 @app.callback(
     [Output("trust_score", 'children')],
     [Input('result', 'data')], prevent_initial_call=True)
@@ -685,12 +685,12 @@ def trust_score(analysis):
         return ["{}/5".format(NO_SCORE)]
     
 @app.callback(
-    [Output("methodology_score", 'children')],
+    [Output("accountability_score", 'children')],
     [Input('result', 'data')], prevent_initial_call=True)
-def methodology_score(analysis):
+def accountability_score(analysis):
     if analysis:
         analysis = json.loads(analysis)
-        score = analysis["final_score"]["methodology"]
+        score = analysis["final_score"]["accountability"]
         return ["{}/5".format(score)]
     else:
         return ["{}/5".format(NO_SCORE)]
@@ -737,11 +737,11 @@ def f1_score(data):
     else:
         result = json.loads(data)
         properties = result["properties"]
-        metric_properties = properties["methodology"]["f1_score"]
+        metric_properties = properties["accountability"]["f1_score"]
         metric_scores = result["results"]
-        if math.isnan(metric_scores["methodology"]["f1_score"]):
+        if math.isnan(metric_scores["accountability"]["f1_score"]):
             return metric_detail_div(metric_properties), []
-        return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["methodology"]["f1_score"]))
+        return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["accountability"]["f1_score"]))
 
 
 # --- Normalization ---
@@ -754,11 +754,11 @@ def normalization(data):
     else:
         result = json.loads(data)
         properties = result["properties"]
-        metric_properties = properties["methodology"]["normalization"]
+        metric_properties = properties["accountability"]["normalization"]
         metric_scores = result["results"]
-        if math.isnan(metric_scores["methodology"]["normalization"]):
+        if math.isnan(metric_scores["accountability"]["normalization"]):
             return metric_detail_div(metric_properties), []
-        return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["methodology"]["normalization"]))
+        return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["accountability"]["normalization"]))
 
 @app.callback(
     [Output("test_accuracy_details", 'children'), Output("test_accuracy_score", 'children')],
@@ -769,11 +769,11 @@ def test_accuracy(data):
     else:
         result = json.loads(data)
         properties = result["properties"]
-        metric_properties = properties["methodology"]["test_accuracy"]
+        metric_properties = properties["accountability"]["test_accuracy"]
         metric_scores = result["results"]
-        if math.isnan(metric_scores["methodology"]["test_accuracy"]):
+        if math.isnan(metric_scores["accountability"]["test_accuracy"]):
             return metric_detail_div(metric_properties), []
-        return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["methodology"]["test_accuracy"]))
+        return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["accountability"]["test_accuracy"]))
 
 @app.callback(
     [Output("missing_data_details", 'children'), Output("missing_data_score", 'children')],
@@ -784,11 +784,11 @@ def missing_data(data):
     else:
         result = json.loads(data)
         properties = result["properties"]
-        metric_properties = properties["methodology"]["missing_data"]
+        metric_properties = properties["accountability"]["missing_data"]
         metric_scores = result["results"]
-        if math.isnan(metric_scores["methodology"]["missing_data"]):
+        if math.isnan(metric_scores["accountability"]["missing_data"]):
             return metric_detail_div(metric_properties), []
-        return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["methodology"]["missing_data"]))
+        return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_scores["accountability"]["missing_data"]))
 
 
 # --- Regularization ---
@@ -800,8 +800,8 @@ def regularization(analysis, solution_set_path):
     if analysis and solution_set_path:
           analysis = json.loads(analysis)
           _, metric_scores, metric_properties = analysis["final_score"] , analysis["results"], analysis["properties"]
-          metric_score = metric_scores["methodology"]["regularization"]
-          regularization_technique = metric_properties["methodology"]["regularization"]
+          metric_score = metric_scores["accountability"]["regularization"]
+          regularization_technique = metric_properties["accountability"]["regularization"]
           if math.isnan(metric_score):
               return metric_detail_div(metric_properties), []
           return metric_detail_div(regularization_technique), html.H4("({}/5)".format(metric_score))
@@ -818,12 +818,12 @@ def train_test_split(data):
     else:
         result = json.loads(data)
         properties = result["properties"]
-        metric_properties = properties["methodology"]["train_test_split"]
+        metric_properties = properties["accountability"]["train_test_split"]
         metric_scores = result["results"]
-        if math.isnan(metric_scores["methodology"]["train_test_split"]):
+        if math.isnan(metric_scores["accountability"]["train_test_split"]):
             return metric_detail_div(metric_properties), []
         return metric_detail_div(metric_properties), html.H4(
-            "({}/5)".format(metric_scores["methodology"]["train_test_split"]))
+            "({}/5)".format(metric_scores["accountability"]["train_test_split"]))
 
 # --- Factsheet Completeness ---
 @app.callback(
@@ -836,8 +836,8 @@ def factsheet_completeness(analysis, solution_set_path):
       else:
           analysis = json.loads(analysis)
           _, metric_scores, metric_properties = analysis["final_score"] , analysis["results"], analysis["properties"]
-          metric_score = metric_scores["methodology"]["factsheet_completeness"]
-          metric_properties= metric_properties["methodology"]["factsheet_completeness"]
+          metric_score = metric_scores["accountability"]["factsheet_completeness"]
+          metric_properties= metric_properties["accountability"]["factsheet_completeness"]
           return metric_detail_div(metric_properties), html.H4("({}/5)".format(metric_score))
 
 @app.callback(
@@ -845,7 +845,7 @@ def factsheet_completeness(analysis, solution_set_path):
     Output(component_id="fairness_section", component_property='style'),
     Output(component_id="explainability_section", component_property='style'),
     Output(component_id="robustness_section", component_property='style'),
-    Output(component_id="methodology_section", component_property='style'),
+    Output(component_id="accountability_section", component_property='style'),
     [Input("bar", 'figure')], prevent_initial_call=True)
 def toggle_pillar_section_visibility(path):
     if path is not None:
@@ -1042,16 +1042,16 @@ def store_trust_analysis(solution_set_dropdown, config_weights, config_mappings,
        Output('fairness_bar', 'figure'),
        Output('explainability_bar', 'figure'),
        Output('robustness_bar', 'figure'),
-       Output('methodology_bar', 'figure'),
+       Output('accountability_bar', 'figure'),
        Output('fairness_spider', 'figure'),
        Output('explainability_spider', 'figure'),
        Output('robustness_spider', 'figure'),
-       Output('methodology_spider', 'figure'),
+       Output('accountability_spider', 'figure'),
        Output('trust_star_rating', 'children'),
        Output('fairness_star_rating', 'children'),
        Output('explainability_star_rating', 'children'),
        Output('robustness_star_rating', 'children'),
-       Output('methodology_star_rating', 'children')],
+       Output('accountability_star_rating', 'children')],
       [Input('result', 'data'),Input("hidden-trigger", "value")])  
 def update_figure(data, trig):
       
@@ -1066,7 +1066,7 @@ def update_figure(data, trig):
       pillars = list(map(lambda x: x.upper(),list(final_score.keys())))
       values = list(final_score.values()) 
         
-      colors = [FAIRNESS_COLOR, EXPLAINABILITY_COLOR, ROBUSTNESS_COLOR, METHODOLOGY_COLOR]
+      colors = [FAIRNESS_COLOR, EXPLAINABILITY_COLOR, ROBUSTNESS_COLOR, ACCOUNTABILITY_COLOR]
       
       # barchart
       chart_list=[]
@@ -1129,7 +1129,7 @@ def update_figure(data, trig):
       star_ratings.append(show_star_rating(final_score["fairness"]))
       star_ratings.append(show_star_rating(final_score["explainability"]))
       star_ratings.append(show_star_rating(final_score["robustness"]))
-      star_ratings.append(show_star_rating(final_score["methodology"]))
+      star_ratings.append(show_star_rating(final_score["accountability"]))
       return chart_list + star_ratings
 
 @app.callback(
@@ -1370,7 +1370,7 @@ layout = html.Div([
                     dbc.Col(dbc.Button("FAIRNESS", id='fairness_s',className="mt-3", color="primary", style={"background-color": FAIRNESS_COLOR})),
                     dbc.Col(dbc.Button("EXPLAINABILITY", id='explainability_s',className="mt-3", color="primary", style={"background-color": EXPLAINABILITY_COLOR})),
                     dbc.Col(dbc.Button("ROBUSTNESS", id='robustness_s',className="mt-3", color="primary" , style={"background-color": ROBUSTNESS_COLOR})),
-                    dbc.Col(dbc.Button("METHODOLOGY", id='methodology_s',className="mt-3", color="primary" , style={"background-color": METHODOLOGY_COLOR})),
+                    dbc.Col(dbc.Button("ACCOUNTABILITY", id='accountability_s',className="mt-3", color="primary" , style={"background-color": ACCOUNTABILITY_COLOR})),
                     ]
                     ), html.Br()],className="text-center", style={"margin-left":"10%","margin-right":"10%"}),
                     html.Div([
@@ -1379,7 +1379,7 @@ layout = html.Div([
                     pillar_section("fairness", fairness_metrics),
                     pillar_section("explainability", explainability_metrics),
                     pillar_section("robustness", robustness_metrics),
-                    pillar_section("methodology", methodology_metrics),
+                    pillar_section("accountability", accountability_metrics),
                     dcc.Store(id='training_data'),
                     dcc.Store(id='test_data'),
                     # html.Div([dbc.Button("Download Report", id='download_report_button', color="primary", className="mt-3"),

@@ -14,12 +14,12 @@ import sklearn.metrics as metrics
 from algorithms.fairness import analyse as analyse_fairness
 from algorithms.explainability import analyse as analyse_explainability
 from algorithms.robustness import analyse as analyse_robustness
-from algorithms.methodology import analyse as analyse_methodology
+from algorithms.accountability import analyse as analyse_accountability
 import collections
 from helpers import *
 
 # define algo
-def trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness, config_explainability, config_robustness, methodology_config, solution_set_path):
+def trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness, config_explainability, config_robustness, accountability_config, solution_set_path):
     # if "scores" in factsheet.keys() and "properties" in factsheet.keys():
     #     scores = factsheet["scores"]
     #     properties = factsheet["properties"]
@@ -28,7 +28,7 @@ def trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness,
             fairness       = analyse_fairness(model, train_data, test_data, factsheet, config_fairness),
             explainability = analyse_explainability(model, train_data, test_data, config_explainability, factsheet),
             robustness     = analyse_robustness(model, train_data, test_data, config_robustness, factsheet),
-            methodology    = analyse_methodology(model, train_data, test_data, factsheet, methodology_config)
+            accountability    = analyse_accountability(model, train_data, test_data, factsheet, accountability_config)
         )
         scores = dict((k, v.score) for k, v in output.items())
         properties = dict((k, v.properties) for k, v in output.items())
@@ -43,7 +43,7 @@ def get_final_score(model, train_data, test_data, config_weights, mappings_confi
     config_fairness = mappings_config["fairness"]
     config_explainability = mappings_config["explainability"]
     config_robustness = mappings_config["robustness"]
-    config_methodology = mappings_config["methodology"]
+    config_accountability = mappings_config["accountability"]
     
     with open('configs/mappings/default.json', 'r') as f:
           default_map = json.loads(f.read())
@@ -54,7 +54,7 @@ def get_final_score(model, train_data, test_data, config_weights, mappings_confi
             scores = factsheet["scores"]
             properties = factsheet["properties"]
         else:
-            result = trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness, config_explainability, config_robustness, config_methodology, solution_set_path)
+            result = trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness, config_explainability, config_robustness, config_accountability, solution_set_path)
             scores = result.score
             factsheet["scores"] = scores
             properties = result.properties
@@ -64,7 +64,7 @@ def get_final_score(model, train_data, test_data, config_weights, mappings_confi
             except Exception as e:
                 print("ERROR in write_into_factsheet: {}".format(e))
     else:
-        result = trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness, config_explainability, config_robustness, config_methodology, solution_set_path)
+        result = trusting_AI_scores(model, train_data, test_data, factsheet, config_fairness, config_explainability, config_robustness, config_accountability, solution_set_path)
         scores = result.score
         properties = result.properties
     

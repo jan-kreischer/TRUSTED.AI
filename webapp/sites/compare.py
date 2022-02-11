@@ -116,7 +116,7 @@ def pillar_section_2(pillar):
 
     ], id="{}_section-2".format(pillar), style={"display": "None"})
 
-pillars = ['fairness', 'explainability', 'robustness', 'methodology']
+pillars = ['fairness', 'explainability', 'robustness', 'accountability']
 
 def map_dropdown(pillar):
     return html.Div(
@@ -205,7 +205,7 @@ layout = html.Div([
                     pillar_section_1("fairness"),
                     pillar_section_1("explainability"),
                     pillar_section_1("robustness"),
-                    pillar_section_1("methodology"),
+                    pillar_section_1("accountability"),
                     dcc.Store(id='training_data-1'),
                     dcc.Store(id='test_data-1')
                 ], id="analysis_section-1")
@@ -226,7 +226,7 @@ layout = html.Div([
                     pillar_section_2("fairness"),
                     pillar_section_2("explainability"),
                     pillar_section_2("robustness"),
-                    pillar_section_2("methodology"),
+                    pillar_section_2("accountability"),
                     dcc.Store(id='training_data-2'),
                     dcc.Store(id='test_data-2')
                 ], id="analysis_section-2")
@@ -261,12 +261,12 @@ def toggle_config(on):
     Output(component_id="fairness_bar-1", component_property='style'),
     Output(component_id="explainability_bar-1", component_property='style'),
     Output(component_id="robustness_bar-1", component_property='style'),
-    Output(component_id="methodology_bar-1", component_property='style'),
+    Output(component_id="accountability_bar-1", component_property='style'),
     Output(component_id="spider-1", component_property='style'),
     Output(component_id="fairness_spider-1", component_property='style'),
     Output(component_id="explainability_spider-1", component_property='style'),
     Output(component_id="robustness_spider-1", component_property='style'),
-    Output(component_id="methodology_spider-1", component_property='style'),
+    Output(component_id="accountability_spider-1", component_property='style'),
     [Input('toggle_charts-1', 'on'), Input('solution_set_dropdown-1', 'value')]
 )
 def toggle_charts_1(visibility_state, solution_set):
@@ -288,12 +288,12 @@ def toggle_charts_1(visibility_state, solution_set):
     Output(component_id="fairness_bar-2", component_property='style'),
     Output(component_id="explainability_bar-2", component_property='style'),
     Output(component_id="robustness_bar-2", component_property='style'),
-    Output(component_id="methodology_bar-2", component_property='style'),
+    Output(component_id="accountability_bar-2", component_property='style'),
     Output(component_id="spider-2", component_property='style'),
     Output(component_id="fairness_spider-2", component_property='style'),
     Output(component_id="explainability_spider-2", component_property='style'),
     Output(component_id="robustness_spider-2", component_property='style'),
-    Output(component_id="methodology_spider-2", component_property='style'),
+    Output(component_id="accountability_spider-2", component_property='style'),
     [Input('toggle_charts-2', 'on'), Input('solution_set_dropdown-2', 'value')]
 )
 def toggle_charts_2(visibility_state, solution_set):
@@ -351,7 +351,7 @@ def load_data_2(solution_set_path):
     Output(component_id="fairness_section-1", component_property='style'),
     Output(component_id="explainability_section-1", component_property='style'),
     Output(component_id="robustness_section-1", component_property='style'),
-    Output(component_id="methodology_section-1", component_property='style'),
+    Output(component_id="accountability_section-1", component_property='style'),
     [Input("bar-1", 'figure')], prevent_initial_call=True)
 def toggle_pillar_section_visibility_1(path):
     if path is not None:
@@ -365,7 +365,7 @@ def toggle_pillar_section_visibility_1(path):
     Output(component_id="fairness_section-2", component_property='style'),
     Output(component_id="explainability_section-2", component_property='style'),
     Output(component_id="robustness_section-2", component_property='style'),
-    Output(component_id="methodology_section-2", component_property='style'),
+    Output(component_id="accountability_section-2", component_property='style'),
     [Input("bar-2", 'figure')], prevent_initial_call=True)
 def toggle_pillar_section_visibility_2(path):
     if path is not None:
@@ -418,7 +418,7 @@ def toggle_pillar_section_visibility_2(path):
               [Input('solution_set_dropdown-1', 'value'),
               Input("apply-config-compare", "n_clicks")],
               [State('config-dropdown-compare', 'value')] +  [State('{}-dropdown-compare'.format(pillar),"value") for pillar in pillars])
-def store_result_1(solution_set_dropdown, n, weight, map_fairness, map_explainability, map_robustness, map_methodology):
+def store_result_1(solution_set_dropdown, n, weight, map_fairness, map_explainability, map_robustness, map_accountability):
     if not solution_set_dropdown:
         return None
     
@@ -427,7 +427,7 @@ def store_result_1(solution_set_dropdown, n, weight, map_fairness, map_explainab
     
     mappings_config = dict()
     
-    for pillar, map_conf in zip(pillars,[map_fairness, map_explainability, map_robustness, map_methodology]):
+    for pillar, map_conf in zip(pillars,[map_fairness, map_explainability, map_robustness, map_accountability]):
         with open(map_conf, 'r') as f:
             mappings_config[pillar] = json.loads(f.read())
     
@@ -446,7 +446,7 @@ def store_result_1(solution_set_dropdown, n, weight, map_fairness, map_explainab
               [Input('solution_set_dropdown-2', 'value'),
                Input("apply-config-compare", "n_clicks")],
               [State('config-dropdown-compare', 'value')] +  [State('{}-dropdown-compare'.format(pillar),"value") for pillar in pillars])
-def store_result_2(solution_set_dropdown, n, weight, map_fairness, map_explainability, map_robustness, map_methodology):
+def store_result_2(solution_set_dropdown, n, weight, map_fairness, map_explainability, map_robustness, map_accountability):
     if not solution_set_dropdown:
         return None
     
@@ -455,12 +455,12 @@ def store_result_2(solution_set_dropdown, n, weight, map_fairness, map_explainab
     
     mappings_config = dict()
     
-    for pillar, map_conf in zip(pillars,[map_fairness, map_explainability, map_robustness, map_methodology]):
+    for pillar, map_conf in zip(pillars,[map_fairness, map_explainability, map_robustness, map_accountability]):
         with open(map_conf, 'r') as f:
             mappings_config[pillar] = json.loads(f.read())
     
     # mappings_config = dict(fairness=config_fairness["parameters"], explainability=config_explainability["parameters"], 
-    #                robustness=config_robustness["parameters"], methodology=config_methodology["parameters"])
+    #                robustness=config_robustness["parameters"], accountability=config_accountability["parameters"])
     print(map_explainability)
     test, train, model, factsheet = read_solution(solution_set_dropdown)
     final_score, results, properties = get_final_score(model, train, test, weights_config, mappings_config, factsheet, solution_set_dropdown)
@@ -768,16 +768,16 @@ def show_properties_2(solution_set_path):
      Output('fairness_bar-1', 'figure'),
      Output('explainability_bar-1', 'figure'),
      Output('robustness_bar-1', 'figure'),
-     Output('methodology_bar-1', 'figure'),
+     Output('accountability_bar-1', 'figure'),
      Output('fairness_spider-1', 'figure'),
      Output('explainability_spider-1', 'figure'),
      Output('robustness_spider-1', 'figure'),
-     Output('methodology_spider-1', 'figure'),
+     Output('accountability_spider-1', 'figure'),
      Output('trust_star_rating-1', 'children'),
      Output('fairness_star_rating-1', 'children'),
      Output('explainability_star_rating-1', 'children'),
      Output('robustness_star_rating-1', 'children'),
-     Output('methodology_star_rating-1', 'children')],
+     Output('accountability_star_rating-1', 'children')],
     Input('result-1', 'data'))
 def update_figure_1(data):
     if data is None:
@@ -788,7 +788,7 @@ def update_figure_1(data):
     pillars = list(map(lambda x: x.upper(),list(final_score.keys())))
     values = list(final_score.values())
 
-    colors = [FAIRNESS_COLOR, EXPLAINABILITY_COLOR, ROBUSTNESS_COLOR, METHODOLOGY_COLOR]
+    colors = [FAIRNESS_COLOR, EXPLAINABILITY_COLOR, ROBUSTNESS_COLOR, ACCOUNTABILITY_COLOR]
 
     # barchart
     chart_list = []
@@ -854,7 +854,7 @@ def update_figure_1(data):
     star_ratings.append(show_star_rating(final_score["fairness"]))
     star_ratings.append(show_star_rating(final_score["explainability"]))
     star_ratings.append(show_star_rating(final_score["robustness"]))
-    star_ratings.append(show_star_rating(final_score["methodology"]))
+    star_ratings.append(show_star_rating(final_score["accountability"]))
     return chart_list + star_ratings
 
 @app.callback(
@@ -863,16 +863,16 @@ def update_figure_1(data):
      Output('fairness_bar-2', 'figure'),
      Output('explainability_bar-2', 'figure'),
      Output('robustness_bar-2', 'figure'),
-     Output('methodology_bar-2', 'figure'),
+     Output('accountability_bar-2', 'figure'),
      Output('fairness_spider-2', 'figure'),
      Output('explainability_spider-2', 'figure'),
      Output('robustness_spider-2', 'figure'),
-     Output('methodology_spider-2', 'figure'),
+     Output('accountability_spider-2', 'figure'),
      Output('trust_star_rating-2', 'children'),
      Output('fairness_star_rating-2', 'children'),
      Output('explainability_star_rating-2', 'children'),
      Output('robustness_star_rating-2', 'children'),
-     Output('methodology_star_rating-2', 'children')],
+     Output('accountability_star_rating-2', 'children')],
     Input('result-2', 'data'))
 def update_figure_2(data):
     if data is None:
@@ -883,7 +883,7 @@ def update_figure_2(data):
     pillars = list(map(lambda x: x.upper(),list(final_score.keys())))
     values = list(final_score.values())
 
-    colors = [FAIRNESS_COLOR, EXPLAINABILITY_COLOR, ROBUSTNESS_COLOR, METHODOLOGY_COLOR]
+    colors = [FAIRNESS_COLOR, EXPLAINABILITY_COLOR, ROBUSTNESS_COLOR, ACCOUNTABILITY_COLOR]
 
     # barchart
     chart_list = []
@@ -948,7 +948,7 @@ def update_figure_2(data):
     star_ratings.append(show_star_rating(final_score["fairness"]))
     star_ratings.append(show_star_rating(final_score["explainability"]))
     star_ratings.append(show_star_rating(final_score["robustness"]))
-    star_ratings.append(show_star_rating(final_score["methodology"]))
+    star_ratings.append(show_star_rating(final_score["accountability"]))
     return chart_list + star_ratings
 
 @app.callback(

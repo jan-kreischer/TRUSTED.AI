@@ -24,8 +24,8 @@ from config import METRICS_CONFIG_PATH
 
 children=[]
 
-config_pillars, config_fairness, config_explainability, config_robustness, config_methodology = 0, 0, 0 ,0, 0
-for config in ["config_pillars", "config_fairness", "config_explainability", "config_robustness", "config_methodology"]:
+config_pillars, config_fairness, config_explainability, config_robustness, config_accountability = 0, 0, 0 ,0, 0
+for config in ["config_pillars", "config_fairness", "config_explainability", "config_robustness", "config_accountability"]:
     with open(os.path.join(METRICS_CONFIG_PATH, config + ".json")) as file:
             exec("%s = json.load(file)" % config)
 
@@ -70,7 +70,7 @@ def get_weight_panel(config_w, pillar):
 explainability_panel, exp_input_ids = get_weight_panel(config_explainability,"explainability")
 fairness_panel ,fair_input_ids = get_weight_panel(config_fairness,"fairness")
 robustness_panel, rob_input_ids = get_weight_panel(config_robustness,"robustness")
-methodology_panel, meth_input_ids = get_weight_panel(config_methodology,"methodology")
+accountability_panel, meth_input_ids = get_weight_panel(config_accountability,"accountability")
 
 #panels
 fair_panel_comp = [html.H3("Fairness", style={'text-align':'center'})] + fairness_panel
@@ -82,7 +82,7 @@ exp_panel = html.Div(exp_panel_comp, style={'width': '22%', 'display': 'inline-b
 rob_panel_comp = [html.H3("Robustness", style={'text-align':'center'})] + robustness_panel
 rob_panel = html.Div(rob_panel_comp, style={'width': '22%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10})
 
-meth_panel_comp = [html.H3("Methodology", style={'text-align':'center'})] + methodology_panel
+meth_panel_comp = [html.H3("Accountability", style={'text-align':'center'})] + accountability_panel
 meth_panel = html.Div(meth_panel_comp, style={'width': '22%', 'display': 'inline-block',"vertical-align": "top",'margin-left': 10})
 
 
@@ -187,7 +187,7 @@ def get_callbacks(app):
                 config_file = json.loads(f.read())
         
         
-        pillars = ['explainability', 'fairness', 'robustness', 'methodology']
+        pillars = ['explainability', 'fairness', 'robustness', 'accountability']
         ids = [exp_input_ids, fair_input_ids, rob_input_ids, meth_input_ids]
         for pillar, pillar_ids in zip(pillars, ids):
             #output = output + [config["pillars"][pillar]] + list(map(lambda metric: config[pillar]["weights"][metric[2:]],pillar_ids[1:]))
@@ -236,7 +236,7 @@ def get_callbacks(app):
                 config = json.loads(f.read())
                 
         output = []
-        pillars = ['explainability', 'fairness', 'robustness', 'methodology']
+        pillars = ['explainability', 'fairness', 'robustness', 'accountability']
         ids = [exp_input_ids, fair_input_ids, rob_input_ids, meth_input_ids]
         for pillar, pillar_ids in zip(pillars, ids):
             output = output + [config["pillars"][pillar]] + list(map(lambda metric: config[pillar][metric[2:]],pillar_ids[1:]))

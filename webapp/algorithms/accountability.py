@@ -7,25 +7,25 @@ from math import isclose
 import re
 
 info = collections.namedtuple('info', 'description value')
-# === Methodology Metrics ===
-def analyse(model, training_dataset, test_dataset, factsheet, methodology_config):
+# === accountability Metrics ===
+def analyse(model, training_dataset, test_dataset, factsheet, accountability_config):
 
-    #_accuracy_thresholds = methodology_config["score_test_accuracy"]["thresholds"]["value"]
-    #_f1_score_thresholds = methodology_config["score_f1"]["thresholds"]["value"]
-    normalization_mapping = methodology_config["score_normalization"]["mappings"]["value"]
-    missing_data_mapping = methodology_config["score_missing_data"]["mappings"]["value"]
-    train_test_split_mapping = methodology_config["score_train_test_split"]["mappings"]["value"]
+    #_accuracy_thresholds = accountability_config["score_test_accuracy"]["thresholds"]["value"]
+    #_f1_score_thresholds = accountability_config["score_f1"]["thresholds"]["value"]
+    normalization_mapping = accountability_config["score_normalization"]["mappings"]["value"]
+    missing_data_mapping = accountability_config["score_missing_data"]["mappings"]["value"]
+    train_test_split_mapping = accountability_config["score_train_test_split"]["mappings"]["value"]
 
-    metrics = list_of_metrics("methodology")
+    metrics = list_of_metrics("accountability")
     output = dict(
-        #output[metric] = exec("%s_score(model, training_dataset, test_dataset, factsheet, methodology_config)" % metric)
+        #output[metric] = exec("%s_score(model, training_dataset, test_dataset, factsheet, accountability_config)" % metric)
         normalization  = normalization_score(model, training_dataset, test_dataset, factsheet, normalization_mapping),
         missing_data = missing_data_score(model, training_dataset, test_dataset, factsheet, missing_data_mapping),
-        regularization   = regularization_score(model, training_dataset, test_dataset, factsheet, methodology_config),
+        regularization   = regularization_score(model, training_dataset, test_dataset, factsheet, accountability_config),
         train_test_split = train_test_split_score(model, training_dataset, test_dataset, factsheet, train_test_split_mapping),
         #test_accuracy = test_accuracy_score(model, training_dataset, test_dataset, factsheet, accuracy_thresholds),
         #f1_score = f1_score(model, training_dataset, test_dataset, factsheet, f1_score_thresholds),
-        factsheet_completeness= factsheet_completeness_score(model, training_dataset, test_dataset, factsheet, methodology_config)
+        factsheet_completeness= factsheet_completeness_score(model, training_dataset, test_dataset, factsheet, accountability_config)
     )
 
     scores = dict((k, v.score) for k, v in output.items())
@@ -107,7 +107,7 @@ def is_between(a, x, b):
     return min(a, b) < x < max(a, b)
 
 # --- Regularization ---
-def regularization_score(model, training_dataset, test_dataset, factsheet, methodology_config):
+def regularization_score(model, training_dataset, test_dataset, factsheet, accountability_config):
     score = 1
     regularization = regularization_metric(factsheet)
     properties = {"dep" :info('Depends on','Factsheet'),
@@ -126,8 +126,8 @@ def regularization_score(model, training_dataset, test_dataset, factsheet, metho
     return result(score=score, properties=properties)
 
 def regularization_metric(factsheet):
-    if "methodology" in factsheet and "regularization" in factsheet["methodology"]:
-        return factsheet["methodology"]["regularization"]
+    if "accountability" in factsheet and "regularization" in factsheet["accountability"]:
+        return factsheet["accountability"]["regularization"]
     else:
         return NOT_SPECIFIED
     
@@ -195,7 +195,7 @@ def f1_metric(model, test_dataset, factsheet):
     return f1_metric
     
 # --- Factsheet Completeness ---
-def factsheet_completeness_score(model, training_dataset, test_dataset, factsheet, methodology_config):
+def factsheet_completeness_score(model, training_dataset, test_dataset, factsheet, accountability_config):
     score = 0
     properties= {"dep" :info('Depends on','Factsheet')}
     
