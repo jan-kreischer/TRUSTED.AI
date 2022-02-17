@@ -1,10 +1,10 @@
 {
     "general": {
-        "model_name": "Melike's SVC2",
+        "model_name": "Melike's Neural Network",
         "purpose_description": "Attack Classification",
         "domain_description": "IT Security",
         "training_data_description": "Alberto's classification data",
-        "model_information": "Sklearn SVM Classifier for IT Security Incident Classification scenario",
+        "model_information": "Keras Neural Network Classifier for IT Security Incident Classification scenario",
         "target_column": "label",
         "authors": "Melike Demirci",
         "contact_information": "melike.demirci@uzh.ch"
@@ -23,63 +23,47 @@
     },
     "scores": {
         "fairness": {
-            "underfitting": 3,
+            "underfitting": NaN,
             "overfitting": NaN,
-            "statistical_parity_difference": 1,
+            "statistical_parity_difference": NaN,
             "equal_opportunity_difference": NaN,
             "average_odds_difference": NaN,
-            "disparate_impact": 1,
-            "class_balance": 1
+            "disparate_impact": NaN,
+            "class_balance": 5
         },
         "explainability": {
-            "algorithm_class": 2,
+            "algorithm_class": 1,
             "correlated_features": 2,
             "model_size": 2,
             "feature_relevance": NaN
         },
         "robustness": {
-            "confidence_score": 5,
+            "confidence_score": NaN,
             "clique_method": NaN,
-            "loss_sensitivity": NaN,
-            "clever_score": NaN,
-            "er_fast_gradient_attack": 1,
-            "er_carlini_wagner_attack": 1,
-            "er_deepfool_attack": 3
+            "loss_sensitivity": 2,
+            "clever_score": 4,
+            "er_fast_gradient_attack": NaN,
+            "er_carlini_wagner_attack": NaN,
+            "er_deepfool_attack": NaN
         },
         "accountability": {
-            "normalization": 1,
+            "normalization": 4,
             "missing_data": 5,
             "regularization": 1,
-            "train_test_split": 2,
+            "train_test_split": 5,
             "factsheet_completeness": 5
         }
     },
     "properties": {
         "fairness": {
             "underfitting": {
-                "Metric Description": "Compares the models achieved test accuracy against a baseline.",
-                "Depends on": "Model, Test Data",
-                "Test Accuracy": "87.47%",
-                "Conclusion": "Model is slighly underfitting",
-                "Score": "3"
+                "Non computable because": "name 'X_train' is not defined"
             },
             "overfitting": {
-                "Non computable because": "The test accuracy is to low and if the model is underfitting to much it can't be overfitting at the same time."
+                "Non computable because": "name 'X_train' is not defined"
             },
             "statistical_parity_difference": {
-                "Metric Description": "The spread between the percentage of observations from the majority group receiving a favorable outcome compared to the protected group. The closes this spread is to zero the better.",
-                "Depends on": "Training Data, Factsheet (Definition of Protected Group and Favorable Outcome)",
-                "----------": "",
-                "|{x|x is protected, y_true is favorable}|": 1,
-                "|{x|x is protected}|": 23,
-                "Favored Protected Group Ratio": "P(y_true is favorable|protected=True) = 4.35%",
-                "|{x|x is not protected, y_true is favorable}|": 327,
-                "|{x|x is not protected}|": 3487,
-                "Favored Unprotected Group Ratio": "P(y_true is favorable|protected=False) = 9.38%",
-                "-----------": "",
-                "Formula": "Statistical Parity Difference = |Favored Protected Group Ratio - Favored Unprotected Group Ratio|",
-                "Statistical Parity Difference": "5.03%",
-                "Score": "1"
+                "Non computable because": "division by zero"
             },
             "equal_opportunity_difference": {
                 "Non computable because": "division by zero"
@@ -88,24 +72,12 @@
                 "Non computable because": "division by zero"
             },
             "disparate_impact": {
-                "Metric Description": "Is quotient of the ratio of samples from the protected group receiving a favorable prediction divided by the ratio of samples from the unprotected group receiving a favorable prediction",
-                "Depends on": "Model, Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)",
-                "----------": "",
-                "|{x|x is protected, y_pred is favorable}": 0,
-                "|{x|x is protected}|": 3,
-                "Protected Favored Ratio": "P(y_hat=favorable|protected=True) = 0.00%",
-                "|{x|x is not protected, y_pred is favorable}|": 34,
-                "|{x|x is not protected}|": 388,
-                "Unprotected Favored Ratio": "P(y_hat=favorable|protected=False) = 8.76%",
-                "-----------": "",
-                "Formula": "Disparate Impact = Protected Favored Ratio / Unprotected Favored Ratio",
-                "Disparate Impact": "0.00",
-                "Score": "1"
+                "Non computable because": "division by zero"
             },
             "class_balance": {
                 "Metric Description": "Measures how well the training data is balanced or unbalanced",
                 "Depends on": "Training Data",
-                "Score": "1"
+                "Score": "5"
             }
         },
         "explainability": {
@@ -116,7 +88,7 @@
                 ],
                 "clf_name": [
                     "model type",
-                    "SVC"
+                    "Sequential"
                 ]
             },
             "correlated_features": {
@@ -148,80 +120,53 @@
         },
         "robustness": {
             "confidence_score": {
-                "confidence_score": [
-                    "Average confidence score",
-                    "86.17%"
+                "non_computable": [
+                    "Non Computable Because",
+                    "Can only be calculated on models which provide prediction probabilities."
+                ]
+            },
+            "clique_method": {
+                "non_computable": [
+                    "Non Computable Because",
+                    "Can only be calculated on Tree-Based models."
+                ]
+            },
+            "loss_sensitivity": {
+                "loss_sensitivity": [
+                    "Average gradient value of the loss function",
+                    "1.54"
                 ],
                 "depends_on": [
                     "Depends on",
-                    "Model and Data"
-                ]
-            },
-            "clique_method": {},
-            "loss_sensitivity": {
-                "non_computable": [
-                    "Non Computable Because",
-                    "Can only be calculated on Keras models."
+                    "Model"
                 ]
             },
             "clever_score": {
-                "non_computable": [
-                    "Non Computable Because",
-                    "Can only be calculated on Keras models."
+                "clever_score": [
+                    "CLEVER Score",
+                    "1.04"
+                ],
+                "depends_on": [
+                    "Depends on",
+                    "Model"
                 ]
             },
             "er_fast_gradient_attack": {
-                "before_attack": [
-                    "FGM Before attack accuracy",
-                    "94.00%"
-                ],
-                "after_attack": [
-                    "FGM After attack accuracy",
-                    "16.00%"
-                ],
-                "difference": [
-                    "FGM Proportional difference (After-Att Acc - Before-Att Acc)/Before-Att Acc",
-                    "82.98%"
-                ],
-                "depends_on": [
-                    "Depends on",
-                    "Model and Data"
+                "non_computable": [
+                    "Non Computable Because",
+                    "Can be calculated on either SVC or Logistic Regression models."
                 ]
             },
             "er_carlini_wagner_attack": {
-                "before_attack": [
-                    "CW Before attack accuracy",
-                    "100.00%"
-                ],
-                "after_attack": [
-                    "CW After attack accuracy",
-                    "20.00%"
-                ],
-                "difference": [
-                    "CW Proportional difference (After-Att Acc - Before-Att Acc)/Before-Att Acc",
-                    "80.00%"
-                ],
-                "depends_on": [
-                    "Depends on",
-                    "Model and Data"
+                "non_computable": [
+                    "Non Computable Because",
+                    "Can be calculated on either SVC or Logistic Regression models."
                 ]
             },
             "er_deepfool_attack": {
-                "before_attack": [
-                    "DF Before attack accuracy",
-                    "100.00%"
-                ],
-                "after_attack": [
-                    "DF After attack accuracy",
-                    "50.00%"
-                ],
-                "difference": [
-                    "DF Proportional difference (After-Att Acc - Before-Att Acc)/Before-Att Acc",
-                    "50.00%"
-                ],
-                "depends_on": [
-                    "Depends on",
-                    "Model and Data"
+                "non_computable": [
+                    "Non Computable Because",
+                    "Can be calculated on either SVC or Logistic Regression models."
                 ]
             }
         },
@@ -233,23 +178,23 @@
                 ],
                 "Training_mean": [
                     "Mean of the training data",
-                    "0.23"
+                    "-0.00"
                 ],
                 "Training_std": [
                     "Standard deviation of the training data",
-                    "0.14"
+                    "1.00"
                 ],
                 "Test_mean": [
                     "Mean of the test data",
-                    "0.22"
+                    "-0.03"
                 ],
                 "Test_std": [
                     "Standard deviation of the test data",
-                    "0.13"
+                    "0.88"
                 ],
                 "normalization": [
                     "Normalization",
-                    "None"
+                    "Training data are standardized"
                 ]
             },
             "missing_data": {
@@ -279,7 +224,7 @@
                 ],
                 "train_test_split": [
                     "Train test split",
-                    "90.00/10.00"
+                    "80.00/20.00"
                 ]
             },
             "factsheet_completeness": {
@@ -305,6 +250,10 @@
                 ],
                 "model_information": [
                     "Factsheet Property model information",
+                    "present"
+                ],
+                "target_column": [
+                    "Factsheet Property target column",
                     "present"
                 ],
                 "authors": [

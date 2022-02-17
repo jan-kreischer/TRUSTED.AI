@@ -64,7 +64,7 @@ def general_section():
             html.I(className="fas fa-backspace"),
             id="delete_solution_button", 
             n_clicks=0,
-            style={"float": "right", "backgroundColor": SECONDARY_COLOR}
+            style={"float": "right", "backgroundColor": SECONDARY_COLOR, "display": "none"}
         ),
 daq.BooleanSwitch(id='toggle_charts',
                 on=False,

@@ -78,6 +78,8 @@ def display_scenario(scenario_id, scenario_name, scenario_link, scenario_descrip
         returns true if the dialog was previously closed.
 
     """
+    scenario_solutions = sorted(scenario_solutions)
+
     sections = [
                 dcc.ConfirmDialog(
                     id='delete_{}_confirm'.format(scenario_id),
@@ -87,7 +89,7 @@ def display_scenario(scenario_id, scenario_name, scenario_link, scenario_descrip
                     html.I(className="fas fa-backspace"),
                     id="delete_{}_button".format(scenario_id), 
                     n_clicks=0,
-                    style={"float": "right", "backgroundColor": SECONDARY_COLOR}
+                    style={"float": "right", "backgroundColor": SECONDARY_COLOR, "display": "none"}
                 ),
         html.H3("▶ {}".format(scenario_name), style={"text-transform": "none"}),
                html.Div(scenario_description, className="mt-4 mb-1", style={"font-style": "italic"}),
@@ -215,7 +217,7 @@ create_scenario_dialog = html.Div(
             html.I(className="fas fa-plus-circle"),
             id="open_create_scenario_dialog", 
             n_clicks=0,
-            style={"float": "right"}
+            style={"float": "right", "display": "none"}
         ),
         dbc.Modal(
             [

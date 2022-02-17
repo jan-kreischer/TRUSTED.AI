@@ -245,7 +245,7 @@ def statistical_parity_difference_score(model, training_dataset, factsheet, thre
         properties["Formula"] =  "Statistical Parity Difference = |Favored Protected Group Ratio - Favored Unprotected Group Ratio|"
         properties["Statistical Parity Difference"] = "{:.2f}%".format(statistical_parity_difference*100)
         
-        score = np.digitize(abs(statistical_parity_difference), thresholds, right=False) + 1 
+        score = np.digitize(abs(statistical_parity_difference), thresholds, right=False) 
         
         properties["Score"] = str(score)
         return result(score=int(score), properties=properties)
@@ -433,7 +433,7 @@ def disparate_impact_score(model, test_dataset, factsheet, thresholds):
         properties["Formula"] = "Disparate Impact = Protected Favored Ratio / Unprotected Favored Ratio"
         properties["Disparate Impact"] = "{:.2f}".format(disparate_impact)
 
-        score = np.digitize(disparate_impact, thresholds, right=False)+1
+        score = np.digitize(disparate_impact, thresholds, right=False)
             
         properties["Score"] = str(score)
         return result(score=int(score), properties=properties) 
