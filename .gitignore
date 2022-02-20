@@ -4,8 +4,3 @@ webapp/report.pdf
 .ipynb_checkpointsa
 **/*.ipynb_checkpoints/
 .DS_Store
-
-webapp/scenarios/*
-!webapp/scenarios/credit_card_approval
-!webapp/scenarios/it_sec_incident_classification
-
