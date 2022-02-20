@@ -1,9 +1,9 @@
 {
     "general": {
-        "model_name": "Melike's Logistic Regression",
+        "model_name": "Logistic Regression 01",
         "purpose_description": "IoT Attack Classification",
         "domain_description": "IT Security",
-        "training_data_description": "Alberto's original Raspery Pie data",
+        "training_data_description": "Alberto's IoT Raspery Pie Data Set",
         "model_information": "Sklearn Logistic Regression Classifier for IoT Security Incident Classification scenario",
         "target_column": "label",
         "authors": "Melike Demirci",

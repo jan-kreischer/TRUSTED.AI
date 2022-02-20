@@ -47,10 +47,10 @@ layout = dbc.Container([
         dbc.Row([
             dbc.Col(html.H2("What metrics do we apply?"), width=12, className="text-center"),
             
-            dbc.Col(html.Div([html.H3("Fairness"), html.Div("Impartial and just decisions without discrimination of protected groups.", ), metrics_list(FAIRNESS_METRICS)]), width=2, className="text-center"),
-            dbc.Col(html.Div([html.H3("Explainability"), html.Div("Provide clarification for the cause of the decision"), metrics_list(EXPLAINABILITY_METRICS)]), width=2, className="text-center"),
-            dbc.Col(html.Div([html.H3("Robustness"), html.Div("Resilience against adversarial inputs"), metrics_list(ROBUSTNESS_METRICS)]), width=2, className="text-center"),
-            dbc.Col(html.Div([html.H3("Accountability"), html.Div("Quality analysis of the model lifecycle"), metrics_list(ACCOUNTABILITY_METRICS)]), width=2, className="text-center"),
+            dbc.Col(html.Div([html.H3("Fairness"), html.Div("Ensuring impartial and just decisions without discrimination of protected groups.", ), metrics_list(FAIRNESS_METRICS)]), width=2, className="text-center"),
+            dbc.Col(html.Div([html.H3("Explainability"), html.Div("Providing clarification of the decision rationale"), metrics_list(EXPLAINABILITY_METRICS)]), width=2, className="text-center"),
+            dbc.Col(html.Div([html.H3("Robustness"), html.Div("Checking the resilience against adversarial inputs"), metrics_list(ROBUSTNESS_METRICS)]), width=2, className="text-center"),
+            dbc.Col(html.Div([html.H3("Accountability"), html.Div("Analysing the quality of the model lifecycle"), metrics_list(ACCOUNTABILITY_METRICS)]), width=2, className="text-center"),
         ],
         justify="center",
         className="mt-4 mb-4 pt-4 pb-4"),

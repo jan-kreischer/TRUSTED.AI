@@ -1,6 +1,13 @@
 {
     "general": {
-        "target_column": "Own_Housing"
+        "model_name": "k-Nearest Neighbours Classifier 01",
+        "purpose_description": "Approving or denying a credit card applicant",
+        "domain_description": "Credit card approval",
+        "training_data_description": "Synthetic credit card dataset",
+        "model_information": "Sklearn k-Nearest Neighbours Classifier",
+        "target_column": "Target",
+        "authors": "Jan Bauer",
+        "contact_information": "jan.bauer@uzh.ch"
     },
     "fairness": {
         "protected_feature": "Group",

@@ -1,14 +1,14 @@
 {
     "general": {
-        "model_name": "Joels Decision Tree Classifier",
+        "model_name": "Decision Tree Classifier 02",
         "purpose_description": "Improved feature selection with a simple model",
         "domain_description": "IT security",
-        "training_data_description": "Alberot's iot raspery pie data set",
-        "model_information": "its an abrivation from albertos random forest classifier",
+        "training_data_description": "Alberto's IoT Raspery Pie Data Set",
+        "model_information": "The model is derived from Alberto Huertas Random Forest Classifier",
         "target_column": "label",
-        "authors": "joel",
-        "contact_information": "joel@uzh.ch",
-        "description": "preprocess data and drop all highly correlated features and use a simple explainable decision tree"
+        "authors": "Joel Leupp",
+        "contact_information": "joel.leupp@uzh.ch",
+        "description": "Preprocess data and drop all highly correlated features and use a simple explainable decision tree"
     },
     "fairness": {
         "protected_feature": "connectivity",

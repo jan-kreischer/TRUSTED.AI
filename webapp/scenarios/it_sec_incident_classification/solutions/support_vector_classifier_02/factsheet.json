@@ -1,9 +1,9 @@
 {
     "general": {
-        "model_name": "Melike's SVC2",
-        "purpose_description": "Attack Classification",
+        "model_name": "Support Vector Classifier 01",
+        "purpose_description": "IoT Attack Classification",
         "domain_description": "IT Security",
-        "training_data_description": "Alberto's classification data",
+        "training_data_description": "Alberto's IoT Raspery Pie Data Set",
         "model_information": "Sklearn SVM Classifier for IT Security Incident Classification scenario",
         "target_column": "label",
         "authors": "Melike Demirci",

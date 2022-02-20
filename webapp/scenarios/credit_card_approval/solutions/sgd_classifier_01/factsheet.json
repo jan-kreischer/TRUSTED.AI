@@ -1,6 +1,13 @@
 {
     "general": {
-        "target_column": "Target"
+        "model_name": "SGD Classifier 01",
+        "purpose_description": "Approving or denying a credit card applicant",
+        "domain_description": "Credit card approval",
+        "training_data_description": "Synthetic credit card dataset",
+        "model_information": "Sklearn SGD Classifier",
+        "target_column": "Target",
+        "authors": "Jan Bauer",
+        "contact_information": "jan.bauer@uzh.ch"
     },
     "fairness": {
         "protected_feature": "Group",
@@ -44,7 +51,7 @@
         "accountability": {
             "normalization": 1,
             "missing_data": 5,
-            "regularization": NaN,
+            "regularization": 3,
             "train_test_split": 5,
             "factsheet_completeness": 1
         }
