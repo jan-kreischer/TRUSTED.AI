@@ -1,6 +1,6 @@
 {
     "general": {
-        "model_name": "Support Vector Classifier 01",
+        "model_name": "Support Vector Classifier 02",
         "purpose_description": "IoT Attack Classification",
         "domain_description": "IT Security",
         "training_data_description": "Alberto's IoT Raspery Pie Data Set",
