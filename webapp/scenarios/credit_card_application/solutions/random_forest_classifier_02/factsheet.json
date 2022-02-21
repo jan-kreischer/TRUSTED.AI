@@ -1,0 +1,353 @@
+{
+    "general": {
+        "model_name": "Random Forest Classifier 02",
+        "purpose_description": "Approving or denying a credit card applicant",
+        "domain_description": "Credit card approval",
+        "training_data_description": "Synthetic credit card dataset",
+        "model_information": "Sklearn Random Forest Classifier",
+        "target_column": "Target",
+        "authors": "Jan Bauer",
+        "contact_information": "jan.bauer@uzh.ch"
+    },
+    "fairness": {
+        "protected_feature": "Group",
+        "protected_values": [
+            1
+        ],
+        "favorable_outcomes": [
+            1
+        ]
+    },
+    "explainability": {},
+    "robustness": {},
+    "accountability": {
+        "regularization": "Other"
+    },
+    "scores": {
+        "fairness": {
+            "underfitting": 5,
+            "overfitting": NaN,
+            "statistical_parity_difference": 0,
+            "equal_opportunity_difference": 4,
+            "average_odds_difference": 5,
+            "disparate_impact": 4,
+            "class_balance": 1
+        },
+        "explainability": {
+            "algorithm_class": 4,
+            "correlated_features": 5,
+            "model_size": 5,
+            "feature_relevance": 1
+        },
+        "robustness": {
+            "confidence_score": 5,
+            "clique_method": 1,
+            "loss_sensitivity": NaN,
+            "clever_score": NaN,
+            "er_fast_gradient_attack": NaN,
+            "er_carlini_wagner_attack": NaN,
+            "er_deepfool_attack": NaN
+        },
+        "accountability": {
+            "normalization": 1,
+            "missing_data": 5,
+            "regularization": 3,
+            "train_test_split": 5,
+            "factsheet_completeness": 5
+        }
+    },
+    "properties": {
+        "fairness": {
+            "underfitting": {
+                "Metric Description": "Compares the models achieved test accuracy against a baseline.",
+                "Depends on": "Model, Test Data",
+                "Test Accuracy": "97.01%",
+                "Conclusion": "Model is not underfitting",
+                "Score": "5"
+            },
+            "overfitting": {
+                "Non computable because": "The test accuracy is to low and if the model is underfitting to much it can't be overfitting at the same time."
+            },
+            "statistical_parity_difference": {
+                "Metric Description": "The spread between the percentage of observations from the majority group receiving a favorable outcome compared to the protected group. The closes this spread is to zero the better.",
+                "Depends on": "Training Data, Factsheet (Definition of Protected Group and Favorable Outcome)",
+                "----------": "",
+                "|{x|x is protected, y_true is favorable}|": 13774,
+                "|{x|x is protected}|": 24073,
+                "Favored Protected Group Ratio": "P(y_true is favorable|protected=True) = 57.22%",
+                "|{x|x is not protected, y_true is favorable}|": 4732,
+                "|{x|x is not protected}|": 23927,
+                "Favored Unprotected Group Ratio": "P(y_true is favorable|protected=False) = 19.78%",
+                "-----------": "",
+                "Formula": "Statistical Parity Difference = |Favored Protected Group Ratio - Favored Unprotected Group Ratio|",
+                "Statistical Parity Difference": "37.44%",
+                "Score": "0"
+            },
+            "equal_opportunity_difference": {
+                "Metric Description": "Difference in true positive rates between protected and unprotected group.",
+                "Depends on": "Model, Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)",
+                "----------": "",
+                "|{x|x is protected, y_true is favorable, y_pred is favorable}|": 3378,
+                "|{x|x is protected, y_true is favorable}|": 3475,
+                "TPR Protected Group": "P(y_pred is favorable|y_true is favorable, protected=True) = 97.21%",
+                "|{x|x is not protected, y_true is favorable, y_pred is favorable}|": 1188,
+                "|{x|x is not protected, y_true is favorable}|": 1264,
+                "TPR Unprotected Group": "P(y_pred is favorable|y_true is favorable, protected=False) = 93.99%",
+                "-----------": "",
+                "Formula": "Equal Opportunity Difference = |TPR Protected Group - TPR Unprotected Group|",
+                "Equal Opportunity Difference": "3.22%",
+                "Score": "4"
+            },
+            "average_odds_difference": {
+                "Metric Description": "Is the average of difference in false positive rates and true positive rates between the protected and unprotected group",
+                "Depends on": "Model, Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)",
+                "----------": "",
+                "|{x|x is protected, y_true is unfavorable, y_pred is favorable}|": 72,
+                "|{x|x is protected, y_true is Unfavorable}|": 2546,
+                "FPR Protected Group": "P(y_pred is favorable|y_true is unfavorable, protected=True) = 2.83%",
+                "|{x|x is not protected, y_true is unfavorable, y_pred is favorable}|": 114,
+                "|{x|x is not protected, y_true is unfavorable}|": 4715,
+                "FPR Unprotected Group": "P(y_pred is favorable|y_true is unfavorable, protected=False) = 2.42%",
+                "|{x|x is protected, y_true is favorable, y_pred is favorable}|": 3378,
+                "|{x|x is protected, y_true is favorable}|": 3475,
+                "TPR Protected Group": "P(y_pred is favorable|y_true is favorable, protected=True) = 97.21%",
+                "|{x|x is not protected, y_true is favorable, y_pred is favorable}|": 1188,
+                "|{x|x is not protected, y_true is favorable}|": 1264,
+                "TPR Unprotected Group": "P(y_pred is favorable|y_true is favorable, protected=False) = 93.99%",
+                "-----------": "",
+                "Formula": "Average Odds Difference = |0.5*(TPR Protected - TPR Unprotected) + 0.5*(FPR Protected - FPR Unprotected)|",
+                "Average Odds Difference": "1.82%",
+                "Score": "5"
+            },
+            "disparate_impact": {
+                "Metric Description": "Is quotient of the ratio of samples from the protected group receiving a favorable prediction divided by the ratio of samples from the unprotected group receiving a favorable prediction",
+                "Depends on": "Model, Test Data, Factsheet (Definition of Protected Group and Favorable Outcome)",
+                "----------": "",
+                "|{x|x is protected, y_pred is favorable}": 3450,
+                "|{x|x is protected}|": 6021,
+                "Protected Favored Ratio": "P(y_hat=favorable|protected=True) = 57.30%",
+                "|{x|x is not protected, y_pred is favorable}|": 1302,
+                "|{x|x is not protected}|": 5979,
+                "Unprotected Favored Ratio": "P(y_hat=favorable|protected=False) = 21.78%",
+                "-----------": "",
+                "Formula": "Disparate Impact = Protected Favored Ratio / Unprotected Favored Ratio",
+                "Disparate Impact": "2.63",
+                "Score": "4"
+            },
+            "class_balance": {
+                "Metric Description": "Measures how well the training data is balanced or unbalanced",
+                "Depends on": "Training Data",
+                "Score": "1"
+            }
+        },
+        "explainability": {
+            "algorithm_class": {
+                "dep": [
+                    "Depends on",
+                    "Model"
+                ],
+                "clf_name": [
+                    "model type",
+                    "RandomForestClassifier"
+                ]
+            },
+            "correlated_features": {
+                "dep": [
+                    "Depends on",
+                    "Training Data"
+                ],
+                "pct_drop": [
+                    "Percentage of highly correlated features",
+                    "0.00%"
+                ]
+            },
+            "model_size": {
+                "dep": [
+                    "Depends on",
+                    "Training Data"
+                ],
+                "n_features": [
+                    "number of features",
+                    5
+                ]
+            },
+            "feature_relevance": {
+                "dep": [
+                    "Depends on",
+                    "Training Data and Model"
+                ],
+                "n_outliers": [
+                    "number of outliers in the importance distribution",
+                    1
+                ],
+                "pct_dist": [
+                    "percentage of feature that make up over 60% of all features importance",
+                    "0.00%"
+                ],
+                "importance": [
+                    "feature importance",
+                    {
+                        "value": [
+                            0.8586286469394574,
+                            0.10714243556816826,
+                            0.0274828185003374,
+                            0.00637892446362967,
+                            0.00036717452840714075
+                        ],
+                        "labels": [
+                            "Income",
+                            "Group",
+                            "Own_Housing",
+                            "Own_Car",
+                            "Num_Children"
+                        ]
+                    }
+                ]
+            }
+        },
+        "robustness": {
+            "confidence_score": {
+                "confidence_score": [
+                    "Average confidence score",
+                    "96.89%"
+                ],
+                "depends_on": [
+                    "Depends on",
+                    "Model and Data"
+                ]
+            },
+            "clique_method": {
+                "error_bound": [
+                    "Average error bound",
+                    "0.00"
+                ],
+                "error": [
+                    "Error",
+                    "1.0"
+                ]
+            },
+            "loss_sensitivity": {
+                "non_computable": [
+                    "Non Computable Because",
+                    "Can only be calculated on Keras models."
+                ]
+            },
+            "clever_score": {
+                "non_computable": [
+                    "Non Computable Because",
+                    "Can only be calculated on Keras models."
+                ]
+            },
+            "er_fast_gradient_attack": {
+                "non_computable": [
+                    "Non Computable Because",
+                    "Can be calculated on either SVC or Logistic Regression models."
+                ]
+            },
+            "er_carlini_wagner_attack": {
+                "non_computable": [
+                    "Non Computable Because",
+                    "Can be calculated on either SVC or Logistic Regression models."
+                ]
+            },
+            "er_deepfool_attack": {
+                "non_computable": [
+                    "Non Computable Because",
+                    "Can be calculated on either SVC or Logistic Regression models."
+                ]
+            }
+        },
+        "accountability": {
+            "normalization": {
+                "dep": [
+                    "Depends on",
+                    "Training and Testing Data"
+                ],
+                "Training_mean": [
+                    "Mean of the training data",
+                    "14485.76"
+                ],
+                "Training_std": [
+                    "Standard deviation of the training data",
+                    "4584.53"
+                ],
+                "Test_mean": [
+                    "Mean of the test data",
+                    "14544.39"
+                ],
+                "Test_std": [
+                    "Standard deviation of the test data",
+                    "4566.49"
+                ],
+                "normalization": [
+                    "Normalization",
+                    "None"
+                ]
+            },
+            "missing_data": {
+                "dep": [
+                    "Depends on",
+                    "Training Data"
+                ],
+                "null_values": [
+                    "Number of the null values",
+                    "0"
+                ]
+            },
+            "regularization": {
+                "dep": [
+                    "Depends on",
+                    "Factsheet"
+                ],
+                "regularization_technique": [
+                    "Regularization technique",
+                    "Other"
+                ]
+            },
+            "train_test_split": {
+                "dep": [
+                    "Depends on",
+                    "Training and Testing Data"
+                ],
+                "train_test_split": [
+                    "Train test split",
+                    "80.00/20.00"
+                ]
+            },
+            "factsheet_completeness": {
+                "dep": [
+                    "Depends on",
+                    "Factsheet"
+                ],
+                "model_name": [
+                    "Factsheet Property model name",
+                    "present"
+                ],
+                "purpose_description": [
+                    "Factsheet Property purpose description",
+                    "present"
+                ],
+                "domain_description": [
+                    "Factsheet Property domain description",
+                    "present"
+                ],
+                "training_data_description": [
+                    "Factsheet Property training data description",
+                    "present"
+                ],
+                "model_information": [
+                    "Factsheet Property model information",
+                    "present"
+                ],
+                "authors": [
+                    "Factsheet Property authors",
+                    "present"
+                ],
+                "contact_information": [
+                    "Factsheet Property contact information",
+                    "present"
+                ]
+            }
+        }
+    }
+}
