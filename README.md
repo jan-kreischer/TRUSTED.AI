@@ -35,7 +35,7 @@ For easy deployment, our project can be combined into a Docker container, using 
 
 1. Run docker build command in order to build the Docker Image from a Dockerfile
 ```
-> docker build -f ./webapp/Dockerfile -t trustedai/webapp:v1 .
+> docker build -f ./Dockerfile -t trustedai/webapp:v1 .
 # docker build -f <path-to-dockerfile> -t <hub-user>/<repo-name>:<tag> .
 # -f ... specify path to Dockerfile
 # -t ... add a tag to the image

@@ -4,22 +4,6 @@
 */.ipynb_checkpoints
 .ipynb_checkpoints/
 
-scenarios/*
-!scenarios/credit_card_approval
-!scenarios/it_sec_incident_classification
-
-scenarios/credit_card_approval/solutions/*
-!scenarios/credit_card_approval/solutions/alberto*
-!scenarios/credit_card_approval/solutions/jan*
-!scenarios/credit_card_approval/solutions/joel*
-!scenarios/credit_card_approval/solutions/melike*
-
-!scenarios/it_sec_incident_classification/solutions/alberto*
-!scenarios/it_sec_incident_classification/solutions/jan*
-!scenarios/it_sec_incident_classification/solutions/joel*
-!scenarios/it_sec_incident_classification/solutions/melike*
-
-
 
 
 
