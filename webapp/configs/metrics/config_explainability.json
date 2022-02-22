@@ -79,9 +79,9 @@
     "feature_relevance": 0.15
   },
    "metrics": {
-    "algorithm_class": "This metric identifies the type of the used learning technique<br>which has an influece on the general level of explainability of the model",
-    "correlated_features": "This metric counts the percentage of of highly correlated features.<br>Correlated features negatively influece the level of explainability of a model.",
+    "algorithm_class": "This metric classifies how explainable the used learning technique is estimated to be.",
+    "correlated_features": "This metric assesses the ratio of highly correlated features, that can be found in the used dataset.",
     "model_size": "This metrics counts the number of features.<br>A smaller features space generally means a simpler and more comprehensible model<br>which benefits explainability",
-    "feature_relevance": "This metric looks at the distribution of the importance of the features.<br>Idealy there should not exists any irrelevant features"
+    "feature_relevance": "This metric looks at the distribution of the importance of the features.<br>Idealy all features should be relevant and add variance."
   }
 }

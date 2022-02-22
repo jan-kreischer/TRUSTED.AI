@@ -25,6 +25,19 @@ import plotly
 from dash_extensions.snippets import send_file
 warnings.filterwarnings('ignore')
 
+#spinners = html.Div(
+#    [
+#        dbc.Spinner(color="primary"),
+#        dbc.Spinner(color="secondary"),
+#        dbc.Spinner(color="success"),
+#        dbc.Spinner(color="warning"),
+#        dbc.Spinner(color="danger"),
+#        dbc.Spinner(color="info"),
+#        dbc.Spinner(color="light"),
+#        dbc.Spinner(color="dark"),
+#    ]
+#)
+
 # === CONFIG ===
 config_fairness, config_explainability, config_robustness, config_accountability, config_pillars = 0, 0, 0 ,0,0
 for config in ["config_pillars","config_fairness", "config_explainability", "config_robustness", "config_accountability"]:
@@ -96,13 +109,11 @@ def trust_section():
             html.H2("• Trustworthiness"),
         ], id="trust_section_heading", className="mt-2 mb-5"),
 
-        html.Div([], id="trust_overview"),
         html.H3("Overall Score", className="text-center mt-2"),
         html.Div([], id="trust_star_rating", className="star_rating, text-center"),
         html.B(["X/5"], id="trust_score", className="text-center", style={"display": "block","font-size":"32px"}),
         dcc.Graph(id='spider', style={'display': 'none'}),
         dcc.Graph(id='bar', style={'display': 'block'}),
-        html.Div([], id="trust_details"),
         html.Hr()
     ], id="trust_section", style={"display": "None"})
 
@@ -249,14 +260,14 @@ def toggle_charts(visibility_state):
     list(map(lambda x: State("{}_section".format(x), "hidden"),  SECTIONS[1:])),
     prevent_initial_call=False
 )
-def toggle_hide_pillar_section(fn,en,rn,mn,alln, fis_open, eis_open, ris_open, mis_open):
+def toggle_hide_pillar_section(fn,en,rn,mn,alln, fis_open, eis_open, ris_open, ais_open):
     if fn or en or rn or mn or alln:
         pillars = np.array(['fairness', 'explainability', 'robustness', 'accountability'])
         out= np.array( [True,True,True,True])
         ctx = dash.callback_context
         pillar = ctx.triggered[0]['prop_id'][:-11]
         if pillar=="all":
-            if fis_open or eis_open or ris_open or mis_open:
+            if fis_open or eis_open or ris_open or ais_open:
                 return [False,False,False,False]
             else:
                 return [True,True,True,True]
