@@ -58,9 +58,9 @@
     },
 	 "metrics": {
         "normalization": "This metric checks if and how the data was normalized.",
-        "missing_data": "This metrics checks if the dataset has missing data<br>and how the missing values were treated",
+        "missing_data": "This metrics assesses how missing data and values were handled",
         "regularization": "This metric checks whether a regularization technique was used during the training process",
-        "train_test_split": "This metric looks at the train/test split that was used in the training process<br>and checks if that split is done in an acceptable way, idealy 80/20",
-        "factsheet_completeness": "This metric checks if the factsheet is complete<br>and has all the obligatory properties included"
+        "train_test_split": "This metric looks at the train/test split that was used for training <br>and checks if the data was split according to the state of the art.",
+        "factsheet_completeness": "This metric checks if the factsheet is complete<br>and if it includes all required information."
     }
 }

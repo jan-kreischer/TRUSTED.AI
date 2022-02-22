@@ -95,12 +95,12 @@
     "er_deepfool_attack": 0.20
   },
     "metrics": {
-    "confidence_score": "This metric computes how confident the model is about its predictions.<br>More confident a model is it is more difficult to fool the model. <br>Hence if the confidence score increases the robustness increases.",
-    "clique_method"    : "For tree based models, Clique Method calculates a bound for<br>the minimal adversarial perturbation to fool a model",
-    "loss_sensitivity"  :"This metric estimates the smoothness of the model.<br>If a small input difference creates a huge output change,<br> then the model is not robust.",
-    "clever_score"   : "This metric is designed for measuring neural networks' robustness.<br> It uses Cross Lipschitz constant estimation.",
-    "er_fast_gradient_attack": "This metric empirically tests the robustness of the model.<br>It calculates and applies Fast Gradient Attack to the model and<br>checks whether the model is fooled by it.",
-    "er_carlini_wagner_attack": "This metric empirically tests the robustness of the model.<br>It calculates and applies Carlini Wagner Attack to the model and<br>checks whether the model is fooled by it.",
-    "er_deepfool_attack": "This metric empirically tests the robustness of the model.<br>It calculates and applies Deepfool Attack to the model and<br>checks whether the model is fooled by it."
+    "confidence_score": "This metric computes how confident the model is about its predictions.<br> The more confident a model is about its prediction the more difficult it is to generate adverserial examples. <br>Hence if the confidence score increases the robustness increases.",
+    "clique_method"    : "The clique method calculates a bound estimation for<br> the minimal adversarial perturbation needed to fool the model.",
+    "loss_sensitivity"  :"This metric estimates the smoothness of the model.<br>If a small input pertubations create a huge change in output then the model is not considered robust.",
+    "clever_score"   : "The clever score can be applied to neural network models. It uses cross lipschitz constant estimation to assess the robustness.",
+    "er_fast_gradient_attack": "This metric empirically tests the robustness of models.<br>It tests the model by using Fast Gradient Attack and checks whether the model can be fooled by it.",
+    "er_carlini_wagner_attack": "This metric empirically tests the robustness of models.<br>It calculates and applies Carlini Wagner Attack to the model and checks whether the model can be fooled by it.",
+    "er_deepfool_attack": "This metric empirically tests the robustness of models.<br>It calculates and applies Deepfool Attack to the model and checks whether the model can be fooled by it."
   }
 }
